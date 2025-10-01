@@ -1,0 +1,29 @@
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
+import 'package:foodkitchen/app/app_router.dart';
+import 'package:foodkitchen/core/theme/app_theme.dart';
+
+final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+    GlobalKey<ScaffoldMessengerState>();
+
+class AppBase extends StatelessWidget {
+  const AppBase({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp.router(
+      scaffoldMessengerKey: scaffoldMessengerKey,
+      builder: (context, child) {
+        return MediaQuery.withNoTextScaling(child: child!);
+      },
+      supportedLocales: context.supportedLocales,
+      localizationsDelegates: context.localizationDelegates,
+      locale: context.locale,
+      themeMode: ThemeMode.light,
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      debugShowCheckedModeBanner: false,
+      routerConfig: router,
+    );
+  }
+}

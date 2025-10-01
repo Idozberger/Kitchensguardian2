@@ -1,0 +1,25 @@
+import 'package:foodkitchen/core/error/failures.dart';
+import 'package:fpdart/fpdart.dart';
+
+abstract interface class AuthRepository {
+  Future<Either<Failure, String>> signUpUserWithEmailAndPassword({
+    required String firstName,
+    required String lastName,
+    required String email,
+    required String password,
+  });
+  Future<Either<Failure, String>> signInUserWithEmailAndPassword({
+    required String email,
+    required String password,
+  });
+  Future<Either<Failure, String>> sendPasswordResetVerificationCode({
+    required String email,
+  });
+  Future<Either<Failure, String>> setUsersNewPassword({
+    required String email,
+    required String newPassword,
+  });
+  Future<Either<Failure, String>> verifyUserEmailWithVerificationCode({
+    required String code,
+  });
+}
