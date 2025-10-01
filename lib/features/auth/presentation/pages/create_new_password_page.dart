@@ -5,7 +5,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
-import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/validators.dart';
 import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
 import 'package:foodkitchen/features/auth/presentation/blocs/auth_bloc.dart';
@@ -13,34 +12,37 @@ import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/features/auth/presentation/widgets/textspan_widget.dart';
 
-class SignUpPage extends StatefulWidget {
-  const SignUpPage({super.key});
+class CreateNewPasswordPage extends StatefulWidget {
+  const CreateNewPasswordPage({super.key});
 
   @override
-  State<SignUpPage> createState() => _SignUpPageState();
+  State<CreateNewPasswordPage> createState() => _CreateNewPasswordPageState();
 }
 
-class _SignUpPageState extends State<SignUpPage> {
+class _CreateNewPasswordPageState extends State<CreateNewPasswordPage> {
   final _formKey = GlobalKey<FormState>();
 
-  final TextEditingController _firstNameController = TextEditingController();
-  final TextEditingController _lastNameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
-  bool _isObscure = false;
-
-  void updateObsecure() {
+  bool _isObscurePassword = false;
+  bool _isObscureConfirmPassword = false;
+  void updateObsecurePassword() {
     setState(() {
-      _isObscure = !_isObscure;
+      _isObscurePassword = !_isObscurePassword;
+    });
+  }
+
+  void updateObsecureConfirmPassword() {
+    setState(() {
+      _isObscureConfirmPassword = !_isObscureConfirmPassword;
     });
   }
 
   @override
   void dispose() {
-    _firstNameController.dispose();
-    _lastNameController.dispose();
-    _emailController.dispose();
+    _confirmPasswordController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -78,12 +80,12 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
                   SizedBox(height: h(24)),
                   Text(
-                    "Join the Food Kitchen".tr(),
+                    "Create new password".tr(),
                     style: Theme.of(context).textTheme.headlineLarge,
                   ),
                   SizedBox(height: h(5)),
                   Text(
-                    "Create an account to save your favorite recipes and start cooking like a pro"
+                    "Create a strong, secure password to update your account and protect your information."
                         .tr(),
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
@@ -93,42 +95,37 @@ class _SignUpPageState extends State<SignUpPage> {
                     child: Column(
                       children: [
                         AppTextField(
-                          controller: _firstNameController,
-                          label: "First name".tr(),
-                          validator: (String? value) {
-                            return nameValidator(value, "First name");
-                          },
-                          hintText: "Enter your first name".tr(),
-                        ),
-                        SizedBox(height: h(20)),
-                        AppTextField(
-                          controller: _lastNameController,
-                          label: "Last name".tr(),
-
-                          validator: (String? value) {
-                            return nameValidator(value, "Last name");
-                          },
-                          hintText: "Enter your last name".tr(),
-                        ),
-                        SizedBox(height: h(20)),
-                        AppTextField(
-                          controller: _emailController,
-                          label: "Email address".tr(),
-                          keyboardType: TextInputType.emailAddress,
-                          validator: emailValidator,
-                          hintText: "Enter your email".tr(),
-                        ),
-
-                        SizedBox(height: h(20)),
-                        AppTextField(
                           controller: _passwordController,
-                          label: "Password".tr(),
-
-                          validator: passwordValidator,
-                          hintText: "Enter your password".tr(),
-                          obscureText: _isObscure,
+                          label: "New password".tr(),
+                          validator: (String? value) {
+                            return nameValidator(value, "New password");
+                          },
+                          hintText: "Enter new password".tr(),
+                          obscureText: !_isObscurePassword,
                           suffixIcon: GestureDetector(
-                            onTap: () => updateObsecure(),
+                            onTap: () => updateObsecurePassword(),
+                            child: Padding(
+                              padding: gapSymmetric(
+                                vertical: 13,
+                                horizontal: 15,
+                              ),
+                              child: SvgPicture.asset(
+                                AppAssets.eyeVisibilitySvg,
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: h(20)),
+                        AppTextField(
+                          controller: _confirmPasswordController,
+                          label: "Confirm new password".tr(),
+                          obscureText: !_isObscureConfirmPassword,
+                          validator: (String? value) {
+                            return nameValidator(value, "Confirm new password");
+                          },
+                          hintText: "Enter new password".tr(),
+                          suffixIcon: GestureDetector(
+                            onTap: () => updateObsecureConfirmPassword(),
                             child: Padding(
                               padding: gapSymmetric(
                                 vertical: 13,
@@ -150,16 +147,8 @@ class _SignUpPageState extends State<SignUpPage> {
                       onPressed: () {
                         if (!_formKey.currentState!.validate()) {}
                       },
-                      text: tr("Login"),
+                      text: tr("Create password"),
                     ),
-                  ),
-
-                  TextspanWidget(
-                    onSignUpTap: () {
-                      Navigator.of(context).pop();
-                    },
-                    text: "Already have an account?".tr(),
-                    buttonText: "Login".tr(),
                   ),
                 ],
               ),

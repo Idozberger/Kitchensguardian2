@@ -1,3 +1,7 @@
+import 'package:foodkitchen/features/auth/presentation/pages/create_new_password_page.dart';
+import 'package:foodkitchen/features/auth/presentation/pages/forgot_password_page.dart';
+import 'package:foodkitchen/features/auth/presentation/pages/reset_password_verification_page.dart'
+    show ResetPasswordVerificationPage;
 import 'package:foodkitchen/features/auth/presentation/pages/signin_page.dart';
 import 'package:foodkitchen/features/auth/presentation/pages/signup_page.dart';
 import 'package:foodkitchen/features/dashboard/presentation/pages/dashboard_page.dart';
@@ -21,6 +25,18 @@ final GoRouter router = GoRouter(
     ),
     GoRoute(path: Routes.signIn, builder: (context, state) => SignInPage()),
     GoRoute(path: Routes.signUp, builder: (context, state) => SignUpPage()),
+    GoRoute(
+      path: Routes.forgotPassword,
+      builder: (context, state) => ForgotPasswordPage(),
+    ),
+    GoRoute(
+      path: Routes.resetPasswordVerification,
+      builder: (context, state) => ResetPasswordVerificationPage(),
+    ),
+    GoRoute(
+      path: Routes.createNewPassword,
+      builder: (context, state) => CreateNewPasswordPage(),
+    ),
     GoRoute(
       path: Routes.dashboard,
       builder: (context, state) => DashboardPage(),

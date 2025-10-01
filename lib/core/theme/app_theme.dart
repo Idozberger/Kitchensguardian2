@@ -35,19 +35,51 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(h(22)), // rounded corners
           ),
+          textStyle: TextStyle(
+            fontSize: t(14),
+            fontWeight: FontWeight.w500,
+            color: Colors.black,
+          ),
           elevation: 0,
           fixedSize: Size(double.maxFinite, h(45)),
           maximumSize: Size(double.maxFinite, h(45)),
           minimumSize: Size(double.maxFinite, h(45)),
         ),
       ),
+
       progressIndicatorTheme: ProgressIndicatorThemeData(color: Colors.white),
-      //  Text Theme (typography)
-      textTheme: const TextTheme(
-        bodyLarge: TextStyle(color: Colors.black87),
-        bodyMedium: TextStyle(color: Colors.black87),
-        bodySmall: TextStyle(color: Color.fromARGB(137, 83, 41, 41)),
+      // Text Theme (typography for light mode)
+      textTheme: TextTheme(
+        bodyLarge: TextStyle(
+          fontFamily: "SFProDisplay",
+          color: Colors.black,
+          fontSize: t(19),
+        ),
+        bodyMedium: TextStyle(
+          fontFamily: "SFProDisplay",
+          color: Colors.black,
+          fontSize: t(15),
+          fontWeight: FontWeight.w500,
+        ),
+        bodySmall: TextStyle(
+          fontFamily: "SFProDisplay",
+          color: Colors.black,
+          fontSize: t(13),
+        ),
+        headlineLarge: TextStyle(
+          fontFamily: "SFProDisplay",
+          color: Colors.black,
+          fontSize: t(19),
+          fontWeight: FontWeight.w500,
+        ),
+        headlineMedium: TextStyle(
+          fontFamily: "SFProDisplay",
+          color: Color(0xff787878),
+          fontSize: t(13),
+          fontWeight: FontWeight.w500,
+        ),
       ),
+
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: Colors.white,
         elevation: 0,

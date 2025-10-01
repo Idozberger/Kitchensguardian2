@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:foodkitchen/core/global/functions/resize.dart';
 
 class GenericButtonWidget extends StatelessWidget {
   final VoidCallback onPressed;
@@ -9,9 +8,10 @@ class GenericButtonWidget extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final bool isLoading;
 
-  const GenericButtonWidget({
+  GenericButtonWidget({
     super.key,
     required this.onPressed,
+
     required this.text,
     this.backgroundColor,
     this.textStyle,
@@ -25,19 +25,9 @@ class GenericButtonWidget extends StatelessWidget {
       width: double.infinity,
       child: ElevatedButton(
         onPressed: onPressed,
-
         child: isLoading
             ? CircularProgressIndicator()
-            : Text(
-                text,
-                style:
-                    textStyle ??
-                    const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xff565656),
-                    ),
-              ),
+            : Text(text, style: TextStyle(color: Colors.black)),
       ),
     );
   }

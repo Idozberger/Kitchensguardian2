@@ -56,12 +56,15 @@ class IntroTextContent extends StatelessWidget {
           Text(
             tr("explore_description"),
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 14, color: Colors.grey[800]),
+            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+              fontSize: t(14),
+              fontWeight: FontWeight.w400,
+            ),
           ),
           gapVertical(20),
           GenericButtonWidget(
             onPressed: () {
-              context.push(Routes.dashboard);
+              context.go(Routes.signIn);
             },
             text: tr("get_started"),
           ),
