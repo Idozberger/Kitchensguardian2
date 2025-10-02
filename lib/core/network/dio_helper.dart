@@ -26,7 +26,9 @@ class DioHelper {
         },
         onError: (DioException e, handler) {
           if (e.response != null) {
+            logError("Status: ${e.response?.data}");
             logError("Status: ${e.response?.statusCode}");
+            logError("Status: ${e.response?.statusMessage}");
           }
           return handler.next(e);
         },
@@ -45,18 +47,36 @@ class DioHelper {
   }
 
   Failure handleError(DioException e) {
+    log("❌ DioException: $e");
+    String message = "Unexpected error occurred";
+
+    if (e.response != null && e.response?.data != null) {
+      final data = e.response?.data;
+
+      if (data is Map<String, dynamic>) {
+        message =
+            data["message"] ??
+            data["error"] ??
+            data["detail"] ??
+            data["msg"] ??
+            message;
+      } else if (data is String) {
+        message = data;
+      }
+    }
+
     switch (e.type) {
       case DioExceptionType.connectionTimeout:
         return NetworkFailure("Connection timed out");
       case DioExceptionType.receiveTimeout:
         return NetworkFailure("Server took too long to respond");
       case DioExceptionType.badResponse:
-        return ServerFailure("Internal Server Error");
+        return ServerFailure(message);
       case DioExceptionType.cancel:
         return NetworkFailure("Request was cancelled");
       case DioExceptionType.unknown:
       default:
-        return UnknownFailure("Unexpected error occurred");
+        return UnknownFailure(message);
     }
   }
 }

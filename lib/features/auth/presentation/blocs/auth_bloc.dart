@@ -34,7 +34,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthSetUserNewPassword>(_onSetUserNewPassword);
     on<AuthVerifyEmail>(_onVerifyUserEmail);
   }
-  void _onAuthSignUp(AuthSignUp event, Emitter<AuthState> emit) async {
+  Future<void> _onAuthSignUp(AuthSignUp event, Emitter<AuthState> emit) async {
     final res = await _userSignUp(
       UserSignUpParams(
         email: event.email,
@@ -46,7 +46,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     res.fold(
       (failure) => emit(AuthFailure(failure.message)),
-      (user) => emit(AuthSuccess(user)),
+      (message) => emit(AuthSuccess(message)),
     );
   }
 

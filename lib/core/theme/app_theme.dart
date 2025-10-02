@@ -46,6 +46,24 @@ class AppTheme {
           minimumSize: Size(double.maxFinite, h(45)),
         ),
       ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          side: BorderSide(color: AppColors.primaryColor, width: 1.5),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(h(22)),
+          ),
+          textStyle: TextStyle(
+            fontSize: t(14),
+            fontWeight: FontWeight.w500,
+            color: AppColors.primaryColor,
+          ),
+          elevation: 0,
+          fixedSize: Size(double.maxFinite, h(45)),
+          maximumSize: Size(double.maxFinite, h(45)),
+          minimumSize: Size(double.maxFinite, h(45)),
+        ),
+      ),
 
       progressIndicatorTheme: ProgressIndicatorThemeData(color: Colors.white),
       // Text Theme (typography for light mode)
@@ -78,6 +96,12 @@ class AppTheme {
           fontSize: t(13),
           fontWeight: FontWeight.w500,
         ),
+        headlineSmall: TextStyle(
+          fontFamily: "SFProDisplay",
+          color: Color(0xff8D8C8C),
+          fontSize: t(15),
+          fontWeight: FontWeight.w400,
+        ),
       ),
 
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
@@ -85,6 +109,7 @@ class AppTheme {
         elevation: 0,
         showUnselectedLabels: true,
         selectedItemColor: AppColors.primaryColor,
+
         selectedLabelStyle: TextStyle(
           color: AppColors.primaryColor,
           fontSize: h(12),
@@ -140,7 +165,7 @@ class AppTheme {
           backgroundColor: AppColors.primaryColor,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(h(22)),
           ),
           elevation: 0,
           fixedSize: Size(double.maxFinite, h(45)),

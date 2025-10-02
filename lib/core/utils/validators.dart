@@ -3,11 +3,11 @@ String? nameValidator(String? value, String fieldName) {
     return "$fieldName is required";
   }
 
-  final parts = value.trim().split(RegExp(r'\s+'));
+  // final parts = value.trim().split(RegExp(r'\s+'));
 
-  if (parts.length < 2) {
-    return "$fieldName must contain at least 2 words";
-  }
+  // if (parts.length < 2) {
+  //   return "$fieldName must contain at least 2 words";
+  // }
 
   return null;
 }

@@ -4,9 +4,10 @@ import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 
 class OtpField extends StatelessWidget {
+  final bool preFilledStar;
   final void Function(String)? onCompleted;
 
-  const OtpField({super.key, this.onCompleted});
+  const OtpField({super.key, this.onCompleted, this.preFilledStar = false});
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +25,7 @@ class OtpField extends StatelessWidget {
     );
 
     return Pinput(
-      length: 6, // ✅ 6-digit OTP
+      length: 6,
       defaultPinTheme: defaultPinTheme,
       focusedPinTheme: defaultPinTheme.copyWith(
         decoration: BoxDecoration(
@@ -38,8 +39,18 @@ class OtpField extends StatelessWidget {
           borderRadius: BorderRadius.circular(h(10)),
         ),
       ),
+      preFilledWidget: preFilledStar
+          ? Text(
+              "*",
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: AppColors.greyColor,
+                fontWeight: FontWeight.w400,
+                fontSize: t(25),
+              ),
+            )
+          : null,
       keyboardType: TextInputType.number,
-      onCompleted: onCompleted, // ✅ triggers when all 6 entered
+      onCompleted: onCompleted,
     );
   }
 }

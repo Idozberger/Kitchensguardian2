@@ -5,6 +5,7 @@ import 'package:foodkitchen/core/theme/app_colors.dart';
 
 class AppTextField extends StatelessWidget {
   final String label;
+  final bool isLabled;
   final String hintText;
   final TextEditingController controller;
   final String? errorText;
@@ -23,6 +24,7 @@ class AppTextField extends StatelessWidget {
     this.keyboardType = TextInputType.text,
     this.suffixIcon,
     this.validator,
+    this.isLabled = true,
   });
 
   @override
@@ -30,9 +32,11 @@ class AppTextField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: Theme.of(context).textTheme.bodyMedium),
+        if (isLabled) ...[
+          Text(label, style: Theme.of(context).textTheme.bodyMedium),
 
-        SizedBox(height: h(10)),
+          SizedBox(height: h(10)),
+        ],
 
         TextFormField(
           obscuringCharacter: "*",

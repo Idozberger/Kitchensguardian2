@@ -13,9 +13,15 @@ Future<void> main() async {
   await Future.wait([
     initDependencies(),
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]),
+
     LocalizationConfig.instance.initialize(),
   ]);
-
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.white,
+      statusBarIconBrightness: Brightness.dark,
+    ),
+  );
   runApp(
     EasyLocalization(
       supportedLocales: LocalizationConfig.instance.supportedLocales,

@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:foodkitchen/core/config/app_assets.dart';
+import 'package:foodkitchen/core/config/routes.dart';
+import 'package:foodkitchen/core/global/functions/gaps.dart';
+import 'package:foodkitchen/core/global/functions/resize.dart';
+import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
+import 'package:foodkitchen/features/dashboard/presentation/widgets/drawer.dart';
 import 'package:foodkitchen/features/home/presentation/pages/home_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/pantry_page.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/planner_page.dart';
+import 'package:go_router/go_router.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -20,12 +28,49 @@ class _DashboardPageState extends State<DashboardPage> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(),
-        drawer: Drawer(),
-        body: _buildBody(),
-        bottomNavigationBar: _buildBottomNav(),
+    return Scaffold(
+      drawer: AppDrawer(),
+      appBar: _buildAppBar(context),
+      body: _buildBody(),
+      bottomNavigationBar: _buildBottomNav(),
+    );
+  }
+
+  AppBar _buildAppBar(BuildContext context) {
+    return AppBar(
+      leadingWidth: w(55),
+      centerTitle: false,
+      leading: Builder(
+        builder: (context) {
+          return Row(
+            children: [
+              SizedBox(width: w(16)),
+              CircularIconButton(
+                iconAsset: AppAssets.drawerSvg,
+                onTap: () {
+                  Scaffold.of(context).openDrawer();
+                },
+              ),
+            ],
+          );
+        },
+      ),
+      actions: [
+        IconButton(
+          onPressed: () {},
+          icon: Image.asset(AppAssets.gemPNG, height: h(16), width: w(22)),
+        ),
+        CircularIconButton(
+          iconAsset: AppAssets.notificationSvg,
+          onTap: () {
+            context.push(Routes.notification);
+          },
+        ),
+        SizedBox(width: w(20)),
+      ],
+      title: Text(
+        "Kitchen’s Guardian",
+        style: Theme.of(context).textTheme.headlineLarge,
       ),
     );
   }
@@ -39,25 +84,42 @@ class _DashboardPageState extends State<DashboardPage> {
         updateSelectedIndex(index);
       },
       items: [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: "home"),
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: "pantry"),
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: "planner"),
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: "grocery"),
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: "profile"),
+        BottomNavigationBarItem(
+          activeIcon: SvgPicture.asset(AppAssets.homeActiveSvg),
+          icon: SvgPicture.asset(AppAssets.homeInactiveSvg),
+          label: "Home",
+        ),
+        BottomNavigationBarItem(
+          icon: SvgPicture.asset(AppAssets.plannerInactiveSvg),
+          activeIcon: SvgPicture.asset(AppAssets.plannerActiveSvg),
+          label: "Planner",
+        ),
+        BottomNavigationBarItem(
+          icon: SvgPicture.asset(AppAssets.groceryInactiveSvg),
+          activeIcon: SvgPicture.asset(AppAssets.groceryActiveSvg),
+          label: "Grocery",
+        ),
+        BottomNavigationBarItem(
+          icon: SvgPicture.asset(AppAssets.profileInactiveSvg),
+          activeIcon: SvgPicture.asset(AppAssets.profileActiveSvg),
+          label: "Profile",
+        ),
       ],
     );
   }
 
   Widget _buildBody() {
-    return IndexedStack(
-      index: _selectedIndex,
-      children: <Widget>[
-        HomePage(),
-        PantryPage(),
-        PlannerPage(),
-        Scaffold(),
-        Scaffold(),
-      ],
+    return SafeArea(
+      child: IndexedStack(
+        index: _selectedIndex,
+        children: <Widget>[
+          HomePage(),
+          PantryPage(),
+          PlannerPage(),
+          Scaffold(),
+          Scaffold(),
+        ],
+      ),
     );
   }
 }

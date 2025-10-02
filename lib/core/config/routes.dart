@@ -8,5 +8,10 @@ class Routes {
   static const String resetPasswordVerification =
       "/reset_password_verification";
   static const String createNewPassword = "/create_new_password";
+  static const String passwordChangedSuccess = "/password_changed_success";
+  static const String verifyEmail = "/verify_email";
+  static const String emailVerifiedSuccess = "/email_verified_success";
   static const String dashboard = "/dashboard";
+  static const String notification = "/notification";
+  static const String scanHistory = "/scan_history";
 }

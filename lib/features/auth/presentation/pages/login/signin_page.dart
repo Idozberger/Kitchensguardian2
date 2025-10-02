@@ -1,5 +1,4 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
@@ -36,6 +35,24 @@ class _SignInPageState extends State<SignInPage> {
     });
   }
 
+  void onLogin() {
+    context.push(Routes.dashboard);
+    String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
+
+    if (email.isEmpty) {
+      AppToast.show("Email is required", ToastType.error);
+    } else if (!RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$").hasMatch(email)) {
+      AppToast.show("Please enter a valid email address", ToastType.error);
+    } else if (password.isEmpty) {
+      AppToast.show("Password is required", ToastType.error);
+    } else if (password.length < 6) {
+      AppToast.show("Password must be at least 6 characters", ToastType.error);
+    } else {
+      context.push(Routes.dashboard);
+    }
+  }
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -62,12 +79,12 @@ class _SignInPageState extends State<SignInPage> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Text(
-                    "Welcome back!".tr(),
+                    tr("welcome_back"),
                     style: Theme.of(context).textTheme.headlineLarge,
                   ),
                   SizedBox(height: h(5)),
                   Text(
-                    "Login to your account.!".tr(),
+                    tr("login_to_your_account"),
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
                   SizedBox(height: h(39)),
@@ -77,19 +94,19 @@ class _SignInPageState extends State<SignInPage> {
                       children: [
                         AppTextField(
                           controller: _emailController,
-                          label: "Email address".tr(),
-                          validator: emailValidator,
+                          label: tr("email_address"),
+                          // validator: emailValidator,
                           keyboardType: TextInputType.emailAddress,
-                          hintText: "Enter your email".tr(),
+                          hintText: tr("enter_your_email_address"),
                         ),
 
                         SizedBox(height: h(20)),
                         AppTextField(
                           controller: _passwordController,
-                          label: "Password".tr(),
+                          label: "password".tr(),
 
-                          validator: passwordValidator,
-                          hintText: "Enter your password".tr(),
+                          // validator: passwordValidator,
+                          hintText: "enter_your_password".tr(),
                           obscureText: _isObscure,
                           suffixIcon: GestureDetector(
                             onTap: () => updateObsecure(),
@@ -113,7 +130,7 @@ class _SignInPageState extends State<SignInPage> {
                     child: TextButton(
                       onPressed: () => context.push(Routes.forgotPassword),
                       child: Text(
-                        "Forgot Password?",
+                        "forgot_password_question".tr(),
                         style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                           color: AppColors.primaryColor,
                         ),
@@ -124,24 +141,25 @@ class _SignInPageState extends State<SignInPage> {
                   Padding(
                     padding: gapOnly(top: 20, bottom: 25),
                     child: GenericButtonWidget(
-                      onPressed: () {
-                        if (!_formKey.currentState!.validate()) {}
-                      },
-                      text: tr("Login"),
+                      onPressed: () => onLogin(),
+                      text: tr("login"),
                     ),
                   ),
 
-                  TextspanWidget(
-                    onSignUpTap: () {
-                      context.push(Routes.signUp);
-                    },
-                    text: "Don't have an account?".tr(),
-                    buttonText: "Sign Up".tr(),
+                  Center(
+                    child: TextspanWidget(
+                      buttonColor: AppColors.primaryColor,
+                      callback: () {
+                        context.push(Routes.signUp);
+                      },
+                      text: "dont_have_account".tr(),
+                      buttonText: "sign_up".tr(),
+                    ),
                   ),
                   SizedBox(height: h(20)),
                   Center(
                     child: Text(
-                      "Or with",
+                      "or_with".tr(),
                       style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                         color: AppColors.greyColor,
                         fontWeight: FontWeight.w400,
@@ -170,7 +188,7 @@ class _SignInPageState extends State<SignInPage> {
                             ),
                             SizedBox(width: w(6)),
                             Text(
-                              "Sign In with Google",
+                              "sign_in_with_google".tr(),
                               style: Theme.of(context).textTheme.bodyMedium!
                                   .copyWith(
                                     fontSize: t(12),
@@ -184,7 +202,7 @@ class _SignInPageState extends State<SignInPage> {
                   ),
                   SizedBox(height: h(110)),
                   Text(
-                    "By logging in, you agree to the terms and conditions of this application.",
+                    "terms_and_conditions_text".tr(),
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodySmall!.copyWith(
                       fontSize: t(14),

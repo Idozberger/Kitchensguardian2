@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
+import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/utils/validators.dart';
@@ -10,7 +11,7 @@ import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
 import 'package:foodkitchen/features/auth/presentation/blocs/auth_bloc.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
-import 'package:foodkitchen/features/auth/presentation/widgets/textspan_widget.dart';
+import 'package:go_router/go_router.dart';
 
 class CreateNewPasswordPage extends StatefulWidget {
   const CreateNewPasswordPage({super.key});
@@ -97,9 +98,7 @@ class _CreateNewPasswordPageState extends State<CreateNewPasswordPage> {
                         AppTextField(
                           controller: _passwordController,
                           label: "New password".tr(),
-                          validator: (String? value) {
-                            return nameValidator(value, "New password");
-                          },
+                          // validator: passwordValidator,
                           hintText: "Enter new password".tr(),
                           obscureText: !_isObscurePassword,
                           suffixIcon: GestureDetector(
@@ -120,9 +119,7 @@ class _CreateNewPasswordPageState extends State<CreateNewPasswordPage> {
                           controller: _confirmPasswordController,
                           label: "Confirm new password".tr(),
                           obscureText: !_isObscureConfirmPassword,
-                          validator: (String? value) {
-                            return nameValidator(value, "Confirm new password");
-                          },
+                          // validator: passwordValidator,
                           hintText: "Enter new password".tr(),
                           suffixIcon: GestureDetector(
                             onTap: () => updateObsecureConfirmPassword(),
@@ -145,7 +142,33 @@ class _CreateNewPasswordPageState extends State<CreateNewPasswordPage> {
                     padding: gapOnly(top: 20, bottom: 25),
                     child: GenericButtonWidget(
                       onPressed: () {
-                        if (!_formKey.currentState!.validate()) {}
+                        String password = _passwordController.text.trim();
+                        String confirmPassword = _confirmPasswordController.text
+                            .trim();
+
+                        if (password.isEmpty) {
+                          AppToast.show(
+                            "Password is required",
+                            ToastType.error,
+                          );
+                        } else if (password.length < 6) {
+                          AppToast.show(
+                            "Password must be at least 6 characters",
+                            ToastType.error,
+                          );
+                        } else if (confirmPassword.isEmpty) {
+                          AppToast.show(
+                            "Confirm password is required",
+                            ToastType.error,
+                          );
+                        } else if (password != confirmPassword) {
+                          AppToast.show(
+                            "Passwords do not match",
+                            ToastType.error,
+                          );
+                        } else {
+                          context.go(Routes.passwordChangedSuccess);
+                        }
                       },
                       text: tr("Create password"),
                     ),

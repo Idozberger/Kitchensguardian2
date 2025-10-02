@@ -1,10 +1,14 @@
-import 'package:foodkitchen/features/auth/presentation/pages/create_new_password_page.dart';
-import 'package:foodkitchen/features/auth/presentation/pages/forgot_password_page.dart';
-import 'package:foodkitchen/features/auth/presentation/pages/reset_password_verification_page.dart'
-    show ResetPasswordVerificationPage;
-import 'package:foodkitchen/features/auth/presentation/pages/signin_page.dart';
-import 'package:foodkitchen/features/auth/presentation/pages/signup_page.dart';
+import 'package:foodkitchen/features/auth/presentation/pages/login/create_new_password_page.dart';
+import 'package:foodkitchen/features/auth/presentation/pages/login/forgot_password_page.dart';
+import 'package:foodkitchen/features/auth/presentation/pages/login/password_changed_success_page.dart';
+import 'package:foodkitchen/features/auth/presentation/pages/login/code_verification_page.dart';
+import 'package:foodkitchen/features/auth/presentation/pages/login/signin_page.dart';
+import 'package:foodkitchen/features/auth/presentation/pages/signup/email_verfied_succes_page.dart';
+import 'package:foodkitchen/features/auth/presentation/pages/signup/signup_page.dart';
+import 'package:foodkitchen/features/auth/presentation/pages/signup/verify_email_page.dart';
 import 'package:foodkitchen/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:foodkitchen/features/dashboard/presentation/pages/notification_page.dart';
+import 'package:foodkitchen/features/history/presentation/pages/history_page.dart';
 import 'package:foodkitchen/features/onboarding/presentation/pages/intro_page.dart';
 import 'package:foodkitchen/features/onboarding/presentation/pages/language_selection_page.dart';
 import 'package:foodkitchen/core/config/routes.dart';
@@ -38,8 +42,33 @@ final GoRouter router = GoRouter(
       builder: (context, state) => CreateNewPasswordPage(),
     ),
     GoRoute(
+      path: Routes.passwordChangedSuccess,
+      builder: (context, state) => PasswordChangedSuccessPage(),
+    ),
+    GoRoute(
+      name: "verify_email",
+      path: Routes.verifyEmail,
+      builder: (context, state) {
+        return VerifyEmailPage(
+          emailAddress: state.uri.queryParameters["email"] ?? "",
+        );
+      },
+    ),
+    GoRoute(
+      path: Routes.emailVerifiedSuccess,
+      builder: (context, state) => EmailVerfiedSuccesPage(),
+    ),
+    GoRoute(
       path: Routes.dashboard,
       builder: (context, state) => DashboardPage(),
+    ),
+    GoRoute(
+      path: Routes.notification,
+      builder: (context, state) => NotificationPage(),
+    ),
+    GoRoute(
+      path: Routes.scanHistory,
+      builder: (context, state) => ScanHistoryPage(),
     ),
   ],
 );

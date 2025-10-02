@@ -4,12 +4,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
+import 'package:foodkitchen/core/dialogs/code_resend.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/widgets/generic_otp_widget.dart';
 import 'package:foodkitchen/features/auth/presentation/blocs/auth_bloc.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
-import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:go_router/go_router.dart';
 
 class ResetPasswordVerificationPage extends StatefulWidget {
@@ -107,7 +107,9 @@ class _ResetPasswordVerificationPageState
                   SizedBox(height: h(30)),
                   Center(
                     child: TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        _showDialog(context);
+                      },
                       child: Text(
                         "Resend code",
                         style: Theme.of(context).textTheme.bodyMedium!,
@@ -117,6 +119,60 @@ class _ResetPasswordVerificationPageState
                 ],
               ),
             ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<dynamic> _showDialog(BuildContext context) {
+    return showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) {
+        return GenericDialog(
+          borderRadius: h(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Success",
+                style: Theme.of(context).textTheme.headlineLarge!.copyWith(
+                  fontWeight: FontWeight.w600,
+                  fontSize: t(20),
+                ),
+              ),
+              SizedBox(height: h(10)),
+              Text(
+                "Your password has been updated successfully.",
+                style: Theme.of(context).textTheme.headlineSmall!,
+              ),
+              SizedBox(height: h(10)),
+              Align(
+                alignment: Alignment.topRight,
+                child: SizedBox(
+                  width: w(72),
+                  height: h(28),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(h(10)),
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+
+                    child: Text(
+                      "oK",
+                      style: Theme.of(context).textTheme.headlineMedium!
+                          .copyWith(fontSize: t(15), color: Colors.black),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         );
       },

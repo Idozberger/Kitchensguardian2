@@ -1,41 +1,45 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:foodkitchen/core/theme/app_colors.dart';
 
 class TextspanWidget extends StatelessWidget {
-  final VoidCallback onSignUpTap;
+  final VoidCallback callback;
   final String text;
   final String buttonText;
-
+  final Color buttonColor;
+  final FontWeight? fontWeight;
+  final TextStyle? style;
   const TextspanWidget({
     super.key,
-    required this.onSignUpTap,
+    required this.callback,
     required this.text,
     required this.buttonText,
+    required this.buttonColor,
+    this.fontWeight = FontWeight.w700,
+    this.style,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text.rich(
-        TextSpan(
-          text: "$text ",
-          style: Theme.of(
-            context,
-          ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w400),
-          children: [
-            TextSpan(
-              text: buttonText,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.primaryColor,
-                fontWeight: FontWeight.w700,
-              ),
-              recognizer: TapGestureRecognizer()..onTap = onSignUpTap,
+    return Text.rich(
+      TextSpan(
+        text: "$text ",
+        style:
+            style ??
+            Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w400),
+        children: [
+          TextSpan(
+            text: buttonText,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: buttonColor,
+              fontWeight: fontWeight,
             ),
-          ],
-        ),
-        textAlign: TextAlign.center,
+            recognizer: TapGestureRecognizer()..onTap = callback,
+          ),
+        ],
       ),
+      textAlign: TextAlign.center,
     );
   }
 }

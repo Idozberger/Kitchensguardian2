@@ -14,14 +14,15 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
   }) async {
     try {
-      final userModel = await authRemoteDataSource
+      String response = await authRemoteDataSource
           .signUpUserWithEmailAndPassword(
             firstName: firstName,
             lastName: lastName,
             email: email,
             password: password,
           );
-      return Right("Success");
+
+      return Right(response);
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
