@@ -9,10 +9,17 @@ import 'package:foodkitchen/features/auth/presentation/pages/signup/verify_email
 import 'package:foodkitchen/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:foodkitchen/features/dashboard/presentation/pages/notification_page.dart';
 import 'package:foodkitchen/features/history/presentation/pages/history_page.dart';
+import 'package:foodkitchen/features/kitchens/presentation/pages/kitchen_page.dart';
 import 'package:foodkitchen/features/onboarding/presentation/pages/intro_page.dart';
 import 'package:foodkitchen/features/onboarding/presentation/pages/language_selection_page.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/features/onboarding/presentation/pages/splash_screen.dart';
+import 'package:foodkitchen/features/pantry/presentation/pages/add_item_page.dart';
+import 'package:foodkitchen/features/pantry/presentation/pages/my_pantry_page.dart';
+import 'package:foodkitchen/features/pantry/presentation/pages/scan_meal_page.dart';
+import 'package:foodkitchen/features/profile/presentation/pages/change_password_page.dart';
+import 'package:foodkitchen/features/profile/presentation/pages/edit_profile_page.dart';
+import 'package:foodkitchen/features/profile/presentation/pages/profile_page.dart';
 import 'package:go_router/go_router.dart';
 
 final GoRouter router = GoRouter(
@@ -69,6 +76,19 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: Routes.scanHistory,
       builder: (context, state) => ScanHistoryPage(),
+    ),
+    GoRoute(path: Routes.addItem, builder: (context, state) => AddItemPage()),
+    GoRoute(path: Routes.myPantry, builder: (context, state) => MyPantryPage()),
+    GoRoute(path: Routes.scanMeal, builder: (context, state) => ScanMealPage()),
+    GoRoute(path: Routes.kitchen, builder: (context, state) => KitchenPage()),
+    GoRoute(path: Routes.profile, builder: (context, state) => ProfilePage()),
+    GoRoute(
+      path: Routes.editProfile,
+      builder: (context, state) => EditProfilePage(),
+    ),
+    GoRoute(
+      path: Routes.changePassword,
+      builder: (context, state) => ChangePasswordPage(),
     ),
   ],
 );

@@ -13,7 +13,10 @@ class AppTextField extends StatelessWidget {
   final TextInputType keyboardType;
   final Widget? suffixIcon;
   final String? Function(String?)? validator;
-
+  final bool isFilled;
+  final Color? color;
+  final Color? fillColor;
+  final Widget? prefixIcon;
   const AppTextField({
     super.key,
     required this.label,
@@ -23,8 +26,12 @@ class AppTextField extends StatelessWidget {
     this.obscureText = false,
     this.keyboardType = TextInputType.text,
     this.suffixIcon,
+    this.prefixIcon,
     this.validator,
     this.isLabled = true,
+    this.isFilled = false,
+    this.fillColor,
+    this.color,
   });
 
   @override
@@ -43,10 +50,12 @@ class AppTextField extends StatelessWidget {
           controller: controller,
           obscureText: obscureText,
           keyboardType: keyboardType,
-          style: Theme.of(context).textTheme.bodyMedium,
+          style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: color),
           validator: validator,
 
           decoration: InputDecoration(
+            filled: isFilled,
+            fillColor: fillColor,
             hintText: hintText,
             hintStyle: Theme.of(
               context,
@@ -59,6 +68,7 @@ class AppTextField extends StatelessWidget {
             disabledBorder: outlineInputBorder(context),
             enabledBorder: outlineInputBorder(context),
             suffixIcon: suffixIcon,
+            prefixIcon: prefixIcon,
           ),
         ),
 
@@ -76,13 +86,13 @@ class AppTextField extends StatelessWidget {
       ],
     );
   }
+}
 
-  OutlineInputBorder outlineInputBorder(BuildContext context) {
-    return OutlineInputBorder(
-      borderRadius: BorderRadius.circular(h(10)),
-      borderSide: BorderSide(
-        color: context.isDarkTheme ? Colors.white : AppColors.greyColor,
-      ),
-    );
-  }
+OutlineInputBorder outlineInputBorder(BuildContext context) {
+  return OutlineInputBorder(
+    borderRadius: BorderRadius.circular(h(10)),
+    borderSide: BorderSide(
+      color: context.isDarkTheme ? Colors.white : AppColors.greyColor,
+    ),
+  );
 }

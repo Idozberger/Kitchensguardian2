@@ -13,7 +13,7 @@ class GenericButtonWidget extends StatelessWidget {
   final bool isOutlined;
   final double? height;
   final BorderRadiusGeometry? borderRadius;
-
+  final Color? color;
   const GenericButtonWidget({
     super.key,
     required this.onPressed,
@@ -23,17 +23,18 @@ class GenericButtonWidget extends StatelessWidget {
     this.textStyle,
     this.padding,
     this.isLoading = false,
-    this.height,
+    this.height = 40,
     this.isOutlined = false,
     this.width = double.infinity,
     this.borderRadius,
+    this.color,
   });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: width,
-      height: height,
+      height: h(height!),
       child: isOutlined
           ? OutlinedButton(
               onPressed: onPressed,
@@ -46,13 +47,17 @@ class GenericButtonWidget extends StatelessWidget {
               ),
             )
           : ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: color),
               onPressed: onPressed,
               child: isLoading
                   ? CircularProgressIndicator()
                   : Text(
                       text,
                       style: Theme.of(context).textTheme.headlineMedium!
-                          .copyWith(fontSize: t(14), color: Colors.black),
+                          .copyWith(
+                            fontSize: t(14),
+                            color: color != null ? Colors.white : Colors.black,
+                          ),
                     ),
             ),
     );

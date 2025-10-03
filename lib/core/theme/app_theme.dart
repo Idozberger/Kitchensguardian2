@@ -17,6 +17,7 @@ class AppTheme {
       // AppBar Styling
       appBarTheme: const AppBarTheme(
         elevation: 0, // no shadow
+        scrolledUnderElevation: 0,
         backgroundColor: Colors.white, // appbar bg
         foregroundColor: Colors.black, // title & icons
       ),

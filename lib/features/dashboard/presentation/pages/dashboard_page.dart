@@ -6,9 +6,11 @@ import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/drawer.dart';
+import 'package:foodkitchen/features/grocery/presentation/pages/grocery_page.dart';
 import 'package:foodkitchen/features/home/presentation/pages/home_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/pantry_page.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/planner_page.dart';
+import 'package:foodkitchen/features/profile/presentation/pages/profile_page.dart';
 import 'package:go_router/go_router.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -115,9 +117,8 @@ class _DashboardPageState extends State<DashboardPage> {
         children: <Widget>[
           HomePage(),
           PantryPage(),
-          PlannerPage(),
-          Scaffold(),
-          Scaffold(),
+          GroceryPage(),
+          ProfilePage(),
         ],
       ),
     );

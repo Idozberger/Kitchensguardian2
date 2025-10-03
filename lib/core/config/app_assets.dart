@@ -8,18 +8,37 @@ class AppAssets {
   static String gemPNG = "assets/images/gem.png";
   static String noKitchenFound = "assets/images/no_kitchen_found.png";
   static String avatar = "assets/images/avatar.png";
+  static String groceryEmpty = "assets/images/grocery_empty.png";
   static String premiumBg = "assets/images/premiumbg.png";
 
   ///[ICONS]
   static String tickSvg = "assets/svgs/tick.svg";
   static String success = "assets/svgs/success.svg";
   static String downArrow = "assets/svgs/down_arrow.svg";
+  static String eyeSvg = "assets/svgs/eye.svg";
+  static String flashSvg = "assets/svgs/flash.svg";
+  static String cameraSwitchSvg = "assets/svgs/switch_camera.svg";
   static String eyeVisibilitySvg = "assets/svgs/eye_visibility.svg";
+  static String recipesSvg = "assets/svgs/recipes.svg";
+  static String decreamentSvg = "assets/svgs/minus.svg";
+  static String lockSvg = "assets/svgs/lock.svg";
+  static String searchSvg = "assets/svgs/search.svg";
+  static String signoutSvg = "assets/svgs/signout.svg";
+  static String restorePurchaseSvg = "assets/svgs/restore_purchase.svg";
+  static String likeSvg = "assets/svgs/like.svg";
+  static String starSvg = "assets/svgs/star.svg";
+
+  static String increamentSvg = "assets/svgs/plus.svg";
   static String addSvg = "assets/svgs/add.svg";
   static String backArrowiOS = "assets/svgs/backarrow.svg";
+  static String deleteSvg = "assets/svgs/delete.svg";
   static String pantrySvg = "assets/svgs/pantry.svg";
   static String scanSvg = "assets/svgs/scan.svg";
   static String drawerSvg = "assets/svgs/drawer.svg";
+  static String editSvg = "assets/svgs/edit.svg";
+  static String cartSvg = "assets/svgs/cart.svg";
+  static String cameraSvg = "assets/svgs/camera.svg";
+  static String listCheckedSvg = "assets/svgs/list_checked.svg";
 
   static String notificationSvg = "assets/svgs/notification.svg";
   static String cancelSvg = "assets/svgs/cancel.svg";
@@ -38,7 +57,6 @@ class AppAssets {
   static String profileInactiveSvg = "assets/svgs/profile_inactive.svg";
 
   ///[DRAWERITEMS]
-
   static String favouriteSvg = "assets/svgs/favourite.svg";
   static String myKitchenMember = "assets/svgs/add_kitchen_member.svg";
   static String kitchenSvg = "assets/svgs/kitchens.svg";

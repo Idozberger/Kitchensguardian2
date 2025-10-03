@@ -3,8 +3,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
-import 'package:foodkitchen/features/dashboard/presentation/pages/notification_page.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
+import 'package:foodkitchen/features/pantry/presentation/widgets/list_tile.dart';
 
 class ScanHistoryPage extends StatelessWidget {
   const ScanHistoryPage({super.key});
@@ -152,7 +152,7 @@ class _HistoryListTileState extends State<HistoryListTile> {
                   .map(
                     (e) => Padding(
                       padding: gapOnly(bottom: 8),
-                      child: RequiredText(text: e),
+                      child: ListItemWidget(text: e),
                     ),
                   )
                   .toList(),

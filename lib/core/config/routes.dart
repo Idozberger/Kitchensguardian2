@@ -14,4 +14,11 @@ class Routes {
   static const String dashboard = "/dashboard";
   static const String notification = "/notification";
   static const String scanHistory = "/scan_history";
+  static const String addItem = "/add_item";
+  static const String myPantry = "/my_pantry";
+  static const String scanMeal = "/scan_meal";
+  static const String kitchen = "/kitchen";
+  static const String profile = "/profile";
+  static const String editProfile = "/edit_profile";
+  static const String changePassword = "/change_password";
 }
