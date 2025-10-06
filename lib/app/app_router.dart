@@ -7,6 +7,7 @@ import 'package:foodkitchen/features/auth/presentation/pages/signup/email_verfie
 import 'package:foodkitchen/features/auth/presentation/pages/signup/signup_page.dart';
 import 'package:foodkitchen/features/auth/presentation/pages/signup/verify_email_page.dart';
 import 'package:foodkitchen/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:foodkitchen/features/dashboard/presentation/pages/my_kitchen_members_page.dart';
 import 'package:foodkitchen/features/dashboard/presentation/pages/notification_page.dart';
 import 'package:foodkitchen/features/history/presentation/pages/history_page.dart';
 import 'package:foodkitchen/features/kitchens/presentation/pages/kitchen_page.dart';
@@ -17,6 +18,11 @@ import 'package:foodkitchen/features/onboarding/presentation/pages/splash_screen
 import 'package:foodkitchen/features/pantry/presentation/pages/add_item_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/my_pantry_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/scan_meal_page.dart';
+import 'package:foodkitchen/features/planner/presentation/pages/add_meal_page.dart';
+import 'package:foodkitchen/features/planner/presentation/pages/edit_meal_page.dart';
+import 'package:foodkitchen/features/planner/presentation/pages/favourite_food_page.dart';
+import 'package:foodkitchen/features/planner/presentation/pages/generate_recipes_page.dart';
+import 'package:foodkitchen/features/planner/presentation/pages/generated_recipes_detail_page.dart';
 import 'package:foodkitchen/features/profile/presentation/pages/change_password_page.dart';
 import 'package:foodkitchen/features/profile/presentation/pages/edit_profile_page.dart';
 import 'package:foodkitchen/features/profile/presentation/pages/profile_page.dart';
@@ -89,6 +95,24 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: Routes.changePassword,
       builder: (context, state) => ChangePasswordPage(),
+    ),
+    GoRoute(path: Routes.addMeal, builder: (context, state) => AddMealPage()),
+    GoRoute(path: Routes.editMeal, builder: (context, state) => EditMealPage()),
+    GoRoute(
+      path: Routes.generateRecipes,
+      builder: (context, state) => GenerateRecipesPage(),
+    ),
+    GoRoute(
+      path: Routes.generateRecipesDetails,
+      builder: (context, state) => GeneratedRecipesDetailPage(),
+    ),
+    GoRoute(
+      path: Routes.favouriteFood,
+      builder: (context, state) => FavouriteFoodPage(),
+    ),
+    GoRoute(
+      path: Routes.myKitchenMembers,
+      builder: (context, state) => MyKitchenMembersPage(),
     ),
   ],
 );

@@ -1,0 +1,104 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:foodkitchen/core/global/functions/resize.dart';
+import 'package:foodkitchen/core/theme/app_colors.dart';
+
+class RecipeTile extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final String? errorText;
+  final String imagePath;
+  final String trailingIcon;
+  final bool selected;
+  final VoidCallback? onTap;
+  final VoidCallback? onTrailingTap;
+
+  const RecipeTile({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    required this.imagePath,
+    required this.trailingIcon,
+    this.selected = false,
+    this.errorText,
+    this.onTap,
+    this.onTrailingTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(h(12)),
+      onTap: onTap,
+      child: Ink(
+        padding: EdgeInsets.all(h(10)),
+        decoration: BoxDecoration(
+          color: selected ? Color(0xffFFFBEB) : null,
+          borderRadius: BorderRadius.circular(h(12)),
+          border: Border.all(
+            color: selected ? AppColors.amberLight : Colors.white,
+            width: 2,
+          ),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(h(10)),
+              child: Image.asset(
+                imagePath,
+                width: w(78),
+                height: h(78),
+                fit: BoxFit.cover,
+              ),
+            ),
+
+            SizedBox(width: w(12)),
+
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.headlineLarge!.copyWith(fontSize: t(17)),
+                  ),
+                  SizedBox(height: h(10)),
+                  Text(
+                    subtitle,
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  if (errorText != null) ...[
+                    SizedBox(height: h(4)),
+                    Text(
+                      errorText!,
+                      style: Theme.of(context).textTheme.headlineSmall!
+                          .copyWith(
+                            color: Colors.red,
+                            fontSize: t(10),
+                            fontWeight: FontWeight.w500,
+                          ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+
+            SizedBox(width: w(12)),
+
+            GestureDetector(
+              onTap: onTrailingTap,
+              child: CircleAvatar(
+                radius: h(12),
+                backgroundColor: AppColors.primaryColor,
+                child: SvgPicture.asset(trailingIcon, height: h(10)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

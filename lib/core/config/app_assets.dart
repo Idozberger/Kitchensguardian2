@@ -7,6 +7,7 @@ class AppAssets {
   static String googlePng = "assets/images/google.png";
   static String gemPNG = "assets/images/gem.png";
   static String noKitchenFound = "assets/images/no_kitchen_found.png";
+  static String crownImage = "assets/images/crown.png";
   static String avatar = "assets/images/avatar.png";
   static String groceryEmpty = "assets/images/grocery_empty.png";
   static String premiumBg = "assets/images/premiumbg.png";
@@ -15,6 +16,7 @@ class AppAssets {
   static String tickSvg = "assets/svgs/tick.svg";
   static String success = "assets/svgs/success.svg";
   static String downArrow = "assets/svgs/down_arrow.svg";
+  static String shareSvg = "assets/svgs/share.svg";
   static String eyeSvg = "assets/svgs/eye.svg";
   static String flashSvg = "assets/svgs/flash.svg";
   static String cameraSwitchSvg = "assets/svgs/switch_camera.svg";
@@ -22,6 +24,14 @@ class AppAssets {
   static String recipesSvg = "assets/svgs/recipes.svg";
   static String decreamentSvg = "assets/svgs/minus.svg";
   static String lockSvg = "assets/svgs/lock.svg";
+  static String gramSvg = "assets/svgs/gram.svg";
+  static String stopWatchSvg = "assets/svgs/watch.svg";
+  static String breakfastSvg = "assets/svgs/breakfast.svg";
+  static String lunchSvg = "assets/svgs/lunch.svg";
+  static String arrowForwardAndroidSvg =
+      "assets/svgs/arrow_forward_android.svg";
+  static String dinnerSvg = "assets/svgs/dinner.svg";
+  static String crownSvg = "assets/svgs/crown.svg";
   static String searchSvg = "assets/svgs/search.svg";
   static String signoutSvg = "assets/svgs/signout.svg";
   static String restorePurchaseSvg = "assets/svgs/restore_purchase.svg";
@@ -31,6 +41,7 @@ class AppAssets {
   static String increamentSvg = "assets/svgs/plus.svg";
   static String addSvg = "assets/svgs/add.svg";
   static String backArrowiOS = "assets/svgs/backarrow.svg";
+  static String forwardArrowiOS = "assets/svgs/arrow_forward.svg";
   static String deleteSvg = "assets/svgs/delete.svg";
   static String pantrySvg = "assets/svgs/pantry.svg";
   static String scanSvg = "assets/svgs/scan.svg";
@@ -58,6 +69,7 @@ class AppAssets {
 
   ///[DRAWERITEMS]
   static String favouriteSvg = "assets/svgs/favourite.svg";
+  static String favouriteFilledSvg = "assets/svgs/favourite_filled.svg";
   static String myKitchenMember = "assets/svgs/add_kitchen_member.svg";
   static String kitchenSvg = "assets/svgs/kitchens.svg";
   static String referralSvg = "assets/svgs/referral.svg";

@@ -65,12 +65,16 @@ class AppDrawer extends StatelessWidget {
         DrawerListTile(
           title: "Favourite",
           iconPath: AppAssets.favouriteSvg,
-          onTap: () {},
+          onTap: () {
+            context.push(Routes.favouriteFood);
+          },
         ),
         DrawerListTile(
           title: "My Kitchen Members",
           iconPath: AppAssets.myKitchenMember,
-          onTap: () {},
+          onTap: () {
+            context.push(Routes.myKitchenMembers);
+          },
         ),
         DrawerListTile(
           title: "Get Referral Code",

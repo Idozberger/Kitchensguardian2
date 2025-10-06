@@ -94,13 +94,13 @@ class AppTheme {
         headlineMedium: TextStyle(
           fontFamily: "SFProDisplay",
           color: Color(0xff787878),
-          fontSize: t(13),
+          fontSize: t(15),
           fontWeight: FontWeight.w500,
         ),
         headlineSmall: TextStyle(
           fontFamily: "SFProDisplay",
           color: Color(0xff8D8C8C),
-          fontSize: t(15),
+          fontSize: t(13),
           fontWeight: FontWeight.w400,
         ),
       ),

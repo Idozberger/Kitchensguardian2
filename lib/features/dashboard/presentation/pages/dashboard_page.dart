@@ -77,36 +77,39 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  BottomNavigationBar _buildBottomNav() {
-    return BottomNavigationBar(
-      currentIndex: _selectedIndex,
-      elevation: 0,
+  Widget _buildBottomNav() {
+    return Padding(
+      padding: gapOnly(top: 10),
+      child: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        elevation: 0,
 
-      onTap: (index) {
-        updateSelectedIndex(index);
-      },
-      items: [
-        BottomNavigationBarItem(
-          activeIcon: SvgPicture.asset(AppAssets.homeActiveSvg),
-          icon: SvgPicture.asset(AppAssets.homeInactiveSvg),
-          label: "Home",
-        ),
-        BottomNavigationBarItem(
-          icon: SvgPicture.asset(AppAssets.plannerInactiveSvg),
-          activeIcon: SvgPicture.asset(AppAssets.plannerActiveSvg),
-          label: "Planner",
-        ),
-        BottomNavigationBarItem(
-          icon: SvgPicture.asset(AppAssets.groceryInactiveSvg),
-          activeIcon: SvgPicture.asset(AppAssets.groceryActiveSvg),
-          label: "Grocery",
-        ),
-        BottomNavigationBarItem(
-          icon: SvgPicture.asset(AppAssets.profileInactiveSvg),
-          activeIcon: SvgPicture.asset(AppAssets.profileActiveSvg),
-          label: "Profile",
-        ),
-      ],
+        onTap: (index) {
+          updateSelectedIndex(index);
+        },
+        items: [
+          BottomNavigationBarItem(
+            activeIcon: SvgPicture.asset(AppAssets.homeActiveSvg),
+            icon: SvgPicture.asset(AppAssets.homeInactiveSvg),
+            label: "Home",
+          ),
+          BottomNavigationBarItem(
+            icon: SvgPicture.asset(AppAssets.plannerInactiveSvg),
+            activeIcon: SvgPicture.asset(AppAssets.plannerActiveSvg),
+            label: "Planner",
+          ),
+          BottomNavigationBarItem(
+            icon: SvgPicture.asset(AppAssets.groceryInactiveSvg),
+            activeIcon: SvgPicture.asset(AppAssets.groceryActiveSvg),
+            label: "Grocery",
+          ),
+          BottomNavigationBarItem(
+            icon: SvgPicture.asset(AppAssets.profileInactiveSvg),
+            activeIcon: SvgPicture.asset(AppAssets.profileActiveSvg),
+            label: "Profile",
+          ),
+        ],
+      ),
     );
   }
 
@@ -116,7 +119,7 @@ class _DashboardPageState extends State<DashboardPage> {
         index: _selectedIndex,
         children: <Widget>[
           HomePage(),
-          PantryPage(),
+          PlannerPage(),
           GroceryPage(),
           ProfilePage(),
         ],

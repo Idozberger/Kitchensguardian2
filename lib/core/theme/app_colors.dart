@@ -4,6 +4,7 @@ class AppColors {
   const AppColors._();
 
   static Color primaryColor = Color(0xffF6A500);
+  static Color amberLight = Color(0xffFFDD98);
 
   static Color unSelectedBottomItemColor = Color(0xffAEADAD);
   static Color greyColor = Color(0xff8F8F8F);

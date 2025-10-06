@@ -37,20 +37,20 @@ class _SignInPageState extends State<SignInPage> {
 
   void onLogin() {
     context.push(Routes.dashboard);
-    String email = _emailController.text.trim();
-    String password = _passwordController.text.trim();
+    // String email = _emailController.text.trim();
+    // String password = _passwordController.text.trim();
 
-    if (email.isEmpty) {
-      AppToast.show("Email is required", ToastType.error);
-    } else if (!RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$").hasMatch(email)) {
-      AppToast.show("Please enter a valid email address", ToastType.error);
-    } else if (password.isEmpty) {
-      AppToast.show("Password is required", ToastType.error);
-    } else if (password.length < 6) {
-      AppToast.show("Password must be at least 6 characters", ToastType.error);
-    } else {
-      context.push(Routes.dashboard);
-    }
+    // if (email.isEmpty) {
+    //   AppToast.show("Email is required", ToastType.error);
+    // } else if (!RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$").hasMatch(email)) {
+    //   AppToast.show("Please enter a valid email address", ToastType.error);
+    // } else if (password.isEmpty) {
+    //   AppToast.show("Password is required", ToastType.error);
+    // } else if (password.length < 6) {
+    //   AppToast.show("Password must be at least 6 characters", ToastType.error);
+    // } else {
+    //   context.push(Routes.dashboard);
+    // }
   }
 
   @override
@@ -170,7 +170,9 @@ class _SignInPageState extends State<SignInPage> {
                   Center(
                     child: InkWell(
                       borderRadius: BorderRadius.circular(h(10)),
-                      onTap: () {},
+                      onTap: () {
+                        onLogin();
+                      },
                       child: Ink(
                         width: w(209),
                         padding: gapAll(10),

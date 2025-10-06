@@ -150,7 +150,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               ),
-              SizedBox(width: h(10)),
+              SizedBox(width: w(10)),
               Flexible(
                 child: SizedBox(
                   width: double.infinity,
