@@ -26,7 +26,7 @@ class DiscoverText extends StatelessWidget {
 
   TextStyle textStyle(BuildContext context) {
     return Theme.of(context).textTheme.bodyLarge!.copyWith(
-      fontSize: t(19),
+      fontSize: t(16),
       fontWeight: FontWeight.w600,
     );
   }

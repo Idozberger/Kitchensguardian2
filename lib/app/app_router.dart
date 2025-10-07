@@ -26,6 +26,7 @@ import 'package:foodkitchen/features/planner/presentation/pages/generated_recipe
 import 'package:foodkitchen/features/profile/presentation/pages/change_password_page.dart';
 import 'package:foodkitchen/features/profile/presentation/pages/edit_profile_page.dart';
 import 'package:foodkitchen/features/profile/presentation/pages/profile_page.dart';
+import 'package:foodkitchen/features/subscription/presentation/pages/subscription_page.dart';
 import 'package:go_router/go_router.dart';
 
 final GoRouter router = GoRouter(
@@ -113,6 +114,10 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: Routes.myKitchenMembers,
       builder: (context, state) => MyKitchenMembersPage(),
+    ),
+    GoRoute(
+      path: Routes.subscription,
+      builder: (context, state) => SubscriptionPage(),
     ),
   ],
 );

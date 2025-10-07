@@ -1,0 +1,93 @@
+import 'package:flutter/material.dart';
+import 'package:foodkitchen/core/config/app_assets.dart';
+import 'package:foodkitchen/core/config/routes.dart';
+import 'package:foodkitchen/core/global/functions/resize.dart';
+import 'package:foodkitchen/core/theme/app_colors.dart';
+import 'package:foodkitchen/core/utils/show_toast.dart';
+import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
+import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
+import 'package:foodkitchen/features/planner/presentation/widgets/day_plan_menu.dart';
+import 'package:foodkitchen/features/planner/presentation/widgets/meal_tile.dart';
+import 'package:go_router/go_router.dart';
+
+class DayPlanTile extends StatelessWidget {
+  final String dayLabel;
+  final List<MealTile> meals;
+
+  const DayPlanTile({super.key, required this.dayLabel, required this.meals});
+
+  @override
+  Widget build(BuildContext context) {
+    return UpperTile(
+      widget: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildHeaderRow(context),
+          gap(height: 5),
+          ...meals.map((meal) => meal),
+          const Divider(color: Color(0xffE6E6E6)),
+          gap(height: 12),
+          _buildFooterButtons(context),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeaderRow(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            Image.asset(AppAssets.avatar, height: h(34)),
+            SizedBox(width: w(13)),
+            Text(dayLabel, style: Theme.of(context).textTheme.headlineLarge),
+          ],
+        ),
+        const DayPlanMenu(),
+      ],
+    );
+  }
+
+  Widget _buildFooterButtons(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: SizedBox(
+            height: h(40),
+            child: OutlinedButton(
+              onPressed: () {
+                context.push(Routes.generateRecipes);
+              },
+              child: Text(
+                "View Recipe",
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontSize: t(14),
+                  color: AppColors.primaryColor,
+                ),
+              ),
+            ),
+          ),
+        ),
+        SizedBox(width: h(10)),
+        Expanded(
+          child: SizedBox(
+            height: h(40),
+            child: ElevatedButton(
+              onPressed: () {
+                AppToast.show("Added to cart", ToastType.success);
+              },
+              child: Text(
+                "Add to Cart",
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontSize: t(14),
+                  color: Colors.black,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}

@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
+import 'package:foodkitchen/core/dialogs/create_kitchen.dart';
+import 'package:foodkitchen/core/dialogs/join_kitchen.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
+import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/features/auth/presentation/widgets/textspan_widget.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
+import 'package:go_router/go_router.dart';
 
 class KitchenPage extends StatelessWidget {
   const KitchenPage({super.key});
@@ -23,6 +27,8 @@ class KitchenPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildSectionTitle(context),
+                SizedBox(height: h(20)),
+                _buildCreateKitchenTile(context),
                 SizedBox(height: h(20)),
                 _buildKitchenHaveSection(context),
               ],
@@ -60,27 +66,57 @@ class KitchenPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Kitchen you have to:",
+            "Kitchen You Have Joined",
             style: Theme.of(
               context,
             ).textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
           SizedBox(height: h(15)),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Flexible(
-                child: GenericButtonWidget(
-                  isOutlined: true,
-                  onPressed: () {},
-                  text: "Create",
+          Text(
+            "No Kitchen Found",
+            style: Theme.of(context).textTheme.headlineMedium!,
+          ),
+          SizedBox(height: h(15)),
+
+          GenericButtonWidget(
+            onPressed: () {
+              showJoinKitchenDialog(context);
+            },
+            text: "Join a Kitchen",
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCreateKitchenTile(BuildContext context) {
+    return UpperTile(
+      widget: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Create a kitchen",
+            style: Theme.of(
+              context,
+            ).textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: h(15)),
+          SizedBox(
+            width: double.infinity,
+            height: h(40),
+            child: OutlinedButton(
+              onPressed: () {
+                showCreateKitchenDialog(context);
+              },
+
+              child: Text(
+                "Create New",
+                style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                  fontSize: t(14),
+                  color: AppColors.primaryColor,
                 ),
               ),
-              SizedBox(width: w(10)),
-              Flexible(
-                child: GenericButtonWidget(onPressed: () {}, text: "Join"),
-              ),
-            ],
+            ),
           ),
         ],
       ),
@@ -140,9 +176,11 @@ class KitchenPage extends StatelessWidget {
                 ],
               ),
               GenericButtonWidget(
-                onPressed: () {},
+                onPressed: () {
+                  context.pop();
+                },
                 text: "View",
-                width: w(78),
+                width: w(90),
                 height: h(23),
               ),
             ],

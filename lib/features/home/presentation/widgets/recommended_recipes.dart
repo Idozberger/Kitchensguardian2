@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
+import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/recipe_card.dart';
@@ -51,18 +52,21 @@ class _RecommendedRecipesState extends State<RecommendedRecipes> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              "Recommended Recipes",
-              style: Theme.of(context).textTheme.headlineLarge!.copyWith(
-                overflow: TextOverflow.ellipsis,
+        Padding(
+          padding: gapSymmetric(horizontal: 20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Recommended Recipes",
+                style: Theme.of(context).textTheme.headlineLarge!.copyWith(
+                  overflow: TextOverflow.ellipsis,
+                ),
+                maxLines: 1,
               ),
-              maxLines: 1,
-            ),
-            SvgPicture.asset(AppAssets.recipesSvg),
-          ],
+              SvgPicture.asset(AppAssets.recipesSvg),
+            ],
+          ),
         ),
         SizedBox(height: h(20)),
         SizedBox(
@@ -81,7 +85,7 @@ class _RecommendedRecipesState extends State<RecommendedRecipes> {
               itemBuilder: (context, index) {
                 final recipe = recipes[index];
                 return Padding(
-                  padding: EdgeInsets.only(right: w(0)),
+                  padding: EdgeInsets.only(left: w(20)),
                   child: RecipeCard(
                     title: recipe["title"]!,
                     description: recipe["description"]!,
@@ -94,14 +98,13 @@ class _RecommendedRecipesState extends State<RecommendedRecipes> {
           ),
         ),
 
-        // Dots Indicator
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(
             recipes.length,
             (index) => Container(
               margin: EdgeInsets.symmetric(horizontal: w(4)),
-              width: _currentPage == index ? w(12) : w(8),
+              width: _currentPage == index ? w(8) : w(8),
               height: h(8),
               decoration: BoxDecoration(
                 color: _currentPage == index

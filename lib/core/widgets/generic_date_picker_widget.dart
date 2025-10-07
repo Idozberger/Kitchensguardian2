@@ -28,7 +28,7 @@ class _SelectDateWidgetState extends State<SelectDateWidget> {
   void initState() {
     super.initState();
     _selectedDate = widget.startDate;
-    _days = List.generate(10, (i) => widget.startDate.add(Duration(days: i)));
+    _days = List.generate(7, (i) => widget.startDate.add(Duration(days: i)));
   }
 
   @override
@@ -39,63 +39,56 @@ class _SelectDateWidgetState extends State<SelectDateWidget> {
         Text("Select Date", style: Theme.of(context).textTheme.headlineLarge),
         gap(height: 7),
         UpperTile(
-          widget: SizedBox(
-            height: h(80),
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: _days.length,
-              separatorBuilder: (_, __) => SizedBox(width: 8),
-              itemBuilder: (context, index) {
-                final date = _days[index];
-                final isSelected = _isSameDate(date, _selectedDate);
+          widget: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: _days.map((date) {
+              final isSelected = _isSameDate(date, _selectedDate);
 
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _selectedDate = date;
-                    });
-                    widget.onChanged(date);
-                  },
-                  child: Container(
-                    width: w(60),
-                    padding: gapSymmetric(vertical: 10),
-                    decoration: BoxDecoration(
-                      color: isSelected ? Color(0xffFFFBEB) : Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: isSelected
-                            ? AppColors.primaryColor
-                            : Colors.white,
-                      ),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          date.day.toString(),
-                          style: Theme.of(context).textTheme.headlineMedium!
-                              .copyWith(
-                                color: isSelected
-                                    ? AppColors.primaryColor
-                                    : Colors.black,
-                              ),
-                        ),
-                        gap(height: 6),
-                        Text(
-                          DateFormat('EEE').format(date),
-                          style: Theme.of(context).textTheme.headlineMedium!
-                              .copyWith(
-                                color: isSelected
-                                    ? AppColors.primaryColor
-                                    : Colors.black,
-                              ),
-                        ),
-                      ],
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedDate = date;
+                  });
+                  widget.onChanged(date);
+                },
+                child: Container(
+                  padding: gapSymmetric(vertical: 10, horizontal: 7),
+                  decoration: BoxDecoration(
+                    color: isSelected ? const Color(0xffFFFBEB) : Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isSelected ? AppColors.primaryColor : Colors.white,
                     ),
                   ),
-                );
-              },
-            ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        date.day.toString(),
+                        style: Theme.of(context).textTheme.headlineMedium!
+                            .copyWith(
+                              color: isSelected
+                                  ? AppColors.primaryColor
+                                  : Colors.black,
+                              fontSize: t(15),
+                            ),
+                      ),
+                      gap(height: 4),
+                      Text(
+                        DateFormat('EEE').format(date),
+                        style: Theme.of(context).textTheme.headlineMedium!
+                            .copyWith(
+                              color: isSelected
+                                  ? AppColors.primaryColor
+                                  : Colors.black,
+                              fontSize: t(15),
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
           ),
         ),
       ],

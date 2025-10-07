@@ -66,12 +66,13 @@ class MyKitchenMembersPage extends StatelessWidget {
                           children: [
                             Text(
                               member["name"],
-                              style: Theme.of(context).textTheme.headlineLarge,
+                              style: Theme.of(context).textTheme.headlineLarge!
+                                  .copyWith(fontSize: t(16)),
                             ),
                             Text(
                               member["type"],
                               style: Theme.of(context).textTheme.headlineMedium!
-                                  .copyWith(fontSize: t(13)),
+                                  .copyWith(fontSize: t(12)),
                             ),
                           ],
                         ),
@@ -79,7 +80,7 @@ class MyKitchenMembersPage extends StatelessWidget {
                           member["email"],
                           style: Theme.of(
                             context,
-                          ).textTheme.headlineMedium!.copyWith(fontSize: t(15)),
+                          ).textTheme.headlineMedium!.copyWith(fontSize: t(13)),
                         ),
                       );
                     },

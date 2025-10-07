@@ -17,6 +17,7 @@ class AppTextField extends StatelessWidget {
   final Color? color;
   final Color? fillColor;
   final Widget? prefixIcon;
+  final bool textAlignCentered;
   const AppTextField({
     super.key,
     required this.label,
@@ -30,6 +31,7 @@ class AppTextField extends StatelessWidget {
     this.validator,
     this.isLabled = true,
     this.isFilled = false,
+    this.textAlignCentered = false,
     this.fillColor,
     this.color,
   });
@@ -76,7 +78,7 @@ class AppTextField extends StatelessWidget {
           SizedBox(height: h(10)),
           Text(
             errorText!,
-            textAlign: TextAlign.start,
+            textAlign: textAlignCentered ? TextAlign.center : TextAlign.start,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: AppColors.errorColor,
               fontSize: t(12),

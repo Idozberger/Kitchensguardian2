@@ -27,4 +27,5 @@ class Routes {
   static const String generateRecipesDetails = "/generate_recipes_details";
   static const String favouriteFood = "/favourite_food";
   static const String myKitchenMembers = "/my_kitchen_members";
+  static const String subscription = "/subscription";
 }

@@ -95,7 +95,7 @@ class _FavouriteFoodPageState extends State<FavouriteFoodPage> {
       ),
       bottomNavigationBar: SafeArea(
         child: Padding(
-          padding: gapSymmetric(horizontal: 20),
+          padding: gapSymmetric(horizontal: 20, vertical: 20),
           child: GenericButtonWidget(
             onPressed: () {
               context.push(Routes.generateRecipes);

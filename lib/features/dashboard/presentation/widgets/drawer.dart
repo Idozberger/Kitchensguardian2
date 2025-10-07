@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
+import 'package:foodkitchen/core/dialogs/logout.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
+import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_premium_card_widget.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/drawer_tile.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
@@ -79,8 +82,14 @@ class AppDrawer extends StatelessWidget {
         DrawerListTile(
           title: "Get Referral Code",
           iconPath: AppAssets.referralSvg,
-          onTap: () {},
+          onTap: () {
+            const referralCode = "REF12345";
+            final message = "Use my referral code: $referralCode";
+            // ignore: deprecated_member_use
+            Share.share(message, subject: "Kitchen Guardian");
+          },
         ),
+
         DrawerListTile(
           title: "Scan History",
           iconPath: AppAssets.historySvg,
@@ -94,7 +103,12 @@ class AppDrawer extends StatelessWidget {
         DrawerListTile(
           title: "Terms & Conditions",
           iconPath: AppAssets.termsAndConditionSvg,
-          onTap: () {},
+          onTap: () {
+            AppToast.show(
+              "We will navigate user to our privacypolicy and termsAndCondition page",
+              ToastType.success,
+            );
+          },
         ),
       ],
     );
@@ -105,7 +119,9 @@ class AppDrawer extends StatelessWidget {
       width: w(150),
       height: h(40),
       child: ElevatedButton.icon(
-        onPressed: () => context.go(Routes.signIn),
+        onPressed: () {
+          showLogoutDialog(context);
+        },
         icon: SvgPicture.asset(AppAssets.logoutSvg),
         label: Text(
           "Log Out",

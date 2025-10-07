@@ -6,6 +6,7 @@ import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
+import 'package:foodkitchen/core/widgets/generic_dropdown_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 
@@ -61,7 +62,6 @@ class _AddItemPageState extends State<AddItemPage> {
           padding: gapSymmetric(horizontal: 20, vertical: 20),
           child: Column(
             children: [
-              /// Dynamic item list
               Expanded(
                 child: ListView.builder(
                   padding: gapZero,
@@ -70,7 +70,7 @@ class _AddItemPageState extends State<AddItemPage> {
                   itemBuilder: (context, index) {
                     final item = _items[index];
                     return Padding(
-                      padding: gapSymmetric(vertical: 10),
+                      padding: gapOnly(bottom: 10),
                       child: UpperTile(
                         widget: _buildPantryItemForm(context, item),
                       ),
@@ -81,22 +81,25 @@ class _AddItemPageState extends State<AddItemPage> {
               SizedBox(height: h(22)),
 
               /// Add more button
-              SizedBox(
-                width: w(188),
-                height: h(40),
-                child: OutlinedButton.icon(
-                  onPressed: _addNewItem,
-                  icon: SvgPicture.asset(
-                    AppAssets.addSvg,
-                    color: AppColors.primaryColor,
-                    width: w(18),
-                    height: h(18),
-                  ),
-                  label: Text(
-                    "Tap to add more",
-                    style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                      fontSize: t(15),
+              Center(
+                child: SizedBox(
+                  width: w(188),
+                  height: h(40),
+                  child: OutlinedButton.icon(
+                    onPressed: _addNewItem,
+                    icon: SvgPicture.asset(
+                      AppAssets.addSvg,
                       color: AppColors.primaryColor,
+                      width: w(18),
+                      height: h(18),
+                    ),
+                    label: Text(
+                      "Tap to add more",
+                      style: Theme.of(context).textTheme.headlineMedium!
+                          .copyWith(
+                            fontSize: t(15),
+                            color: AppColors.primaryColor,
+                          ),
                     ),
                   ),
                 ),
@@ -106,7 +109,6 @@ class _AddItemPageState extends State<AddItemPage> {
         ),
       ),
 
-      /// Save button
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: gapSymmetric(horizontal: 20, vertical: 10),
@@ -160,17 +162,17 @@ class _AddItemPageState extends State<AddItemPage> {
         SizedBox(height: h(10)),
         AppTextField(
           controller: item.nameController,
-          hintText: "Enter item name",
+          hintText: "Enter item quantity",
           fillColor: const Color(0xffF9F9F9),
           isFilled: true,
           isLabled: false,
+          keyboardType: TextInputType.number,
           label: "",
         ),
         SizedBox(height: h(15)),
         Row(
           spacing: w(12),
           children: [
-            /// Quantity field
             pantryItemTile(
               label: "Quantity",
               child: AppTextField(
@@ -184,65 +186,29 @@ class _AddItemPageState extends State<AddItemPage> {
                 label: "",
               ),
             ),
-
-            /// Units dropdown
-            pantryItemTile(
-              label: "Units",
-              child: DropdownButtonFormField<String>(
+            Flexible(
+              child: PopupDropdownField(
+                label: "Units",
+                hint: "Select Units",
                 value: item.unit,
-                icon: SvgPicture.asset(
-                  AppAssets.downArrow,
-                  color: const Color(0xff787878),
-                ),
-                decoration: _dropdownDecoration(context),
-                items: ["Kg", "Gram", "Litre", "Piece"]
-                    .map(
-                      (unit) => DropdownMenuItem(
-                        value: unit,
-                        child: Text(unit, style: _dropdownTextStyle(context)),
-                      ),
-                    )
-                    .toList(),
+                items: ["Kg", "Gram", "Litre", "Piece"],
                 onChanged: (val) => setState(() => item.unit = val),
               ),
             ),
-
-            /// Pantry dropdown
-            pantryItemTile(
-              label: "Pantry",
-              child: DropdownButtonFormField<String>(
+            Flexible(
+              child: PopupDropdownField(
+                label: "Pantry",
+                hint: "Select Pantry",
                 value: item.pantry,
-                icon: SvgPicture.asset(
-                  AppAssets.downArrow,
-                  color: const Color(0xff787878),
-                ),
-                decoration: _dropdownDecoration(context),
-                items:
-                    [
-                          "Fridge",
-                          "Freezer",
-                          "Shelves",
-                          "Cabinets",
-                          "Drawers",
-                          "Cold cellar",
-                          "Butler's",
-                        ]
-                        .map(
-                          (pantry) => DropdownMenuItem(
-                            value: pantry,
-                            child: Container(
-                              constraints: BoxConstraints(maxWidth: w(60)),
-                              child: Text(
-                                pantry,
-                                maxLines: 2,
-                                softWrap: true,
-                                overflow: TextOverflow.ellipsis,
-                                style: _dropdownTextStyle(context),
-                              ),
-                            ),
-                          ),
-                        )
-                        .toList(),
+                items: [
+                  "Fridge",
+                  "Freezer",
+                  "Shelves",
+                  "Cabinets",
+                  "Drawers",
+                  "Cold cellar",
+                  "Butler's Pantry",
+                ],
                 onChanged: (val) => setState(() => item.pantry = val),
               ),
             ),
@@ -252,7 +218,6 @@ class _AddItemPageState extends State<AddItemPage> {
     );
   }
 
-  /// Common form label
   Widget _formLabel(BuildContext context, String label, {Widget? action}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -269,7 +234,6 @@ class _AddItemPageState extends State<AddItemPage> {
     );
   }
 
-  /// Dropdown decoration
   InputDecoration _dropdownDecoration(BuildContext context) {
     return InputDecoration(
       contentPadding: gapSymmetric(horizontal: 8, vertical: 15),
@@ -284,7 +248,6 @@ class _AddItemPageState extends State<AddItemPage> {
     );
   }
 
-  /// Dropdown text style
   TextStyle? _dropdownTextStyle(BuildContext context) {
     return Theme.of(context).textTheme.headlineMedium?.copyWith(
       fontSize: t(15),
@@ -292,7 +255,6 @@ class _AddItemPageState extends State<AddItemPage> {
     );
   }
 
-  /// Common Pantry Item tile with label + child
   Widget pantryItemTile({required String label, required Widget child}) {
     return Expanded(
       child: Column(
@@ -306,7 +268,6 @@ class _AddItemPageState extends State<AddItemPage> {
     );
   }
 
-  /// App bar
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
       leadingWidth: w(55),

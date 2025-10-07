@@ -49,13 +49,15 @@ class _ScanMealPageState extends State<ScanMealPage> {
 
   Future<void> _captureAndNavigate() async {
     try {
-      // await _initializeControllerFuture;
-      // final image = await _controller!.takePicture();
+      await _initializeControllerFuture;
+      final image = await _controller!.takePicture();
 
-      // if (!mounted) return;
+      if (!mounted) return;
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) => CaptureDetailsPage(imagePath: null)),
+        MaterialPageRoute(
+          builder: (_) => CaptureDetailsPage(imagePath: image.path),
+        ),
       );
     } catch (e) {
       debugPrint("Error capturing image: $e");

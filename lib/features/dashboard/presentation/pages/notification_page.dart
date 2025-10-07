@@ -22,7 +22,7 @@ class NotificationPage extends StatelessWidget {
             padding: EdgeInsets.zero,
             itemBuilder: (context, index) {
               return Padding(
-                padding: gapSymmetric(vertical: 15),
+                padding: gapOnly(bottom: 15),
                 child: ListItemWidget(
                   text:
                       "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ${index + 1}",

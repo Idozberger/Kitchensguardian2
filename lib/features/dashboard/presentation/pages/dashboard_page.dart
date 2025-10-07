@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
-import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
+import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/drawer.dart';
 import 'package:foodkitchen/features/grocery/presentation/pages/grocery_page.dart';
 import 'package:foodkitchen/features/home/presentation/pages/home_page.dart';
-import 'package:foodkitchen/features/pantry/presentation/pages/pantry_page.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/planner_page.dart';
 import 'package:foodkitchen/features/profile/presentation/pages/profile_page.dart';
 import 'package:go_router/go_router.dart';
@@ -59,7 +58,9 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
       actions: [
         IconButton(
-          onPressed: () {},
+          onPressed: () {
+            AppToast.show("Premium", ToastType.success);
+          },
           icon: Image.asset(AppAssets.gemPNG, height: h(16), width: w(22)),
         ),
         CircularIconButton(
@@ -78,38 +79,35 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Widget _buildBottomNav() {
-    return Padding(
-      padding: gapOnly(top: 10),
-      child: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        elevation: 0,
+    return BottomNavigationBar(
+      currentIndex: _selectedIndex,
+      elevation: 0,
 
-        onTap: (index) {
-          updateSelectedIndex(index);
-        },
-        items: [
-          BottomNavigationBarItem(
-            activeIcon: SvgPicture.asset(AppAssets.homeActiveSvg),
-            icon: SvgPicture.asset(AppAssets.homeInactiveSvg),
-            label: "Home",
-          ),
-          BottomNavigationBarItem(
-            icon: SvgPicture.asset(AppAssets.plannerInactiveSvg),
-            activeIcon: SvgPicture.asset(AppAssets.plannerActiveSvg),
-            label: "Planner",
-          ),
-          BottomNavigationBarItem(
-            icon: SvgPicture.asset(AppAssets.groceryInactiveSvg),
-            activeIcon: SvgPicture.asset(AppAssets.groceryActiveSvg),
-            label: "Grocery",
-          ),
-          BottomNavigationBarItem(
-            icon: SvgPicture.asset(AppAssets.profileInactiveSvg),
-            activeIcon: SvgPicture.asset(AppAssets.profileActiveSvg),
-            label: "Profile",
-          ),
-        ],
-      ),
+      onTap: (index) {
+        updateSelectedIndex(index);
+      },
+      items: [
+        BottomNavigationBarItem(
+          activeIcon: SvgPicture.asset(AppAssets.homeActiveSvg),
+          icon: SvgPicture.asset(AppAssets.homeInactiveSvg),
+          label: "Home",
+        ),
+        BottomNavigationBarItem(
+          icon: SvgPicture.asset(AppAssets.plannerInactiveSvg),
+          activeIcon: SvgPicture.asset(AppAssets.plannerActiveSvg),
+          label: "Planner",
+        ),
+        BottomNavigationBarItem(
+          icon: SvgPicture.asset(AppAssets.groceryInactiveSvg),
+          activeIcon: SvgPicture.asset(AppAssets.groceryActiveSvg),
+          label: "Grocery",
+        ),
+        BottomNavigationBarItem(
+          icon: SvgPicture.asset(AppAssets.profileInactiveSvg),
+          activeIcon: SvgPicture.asset(AppAssets.profileActiveSvg),
+          label: "Profile",
+        ),
+      ],
     );
   }
 

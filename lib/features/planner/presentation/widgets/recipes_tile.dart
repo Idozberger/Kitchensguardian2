@@ -63,7 +63,7 @@ class RecipeTile extends StatelessWidget {
                     title,
                     style: Theme.of(
                       context,
-                    ).textTheme.headlineLarge!.copyWith(fontSize: t(17)),
+                    ).textTheme.headlineLarge!.copyWith(fontSize: t(15)),
                   ),
                   SizedBox(height: h(10)),
                   Text(

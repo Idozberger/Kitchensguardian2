@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
+import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
@@ -10,6 +11,7 @@ import 'package:foodkitchen/core/widgets/generic_date_picker_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
+import 'package:go_router/go_router.dart';
 
 class AddMealPage extends StatefulWidget {
   const AddMealPage({super.key});
@@ -31,19 +33,21 @@ class _AddMealPageState extends State<AddMealPage> {
       backgroundColor: const Color(0xffF9F9F9),
       appBar: _buildAppBar(context),
       body: SafeArea(
-        child: Padding(
-          padding: gapSymmetric(horizontal: 20, vertical: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildDatePicker(),
-              gap(height: 20),
-              _buildMealTypeSection(),
-              gap(height: 20),
-              _buildCaloriesSection(),
-              gap(height: 18),
-              _buildActionButtons(),
-            ],
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: gapSymmetric(horizontal: 20, vertical: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildDatePicker(),
+                gap(height: 20),
+                _buildMealTypeSection(),
+                gap(height: 20),
+                _buildCaloriesSection(),
+                gap(height: 18),
+                _buildActionButtons(),
+              ],
+            ),
           ),
         ),
       ),
@@ -148,7 +152,12 @@ class _AddMealPageState extends State<AddMealPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          GenericButtonWidget(onPressed: () {}, text: "Find Recipes"),
+          GenericButtonWidget(
+            onPressed: () {
+              context.push(Routes.generateRecipes);
+            },
+            text: "Find Recipes",
+          ),
           gap(height: 16),
           Row(
             children: [
@@ -181,7 +190,9 @@ class _AddMealPageState extends State<AddMealPage> {
               width: double.infinity,
               height: h(40),
               child: OutlinedButton(
-                onPressed: () {},
+                onPressed: () {
+                  context.pop();
+                },
                 child: Text(
                   "Cancel",
                   style: Theme.of(context).textTheme.headlineMedium!.copyWith(
@@ -198,7 +209,9 @@ class _AddMealPageState extends State<AddMealPage> {
               width: double.infinity,
               height: h(40),
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  context.pop();
+                },
                 child: Text(
                   "Add Meal",
                   style: Theme.of(context).textTheme.headlineMedium!.copyWith(

@@ -70,7 +70,7 @@ class ScanHistoryPage extends StatelessWidget {
 class HistoryListTile extends StatefulWidget {
   final String title;
   final String date;
-  final List<String> details; // texts to show when expanded
+  final List<String> details;
 
   const HistoryListTile({
     super.key,
@@ -89,7 +89,6 @@ class _HistoryListTileState extends State<HistoryListTile> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: gapOnly(bottom: 10), // spacing between tiles
       padding: gapAll(15),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -99,7 +98,6 @@ class _HistoryListTileState extends State<HistoryListTile> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// Top Row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -107,7 +105,9 @@ class _HistoryListTileState extends State<HistoryListTile> {
                 children: [
                   Text(
                     widget.title,
-                    style: Theme.of(context).textTheme.headlineLarge,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.headlineLarge!.copyWith(fontSize: t(18)),
                   ),
                   SizedBox(width: w(16)),
                   Container(
@@ -128,14 +128,14 @@ class _HistoryListTileState extends State<HistoryListTile> {
                   ),
                 ],
               ),
-              IconButton(
-                onPressed: () {
+              GestureDetector(
+                onTap: () {
                   setState(() {
                     _isExpanded = !_isExpanded;
                   });
                 },
-                icon: AnimatedRotation(
-                  turns: _isExpanded ? 0.5 : 0, // rotate arrow
+                child: AnimatedRotation(
+                  turns: _isExpanded ? 0.5 : 0,
                   duration: const Duration(milliseconds: 200),
                   child: SvgPicture.asset(AppAssets.downArrow),
                 ),
@@ -151,7 +151,7 @@ class _HistoryListTileState extends State<HistoryListTile> {
               children: widget.details
                   .map(
                     (e) => Padding(
-                      padding: gapOnly(bottom: 8),
+                      padding: gapOnly(bottom: 6),
                       child: ListItemWidget(text: e),
                     ),
                   )

@@ -41,7 +41,7 @@ class GenericButtonWidget extends StatelessWidget {
               child: Text(
                 text,
                 style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                  fontSize: t(14),
+                  fontSize: t(13),
                   color: AppColors.primaryColor,
                 ),
               ),
@@ -55,7 +55,7 @@ class GenericButtonWidget extends StatelessWidget {
                       text,
                       style: Theme.of(context).textTheme.headlineMedium!
                           .copyWith(
-                            fontSize: t(14),
+                            fontSize: t(13),
                             color: color != null ? Colors.white : Colors.black,
                           ),
                     ),

@@ -117,7 +117,9 @@ class _GroceryPageState extends State<GroceryPage> {
           onTap: () => setState(() => _selectedIndex = index),
           child: RoundedTextContainer(
             isBordered: true,
-            borderColor: const Color(0xffD4D2D2),
+            borderColor: isSelected
+                ? AppColors.primaryColor
+                : const Color(0xffD4D2D2),
             horizontalPad: 15,
             verticalPad: 12,
             text: categories[index],
@@ -146,7 +148,7 @@ class _GroceryPageState extends State<GroceryPage> {
         physics: const NeverScrollableScrollPhysics(),
         itemCount: currentItems.length,
         separatorBuilder: (_, __) => Padding(
-          padding: gapOnly(top: 15, bottom: 10),
+          padding: gapOnly(top: 5, bottom: 5),
           child: const Divider(color: Color(0xffF4F4F4)),
         ),
         itemBuilder: (context, index) {
@@ -169,9 +171,7 @@ class _GroceryPageState extends State<GroceryPage> {
       return GenericButtonWidget(
         onPressed: () {
           setState(() {
-            finalListItems.addAll(
-              currentItems.where((item) => item["checked"] == true),
-            );
+            finalListItems.addAll(currentItems);
             _selectedIndex = 2;
           });
         },
@@ -185,11 +185,17 @@ class _GroceryPageState extends State<GroceryPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "2/4 items completed",
+          "${finalListItems.where((item) => item["checked"] == true).toList().length}/${finalListItems.length} items completed",
           style: Theme.of(context).textTheme.headlineMedium,
         ),
         gap(height: 20),
-        SegmentedProgressBar(total: 4, completed: 2),
+        SegmentedProgressBar(
+          total: finalListItems.length,
+          completed: finalListItems
+              .where((item) => item["checked"] == true)
+              .toList()
+              .length,
+        ),
         gap(height: 20),
         _buildShareButton(context),
       ],

@@ -4,6 +4,7 @@ import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
+import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_checktile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
@@ -93,7 +94,7 @@ class _GeneratedRecipesDetailPageState
           ? null
           : SafeArea(
               child: Padding(
-                padding: gapSymmetric(horizontal: 20),
+                padding: gapSymmetric(horizontal: 20, vertical: 20),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -257,7 +258,9 @@ class _GeneratedRecipesDetailPageState
           width: double.infinity,
           height: h(40),
           child: OutlinedButton(
-            onPressed: () {},
+            onPressed: () {
+              AppToast.show("Added to your weekly plan ", ToastType.success);
+            },
             child: Text(
               "Add to Weekly Meal",
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(

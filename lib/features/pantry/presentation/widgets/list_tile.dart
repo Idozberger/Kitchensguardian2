@@ -23,10 +23,10 @@ class ListItemWidget extends StatelessWidget {
         Padding(
           padding: crossAlignment == CrossAxisAlignment.center
               ? gapZero
-              : gapOnly(top: 4),
+              : gapOnly(top: 6),
           child: Container(
-            width: 8,
-            height: 8,
+            width: w(8),
+            height: h(8),
             margin: EdgeInsets.only(right: 6),
             decoration: BoxDecoration(
               color: AppColors.primaryColor,
@@ -40,7 +40,7 @@ class ListItemWidget extends StatelessWidget {
             text,
 
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontSize: t(15),
+              fontSize: t(13),
               fontWeight: FontWeight.w400,
               color: Color(0xff787878),
             ),

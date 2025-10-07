@@ -30,7 +30,6 @@ class _MyPantryPageState extends State<MyPantryPage> {
         body: SafeArea(
           child: Column(
             children: [
-              /// Tabs
               Container(
                 color: Colors.white,
                 child: TabBar(
@@ -109,23 +108,21 @@ class _MyPantryPageState extends State<MyPantryPage> {
     String type, [
     bool requestButton = false,
   ]) {
-    return Expanded(
-      child: ListView.separated(
-        itemCount: 8,
-        shrinkWrap: true,
-        separatorBuilder: (context, index) =>
-            const Divider(color: Color(0xffF4F4F4)),
-        padding: gapSymmetric(horizontal: 20, vertical: 15),
-        itemBuilder: (context, index) {
-          return PantryItemCard(
-            title: "$type ${index + 1}",
-            quantity: "1 Bottle",
-            unit: "1 Litre",
-            pantry: "Fridge",
-            expiry: "Expires in ${index + 1} days",
-          );
-        },
-      ),
+    return ListView.separated(
+      itemCount: 3,
+      shrinkWrap: true,
+      separatorBuilder: (context, index) =>
+          const Divider(color: Color(0xffF4F4F4)),
+      padding: gapSymmetric(horizontal: 20, vertical: 20),
+      itemBuilder: (context, index) {
+        return PantryItemCard(
+          title: "$type ${index + 1}",
+          quantity: "1 Bottle",
+          unit: "1 Litre",
+          pantry: "Fridge",
+          expiry: "Expires in ${index + 1} days",
+        );
+      },
     );
   }
 
@@ -221,85 +218,87 @@ class _PantryItemCardState extends State<PantryItemCard> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: gapSymmetric(vertical: 5),
-      padding: gapAll(15),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(h(10)),
-        border: Border.all(color: const Color(0xffD4D2D2)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          /// Top Row
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    widget.title,
-                    style: Theme.of(context).textTheme.headlineLarge,
-                  ),
-                  if (!_isExpanded) ...[
-                    SizedBox(width: w(12)),
-                    _buildInlineInfo(widget.quantity),
-                    _dot(),
-                    _buildInlineInfo(widget.unit),
-                    _dot(),
-                    _buildInlineInfo(widget.pantry),
+    return GestureDetector(
+      onTap: () {
+        setState(() => _isExpanded = !_isExpanded);
+      },
+      child: Container(
+        margin: gapSymmetric(vertical: 0),
+        padding: gapAll(15),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(h(10)),
+          border: Border.all(color: const Color(0xffD4D2D2)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            /// Top Row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      widget.title,
+                      style: Theme.of(context).textTheme.headlineLarge,
+                    ),
+                    if (!_isExpanded) ...[
+                      SizedBox(width: w(12)),
+                      _buildInlineInfo(widget.quantity),
+                      _dot(),
+                      _buildInlineInfo(widget.unit),
+                      _dot(),
+                      _buildInlineInfo(widget.pantry),
+                    ],
                   ],
-                ],
-              ),
-              IconButton(
-                onPressed: () => setState(() => _isExpanded = !_isExpanded),
-                icon: AnimatedRotation(
+                ),
+                AnimatedRotation(
                   turns: _isExpanded ? 0.5 : 0,
                   duration: const Duration(milliseconds: 200),
                   child: SvgPicture.asset(AppAssets.downArrow),
                 ),
+              ],
+            ),
+
+            /// Expanded Details
+            if (_isExpanded) ...[
+              SizedBox(height: h(15)),
+              Row(
+                children: [
+                  _buildInlineInfo(widget.quantity),
+                  _dot(),
+                  _buildInlineInfo(widget.unit),
+                  _dot(),
+                  _buildInlineInfo(widget.pantry),
+                ],
+              ),
+              SizedBox(height: h(10)),
+              Text(
+                widget.expiry,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontSize: t(14),
+                  color: const Color(0xff787878),
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+              SizedBox(height: h(15)),
+
+              /// Action Buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  _circleButton(AppAssets.editSvg, () {}),
+                  _circleButton(AppAssets.cartSvg, () {}),
+                  _circleButton(AppAssets.listCheckedSvg, () {}),
+                  _circleButton(AppAssets.deleteSvg, () {
+                    _showDeleteDialog(context);
+                  }),
+                ],
               ),
             ],
-          ),
-
-          /// Expanded Details
-          if (_isExpanded) ...[
-            SizedBox(height: h(15)),
-            Row(
-              children: [
-                _buildInlineInfo(widget.quantity),
-                _dot(),
-                _buildInlineInfo(widget.unit),
-                _dot(),
-                _buildInlineInfo(widget.pantry),
-              ],
-            ),
-            SizedBox(height: h(10)),
-            Text(
-              widget.expiry,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontSize: t(14),
-                color: const Color(0xff787878),
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-            SizedBox(height: h(15)),
-
-            /// Action Buttons
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                _circleButton(AppAssets.editSvg, () {}),
-                _circleButton(AppAssets.cartSvg, () {}),
-                _circleButton(AppAssets.listCheckedSvg, () {}),
-                _circleButton(AppAssets.deleteSvg, () {
-                  _showDeleteDialog(context);
-                }),
-              ],
-            ),
           ],
-        ],
+        ),
       ),
     );
   }

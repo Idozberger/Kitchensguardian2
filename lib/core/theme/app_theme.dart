@@ -72,7 +72,7 @@ class AppTheme {
         bodyLarge: TextStyle(
           fontFamily: "SFProDisplay",
           color: Colors.black,
-          fontSize: t(19),
+          fontSize: t(16),
         ),
         bodyMedium: TextStyle(
           fontFamily: "SFProDisplay",
@@ -88,13 +88,13 @@ class AppTheme {
         headlineLarge: TextStyle(
           fontFamily: "SFProDisplay",
           color: Colors.black,
-          fontSize: t(19),
+          fontSize: t(16),
           fontWeight: FontWeight.w500,
         ),
         headlineMedium: TextStyle(
           fontFamily: "SFProDisplay",
           color: Color(0xff787878),
-          fontSize: t(15),
+          fontSize: t(14),
           fontWeight: FontWeight.w500,
         ),
         headlineSmall: TextStyle(
@@ -169,9 +169,20 @@ class AppTheme {
             borderRadius: BorderRadius.circular(h(22)),
           ),
           elevation: 0,
-          fixedSize: Size(double.maxFinite, h(45)),
-          maximumSize: Size(double.maxFinite, h(45)),
-          minimumSize: Size(double.maxFinite, h(45)),
+          fixedSize: Size(double.maxFinite, h(40)),
+          maximumSize: Size(double.maxFinite, h(40)),
+          minimumSize: Size(double.maxFinite, h(40)),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(h(22)),
+          ),
+          elevation: 0,
+          fixedSize: Size(double.maxFinite, h(40)),
+          maximumSize: Size(double.maxFinite, h(40)),
+          minimumSize: Size(double.maxFinite, h(40)),
         ),
       ),
 

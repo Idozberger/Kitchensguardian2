@@ -46,7 +46,9 @@ class AppAssets {
   static String pantrySvg = "assets/svgs/pantry.svg";
   static String scanSvg = "assets/svgs/scan.svg";
   static String drawerSvg = "assets/svgs/drawer.svg";
+  static String popupMenuSvg = "assets/svgs/popup.svg";
   static String editSvg = "assets/svgs/edit.svg";
+  static String crossSvg = "assets/svgs/cross.svg";
   static String cartSvg = "assets/svgs/cart.svg";
   static String cameraSvg = "assets/svgs/camera.svg";
   static String listCheckedSvg = "assets/svgs/list_checked.svg";
@@ -66,6 +68,7 @@ class AppAssets {
 
   static String profileActiveSvg = "assets/svgs/profile_active.svg";
   static String profileInactiveSvg = "assets/svgs/profile_inactive.svg";
+  static String findRecipesSvg = "assets/svgs/find_recipes.svg";
 
   ///[DRAWERITEMS]
   static String favouriteSvg = "assets/svgs/favourite.svg";

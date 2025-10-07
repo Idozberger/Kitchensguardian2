@@ -33,19 +33,21 @@ class _EditMealPageState extends State<EditMealPage> {
       backgroundColor: const Color(0xffF9F9F9),
       appBar: _buildAppBar(context),
       body: SafeArea(
-        child: Padding(
-          padding: gapSymmetric(horizontal: 20, vertical: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildDatePicker(),
-              gap(height: 20),
-              _buildMealTypeSection(),
-              gap(height: 20),
-              _buildCaloriesSection(),
-              gap(height: 18),
-              _buildActionButtons(),
-            ],
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: gapSymmetric(horizontal: 20, vertical: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildDatePicker(),
+                gap(height: 20),
+                _buildMealTypeSection(),
+                gap(height: 20),
+                _buildCaloriesSection(),
+                gap(height: 18),
+                _buildActionButtons(),
+              ],
+            ),
           ),
         ),
       ),
@@ -188,7 +190,9 @@ class _EditMealPageState extends State<EditMealPage> {
               width: double.infinity,
               height: h(40),
               child: OutlinedButton(
-                onPressed: () {},
+                onPressed: () {
+                  context.pop();
+                },
                 child: Text(
                   "Cancel",
                   style: Theme.of(context).textTheme.headlineMedium!.copyWith(
@@ -205,7 +209,9 @@ class _EditMealPageState extends State<EditMealPage> {
               width: double.infinity,
               height: h(40),
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  context.pop();
+                },
                 child: Text(
                   "Save Edit",
                   style: Theme.of(context).textTheme.headlineMedium!.copyWith(
