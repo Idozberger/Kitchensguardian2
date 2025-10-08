@@ -1,4 +1,3 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
@@ -7,7 +6,6 @@ import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
-import 'package:foodkitchen/core/utils/validators.dart';
 import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
 import 'package:foodkitchen/features/auth/presentation/blocs/auth_bloc.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
@@ -36,21 +34,22 @@ class _SignInPageState extends State<SignInPage> {
   }
 
   void onLogin() {
-    context.push(Routes.dashboard);
-    // String email = _emailController.text.trim();
-    // String password = _passwordController.text.trim();
+    String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
 
-    // if (email.isEmpty) {
-    //   AppToast.show("Email is required", ToastType.error);
-    // } else if (!RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$").hasMatch(email)) {
-    //   AppToast.show("Please enter a valid email address", ToastType.error);
-    // } else if (password.isEmpty) {
-    //   AppToast.show("Password is required", ToastType.error);
-    // } else if (password.length < 6) {
-    //   AppToast.show("Password must be at least 6 characters", ToastType.error);
-    // } else {
-    //   context.push(Routes.dashboard);
-    // }
+    if (email.isEmpty) {
+      AppToast.show("Email is required", ToastType.error);
+    } else if (!RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$").hasMatch(email)) {
+      AppToast.show("Please enter a valid email address", ToastType.error);
+    } else if (password.isEmpty) {
+      AppToast.show("Password is required", ToastType.error);
+    } else if (password.length < 6) {
+      AppToast.show("Password must be at least 6 characters", ToastType.error);
+    } else {
+      context.read<AuthBloc>().add(
+        AuthSignIn(email: email, password: password),
+      );
+    }
   }
 
   @override
@@ -64,6 +63,10 @@ class _SignInPageState extends State<SignInPage> {
   Widget build(BuildContext context) {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (BuildContext context, AuthState state) {
+        if (state is AuthSuccess) {
+          AppToast.show(state.successMessage, ToastType.success);
+          context.go(Routes.dashboard);
+        }
         if (state is AuthFailure) {
           AppToast.show(state.message, ToastType.error);
         }
@@ -79,12 +82,12 @@ class _SignInPageState extends State<SignInPage> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Text(
-                    tr("welcome_back"),
+                    "Welcome back",
                     style: Theme.of(context).textTheme.headlineLarge,
                   ),
                   SizedBox(height: h(5)),
                   Text(
-                    tr("login_to_your_account"),
+                    "Login to your account.",
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
                   SizedBox(height: h(39)),
@@ -94,19 +97,19 @@ class _SignInPageState extends State<SignInPage> {
                       children: [
                         AppTextField(
                           controller: _emailController,
-                          label: tr("email_address"),
+                          label: "Email address",
                           // validator: emailValidator,
                           keyboardType: TextInputType.emailAddress,
-                          hintText: tr("enter_your_email_address"),
+                          hintText: "Enter your email address",
                         ),
 
                         SizedBox(height: h(20)),
                         AppTextField(
                           controller: _passwordController,
-                          label: "password".tr(),
+                          label: "Password",
 
                           // validator: passwordValidator,
-                          hintText: "enter_your_password".tr(),
+                          hintText: "Enter your password",
                           obscureText: _isObscure,
                           suffixIcon: GestureDetector(
                             onTap: () => updateObsecure(),
@@ -130,7 +133,7 @@ class _SignInPageState extends State<SignInPage> {
                     child: TextButton(
                       onPressed: () => context.push(Routes.forgotPassword),
                       child: Text(
-                        "forgot_password_question".tr(),
+                        "Forgot Password?",
                         style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                           color: AppColors.primaryColor,
                         ),
@@ -142,7 +145,8 @@ class _SignInPageState extends State<SignInPage> {
                     padding: gapOnly(top: 20, bottom: 25),
                     child: GenericButtonWidget(
                       onPressed: () => onLogin(),
-                      text: tr("login"),
+                      text: "Login",
+                      isLoading: state is AuthLoading,
                     ),
                   ),
 
@@ -152,14 +156,14 @@ class _SignInPageState extends State<SignInPage> {
                       callback: () {
                         context.push(Routes.signUp);
                       },
-                      text: "dont_have_account".tr(),
-                      buttonText: "sign_up".tr(),
+                      text: "Don’t have an account? ",
+                      buttonText: "Sign Up",
                     ),
                   ),
                   SizedBox(height: h(20)),
                   Center(
                     child: Text(
-                      "or_with".tr(),
+                      "Or with",
                       style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                         color: AppColors.greyColor,
                         fontWeight: FontWeight.w400,
@@ -190,7 +194,7 @@ class _SignInPageState extends State<SignInPage> {
                             ),
                             SizedBox(width: w(6)),
                             Text(
-                              "sign_in_with_google".tr(),
+                              "Sign In with Google",
                               style: Theme.of(context).textTheme.bodyMedium!
                                   .copyWith(
                                     fontSize: t(12),
@@ -204,7 +208,7 @@ class _SignInPageState extends State<SignInPage> {
                   ),
                   SizedBox(height: h(110)),
                   Text(
-                    "terms_and_conditions_text".tr(),
+                    "By logging in, you agree to the terms and conditions of this application.",
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodySmall!.copyWith(
                       fontSize: t(14),

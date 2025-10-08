@@ -32,12 +32,52 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<Failure, String>> verifyUserEmailWithVerificationCode({
-    required String code,
+    required String verificationCode,
+    required String email,
   }) async {
     try {
-      final userModel = await authRemoteDataSource
-          .verifyUserEmailWithVerificationCode(code: code);
-      return Right("User Verfied Successfully");
+      String response = await authRemoteDataSource
+          .verifyUserEmailWithVerificationCode(
+            verficationCode: verificationCode,
+            email: email,
+          );
+      return Right(response);
+    } on Failure catch (f) {
+      return Left(f);
+    } catch (e) {
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, String>> sendPasswordResetEmail({
+    required String email,
+  }) async {
+    try {
+      final response = await authRemoteDataSource.sendPasswordResetEmail(
+        email: email,
+      );
+      return Right(response);
+    } on Failure catch (f) {
+      return Left(f);
+    } catch (e) {
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, String>> setUsersNewPassword({
+    required String email,
+    required String newPassword,
+    required String verificationCode,
+  }) async {
+    try {
+      final response = await authRemoteDataSource.setUsersNewPassword(
+        email: email,
+        newPassword: newPassword,
+        verificationCode: verificationCode,
+      );
+      return Right(response);
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
@@ -51,9 +91,9 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
   }) async {
     try {
-      final userModel = await authRemoteDataSource
+      final response = await authRemoteDataSource
           .signInUserWithEmailAndPassword(email: email, password: password);
-      return Right("Success");
+      return Right(response);
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
@@ -62,31 +102,22 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, String>> sendPasswordResetVerificationCode({
+  Future<Either<Failure, String>> sendUserEmailVerificationCode({
+    required String firstName,
+    required String lastName,
     required String email,
+    required String password,
   }) async {
     try {
-      final userModel = await authRemoteDataSource
-          .sendPasswordResetVerificationCode(email: email);
-      return Right("Success");
-    } on Failure catch (f) {
-      return Left(f);
-    } catch (e) {
-      return Left(UnknownFailure(e.toString()));
-    }
-  }
+      String response = await authRemoteDataSource
+          .sendUserEmailVerificationCode(
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            password: password,
+          );
 
-  @override
-  Future<Either<Failure, String>> setUsersNewPassword({
-    required String email,
-    required String newPassword,
-  }) async {
-    try {
-      final userModel = await authRemoteDataSource.setUsersNewPassword(
-        email: email,
-        newPassword: newPassword,
-      );
-      return Right("Success");
+      return Right(response);
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {

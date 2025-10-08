@@ -54,7 +54,7 @@ class ProfilePage extends StatelessWidget {
                       title: "Sign Out",
                       subTitle: "Sign out of your account",
                       callback: () {
-                        showLogoutDialog(context);
+                        context.push(Routes.logout);
                       },
                     ),
                   ],

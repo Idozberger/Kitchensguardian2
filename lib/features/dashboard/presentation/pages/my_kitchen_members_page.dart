@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
+import 'package:foodkitchen/core/theme/app_colors.dart';
+import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
+import 'package:go_router/go_router.dart';
 
 class MyKitchenMembersPage extends StatelessWidget {
   MyKitchenMembersPage({super.key});
@@ -49,7 +52,7 @@ class MyKitchenMembersPage extends StatelessWidget {
                     "All kitchen members",
                     style: Theme.of(context).textTheme.headlineLarge,
                   ),
-                  gap(height: 20),
+                  gap(height: 10),
                   ListView.separated(
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
@@ -84,6 +87,40 @@ class MyKitchenMembersPage extends StatelessWidget {
                         ),
                       );
                     },
+                  ),
+                  gap(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(
+                        child: SizedBox(
+                          width: double.infinity,
+                          height: h(40),
+                          child: OutlinedButton(
+                            onPressed: () {
+                              context.pop();
+                            },
+
+                            child: Text(
+                              "Kick",
+                              style: Theme.of(context).textTheme.headlineMedium!
+                                  .copyWith(
+                                    fontSize: t(13),
+                                    color: AppColors.primaryColor,
+                                  ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: w(10)),
+
+                      Flexible(
+                        child: GenericButtonWidget(
+                          onPressed: () {},
+                          text: "Make Co-Host",
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

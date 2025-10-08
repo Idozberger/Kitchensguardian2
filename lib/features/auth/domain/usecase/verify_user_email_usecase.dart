@@ -10,13 +10,15 @@ class VerifyUserEmail implements UseCase<String, VerifyUserEmailParams> {
   @override
   Future<Either<Failure, String>> call(VerifyUserEmailParams params) async {
     return await authRepository.verifyUserEmailWithVerificationCode(
-      code: params.code,
+      verificationCode: params.verificationCode,
+      email: params.email,
     );
   }
 }
 
 class VerifyUserEmailParams {
-  final String code;
+  final String email;
+  final String verificationCode;
 
-  VerifyUserEmailParams({required this.code});
+  VerifyUserEmailParams({required this.email, required this.verificationCode});
 }

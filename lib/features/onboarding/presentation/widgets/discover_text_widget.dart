@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 
@@ -12,12 +12,12 @@ class DiscoverText extends StatelessWidget {
     return Text.rich(
       TextSpan(
         children: [
-          TextSpan(text: tr('discover'), style: textStyle(context)),
+          TextSpan(text: 'Discover ', style: textStyle(context)),
           TextSpan(
-            text: tr('delicious_recipes'),
+            text: 'Delicious Recipes ',
             style: textStyle(context).copyWith(color: AppColors.primaryColor),
           ),
-          TextSpan(text: tr('from_world'), style: textStyle(context)),
+          TextSpan(text: 'From Around The World', style: textStyle(context)),
         ],
       ),
       textAlign: TextAlign.center,

@@ -59,7 +59,7 @@ class _DashboardPageState extends State<DashboardPage> {
       actions: [
         IconButton(
           onPressed: () {
-            AppToast.show("Premium", ToastType.success);
+            context.push(Routes.subscription);
           },
           icon: Image.asset(AppAssets.gemPNG, height: h(16), width: w(22)),
         ),

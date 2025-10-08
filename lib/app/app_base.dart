@@ -1,4 +1,3 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:foodkitchen/app/app_router.dart';
 import 'package:foodkitchen/core/theme/app_theme.dart';
@@ -16,9 +15,7 @@ class AppBase extends StatelessWidget {
       builder: (context, child) {
         return MediaQuery.withNoTextScaling(child: child!);
       },
-      supportedLocales: context.supportedLocales,
-      localizationsDelegates: context.localizationDelegates,
-      locale: context.locale,
+
       themeMode: ThemeMode.light,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,

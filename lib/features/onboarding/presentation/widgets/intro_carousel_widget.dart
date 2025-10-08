@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:foodkitchen/features/onboarding/model/intro_page_slider.dart';
+import 'package:foodkitchen/features/onboarding/data/model/intro_page_slider.dart';
 import 'package:foodkitchen/features/onboarding/presentation/widgets/intro_page_indicator_widget.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
@@ -13,26 +13,31 @@ class IntroCarousel extends StatefulWidget {
 }
 
 class _IntroCarouselState extends State<IntroCarousel> {
-  late PageController _pageController = PageController();
+  late final PageController _pageController;
   double _currentPage = 0.0;
   int _selectedIndex = 0;
+  final List<IntroPageSlider> _sliders = [
+    IntroPageSlider(imageSource: AppAssets.onBoardingSliderBg01),
+    IntroPageSlider(imageSource: AppAssets.onBoardingSliderBg02),
+    IntroPageSlider(imageSource: AppAssets.onBoardingSliderBg01),
+    IntroPageSlider(imageSource: AppAssets.onBoardingSliderBg02),
+    IntroPageSlider(imageSource: AppAssets.onBoardingSliderBg01),
+    IntroPageSlider(imageSource: AppAssets.onBoardingSliderBg02),
+  ];
+
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(viewportFraction: 0.85);
+    _pageController = PageController(
+      viewportFraction: 0.85,
+      initialPage: 1000 * _sliders.length,
+    );
+
     _pageController.addListener(() {
       setState(() {
         _currentPage = _pageController.page ?? 0;
       });
     });
-  }
-
-  List<IntroPageSlider> _getSlider() {
-    return [
-      IntroPageSlider(imageSource: AppAssets.onBoardingSliderBg01),
-      IntroPageSlider(imageSource: AppAssets.onBoardingSliderBg02),
-      IntroPageSlider(imageSource: AppAssets.onBoardingSliderBg01),
-    ];
   }
 
   @override
@@ -50,14 +55,9 @@ class _IntroCarouselState extends State<IntroCarousel> {
           child: PageView.builder(
             controller: _pageController,
             physics: const ClampingScrollPhysics(),
-            itemCount: _getSlider().length,
-            onPageChanged: (value) {
-              setState(() {
-                _selectedIndex = value;
-              });
-            },
             itemBuilder: (context, index) {
-              final imagePath = _getSlider()[index].imageSource;
+              final actualIndex = index % _sliders.length;
+              final imagePath = _sliders[actualIndex].imageSource;
               final distance = (_currentPage - index).abs();
               final scale = (1 + distance * 0.1).clamp(1.0, 1.15);
               final height = h(294) * scale;
@@ -82,13 +82,15 @@ class _IntroCarouselState extends State<IntroCarousel> {
                 ),
               );
             },
+            onPageChanged: (index) {
+              setState(() {
+                _selectedIndex = index % _sliders.length;
+              });
+            },
           ),
         ),
         gapVertical(23),
-        PageIndicator(
-          count: _getSlider().length,
-          selectedIndex: _selectedIndex,
-        ),
+        PageIndicator(count: _sliders.length, selectedIndex: _selectedIndex),
       ],
     );
   }

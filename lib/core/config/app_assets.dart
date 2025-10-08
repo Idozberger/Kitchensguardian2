@@ -5,7 +5,10 @@ class AppAssets {
   static String onBoardingSliderBg01 = "assets/images/onboarding_bg_01.png";
   static String onBoardingSliderBg02 = "assets/images/onboarding_bg_02.png";
   static String googlePng = "assets/images/google.png";
+  static String noInternetPng = "assets/images/no_internet.png";
   static String gemPNG = "assets/images/gem.png";
+  static String logoutPng = "assets/images/logout.png";
+  static String notFoundPng = "assets/images/404.png";
   static String noKitchenFound = "assets/images/no_kitchen_found.png";
   static String crownImage = "assets/images/crown.png";
   static String avatar = "assets/images/avatar.png";

@@ -1,3 +1,7 @@
+import 'package:foodkitchen/core/dialogs/logout.dart';
+import 'package:foodkitchen/core/dialogs/no_internet.dart';
+import 'package:foodkitchen/core/dialogs/not_found_404.dart';
+import 'package:foodkitchen/features/auth/data/model/user_model.dart';
 import 'package:foodkitchen/features/auth/presentation/pages/login/create_new_password_page.dart';
 import 'package:foodkitchen/features/auth/presentation/pages/login/forgot_password_page.dart';
 import 'package:foodkitchen/features/auth/presentation/pages/login/password_changed_success_page.dart';
@@ -12,7 +16,6 @@ import 'package:foodkitchen/features/dashboard/presentation/pages/notification_p
 import 'package:foodkitchen/features/history/presentation/pages/history_page.dart';
 import 'package:foodkitchen/features/kitchens/presentation/pages/kitchen_page.dart';
 import 'package:foodkitchen/features/onboarding/presentation/pages/intro_page.dart';
-import 'package:foodkitchen/features/onboarding/presentation/pages/language_selection_page.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/features/onboarding/presentation/pages/splash_screen.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/add_item_page.dart';
@@ -37,10 +40,10 @@ final GoRouter router = GoRouter(
       builder: (context, state) => const SplashScreen(),
     ),
     GoRoute(path: Routes.onBoarding, builder: (context, state) => IntroPage()),
-    GoRoute(
-      path: Routes.languageSelection,
-      builder: (context, state) => LanguageSelectionPage(),
-    ),
+    // GoRoute(
+    //   path: Routes.languageSelection,
+    //   builder: (context, state) => LanguageSelectionPage(),
+    // ),
     GoRoute(path: Routes.signIn, builder: (context, state) => SignInPage()),
     GoRoute(path: Routes.signUp, builder: (context, state) => SignUpPage()),
     GoRoute(
@@ -48,12 +51,21 @@ final GoRouter router = GoRouter(
       builder: (context, state) => ForgotPasswordPage(),
     ),
     GoRoute(
+      name: "reset_password_verification",
       path: Routes.resetPasswordVerification,
-      builder: (context, state) => ResetPasswordVerificationPage(),
+      builder: (context, state) {
+        final String email = state.extra as String;
+        return ResetPasswordVerificationPage(email: email);
+      },
     ),
+
     GoRoute(
+      name: "create_new_password",
       path: Routes.createNewPassword,
-      builder: (context, state) => CreateNewPasswordPage(),
+      builder: (context, state) {
+        final String email = state.extra as String;
+        return CreateNewPasswordPage(email: email);
+      },
     ),
     GoRoute(
       path: Routes.passwordChangedSuccess,
@@ -63,9 +75,8 @@ final GoRouter router = GoRouter(
       name: "verify_email",
       path: Routes.verifyEmail,
       builder: (context, state) {
-        return VerifyEmailPage(
-          emailAddress: state.uri.queryParameters["email"] ?? "",
-        );
+        final UserModel userModel = state.extra as UserModel;
+        return VerifyEmailPage(userModel: userModel);
       },
     ),
     GoRoute(
@@ -118,6 +129,15 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: Routes.subscription,
       builder: (context, state) => SubscriptionPage(),
+    ),
+    GoRoute(path: Routes.logout, builder: (context, state) => LogoutDialog()),
+    GoRoute(
+      path: Routes.notFound404,
+      builder: (context, state) => NotFound404Dialog(),
+    ),
+    GoRoute(
+      path: Routes.noInternet,
+      builder: (context, state) => NoInternetDialog(),
     ),
   ],
 );

@@ -1,12 +1,9 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
-import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
-import 'package:foodkitchen/core/utils/validators.dart';
 import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
 import 'package:foodkitchen/features/auth/presentation/blocs/auth_bloc.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
@@ -21,6 +18,7 @@ class ForgotPasswordPage extends StatefulWidget {
 }
 
 class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
+  bool isNaviagted = false;
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController _emailController = TextEditingController();
@@ -28,6 +26,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   @override
   void dispose() {
     _emailController.dispose();
+
     super.dispose();
   }
 
@@ -35,6 +34,15 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   Widget build(BuildContext context) {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (BuildContext context, AuthState state) {
+        if (state is AuthForgotMailSent) {
+          if (isNaviagted == false) {
+            context.pushNamed(
+              'create_new_password',
+              extra: _emailController.text.trim(),
+            );
+            isNaviagted = true;
+          }
+        }
         if (state is AuthFailure) {
           AppToast.show(state.message, ToastType.error);
         }
@@ -64,25 +72,25 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   ),
                   SizedBox(height: h(24)),
                   Text(
-                    "Forgot Password".tr(),
+                    "Forgot Password",
                     style: Theme.of(context).textTheme.headlineLarge,
                   ),
                   SizedBox(height: h(5)),
                   Text(
-                    "Enter your email address to reset your password".tr(),
+                    "Enter your email address to reset your password",
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
-                  SizedBox(height: h(39)),
+                  SizedBox(height: h(24)),
                   Form(
                     key: _formKey,
                     child: Column(
                       children: [
                         AppTextField(
                           controller: _emailController,
-                          label: "Email address".tr(),
+                          label: "Email address",
                           keyboardType: TextInputType.emailAddress,
                           // validator: emailValidator,
-                          hintText: "Enter your email".tr(),
+                          hintText: "Enter your email",
                         ),
                       ],
                     ),
@@ -104,10 +112,14 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             ToastType.error,
                           );
                         } else {
-                          context.push(Routes.resetPasswordVerification);
+                          isNaviagted = false;
+                          context.read<AuthBloc>().add(
+                            AuthSendPasswordResetEmail(email: email),
+                          );
                         }
                       },
-                      text: tr("Send link"),
+                      text: "Send link",
+                      isLoading: state is AuthLoading,
                     ),
                   ),
                 ],

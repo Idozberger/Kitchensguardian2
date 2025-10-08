@@ -12,13 +12,19 @@ class SetUserNewPassword implements UseCase<String, SetUserNewPasswordParams> {
     return await authRepository.setUsersNewPassword(
       email: params.email,
       newPassword: params.newPassword,
+      verificationCode: params.verificationCode,
     );
   }
 }
 
 class SetUserNewPasswordParams {
   final String email;
+  final String verificationCode;
   final String newPassword;
 
-  SetUserNewPasswordParams({required this.email, required this.newPassword});
+  SetUserNewPasswordParams({
+    required this.email,
+    required this.newPassword,
+    required this.verificationCode,
+  });
 }

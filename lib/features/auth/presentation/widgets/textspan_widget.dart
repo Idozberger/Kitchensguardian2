@@ -11,6 +11,7 @@ class TextspanWidget extends StatelessWidget {
   final double? fontSize;
   final double? fontSizeTitle;
   final FontWeight? titleFontWeight;
+  final TextAlign? textAlign;
   const TextspanWidget({
     super.key,
     required this.callback,
@@ -22,6 +23,7 @@ class TextspanWidget extends StatelessWidget {
     this.fontSize,
     this.fontSizeTitle,
     this.titleFontWeight = FontWeight.w400,
+    this.textAlign = TextAlign.center,
   });
 
   @override
@@ -29,6 +31,7 @@ class TextspanWidget extends StatelessWidget {
     return Text.rich(
       TextSpan(
         text: "$text ",
+
         style:
             style ??
             Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -47,7 +50,7 @@ class TextspanWidget extends StatelessWidget {
           ),
         ],
       ),
-      textAlign: TextAlign.center,
+      textAlign: textAlign,
     );
   }
 }

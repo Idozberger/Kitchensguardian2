@@ -1,4 +1,3 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
@@ -10,34 +9,60 @@ import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_otp_widget.dart';
+import 'package:foodkitchen/features/auth/data/model/user_model.dart';
 import 'package:foodkitchen/features/auth/presentation/blocs/auth_bloc.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/features/auth/presentation/widgets/textspan_widget.dart';
 import 'package:go_router/go_router.dart';
 
 class VerifyEmailPage extends StatefulWidget {
-  final String emailAddress;
-  const VerifyEmailPage({super.key, required this.emailAddress});
+  final UserModel userModel;
+  const VerifyEmailPage({super.key, required this.userModel});
 
   @override
   State<VerifyEmailPage> createState() => _VerifyEmailPageState();
 }
 
 class _VerifyEmailPageState extends State<VerifyEmailPage> {
+  late UserModel userModel;
+  late AuthBloc authBloc;
   final _formKey = GlobalKey<FormState>();
 
-  String pin = "";
+  String verificationCode = "";
 
-  void updatePin(String value) {
+  void updatePin(String code) {
     setState(() {
-      pin = value;
+      verificationCode = code;
     });
+  }
+
+  @override
+  void initState() {
+    userModel = widget.userModel;
+    authBloc = context.read<AuthBloc>();
+    sendVerificationCode();
+    super.initState();
+  }
+
+  void sendVerificationCode() async {
+    authBloc.add(
+      AuthSendUserEmailVerficationCode(
+        email: userModel.email,
+        firstName: userModel.firstName,
+        lastName: userModel.lastName,
+        password: userModel.password,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (BuildContext context, AuthState state) {
+        if (state is AuthUserVerified) {
+          AppToast.show(state.successMessage, ToastType.success);
+          context.go(Routes.emailVerifiedSuccess);
+        }
         if (state is AuthFailure) {
           AppToast.show(state.message, ToastType.error);
         }
@@ -72,22 +97,20 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                   ),
                   SizedBox(height: h(5)),
                   Text(
-                    "Please type the verification code sent to".tr(),
+                    "Please type the verification code sent to",
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: TextspanWidget(
-                      callback: () {
-                        Navigator.pop(context);
-                      },
-                      style: Theme.of(context).textTheme.headlineMedium,
-                      text: widget.emailAddress,
-                      buttonText: "(change Email)",
+                  TextspanWidget(
+                    textAlign: TextAlign.left,
+                    callback: () {
+                      Navigator.pop(context);
+                    },
+                    style: Theme.of(context).textTheme.headlineMedium,
+                    text: userModel.email,
+                    buttonText: "(change Email)",
 
-                      buttonColor: AppColors.primaryColor,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    buttonColor: AppColors.primaryColor,
+                    fontWeight: FontWeight.w600,
                   ),
                   SizedBox(height: h(20)),
                   Form(
@@ -120,10 +143,16 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                     child: GenericButtonWidget(
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
-                          context.go(Routes.emailVerifiedSuccess);
+                          authBloc.add(
+                            AuthVerifyEmail(
+                              email: userModel.email,
+                              verificationCode: verificationCode,
+                            ),
+                          );
                         }
                       },
-                      text: tr("Verify"),
+                      text: "Verify",
+                      isLoading: state is AuthLoading,
                     ),
                   ),
 
@@ -131,11 +160,12 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                     child: TextspanWidget(
                       buttonColor: AppColors.primaryColor,
                       callback: () {
-                        setState(() {});
+                        sendVerificationCode();
+
                         _showDialog(context);
                       },
-                      text: "I don’t receive a verification code!".tr(),
-                      buttonText: "Resend".tr(),
+                      text: "I don’t receive a verification code!",
+                      buttonText: "Resend",
                     ),
                   ),
                 ],

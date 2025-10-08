@@ -1,12 +1,12 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
+import 'package:foodkitchen/core/dialogs/code_resend.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
-import 'package:foodkitchen/core/utils/validators.dart';
+import 'package:foodkitchen/core/widgets/generic_otp_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
 import 'package:foodkitchen/features/auth/presentation/blocs/auth_bloc.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
@@ -14,7 +14,9 @@ import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:go_router/go_router.dart';
 
 class CreateNewPasswordPage extends StatefulWidget {
-  const CreateNewPasswordPage({super.key});
+  final String email;
+
+  const CreateNewPasswordPage({super.key, required this.email});
 
   @override
   State<CreateNewPasswordPage> createState() => _CreateNewPasswordPageState();
@@ -41,6 +43,20 @@ class _CreateNewPasswordPageState extends State<CreateNewPasswordPage> {
     });
   }
 
+  String pin = "";
+
+  void updatePin(String value) {
+    setState(() {
+      pin = value;
+    });
+  }
+
+  void onResendCode() {
+    context.read<AuthBloc>().add(
+      AuthSendPasswordResetEmail(email: widget.email),
+    );
+  }
+
   @override
   void dispose() {
     _confirmPasswordController.dispose();
@@ -52,6 +68,10 @@ class _CreateNewPasswordPageState extends State<CreateNewPasswordPage> {
   Widget build(BuildContext context) {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (BuildContext context, AuthState state) {
+        if (state is AuthUserPasswordChanged) {
+          AppToast.show(state.successMessage, ToastType.success);
+          context.go(Routes.passwordChangedSuccess);
+        }
         if (state is AuthFailure) {
           AppToast.show(state.message, ToastType.error);
         }
@@ -80,26 +100,39 @@ class _CreateNewPasswordPageState extends State<CreateNewPasswordPage> {
                     ),
                   ),
                   SizedBox(height: h(24)),
+
                   Text(
-                    "Create new password".tr(),
+                    "Create new password",
                     style: Theme.of(context).textTheme.headlineLarge,
                   ),
                   SizedBox(height: h(5)),
                   Text(
-                    "Create a strong, secure password to update your account and protect your information."
-                        .tr(),
+                    "Create a strong, secure password to update your account and protect your information.",
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
-                  SizedBox(height: h(39)),
+                  SizedBox(height: h(20)),
                   Form(
                     key: _formKey,
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        Text(
+                          "Verification Code",
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                        SizedBox(height: h(15)),
+                        OtpField(
+                          onCompleted: (code) {
+                            updatePin(code);
+                            debugPrint("Entered OTP: $code");
+                          },
+                        ),
+                        SizedBox(height: h(20)),
                         AppTextField(
                           controller: _passwordController,
-                          label: "New password".tr(),
+                          label: "New password",
                           // validator: passwordValidator,
-                          hintText: "Enter new password".tr(),
+                          hintText: "Enter new password",
                           obscureText: !_isObscurePassword,
                           suffixIcon: GestureDetector(
                             onTap: () => updateObsecurePassword(),
@@ -117,10 +150,10 @@ class _CreateNewPasswordPageState extends State<CreateNewPasswordPage> {
                         SizedBox(height: h(20)),
                         AppTextField(
                           controller: _confirmPasswordController,
-                          label: "Confirm new password".tr(),
+                          label: "Confirm new password",
                           obscureText: !_isObscureConfirmPassword,
                           // validator: passwordValidator,
-                          hintText: "Enter new password".tr(),
+                          hintText: "Enter new password",
                           suffixIcon: GestureDetector(
                             onTap: () => updateObsecureConfirmPassword(),
                             child: Padding(
@@ -139,7 +172,7 @@ class _CreateNewPasswordPageState extends State<CreateNewPasswordPage> {
                   ),
 
                   Padding(
-                    padding: gapOnly(top: 20, bottom: 25),
+                    padding: gapOnly(top: 20, bottom: 15),
                     child: GenericButtonWidget(
                       onPressed: () {
                         String password = _passwordController.text.trim();
@@ -167,15 +200,88 @@ class _CreateNewPasswordPageState extends State<CreateNewPasswordPage> {
                             ToastType.error,
                           );
                         } else {
-                          context.go(Routes.passwordChangedSuccess);
+                          context.read<AuthBloc>().add(
+                            AuthSetUserNewPassword(
+                              email: widget.email,
+                              newPassword: password,
+                              verificationCode: pin,
+                            ),
+                          );
                         }
                       },
-                      text: tr("Create password"),
+                      text: "Create password",
+                      isLoading: state is AuthLoading,
+                    ),
+                  ),
+                  Center(
+                    child: TextButton(
+                      onPressed: () {
+                        onResendCode();
+                        _showDialog(context);
+                      },
+                      child: Text(
+                        "Resend code",
+                        style: Theme.of(context).textTheme.bodyMedium!,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<dynamic> _showDialog(BuildContext context) {
+    return showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) {
+        return GenericDialog(
+          borderRadius: h(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Success",
+                style: Theme.of(context).textTheme.headlineLarge!.copyWith(
+                  fontWeight: FontWeight.w600,
+                  fontSize: t(20),
+                ),
+              ),
+              SizedBox(height: h(10)),
+              Text(
+                "Your password has been updated successfully.",
+                style: Theme.of(context).textTheme.headlineSmall!,
+              ),
+              SizedBox(height: h(10)),
+              Align(
+                alignment: Alignment.topRight,
+                child: SizedBox(
+                  width: w(72),
+                  height: h(28),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(h(10)),
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+
+                    child: Text(
+                      "oK",
+                      style: Theme.of(context).textTheme.headlineMedium!
+                          .copyWith(fontSize: t(15), color: Colors.black),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         );
       },

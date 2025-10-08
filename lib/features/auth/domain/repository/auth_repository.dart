@@ -8,18 +8,26 @@ abstract interface class AuthRepository {
     required String email,
     required String password,
   });
+  Future<Either<Failure, String>> sendUserEmailVerificationCode({
+    required String firstName,
+    required String lastName,
+    required String email,
+    required String password,
+  });
   Future<Either<Failure, String>> signInUserWithEmailAndPassword({
     required String email,
     required String password,
   });
-  Future<Either<Failure, String>> sendPasswordResetVerificationCode({
+  Future<Either<Failure, String>> sendPasswordResetEmail({
     required String email,
   });
   Future<Either<Failure, String>> setUsersNewPassword({
     required String email,
+    required String verificationCode,
     required String newPassword,
   });
   Future<Either<Failure, String>> verifyUserEmailWithVerificationCode({
-    required String code,
+    required String verificationCode,
+    required String email,
   });
 }

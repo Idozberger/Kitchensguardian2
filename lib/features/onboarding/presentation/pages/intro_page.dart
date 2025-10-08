@@ -1,4 +1,3 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:foodkitchen/features/onboarding/presentation/widgets/discover_text_widget.dart';
 import 'package:foodkitchen/features/onboarding/presentation/widgets/intro_carousel_widget.dart';
@@ -54,7 +53,7 @@ class IntroTextContent extends StatelessWidget {
           DiscoverText(),
           gapVertical(11),
           Text(
-            tr("explore_description"),
+            "Explore thousands of recipes from various cuisines and categories, from appetizers to desserts.",
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium!.copyWith(
               fontSize: t(14),
@@ -66,7 +65,7 @@ class IntroTextContent extends StatelessWidget {
             onPressed: () {
               context.go(Routes.signIn);
             },
-            text: tr("get_started"),
+            text: "Get Started",
           ),
         ],
       ),

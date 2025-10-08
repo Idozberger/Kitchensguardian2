@@ -28,4 +28,7 @@ class Routes {
   static const String favouriteFood = "/favourite_food";
   static const String myKitchenMembers = "/my_kitchen_members";
   static const String subscription = "/subscription";
+  static const String logout = "/logout";
+  static const String notFound404 = "/not_found_404";
+  static const String noInternet = "/no_internet";
 }

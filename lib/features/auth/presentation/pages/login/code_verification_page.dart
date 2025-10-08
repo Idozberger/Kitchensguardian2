@@ -1,4 +1,3 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
@@ -13,7 +12,8 @@ import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:go_router/go_router.dart';
 
 class ResetPasswordVerificationPage extends StatefulWidget {
-  const ResetPasswordVerificationPage({super.key});
+  final String email;
+  const ResetPasswordVerificationPage({super.key, required this.email});
 
   @override
   State<ResetPasswordVerificationPage> createState() =>
@@ -32,10 +32,17 @@ class _ResetPasswordVerificationPageState
     });
   }
 
+  void onResendCode() {
+    context.read<AuthBloc>().add(
+      AuthSendPasswordResetEmail(email: widget.email),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (BuildContext context, AuthState state) {
+        if (state is AuthForgotMailSent) {}
         if (state is AuthFailure) {
           AppToast.show(state.message, ToastType.error);
         }
@@ -65,16 +72,15 @@ class _ResetPasswordVerificationPageState
                   ),
                   SizedBox(height: h(24)),
                   Text(
-                    "Resetting your password".tr(),
+                    "Resetting your password",
                     style: Theme.of(context).textTheme.headlineLarge,
                   ),
                   SizedBox(height: h(5)),
                   Text(
-                    "Please use the 6 digit PIN we sent you to your email address to reset your password. if you didn’t receive it, check your inbox, spam or promotions folder."
-                        .tr(),
+                    "Please use the 5 digit PIN we sent you to your email address to reset your password. if you didn’t receive it, check your inbox, spam or promotions folder.",
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
-                  SizedBox(height: h(39)),
+                  SizedBox(height: h(30)),
                   Form(
                     key: _formKey,
                     child: Column(
@@ -88,7 +94,7 @@ class _ResetPasswordVerificationPageState
                       ],
                     ),
                   ),
-                  SizedBox(height: h(30)),
+                  SizedBox(height: h(15)),
                   Center(
                     child: TextButton(
                       onPressed: () {
@@ -104,10 +110,11 @@ class _ResetPasswordVerificationPageState
                       ),
                     ),
                   ),
-                  SizedBox(height: h(30)),
+
                   Center(
                     child: TextButton(
                       onPressed: () {
+                        onResendCode();
                         _showDialog(context);
                       },
                       child: Text(

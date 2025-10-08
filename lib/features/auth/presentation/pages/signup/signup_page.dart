@@ -1,14 +1,12 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
-import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
-import 'package:foodkitchen/core/utils/validators.dart';
 import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
+import 'package:foodkitchen/features/auth/data/model/user_model.dart';
 import 'package:foodkitchen/features/auth/presentation/blocs/auth_bloc.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
@@ -54,11 +52,17 @@ class _SignUpPageState extends State<SignUpPage> {
         if (state is AuthFailure) {
           AppToast.show(state.message, ToastType.error);
         }
-        if (state is AuthSuccess) {
+        if (state is AuthUserCreatedSuccess) {
           AppToast.show(state.successMessage, ToastType.success);
+
           context.pushNamed(
             "verify_email",
-            queryParameters: {'email': _emailController.text.trim()},
+            extra: UserModel(
+              email: _emailController.text.trim(),
+              firstName: _firstNameController.text,
+              lastName: _lastNameController.text,
+              password: _passwordController.text.trim(),
+            ),
           );
         }
       },
@@ -87,13 +91,12 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
                   SizedBox(height: h(24)),
                   Text(
-                    "Join the Food Kitchen".tr(),
+                    "Join the Food Kitchen",
                     style: Theme.of(context).textTheme.headlineLarge,
                   ),
                   SizedBox(height: h(5)),
                   Text(
-                    "Create an account to save your favorite recipes and start cooking like a pro"
-                        .tr(),
+                    "Create an account to save your favorite recipes and start cooking like a pro",
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
                   SizedBox(height: h(39)),
@@ -103,38 +106,38 @@ class _SignUpPageState extends State<SignUpPage> {
                       children: [
                         AppTextField(
                           controller: _firstNameController,
-                          label: "First name".tr(),
+                          label: "First name",
                           // validator: (String? value) {
                           //   return nameValidator(value, "First name");
                           // },
-                          hintText: "Enter your first name".tr(),
+                          hintText: "Enter your first name",
                         ),
                         SizedBox(height: h(20)),
                         AppTextField(
                           controller: _lastNameController,
-                          label: "Last name".tr(),
+                          label: "Last name",
 
                           // validator: (String? value) {
                           //   return nameValidator(value, "Last name");
                           // },
-                          hintText: "Enter your last name".tr(),
+                          hintText: "Enter your last name",
                         ),
                         SizedBox(height: h(20)),
                         AppTextField(
                           controller: _emailController,
-                          label: "Email address".tr(),
+                          label: "Email address",
                           keyboardType: TextInputType.emailAddress,
                           // validator: emailValidator,
-                          hintText: "Enter your email".tr(),
+                          hintText: "Enter your email",
                         ),
 
                         SizedBox(height: h(20)),
                         AppTextField(
                           controller: _passwordController,
-                          label: "Password".tr(),
+                          label: "Password",
 
                           // validator: passwordValidator,
-                          hintText: "Enter your password".tr(),
+                          hintText: "Enter your password",
                           obscureText: _isObscure,
                           suffixIcon: GestureDetector(
                             onTap: () => updateObsecure(),
@@ -220,22 +223,17 @@ class _SignUpPageState extends State<SignUpPage> {
                           );
                           return;
                         }
-                        context.pushNamed(
-                          "verify_email",
-                          queryParameters: {
-                            'email': _emailController.text.trim(),
-                          },
+
+                        context.read<AuthBloc>().add(
+                          AuthSignUp(
+                            email: email,
+                            firstName: firstName,
+                            lastName: lastName,
+                            password: password,
+                          ),
                         );
-                        // context.read<AuthBloc>().add(
-                        //   AuthSignUp(
-                        //     email: email,
-                        //     firstName: firstName,
-                        //     lastName: lastName,
-                        //     password: password,
-                        //   ),
-                        // );
                       },
-                      text: tr("Sign up"),
+                      text: "Sign up",
                       isLoading: state is AuthLoading,
                     ),
                   ),
@@ -246,8 +244,8 @@ class _SignUpPageState extends State<SignUpPage> {
                       callback: () {
                         Navigator.of(context).pop();
                       },
-                      text: "Already have an account?".tr(),
-                      buttonText: "Login".tr(),
+                      text: "Already have an account?",
+                      buttonText: "Login",
                     ),
                   ),
                 ],

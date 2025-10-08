@@ -12,8 +12,7 @@ class OtpField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final defaultPinTheme = PinTheme(
-      width: w(50),
-      height: h(55),
+      constraints: BoxConstraints(minWidth: w(55), minHeight: h(55)),
       textStyle: Theme.of(context).textTheme.headlineSmall?.copyWith(
         color: Colors.black,
         fontWeight: FontWeight.w600,
@@ -25,7 +24,9 @@ class OtpField extends StatelessWidget {
     );
 
     return Pinput(
-      length: 6,
+      length: 5,
+      separatorBuilder: (index) => SizedBox(width: w(15)),
+
       defaultPinTheme: defaultPinTheme,
       focusedPinTheme: defaultPinTheme.copyWith(
         decoration: BoxDecoration(

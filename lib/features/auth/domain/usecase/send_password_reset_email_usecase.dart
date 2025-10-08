@@ -12,9 +12,7 @@ class SendPasswordResetEmail
   Future<Either<Failure, String>> call(
     SendPasswordResetEmailParams params,
   ) async {
-    return await authRepository.sendPasswordResetVerificationCode(
-      email: params.email,
-    );
+    return await authRepository.sendPasswordResetEmail(email: params.email);
   }
 }
 
