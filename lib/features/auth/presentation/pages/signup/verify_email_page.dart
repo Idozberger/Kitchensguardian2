@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
-import 'package:foodkitchen/core/dialogs/code_resend.dart';
+import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
@@ -59,8 +59,11 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
   Widget build(BuildContext context) {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (BuildContext context, AuthState state) {
-        if (state is AuthUserVerified) {
+        if (state is AuthEmailVerificationCodeSent) {
           AppToast.show(state.successMessage, ToastType.success);
+        }
+        if (state is AuthUserVerified) {
+          // AppToast.show(state.successMessage, ToastType.success);
           context.go(Routes.emailVerifiedSuccess);
         }
         if (state is AuthFailure) {

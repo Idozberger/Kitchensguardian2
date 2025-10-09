@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
-import 'package:foodkitchen/core/dialogs/create_kitchen.dart';
 import 'package:foodkitchen/core/dialogs/join_kitchen.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
+import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
+import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
+import 'package:foodkitchen/features/home/presentation/bloc/home_state.dart';
+import 'package:foodkitchen/features/home/presentation/dialogs/create_kitchen.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/no_kitchen_found.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/recommended_recipes.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/rounded_text_container.dart';
@@ -45,52 +49,64 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildBody(BuildContext context) {
-    return ListView(
-      padding: gapOnly(left: 20, right: 20, bottom: 20, top: 10),
-      children: [
-        if (isJoinedKitched) ...[
-          if (isClickedPantryAction)
-            _buildTextAndButtonTile(
-              context,
-              title: "Scan to log in your food!",
-              buttonText: "Scan",
-              svgPath: AppAssets.scanSvg,
-              callback: () {
-                context.push(Routes.scanMeal);
-              },
-            ),
-          SizedBox(height: h(20)),
+    return BlocConsumer<HomeBloc, HomeState>(
+      listener: (context, state) {
+        if (state.successMessage != null) {
+          AppToast.show(state.successMessage!, ToastType.success);
+        }
+        if (state.errorMessage != null) {
+          AppToast.show(state.errorMessage!, ToastType.error);
+        }
+      },
+      builder: (_, homeState) {
+        return ListView(
+          padding: gapOnly(left: 20, right: 20, bottom: 20, top: 10),
+          children: [
+            if (isJoinedKitched) ...[
+              if (isClickedPantryAction)
+                _buildTextAndButtonTile(
+                  context,
+                  title: "Scan to log in your food!",
+                  buttonText: "Scan",
+                  svgPath: AppAssets.scanSvg,
+                  callback: () {
+                    context.push(Routes.scanMeal);
+                  },
+                ),
+              SizedBox(height: h(20)),
 
-          _buildPantryTile(context),
-          SizedBox(height: h(20)),
-          _buildTextAndButtonTile(
-            context,
-            title: "Find Recipes",
-            buttonText: "Find Recipes",
-            svgPath: AppAssets.findRecipesSvg,
-            callback: () {
-              // context.push(Routes.scanMeal);
-            },
-          ),
-          SizedBox(height: h(20)),
-          UpperTile(widget: RecommendedRecipes(), horizontalPadding: 0),
-          SizedBox(height: h(20)),
-          _buildSmartCartTile(context),
-          if (isGeneratedRecipes) ...[
-            SizedBox(height: h(20)),
-            UpperTile(widget: TonightRecipeWidget(), horizontalPadding: 0),
+              _buildPantryTile(context),
+              SizedBox(height: h(20)),
+              _buildTextAndButtonTile(
+                context,
+                title: "Find Recipes",
+                buttonText: "Find Recipes",
+                svgPath: AppAssets.findRecipesSvg,
+                callback: () {
+                  // context.push(Routes.scanMeal);
+                },
+              ),
+              SizedBox(height: h(20)),
+              UpperTile(widget: RecommendedRecipes(), horizontalPadding: 0),
+              SizedBox(height: h(20)),
+              _buildSmartCartTile(context),
+              if (isGeneratedRecipes) ...[
+                SizedBox(height: h(20)),
+                UpperTile(widget: TonightRecipeWidget(), horizontalPadding: 0),
+              ],
+            ],
+            if (isJoinedKitched == false) ...[
+              _buildHomeUpperTile(context),
+              SizedBox(height: h(140)),
+              EmptyStateWidget(
+                context,
+                imagePath: AppAssets.noKitchenFound,
+                title: 'No Kitchen found',
+              ),
+            ],
           ],
-        ],
-        if (isJoinedKitched == false) ...[
-          _buildHomeUpperTile(context),
-          SizedBox(height: h(140)),
-          EmptyStateWidget(
-            context,
-            imagePath: AppAssets.noKitchenFound,
-            title: 'No Kitchen found',
-          ),
-        ],
-      ],
+        );
+      },
     );
   }
 

@@ -1,4 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
+import 'package:foodkitchen/core/common/domain/usecase/get_current_user.dart';
 import 'package:foodkitchen/features/auth/domain/usecase/send_password_reset_email_usecase.dart';
 import 'package:foodkitchen/features/auth/domain/usecase/send_user_email_verification_code_usecase.dart';
 import 'package:foodkitchen/features/auth/domain/usecase/set_user_new_password_usecase.dart';
@@ -9,6 +11,8 @@ part 'auth_event.dart';
 part 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
+  final UserCubit _userCubit;
+  final GetCurrentUserUseCase _getCurrentUser;
   final UserSignUp _userSignUp;
   final SendUserEmailVerificationCode _sendUserEmailVerificationCode;
   final UserSignIn _userSignIn;
@@ -17,18 +21,22 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final VerifyUserEmail _verifyUserEmail;
 
   AuthBloc({
+    required UserCubit userCubit,
     required UserSignUp userSignUp,
     required SendUserEmailVerificationCode sendUserEmailVerificationCode,
     required UserSignIn userSignIn,
     required SendPasswordResetEmail sendPasswordResetEmail,
     required SetUserNewPassword setUserNewPassword,
     required VerifyUserEmail verifyUserEmail,
-  }) : _userSignUp = userSignUp,
+    required GetCurrentUserUseCase getCurrentUser,
+  }) : _userCubit = userCubit,
+       _userSignUp = userSignUp,
        _sendUserEmailVerificationCode = sendUserEmailVerificationCode,
        _userSignIn = userSignIn,
        _sendPasswordResetEmail = sendPasswordResetEmail,
        _setUserNewPassword = setUserNewPassword,
        _verifyUserEmail = verifyUserEmail,
+       _getCurrentUser = getCurrentUser,
 
        super(AuthInitial()) {
     on<AuthEvent>((_, emit) => emit(AuthLoading()));
@@ -38,6 +46,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthSendPasswordResetEmail>(_onSendPasswordResetEmail);
     on<AuthSetUserNewPassword>(_onSetUserNewPassword);
     on<AuthVerifyEmail>(_onVerifyUserEmail);
+    on<AuthGetCurrentUser>(_onGetCurrentUser);
   }
   Future<void> _onAuthSignUp(AuthSignUp event, Emitter<AuthState> emit) async {
     final res = await _userSignUp(
@@ -68,7 +77,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
 
     res.fold((failure) => emit(AuthFailure(failure.message)), (message) {
-      emit(AuthSuccess(message));
+      emit(AuthEmailVerificationCodeSent(message));
     });
   }
 
@@ -77,10 +86,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       UserSignInParams(email: event.email, password: event.password),
     );
 
-    res.fold(
-      (failure) => emit(AuthFailure(failure.message)),
-      (user) => emit(AuthSuccess(user)),
-    );
+    res.fold((failure) => emit(AuthFailure(failure.message)), (user) {
+      emit(AuthSuccess(user));
+      _onGetCurrentUser(AuthGetCurrentUser(), emit);
+    });
   }
 
   void _onVerifyUserEmail(
@@ -130,5 +139,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       (failure) => emit(AuthFailure(failure.message)),
       (message) => emit(AuthUserPasswordChanged(message)),
     );
+  }
+
+  Future<void> _onGetCurrentUser(
+    AuthGetCurrentUser event,
+    Emitter<AuthState> emit,
+  ) async {
+    final res = await _getCurrentUser(NoParams());
+
+    res.fold((failure) {}, (user) {
+      _userCubit.setUser(
+        firstName: user?.firstName ?? "",
+        lastName: user?.lastName ?? "",
+        email: user?.email ?? "",
+      );
+    });
   }
 }

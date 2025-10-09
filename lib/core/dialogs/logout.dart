@@ -7,6 +7,7 @@ import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LogoutDialog extends StatelessWidget {
   const LogoutDialog({super.key});
@@ -66,7 +67,14 @@ class LogoutDialog extends StatelessWidget {
 
                 Flexible(
                   child: GenericButtonWidget(
-                    onPressed: () {
+                    onPressed: () async {
+                      final prefs = await SharedPreferences.getInstance();
+
+                      final token = prefs.getString('access-token');
+                      print('🧾 Current token: $token');
+
+                      await prefs.remove('access-token');
+
                       context.go(Routes.signIn);
                     },
                     text: "Log out",

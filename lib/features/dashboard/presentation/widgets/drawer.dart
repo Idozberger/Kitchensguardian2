@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
+import 'package:foodkitchen/core/common/cubits/user_state.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
-import 'package:foodkitchen/core/dialogs/logout.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
@@ -17,30 +19,34 @@ class AppDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Drawer(
-      width: w(307),
-      child: SafeArea(
-        child: Padding(
-          padding: gapSymmetric(horizontal: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildProfileSection(context),
-              gap(height: 20),
-              const PremiumCardWidget(),
-              gap(height: 20),
-              _buildDrawerItems(context),
-              const Spacer(),
-              _buildLogoutButton(context),
-              gap(height: 10),
-            ],
+    return BlocBuilder<UserCubit, UserState>(
+      builder: (_, userState) {
+        return Drawer(
+          width: w(307),
+          child: SafeArea(
+            child: Padding(
+              padding: gapSymmetric(horizontal: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildProfileSection(context, userState),
+                  gap(height: 20),
+                  const PremiumCardWidget(),
+                  gap(height: 20),
+                  _buildDrawerItems(context),
+                  const Spacer(),
+                  _buildLogoutButton(context),
+                  gap(height: 10),
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildProfileSection(BuildContext context) {
+  Widget _buildProfileSection(BuildContext context, UserState userState) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -49,10 +55,13 @@ class AppDrawer extends StatelessWidget {
           backgroundImage: AssetImage(AppAssets.avatar),
         ),
         gap(height: 15),
-        Text("Emily David", style: Theme.of(context).textTheme.headlineLarge),
+        Text(
+          "${userState.firstName} ${userState.lastName}",
+          style: Theme.of(context).textTheme.headlineLarge,
+        ),
         gap(height: 5),
         Text(
-          "fakemail@example.com",
+          userState.email,
           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
             fontSize: t(15),
             color: const Color(0xff787878),
@@ -120,9 +129,9 @@ class AppDrawer extends StatelessWidget {
       height: h(40),
       child: ElevatedButton.icon(
         onPressed: () {
-          // context.push(Routes.logout);
+          context.push(Routes.logout);
           // context.push(Routes.noInternet);
-          context.push(Routes.notFound404);
+          // context.push(Routes.notFound404);
         },
         icon: SvgPicture.asset(AppAssets.logoutSvg),
         label: Text(

@@ -3,8 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/app/app_base.dart';
 import 'package:foodkitchen/app/di.dart';
+import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 
 import 'package:foodkitchen/features/auth/presentation/blocs/auth_bloc.dart';
+import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
+import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_cubit.dart';
+import 'package:foodkitchen/features/onboarding/presentation/bloc/user_bloc.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,7 +25,13 @@ Future<void> main() async {
   );
   runApp(
     MultiBlocProvider(
-      providers: [BlocProvider<AuthBloc>(create: (_) => sl<AuthBloc>())],
+      providers: [
+        BlocProvider<UserBloc>(create: (_) => sl<UserBloc>()),
+        BlocProvider<UserCubit>(create: (_) => sl<UserCubit>()),
+        BlocProvider<AuthBloc>(create: (_) => sl<AuthBloc>()),
+        BlocProvider<HomeBloc>(create: (_) => sl<HomeBloc>()),
+        BlocProvider<KitchenCubit>(create: (_) => sl<KitchenCubit>()),
+      ],
       child: const AppBase(),
     ),
   );

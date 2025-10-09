@@ -50,7 +50,7 @@ class OtpField extends StatelessWidget {
               ),
             )
           : null,
-      keyboardType: TextInputType.number,
+      keyboardType: TextInputType.text,
       onCompleted: onCompleted,
     );
   }

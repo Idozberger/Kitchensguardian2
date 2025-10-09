@@ -7,6 +7,7 @@ import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
+import 'package:foodkitchen/features/auth/data/model/user_model.dart';
 import 'package:foodkitchen/features/auth/presentation/blocs/auth_bloc.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
@@ -25,7 +26,7 @@ class _SignInPageState extends State<SignInPage> {
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool _isObscure = false;
+  bool _isObscure = true;
 
   void updateObsecure() {
     setState(() {
@@ -69,6 +70,18 @@ class _SignInPageState extends State<SignInPage> {
         }
         if (state is AuthFailure) {
           AppToast.show(state.message, ToastType.error);
+
+          if (state.message == "User not verified") {
+            context.pushNamed(
+              "verify_email",
+              extra: UserModel(
+                email: _emailController.text.trim(),
+                firstName: "",
+                lastName: "",
+                password: _passwordController.text.trim(),
+              ),
+            );
+          }
         }
       },
       builder: (BuildContext context, AuthState state) {

@@ -135,9 +135,5 @@ final GoRouter router = GoRouter(
       path: Routes.notFound404,
       builder: (context, state) => NotFound404Dialog(),
     ),
-    GoRoute(
-      path: Routes.noInternet,
-      builder: (context, state) => NoInternetDialog(),
-    ),
   ],
 );

@@ -87,13 +87,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource {
           ? jsonDecode(response.data)
           : response.data;
 
-      final accessToken = data["access_token"];
       final message = data["message"];
-
-      if (accessToken != null) {
-        await sharedPreferences.setString("access-token", accessToken);
-        print("Access token saved ✅");
-      }
 
       return message ?? "Verification successful";
     } on DioException catch (e) {

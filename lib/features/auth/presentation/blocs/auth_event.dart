@@ -15,6 +15,8 @@ final class AuthSignUp extends AuthEvent {
   });
 }
 
+class AuthGetCurrentUser extends AuthEvent {}
+
 final class AuthSendUserEmailVerficationCode extends AuthEvent {
   final String firstName;
   final String lastName;

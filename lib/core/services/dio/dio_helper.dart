@@ -1,6 +1,6 @@
 import 'dart:developer';
-
 import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/core/global/functions/logs.dart';
 
@@ -10,9 +10,21 @@ class DioHelper {
   DioHelper(this._dio) {
     _dio.interceptors.add(
       InterceptorsWrapper(
-        onRequest: (options, handler) {
+        onRequest: (options, handler) async {
+          final prefs = await SharedPreferences.getInstance();
+          final token = prefs.getString("access-token");
+
+          ///[dio.options.headers]
+          if (token != null && token.isNotEmpty) {
+            options.headers['Authorization'] = 'Bearer $token';
+          }
+
           log(
-            "➡️ [REQUEST]\nURL: ${options.uri}\nMethod: ${options.method}\nHeaders: ${options.headers}\nData: ${options.data}",
+            "➡️ [REQUEST]\n"
+            "URL: ${options.uri}\n"
+            "Method: ${options.method}\n"
+            "Headers: ${options.headers}\n"
+            "Data: ${options.data}",
           );
 
           return handler.next(options);
@@ -20,16 +32,22 @@ class DioHelper {
         onResponse: (response, handler) {
           logSuccess("✅ [RESPONSE]");
           logSuccess(
-            "Data: ${response.data} ${response.requestOptions.uri} ${response.statusCode}",
+            "Data: ${response.data} "
+            "${response.requestOptions.uri} "
+            "${response.statusCode}",
           );
           return handler.next(response);
         },
         onError: (DioException e, handler) {
           if (e.response != null) {
-            logError("Status: ${e.response?.data}");
+            logError("❌ [ERROR RESPONSE]");
+            logError("Data: ${e.response?.data}");
             logError("Status: ${e.response?.statusCode}");
-            logError("Status: ${e.response?.statusMessage}");
+            logError("Message: ${e.response?.statusMessage}");
+          } else {
+            logError("❌ [DIO ERROR] ${e.message}");
           }
+
           return handler.next(e);
         },
       ),

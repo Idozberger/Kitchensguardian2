@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:foodkitchen/features/onboarding/data/model/intro_page_slider.dart';
+import 'package:foodkitchen/core/common/data/model/intro_page_slider.dart';
 import 'package:foodkitchen/features/onboarding/presentation/widgets/intro_page_indicator_widget.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';

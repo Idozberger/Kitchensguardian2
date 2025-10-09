@@ -8,6 +8,11 @@ final class AuthInitial extends AuthState {}
 
 final class AuthLoading extends AuthState {}
 
+final class AuthEmailVerificationCodeSent extends AuthState {
+  final String successMessage;
+  AuthEmailVerificationCodeSent(this.successMessage);
+}
+
 final class AuthUserPasswordChanged extends AuthState {
   final String successMessage;
   AuthUserPasswordChanged(this.successMessage);

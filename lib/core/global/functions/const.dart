@@ -7,4 +7,9 @@ class AppConstants {
   static const String verifyCode = '/api/verify_user';
   static const String forgot = '/api/forgot_password';
   static const String resetPassword = '/api/reset_password';
+
+  ////logged in operations
+  static const String createKitchen = "/api/kitchen/create";
+  static const String joinKitchen = "/api/kitchen/join_with_code";
+  static const String kitchens = "/api/kitchen/list_user_kitchens";
 }

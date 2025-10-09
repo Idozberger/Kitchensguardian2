@@ -3,5 +3,5 @@ import 'package:foodkitchen/core/error/failures.dart';
 import 'package:fpdart/fpdart.dart';
 
 abstract interface class CurrentUserRepository {
-  Future<Either<Failure, User>> getCurrentUser();
+  Future<Either<Failure, User?>> getCurrentUser();
 }
