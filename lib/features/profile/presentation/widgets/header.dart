@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
@@ -8,8 +10,20 @@ import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/features/profile/presentation/widgets/star_tile.dart';
 import 'package:go_router/go_router.dart';
 
-class ProfileHeader extends StatelessWidget {
+class ProfileHeader extends StatefulWidget {
   const ProfileHeader({super.key});
+
+  @override
+  State<ProfileHeader> createState() => _ProfileHeaderState();
+}
+
+class _ProfileHeaderState extends State<ProfileHeader> {
+  late UserCubit userCubit;
+  @override
+  void initState() {
+    userCubit = context.read<UserCubit>();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,14 +40,14 @@ class ProfileHeader extends StatelessWidget {
                 spacing: h(5),
                 children: [
                   Text(
-                    "Emily David",
+                    "${userCubit.state.firstName} ${userCubit.state.lastName}",
                     style: Theme.of(context).textTheme.headlineLarge,
                   ),
                   Text(
-                    "fakemail@example.com",
+                    userCubit.state.email,
                     style: Theme.of(
                       context,
-                    ).textTheme.headlineMedium!.copyWith(fontSize: t(15)),
+                    ).textTheme.headlineMedium!.copyWith(fontSize: t(12)),
                   ),
                 ],
               ),

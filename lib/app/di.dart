@@ -39,6 +39,11 @@ import 'package:foodkitchen/features/kitchens/domain/usecases/get_kitchens.dart'
 import 'package:foodkitchen/features/kitchens/domain/usecases/join_kitchen.dart';
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_bloc.dart';
 import 'package:foodkitchen/features/onboarding/presentation/bloc/user_bloc.dart';
+import 'package:foodkitchen/features/pantry/data/datasource/pantry_remote_datasource.dart';
+import 'package:foodkitchen/features/pantry/data/repository/pantry_repository_impl.dart';
+import 'package:foodkitchen/features/pantry/domain/repository/pantry_repository.dart';
+import 'package:foodkitchen/features/pantry/domain/usecases/add_pantry_item.dart';
+import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -58,6 +63,7 @@ Future<void> initDependencies() async {
   _initAuth();
   _initKitchen();
   _initDashboard();
+  _initPantry();
 }
 
 void _dioInjection() {
@@ -186,5 +192,22 @@ void _initDashboard() async {
         makeCohost: MakeCohost(sl()),
         kickMember: KickMember(sl()),
       ),
+    );
+}
+
+void _initPantry() async {
+  // Datasource
+
+  sl
+    ..registerFactory<PantryRemoteDatasource>(
+      () => PantryRemoteDatasourceImpl(sl()),
+    )
+    // Repository
+    ..registerFactory<PantryRepository>(() => PantryRepositoryImpl(sl()))
+    // Usecases
+    ..registerFactory(() => AddPantryItem(sl()))
+    // Bloc
+    ..registerLazySingleton(
+      () => PantryBloc(addPantryItem: AddPantryItem(sl())),
     );
 }

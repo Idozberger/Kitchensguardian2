@@ -20,4 +20,6 @@ class AppConstants {
 
   static const String refreshKitchenInvitationCode =
       "/api/kitchen/refresh_invitation_code";
+  static const String addPantryItem = "/api/kitchen/add_items";
+  static const String getPantryItems = "/api/kitchen/list_items";
 }
