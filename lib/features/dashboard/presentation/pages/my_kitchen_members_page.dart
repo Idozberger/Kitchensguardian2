@@ -1,133 +1,237 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
+import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
+import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_bloc.dart';
+import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_event.dart';
+import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_state.dart';
 
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:go_router/go_router.dart';
 
-class MyKitchenMembersPage extends StatelessWidget {
+class MyKitchenMembersPage extends StatefulWidget {
   MyKitchenMembersPage({super.key});
-  final List<Map<String, dynamic>> members = [
-    {
-      "name": "Emily David",
-      "type": "(host)",
-      "email": "emily.david@example.com",
-    },
-    {
-      "name": "Alisha Dawood",
-      "type": "(member)",
-      "email": "alisha.dawood@example.com",
-    },
-    {
-      "name": "Lawrence Dube",
-      "type": "(member)",
-      "email": "lawrence.dube@example.com",
-    },
-    {
-      "name": "Garry Elis",
-      "type": "(member)",
-      "email": "garry.elis@example.com",
-    },
-  ];
+
+  @override
+  State<MyKitchenMembersPage> createState() => _MyKitchenMembersPageState();
+}
+
+class _MyKitchenMembersPageState extends State<MyKitchenMembersPage> {
+  late DashboardBloc dashboardBloc;
+  late UserCubit userCubit;
+  int? selectedMemberIndex;
+
+  @override
+  void initState() {
+    dashboardBloc = context.read<DashboardBloc>();
+    userCubit = context.read<UserCubit>();
+    getAllKitchenMembers();
+    super.initState();
+  }
+
+  void getAllKitchenMembers() {
+    String activeKitchenId = userCubit.state.activeKitchenId;
+    if (activeKitchenId.isNotEmpty) {
+      dashboardBloc.add(
+        GetKitchenMembersEvent(activeKitchenId: activeKitchenId),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color(0xffF9F9F9),
-      appBar: _buildAppBar(context),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: gapSymmetric(horizontal: 20, vertical: 20),
-            child: UpperTile(
-              widget: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "All kitchen members",
-                    style: Theme.of(context).textTheme.headlineLarge,
-                  ),
-                  gap(height: 10),
-                  ListView.separated(
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    itemCount: members.length,
-                    separatorBuilder: (context, index) =>
-                        Divider(thickness: 1, color: Colors.grey.shade300),
-                    itemBuilder: (context, index) {
-                      final member = members[index];
-                      return ListTile(
-                        leading: Image.asset(AppAssets.avatar),
-                        dense: true,
-                        contentPadding: gapZero,
-                        title: Row(
+    return BlocConsumer<DashboardBloc, DashboardState>(
+      listener: (context, state) {
+        if (state is DashboardFailure) {
+          getAllKitchenMembers();
+          AppToast.show(state.message, ToastType.error);
+        }
+        if (state is DashboardSuccess) {
+          getAllKitchenMembers();
+          AppToast.show(state.successMessage, ToastType.error);
+        }
+      },
+      builder: (context, state) {
+        if (state is DashboardLoading) {
+          return Scaffold(
+            backgroundColor: const Color(0xffF9F9F9),
+            appBar: _buildAppBar(context),
+            body: Center(
+              child: CircularProgressIndicator(color: AppColors.primaryColor),
+            ),
+          );
+        } else if (state is DashboardLoaded) {
+          return Scaffold(
+            backgroundColor: const Color(0xffF9F9F9),
+            appBar: _buildAppBar(context),
+            body: SafeArea(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: gapSymmetric(horizontal: 20, vertical: 20),
+                  child: UpperTile(
+                    widget: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "All kitchen members",
+                          style: Theme.of(context).textTheme.headlineLarge,
+                        ),
+                        gap(height: 10),
+                        ListView.separated(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: state.kitchenMembers.length,
+                          separatorBuilder: (context, index) => Divider(
+                            thickness: 1,
+                            color: Colors.grey.shade300,
+                          ),
+                          itemBuilder: (context, index) {
+                            final member = state.kitchenMembers[index];
+                            final isSelected = selectedMemberIndex == index;
+
+                            return GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  if (selectedMemberIndex == index) {
+                                    selectedMemberIndex = null;
+                                  } else {
+                                    selectedMemberIndex = index;
+                                  }
+                                });
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? AppColors.primaryColor.withOpacity(0.1)
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: ListTile(
+                                  leading: Image.asset(AppAssets.avatar),
+                                  dense: true,
+                                  contentPadding: gapZero,
+                                  title: Row(
+                                    children: [
+                                      Text(
+                                        member.name,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .headlineLarge!
+                                            .copyWith(fontSize: t(16)),
+                                      ),
+                                      Text(
+                                        " (${member.type})",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .headlineMedium!
+                                            .copyWith(fontSize: t(12)),
+                                      ),
+                                    ],
+                                  ),
+                                  subtitle: Text(
+                                    member.userId,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineMedium!
+                                        .copyWith(fontSize: t(13)),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        gap(height: 20),
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              member["name"],
-                              style: Theme.of(context).textTheme.headlineLarge!
-                                  .copyWith(fontSize: t(16)),
+                            Flexible(
+                              child: SizedBox(
+                                width: double.infinity,
+                                height: h(40),
+                                child: OutlinedButton(
+                                  onPressed: selectedMemberIndex == null
+                                      ? () {
+                                          AppToast.show(
+                                            "Select Member First",
+                                            ToastType.info,
+                                          );
+                                        }
+                                      : () {
+                                          final member = state
+                                              .kitchenMembers[selectedMemberIndex!];
+                                          dashboardBloc.add(
+                                            KickMemberEvent(
+                                              activeKitchenId: userCubit
+                                                  .state
+                                                  .activeKitchenId,
+                                              memberId: member.userId,
+                                            ),
+                                          );
+                                        },
+                                  child: Text(
+                                    "Kick",
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineMedium!
+                                        .copyWith(
+                                          fontSize: t(13),
+                                          color: selectedMemberIndex == null
+                                              ? Colors.grey
+                                              : AppColors.primaryColor,
+                                        ),
+                                  ),
+                                ),
+                              ),
                             ),
-                            Text(
-                              member["type"],
-                              style: Theme.of(context).textTheme.headlineMedium!
-                                  .copyWith(fontSize: t(12)),
+                            SizedBox(width: w(10)),
+                            Flexible(
+                              child: GenericButtonWidget(
+                                onPressed: selectedMemberIndex == null
+                                    ? () {
+                                        AppToast.show(
+                                          "Select Member First",
+                                          ToastType.info,
+                                        );
+                                      }
+                                    : () {
+                                        final member = state
+                                            .kitchenMembers[selectedMemberIndex!];
+                                        dashboardBloc.add(
+                                          MakeCohostEvent(
+                                            activeKitchenId:
+                                                userCubit.state.activeKitchenId,
+                                            memberId: member.userId,
+                                          ),
+                                        );
+                                      },
+                                text: "Make Co-Host",
+                              ),
                             ),
                           ],
                         ),
-                        subtitle: Text(
-                          member["email"],
-                          style: Theme.of(
-                            context,
-                          ).textTheme.headlineMedium!.copyWith(fontSize: t(13)),
-                        ),
-                      );
-                    },
+                      ],
+                    ),
                   ),
-                  gap(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Flexible(
-                        child: SizedBox(
-                          width: double.infinity,
-                          height: h(40),
-                          child: OutlinedButton(
-                            onPressed: () {
-                              context.pop();
-                            },
-
-                            child: Text(
-                              "Kick",
-                              style: Theme.of(context).textTheme.headlineMedium!
-                                  .copyWith(
-                                    fontSize: t(13),
-                                    color: AppColors.primaryColor,
-                                  ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: w(10)),
-
-                      Flexible(
-                        child: GenericButtonWidget(
-                          onPressed: () {},
-                          text: "Make Co-Host",
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
-        ),
-      ),
+          );
+        } else {
+          return Scaffold(
+            backgroundColor: const Color(0xffF9F9F9),
+            appBar: _buildAppBar(context),
+            body: const Center(child: Text("Please select the kitchen!")),
+          );
+        }
+      },
     );
   }
 

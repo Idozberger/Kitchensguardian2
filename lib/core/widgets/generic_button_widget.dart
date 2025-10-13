@@ -50,7 +50,10 @@ class GenericButtonWidget extends StatelessWidget {
               style: ElevatedButton.styleFrom(backgroundColor: color),
               onPressed: onPressed,
               child: isLoading
-                  ? CircularProgressIndicator()
+                  ? Transform.scale(
+                      scale: 0.7,
+                      child: CircularProgressIndicator(),
+                    )
                   : Text(
                       text,
                       style: Theme.of(context).textTheme.headlineMedium!

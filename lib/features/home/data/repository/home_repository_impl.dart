@@ -1,5 +1,7 @@
 import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/features/home/data/datasource/home_remote_datasource.dart';
+import 'package:foodkitchen/features/home/data/models/kitchen_model.dart';
+import 'package:foodkitchen/features/home/domain/entities/kitchen.dart';
 import 'package:foodkitchen/features/home/domain/repository/home_repository.dart';
 import 'package:fpdart/fpdart.dart';
 
@@ -7,14 +9,20 @@ class HomeRepositoryImpl implements HomeRepository {
   final HomeRemoteDataSource homeRemoteDataSource;
   HomeRepositoryImpl(this.homeRemoteDataSource);
   @override
-  Future<Either<Failure, String>> createKitchen({
+  Future<Either<Failure, Kitchen>> createKitchen({
     required String kitchenName,
   }) async {
     try {
       final response = await homeRemoteDataSource.createKitchen(
         kitchenName: kitchenName,
       );
-      return right(response);
+      final kitchenModel = KitchenModel(
+        invitationCard: response["invitation_code"],
+        kitchenId: response["kitchen_id"],
+        message: response["message"],
+      );
+
+      return right(kitchenModel);
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {

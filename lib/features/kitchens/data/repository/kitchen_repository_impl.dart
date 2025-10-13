@@ -23,4 +23,36 @@ class KitchenRepositoryImpl implements KitchenRepository {
       return Left(UnknownFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, String>> createKitchen({
+    required String kitchenName,
+  }) async {
+    try {
+      final response = await kitchenRemoteDataSource.createKitchen(
+        kitchenName: kitchenName,
+      );
+      return right(response);
+    } on Failure catch (f) {
+      return Left(f);
+    } catch (e) {
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, String>> joinKitchen({
+    required String invitationCode,
+  }) async {
+    try {
+      final response = await kitchenRemoteDataSource.joinKitchen(
+        invitationCode: invitationCode,
+      );
+      return right(response);
+    } on Failure catch (f) {
+      return Left(f);
+    } catch (e) {
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
 }

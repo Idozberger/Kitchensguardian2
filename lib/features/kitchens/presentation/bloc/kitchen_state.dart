@@ -1,44 +1,32 @@
 import 'package:equatable/equatable.dart';
-import 'package:foodkitchen/features/kitchens/data/model/kitchen.dart';
+import 'package:foodkitchen/features/kitchens/domain/entities/kitchen.dart';
 
-class KitchenState extends Equatable {
-  final bool loadingKitchens;
-  final bool loadingJoinedKitchens;
-  final String? errorMessage;
-  final String? successMessage;
-  final List<KitchenModel>? kitchenList;
-
-  const KitchenState({
-    this.loadingKitchens = false,
-    this.loadingJoinedKitchens = false,
-    this.errorMessage,
-    this.successMessage,
-    this.kitchenList,
-  });
-
-  KitchenState copyWith({
-    bool? loadingKitchens,
-    bool? loadingJoinedKitchens,
-    String? errorMessage,
-    String? successMessage,
-    List<KitchenModel>? kitchenList,
-  }) {
-    return KitchenState(
-      loadingKitchens: loadingKitchens ?? this.loadingKitchens,
-      loadingJoinedKitchens:
-          loadingJoinedKitchens ?? this.loadingJoinedKitchens,
-      errorMessage: errorMessage,
-      successMessage: successMessage,
-      kitchenList: kitchenList ?? this.kitchenList,
-    );
-  }
+abstract class KitchenState extends Equatable {
+  const KitchenState();
 
   @override
-  List<Object?> get props => [
-    loadingKitchens,
-    errorMessage,
-    successMessage,
-    loadingJoinedKitchens,
-    kitchenList,
-  ];
+  List<Object?> get props => [];
+}
+
+class KitchenInitial extends KitchenState {}
+
+class KitchensLoading extends KitchenState {}
+
+class KitchenFailure extends KitchenState {
+  final String errorMessage;
+  KitchenFailure(this.errorMessage);
+}
+
+class KitchenSuccess extends KitchenState {
+  final String successMessage;
+  KitchenSuccess(this.successMessage);
+}
+
+class KitchensLoaded extends KitchenState {
+  final List<Kitchen> kitchens;
+
+  const KitchensLoaded(this.kitchens);
+
+  @override
+  List<Object?> get props => [kitchens];
 }

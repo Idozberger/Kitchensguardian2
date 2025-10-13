@@ -6,8 +6,9 @@ import 'package:foodkitchen/app/di.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 
 import 'package:foodkitchen/features/auth/presentation/blocs/auth_bloc.dart';
+import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
-import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_cubit.dart';
+import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_bloc.dart';
 import 'package:foodkitchen/features/onboarding/presentation/bloc/user_bloc.dart';
 
 Future<void> main() async {
@@ -30,7 +31,8 @@ Future<void> main() async {
         BlocProvider<UserCubit>(create: (_) => sl<UserCubit>()),
         BlocProvider<AuthBloc>(create: (_) => sl<AuthBloc>()),
         BlocProvider<HomeBloc>(create: (_) => sl<HomeBloc>()),
-        BlocProvider<KitchenCubit>(create: (_) => sl<KitchenCubit>()),
+        BlocProvider<KitchenBloc>(create: (_) => sl<KitchenBloc>()),
+        BlocProvider<DashboardBloc>(create: (_) => sl<DashboardBloc>()),
       ],
       child: const AppBase(),
     ),

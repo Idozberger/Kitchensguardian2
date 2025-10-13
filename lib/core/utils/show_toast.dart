@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:foodkitchen/core/global/functions/resize.dart';
 
 enum ToastType { success, error, warning, info }
 
@@ -31,7 +32,7 @@ class AppToast {
       gravity: ToastGravity.BOTTOM,
       backgroundColor: bgColor,
       textColor: Colors.white,
-      fontSize: 14,
+      fontSize: t(12),
     );
   }
 }

@@ -1,6 +1,7 @@
 class User {
   final String? firstName;
   final String? lastName;
+  final String? userId;
   final String? email;
   final bool? hasExpired;
   final String? expirationDate;
@@ -11,6 +12,7 @@ class User {
     this.email,
     this.expirationDate,
     this.hasExpired,
+    this.userId,
   });
 
   User copyWith({

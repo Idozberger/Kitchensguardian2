@@ -149,6 +149,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     res.fold((failure) {}, (user) {
       _userCubit.setUser(
+        userId: user?.userId ?? "",
         firstName: user?.firstName ?? "",
         lastName: user?.lastName ?? "",
         email: user?.email ?? "",

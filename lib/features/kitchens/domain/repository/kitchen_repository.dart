@@ -4,4 +4,6 @@ import 'package:fpdart/fpdart.dart';
 
 abstract interface class KitchenRepository {
   Future<Either<Failure, List<KitchenModel>>> getKitchens();
+  Future<Either<Failure, String>> createKitchen({required String kitchenName});
+  Future<Either<Failure, String>> joinKitchen({required String invitationCode});
 }

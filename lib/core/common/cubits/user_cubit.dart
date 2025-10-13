@@ -8,10 +8,20 @@ class UserCubit extends Cubit<UserState> {
     required String firstName,
     required String lastName,
     required String email,
+    required String userId,
   }) {
     emit(
-      state.copyWith(firstName: firstName, lastName: lastName, email: email),
+      state.copyWith(
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        userId: userId,
+      ),
     );
+  }
+
+  void updateActiveKitchenId({required String activeKitchenId}) {
+    emit(state.copyWith(activeKitchenId: activeKitchenId));
   }
 
   void toggleLoading(bool value) {

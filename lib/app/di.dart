@@ -18,6 +18,13 @@ import 'package:foodkitchen/core/common/data/datasource/current_user_remote_data
 import 'package:foodkitchen/core/common/data/repositories/current_user_respository_impl.dart';
 import 'package:foodkitchen/core/common/domain/repository/current_user_repository.dart';
 import 'package:foodkitchen/core/common/domain/usecase/get_current_user.dart';
+import 'package:foodkitchen/features/dashboard/data/datasource/dashboard_remote_datasource.dart';
+import 'package:foodkitchen/features/dashboard/data/repository/dashboard_repository_impl.dart';
+import 'package:foodkitchen/features/dashboard/domain/repository/dashboard_repository.dart';
+import 'package:foodkitchen/features/dashboard/domain/usecases/get_kitchen_members.dart';
+import 'package:foodkitchen/features/dashboard/domain/usecases/kick_member.dart';
+import 'package:foodkitchen/features/dashboard/domain/usecases/make_cohost.dart';
+import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:foodkitchen/features/home/data/datasource/home_remote_datasource.dart';
 import 'package:foodkitchen/features/home/data/repository/home_repository_impl.dart';
 import 'package:foodkitchen/features/home/domain/repository/home_repository.dart';
@@ -27,8 +34,10 @@ import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
 import 'package:foodkitchen/features/kitchens/data/datasource/kitchen_remote_datasource.dart';
 import 'package:foodkitchen/features/kitchens/data/repository/kitchen_repository_impl.dart';
 import 'package:foodkitchen/features/kitchens/domain/repository/kitchen_repository.dart';
+import 'package:foodkitchen/features/kitchens/domain/usecases/create_kitchen.dart';
 import 'package:foodkitchen/features/kitchens/domain/usecases/get_kitchens.dart';
-import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_cubit.dart';
+import 'package:foodkitchen/features/kitchens/domain/usecases/join_kitchen.dart';
+import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_bloc.dart';
 import 'package:foodkitchen/features/onboarding/presentation/bloc/user_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
@@ -48,6 +57,7 @@ Future<void> initDependencies() async {
   _initHome();
   _initAuth();
   _initKitchen();
+  _initDashboard();
 }
 
 void _dioInjection() {
@@ -129,6 +139,7 @@ void _initHome() async {
       () => HomeBloc(
         createKitchen: CreateKitchen(sl()),
         joinKitchen: JoinKitchen(sl()),
+        userCubit: sl(),
       ),
     );
 }
@@ -143,6 +154,37 @@ void _initKitchen() async {
     ..registerFactory<KitchenRepository>(() => KitchenRepositoryImpl(sl()))
     // Usecases
     ..registerFactory(() => GetKitchens(sl()))
+    ..registerFactory(() => CreateKitchenUseCase(sl()))
+    ..registerFactory(() => JoinKitchenUseCase(sl()))
     // Bloc
-    ..registerLazySingleton(() => KitchenCubit(getKitchens: GetKitchens(sl())));
+    ..registerLazySingleton(
+      () => KitchenBloc(
+        getKitchens: GetKitchens(sl()),
+        createKitchen: CreateKitchenUseCase(sl()),
+        joinKitchen: JoinKitchenUseCase(sl()),
+      ),
+    );
+}
+
+void _initDashboard() async {
+  // Datasource
+
+  sl
+    ..registerFactory<DashboardRemoteDatasource>(
+      () => DashboardRemoteDatasourceImpl(sl()),
+    )
+    // Repository
+    ..registerFactory<DashboardRepository>(() => DashboardRepositoryImpl(sl()))
+    // Usecases
+    ..registerFactory(() => GetKitchenMembers(sl()))
+    ..registerFactory(() => MakeCohost(sl()))
+    ..registerFactory(() => KickMember(sl()))
+    // Bloc
+    ..registerLazySingleton(
+      () => DashboardBloc(
+        getMembers: GetKitchenMembers(sl()),
+        makeCohost: MakeCohost(sl()),
+        kickMember: KickMember(sl()),
+      ),
+    );
 }

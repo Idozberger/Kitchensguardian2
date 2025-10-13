@@ -18,6 +18,7 @@ class DartJwtDecoder {
 
       final Map<String, dynamic> userMap = {
         "first_name": sub["first_name"],
+        "user_id": sub["user_id"],
         "last_name": sub["last_name"],
         "email": sub["email"],
         "has_expired": hasExpired,

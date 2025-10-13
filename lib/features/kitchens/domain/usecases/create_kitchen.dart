@@ -1,0 +1,22 @@
+import 'package:foodkitchen/core/error/failures.dart';
+import 'package:foodkitchen/core/usecase/usecase.dart';
+import 'package:foodkitchen/features/kitchens/domain/repository/kitchen_repository.dart';
+import 'package:fpdart/fpdart.dart';
+
+class CreateKitchenUseCase implements UseCase<String, CreateKitchenParams> {
+  final KitchenRepository kitchenRepository;
+  const CreateKitchenUseCase(this.kitchenRepository);
+
+  @override
+  Future<Either<Failure, String>> call(CreateKitchenParams params) async {
+    return await kitchenRepository.createKitchen(
+      kitchenName: params.kitchenName,
+    );
+  }
+}
+
+class CreateKitchenParams {
+  final String kitchenName;
+
+  CreateKitchenParams({required this.kitchenName});
+}

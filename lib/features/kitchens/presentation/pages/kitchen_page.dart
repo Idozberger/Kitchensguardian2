@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
-import 'package:foodkitchen/core/dialogs/join_kitchen.dart';
+
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
+import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
-import 'package:foodkitchen/features/auth/presentation/widgets/textspan_widget.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
-import 'package:foodkitchen/features/home/presentation/dialogs/create_kitchen.dart';
-import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_cubit.dart';
+import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_bloc.dart';
+import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_event.dart';
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_state.dart';
-import 'package:go_router/go_router.dart';
+import 'package:foodkitchen/features/kitchens/presentation/dialogs/create_kitchen.dart';
+import 'package:foodkitchen/features/kitchens/presentation/dialogs/join_kitchen.dart';
+import 'package:foodkitchen/features/kitchens/presentation/widgets/kitchen_tile.dart';
 
 class KitchenPage extends StatefulWidget {
   const KitchenPage({super.key});
@@ -22,16 +24,16 @@ class KitchenPage extends StatefulWidget {
 }
 
 class _KitchenPageState extends State<KitchenPage> {
-  late KitchenCubit kitchenCubit;
+  late KitchenBloc kitchenBloc;
   @override
   void initState() {
-    kitchenCubit = context.read<KitchenCubit>();
-    getKichen();
+    kitchenBloc = context.read<KitchenBloc>();
+    fetchAllKitchens();
     super.initState();
   }
 
-  getKichen() async {
-    await kitchenCubit.getKitchens();
+  void fetchAllKitchens() {
+    kitchenBloc.add(FetchKitchens());
   }
 
   @override
@@ -39,26 +41,41 @@ class _KitchenPageState extends State<KitchenPage> {
     return Scaffold(
       backgroundColor: const Color(0xffF9F9F9),
       appBar: _buildAppBar(context),
-      body: BlocConsumer<KitchenCubit, KitchenState>(
-        listener: (context, state) {},
+      body: BlocConsumer<KitchenBloc, KitchenState>(
+        listener: (context, state) {
+          if (state is KitchenSuccess) {
+            AppToast.show(state.successMessage, ToastType.success);
+            fetchAllKitchens();
+          }
+          if (state is KitchenFailure) {
+            AppToast.show(state.errorMessage, ToastType.error);
+          }
+        },
         builder: (_, kitchenState) {
-          return SafeArea(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: gapSymmetric(horizontal: 20, vertical: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildSectionTitle(context),
-                    SizedBox(height: h(20)),
-                    _buildCreateKitchenTile(context),
-                    SizedBox(height: h(20)),
-                    _buildKitchenHaveSection(context, kitchenState),
-                  ],
+          if (kitchenState is KitchensLoading) {
+            return Center(
+              child: CircularProgressIndicator(color: AppColors.primaryColor),
+            );
+          } else if (kitchenState is KitchensLoaded) {
+            return SafeArea(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: gapSymmetric(horizontal: 20, vertical: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildSectionTitle(context, kitchenState),
+                      SizedBox(height: h(20)),
+                      _buildCreateKitchenTile(context),
+                      SizedBox(height: h(20)),
+                      _buildKitchenHaveSection(context, kitchenState),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          );
+            );
+          }
+          return Center(child: Text("Something went wrong!"));
         },
       ),
     );
@@ -85,7 +102,12 @@ class _KitchenPageState extends State<KitchenPage> {
     );
   }
 
-  Widget _buildSectionTitle(BuildContext context) {
+  Widget _buildSectionTitle(BuildContext context, KitchensLoaded kitchenState) {
+    final kitchensWithoutInvitationCode = kitchenState.kitchens
+        // ignore: unnecessary_null_comparison
+        .where((kitchen) => kitchen.role == "member")
+        .toList();
+
     return UpperTile(
       widget: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -97,10 +119,31 @@ class _KitchenPageState extends State<KitchenPage> {
             ).textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
           SizedBox(height: h(15)),
-          Text(
-            "No Kitchen Found",
-            style: Theme.of(context).textTheme.headlineMedium!,
-          ),
+
+          if (kitchensWithoutInvitationCode.isEmpty)
+            Text(
+              "No Kitchen Found",
+              style: Theme.of(context).textTheme.headlineMedium!,
+            )
+          else
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: kitchensWithoutInvitationCode.length,
+              itemBuilder: (BuildContext context, int index) {
+                final kitchen = kitchensWithoutInvitationCode[index];
+                return Padding(
+                  padding: gapOnly(bottom: 4),
+                  child: KitchenTile(
+                    imagePath: AppAssets.avatar,
+                    title: kitchen.kitchenName,
+                    email: kitchen.invitationCode,
+                    membersText: "(${kitchen.role})",
+                  ),
+                );
+              },
+            ),
+
           SizedBox(height: h(15)),
 
           GenericButtonWidget(
@@ -150,7 +193,7 @@ class _KitchenPageState extends State<KitchenPage> {
 
   Widget _buildKitchenHaveSection(
     BuildContext context,
-    KitchenState kitchenState,
+    KitchensLoaded kitchenState,
   ) {
     return UpperTile(
       widget: Column(
@@ -165,57 +208,34 @@ class _KitchenPageState extends State<KitchenPage> {
           SizedBox(height: h(15)),
 
           Text(
-            kitchenState.kitchenList != null
-                ? "${kitchenState.kitchenList!.length} kitchen found: "
+            kitchenState.kitchens.isNotEmpty
+                ? "${kitchenState.kitchens.length} kitchen found: "
                 : "1 kitchen found:",
             style: Theme.of(
               context,
             ).textTheme.headlineMedium?.copyWith(fontSize: t(15)),
           ),
           SizedBox(height: h(14)),
+          if (kitchenState.kitchens.isNotEmpty)
+            ListView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              itemCount: kitchenState.kitchens.length,
+              itemBuilder: (BuildContext context, int index) {
+                final kitchen = kitchenState.kitchens[index];
 
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Image.asset(AppAssets.avatar, width: w(40), height: h(38)),
-                  SizedBox(width: w(5)),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TextspanWidget(
-                        callback: () {},
-                        text: "Emily David",
-                        buttonText: "(1k Members)",
-                        buttonColor: Colors.grey,
-                        fontSize: t(12),
-                        fontSizeTitle: t(15),
-                        titleFontWeight: FontWeight.w500,
-                      ),
-
-                      Text(
-                        "fakemail@example.coms",
-                        style: Theme.of(context).textTheme.headlineMedium
-                            ?.copyWith(
-                              fontWeight: FontWeight.w500,
-                              fontSize: t(12),
-                            ),
-                      ),
-                    ],
+                return Padding(
+                  padding: gapOnly(bottom: 4),
+                  child: KitchenTile(
+                    onButtonPressed: () {},
+                    imagePath: AppAssets.avatar,
+                    title: kitchen.kitchenName,
+                    email: kitchen.invitationCode,
+                    membersText: "(${kitchen.role})",
                   ),
-                ],
-              ),
-              GenericButtonWidget(
-                onPressed: () {
-                  context.pop();
-                },
-                text: "View",
-                width: w(90),
-                height: h(23),
-              ),
-            ],
-          ),
+                );
+              },
+            ),
         ],
       ),
     );
