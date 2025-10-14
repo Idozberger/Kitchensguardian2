@@ -1,12 +1,17 @@
-# FoodKitchen
+# 🧱 Food Guardian
 
-A project built with **Clean Architecture** principles, using **FVM (Flutter Version Management)** for consistent versioning.  
+This repository demonstrates a **Clean Architecture** setup for Flutter apps using **Bloc / Cubit** for state management.  
+The goal is to achieve a **scalable**, **testable**, and **maintainable** codebase by separating responsibilities across layers.
 
-## Project Setup
+Technologies Used
 
-This project uses **FVM** to manage Flutter versions.  
+🧱 Clean Architecture
 
-fvm use 3.32.4
-fvm flutter pub get
+🧠 Bloc / Cubit for state management
 
-dependency injection is handled using get_it
+⚙️ Dio for networking
+
+🔥 REST APIs
+
+🧪 Unit Testing for domain logic
+
