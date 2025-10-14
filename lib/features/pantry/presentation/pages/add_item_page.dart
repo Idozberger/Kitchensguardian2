@@ -13,6 +13,7 @@ import 'package:foodkitchen/core/widgets/generic_dropdown_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:foodkitchen/features/pantry/domain/entities/pantry.dart';
+import 'package:foodkitchen/features/pantry/domain/entities/pantry_item.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_bloc.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_event.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_state.dart';
@@ -149,7 +150,8 @@ class _AddItemPageState extends State<AddItemPage> {
                         return PantryItemEntity(
                           name: item.nameController.text.trim(),
                           quantity:
-                              int.tryParse(item.qtyController.text.trim()) ?? 0,
+                              double.tryParse(item.qtyController.text.trim()) ??
+                              0,
                           unit: item.unit ?? '',
                           group: item.pantry ?? '',
                         );
@@ -209,11 +211,11 @@ class _AddItemPageState extends State<AddItemPage> {
         SizedBox(height: h(10)),
         AppTextField(
           controller: item.nameController,
-          hintText: "Enter item quantity",
+          hintText: "Enter item name",
           fillColor: const Color(0xffF9F9F9),
           isFilled: true,
           isLabled: false,
-          keyboardType: TextInputType.number,
+          keyboardType: TextInputType.text,
           label: "",
         ),
         SizedBox(height: h(15)),

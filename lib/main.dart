@@ -7,10 +7,12 @@ import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 
 import 'package:foodkitchen/features/auth/presentation/blocs/auth_bloc.dart';
 import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_bloc.dart';
+import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_bloc.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_bloc.dart';
 import 'package:foodkitchen/features/onboarding/presentation/bloc/user_bloc.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_bloc.dart';
+import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,6 +37,8 @@ Future<void> main() async {
         BlocProvider<KitchenBloc>(create: (_) => sl<KitchenBloc>()),
         BlocProvider<DashboardBloc>(create: (_) => sl<DashboardBloc>()),
         BlocProvider<PantryBloc>(create: (_) => sl<PantryBloc>()),
+        BlocProvider<GroceryBloc>(create: (_) => sl<GroceryBloc>()),
+        BlocProvider<PlannerBloc>(create: (_) => sl<PlannerBloc>()),
       ],
       child: const AppBase(),
     ),

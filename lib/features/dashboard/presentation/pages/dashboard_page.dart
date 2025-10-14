@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
-import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/drawer.dart';
 import 'package:foodkitchen/features/grocery/presentation/pages/grocery_page.dart';
@@ -21,7 +20,15 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   int _selectedIndex = 0;
-  void updateSelectedIndex(int index) {
+
+  final List<Widget> _pages = const [
+    HomePage(),
+    PlannerPage(),
+    GroceryPage(),
+    ProfilePage(),
+  ];
+
+  void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
@@ -30,9 +37,11 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: AppDrawer(),
+      drawer: const AppDrawer(),
       appBar: _buildAppBar(context),
-      body: _buildBody(),
+      body: SafeArea(
+        child: IndexedStack(index: _selectedIndex, children: _pages),
+      ),
       bottomNavigationBar: _buildBottomNav(),
     );
   }
@@ -48,9 +57,7 @@ class _DashboardPageState extends State<DashboardPage> {
               SizedBox(width: w(16)),
               CircularIconButton(
                 iconAsset: AppAssets.drawerSvg,
-                onTap: () {
-                  Scaffold.of(context).openDrawer();
-                },
+                onTap: () => Scaffold.of(context).openDrawer(),
               ),
             ],
           );
@@ -58,16 +65,12 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
       actions: [
         IconButton(
-          onPressed: () {
-            context.push(Routes.subscription);
-          },
+          onPressed: () => context.push(Routes.subscription),
           icon: Image.asset(AppAssets.gemPNG, height: h(16), width: w(22)),
         ),
         CircularIconButton(
           iconAsset: AppAssets.notificationSvg,
-          onTap: () {
-            context.push(Routes.notification);
-          },
+          onTap: () => context.push(Routes.notification),
         ),
         SizedBox(width: w(20)),
       ],
@@ -80,12 +83,10 @@ class _DashboardPageState extends State<DashboardPage> {
 
   Widget _buildBottomNav() {
     return BottomNavigationBar(
+      type: BottomNavigationBarType.fixed,
       currentIndex: _selectedIndex,
       elevation: 0,
-
-      onTap: (index) {
-        updateSelectedIndex(index);
-      },
+      onTap: _onItemTapped,
       items: [
         BottomNavigationBarItem(
           activeIcon: SvgPicture.asset(AppAssets.homeActiveSvg),
@@ -93,35 +94,21 @@ class _DashboardPageState extends State<DashboardPage> {
           label: "Home",
         ),
         BottomNavigationBarItem(
-          icon: SvgPicture.asset(AppAssets.plannerInactiveSvg),
           activeIcon: SvgPicture.asset(AppAssets.plannerActiveSvg),
+          icon: SvgPicture.asset(AppAssets.plannerInactiveSvg),
           label: "Planner",
         ),
         BottomNavigationBarItem(
-          icon: SvgPicture.asset(AppAssets.groceryInactiveSvg),
           activeIcon: SvgPicture.asset(AppAssets.groceryActiveSvg),
+          icon: SvgPicture.asset(AppAssets.groceryInactiveSvg),
           label: "Grocery",
         ),
         BottomNavigationBarItem(
-          icon: SvgPicture.asset(AppAssets.profileInactiveSvg),
           activeIcon: SvgPicture.asset(AppAssets.profileActiveSvg),
+          icon: SvgPicture.asset(AppAssets.profileInactiveSvg),
           label: "Profile",
         ),
       ],
-    );
-  }
-
-  Widget _buildBody() {
-    return SafeArea(
-      child: IndexedStack(
-        index: _selectedIndex,
-        children: <Widget>[
-          HomePage(),
-          PlannerPage(),
-          GroceryPage(),
-          ProfilePage(),
-        ],
-      ),
     );
   }
 }

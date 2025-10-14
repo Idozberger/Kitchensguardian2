@@ -1,10 +1,13 @@
 import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/features/pantry/domain/entities/pantry.dart';
+import 'package:foodkitchen/features/pantry/domain/entities/pantry_item.dart';
+import 'package:foodkitchen/features/pantry/domain/entities/scan_receipt.dart';
 import 'package:fpdart/fpdart.dart';
 
 abstract interface class PantryRepository {
   Future<Either<Failure, String>> addItem({required Pantry pantry});
-  Future<Either<Failure, PantryItemEntity>> getItems({
-    required String KitchenId,
+  Future<Either<Failure, List<PantryItemEntity>>> getItems({
+    required String kitchenId,
   });
+  Future<Either<Failure, ScanReceipt>> scanRecipt({required String filePath});
 }

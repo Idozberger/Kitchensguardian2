@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 abstract interface class KitchenRemoteDatasource {
   Future<List<Map<String, dynamic>>> getKitchens();
@@ -10,12 +11,13 @@ abstract interface class KitchenRemoteDatasource {
 
 class KitchenRemoteDataSourceImpl implements KitchenRemoteDatasource {
   final DioHelper dio;
-  KitchenRemoteDataSourceImpl(this.dio);
+  final SharedPreferences sharedPreferences;
+  KitchenRemoteDataSourceImpl(this.dio, this.sharedPreferences);
   @override
   Future<List<Map<String, dynamic>>> getKitchens() async {
     try {
       final response = await dio.get(AppConstants.kitchens);
-      print(response.data);
+
       final data = response.data["kitchens"];
 
       if (data is List) {
@@ -35,6 +37,13 @@ class KitchenRemoteDataSourceImpl implements KitchenRemoteDatasource {
         AppConstants.createKitchen,
         data: {"kitchen_name": kitchenName},
       );
+      final data = response.data;
+
+      final kitchenId = data["kitchen_id"];
+      final invitationCode = data["invitation_code"];
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('kitchen_id', kitchenId.toString());
+      await prefs.setString('invitation_code', invitationCode.toString());
       return response.data["message"];
     } on DioException catch (e) {
       throw dio.handleError(e);
@@ -48,6 +57,11 @@ class KitchenRemoteDataSourceImpl implements KitchenRemoteDatasource {
         AppConstants.joinKitchen,
         data: {"invitation_code": invitationCode},
       );
+      final data = response.data;
+      final kitchenId = data["kitchen_id"];
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('kitchen_id', kitchenId.toString());
+
       return response.data["message"];
     } on DioException catch (e) {
       throw dio.handleError(e);

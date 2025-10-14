@@ -7,7 +7,10 @@ import 'package:foodkitchen/features/pantry/data/model/pantry_model.dart';
 
 abstract interface class PantryRemoteDatasource {
   Future<String> addPantryItem({required PantryModel pantryModel});
-  Future<Map<String, dynamic>> getPantryItems({required String kitchenId});
+  Future<List<Map<String, dynamic>>> getPantryItems({
+    required String kitchenId,
+  });
+  Future<Map<String, dynamic>> scanRecipt({required String filePath});
 }
 
 class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
@@ -27,14 +30,47 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
   }
 
   @override
-  Future<Map<String, dynamic>> getPantryItems({
+  Future<List<Map<String, dynamic>>> getPantryItems({
     required String kitchenId,
   }) async {
     try {
       final response = await dio.get(
         "${AppConstants.getPantryItems}?kitchen_id=$kitchenId",
       );
-      return response.data["message"];
+      final data = response.data["items"];
+
+      if (data is List) {
+        return data.map((e) => Map<String, dynamic>.from(e)).toList();
+      } else {
+        throw Exception("Invalid data");
+      }
+    } on DioException catch (e) {
+      throw dio.handleError(e);
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> scanRecipt({required String filePath}) async {
+    try {
+      final formData = FormData.fromMap({
+        "file": await MultipartFile.fromFile(
+          filePath,
+          filename: filePath.split('/').last,
+          contentType: DioMediaType('image', 'jpeg'),
+        ),
+      });
+
+      final response = await dio.post(AppConstants.scanRecipt, data: formData);
+
+      final message = response.data["message"] ?? "Unknown response";
+      final items = response.data["res"]["items"];
+
+      return {
+        "message": message,
+        "items": (items is List)
+            ? items.map((e) => Map<String, dynamic>.from(e)).toList()
+            : [],
+      };
     } on DioException catch (e) {
       throw dio.handleError(e);
     }

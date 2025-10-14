@@ -14,8 +14,8 @@ class CircularIconButton extends StatelessWidget {
   const CircularIconButton({
     super.key,
     required this.iconAsset,
-    this.size = 36,
-    this.padding = 10,
+    this.size = 30,
+    this.padding = 8,
     this.borderColor = const Color(0xffD4D2D2),
     this.borderWidth = 1.5,
     this.onTap,

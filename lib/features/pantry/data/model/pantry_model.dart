@@ -1,4 +1,5 @@
 import 'package:foodkitchen/features/pantry/domain/entities/pantry.dart';
+import 'package:foodkitchen/features/pantry/domain/entities/pantry_item.dart';
 
 class PantryModel extends Pantry {
   PantryModel({required super.kitchenId, required super.items});
@@ -48,7 +49,7 @@ class PantryItemModel extends PantryItemEntity {
   factory PantryItemModel.fromJson(Map<String, dynamic> json) {
     return PantryItemModel(
       name: json['name'] as String,
-      quantity: int.tryParse(json['quantity'].toString()) ?? 0,
+      quantity: json['quantity'] ?? 0,
       unit: json['unit'] as String,
       group: json['group'] as String,
     );

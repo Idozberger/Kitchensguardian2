@@ -14,7 +14,7 @@ import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_event
 import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_state.dart';
 
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
-import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MyKitchenMembersPage extends StatefulWidget {
   MyKitchenMembersPage({super.key});
@@ -36,13 +36,13 @@ class _MyKitchenMembersPageState extends State<MyKitchenMembersPage> {
     super.initState();
   }
 
-  void getAllKitchenMembers() {
-    String activeKitchenId = userCubit.state.activeKitchenId;
-    if (activeKitchenId.isNotEmpty) {
-      dashboardBloc.add(
-        GetKitchenMembersEvent(activeKitchenId: activeKitchenId),
-      );
-    }
+  void getAllKitchenMembers() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? activeKitchenId = prefs.getString('kitchen_id');
+
+    dashboardBloc.add(
+      GetKitchenMembersEvent(activeKitchenId: activeKitchenId ?? ""),
+    );
   }
 
   @override

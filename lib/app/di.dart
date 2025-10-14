@@ -25,6 +25,11 @@ import 'package:foodkitchen/features/dashboard/domain/usecases/get_kitchen_membe
 import 'package:foodkitchen/features/dashboard/domain/usecases/kick_member.dart';
 import 'package:foodkitchen/features/dashboard/domain/usecases/make_cohost.dart';
 import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_bloc.dart';
+import 'package:foodkitchen/features/grocery/data/datasource/grocery_remote_datasource.dart';
+import 'package:foodkitchen/features/grocery/data/repository/grocery_repository_impl.dart';
+import 'package:foodkitchen/features/grocery/domain/repository/grocery_repository.dart';
+import 'package:foodkitchen/features/grocery/domain/usecases/get_requested_items.dart';
+import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_bloc.dart';
 import 'package:foodkitchen/features/home/data/datasource/home_remote_datasource.dart';
 import 'package:foodkitchen/features/home/data/repository/home_repository_impl.dart';
 import 'package:foodkitchen/features/home/domain/repository/home_repository.dart';
@@ -43,7 +48,14 @@ import 'package:foodkitchen/features/pantry/data/datasource/pantry_remote_dataso
 import 'package:foodkitchen/features/pantry/data/repository/pantry_repository_impl.dart';
 import 'package:foodkitchen/features/pantry/domain/repository/pantry_repository.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/add_pantry_item.dart';
+import 'package:foodkitchen/features/pantry/domain/usecases/get_pantry_items.dart';
+import 'package:foodkitchen/features/pantry/domain/usecases/scan_receipt.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_bloc.dart';
+import 'package:foodkitchen/features/planner/data/datasource/planner_remote_datasource.dart';
+import 'package:foodkitchen/features/planner/data/repository/planner_repository_impl.dart';
+import 'package:foodkitchen/features/planner/domain/repository/planner_repository.dart';
+import 'package:foodkitchen/features/planner/domain/usecases/generate_recipes.dart';
+import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -64,6 +76,8 @@ Future<void> initDependencies() async {
   _initKitchen();
   _initDashboard();
   _initPantry();
+  _initGrocery();
+  _initPlanner();
 }
 
 void _dioInjection() {
@@ -154,7 +168,7 @@ void _initKitchen() async {
   // Datasource
   sl
     ..registerFactory<KitchenRemoteDatasource>(
-      () => KitchenRemoteDataSourceImpl(sl()),
+      () => KitchenRemoteDataSourceImpl(sl(), sl()),
     )
     // Repository
     ..registerFactory<KitchenRepository>(() => KitchenRepositoryImpl(sl()))
@@ -206,8 +220,48 @@ void _initPantry() async {
     ..registerFactory<PantryRepository>(() => PantryRepositoryImpl(sl()))
     // Usecases
     ..registerFactory(() => AddPantryItem(sl()))
+    ..registerFactory(() => GetPantryItems(sl()))
+    ..registerFactory(() => ScanReceiptUseCase(sl()))
     // Bloc
     ..registerLazySingleton(
-      () => PantryBloc(addPantryItem: AddPantryItem(sl())),
+      () => PantryBloc(
+        addPantryItem: AddPantryItem(sl()),
+        getPantryItems: GetPantryItems(sl()),
+        scanReceipt: ScanReceiptUseCase(sl()),
+      ),
+    );
+}
+
+void _initGrocery() async {
+  // Datasource
+
+  sl
+    ..registerFactory<GroceryRemoteDatasource>(
+      () => GroceryRemoteDatasourceImpl(sl()),
+    )
+    // Repository
+    ..registerFactory<GroceryRepository>(() => GroceryRepositoryImpl(sl()))
+    // Usecases
+    ..registerFactory(() => GetRequestedItems(sl()))
+    // Bloc
+    ..registerLazySingleton(
+      () => GroceryBloc(getRequestedItems: GetRequestedItems(sl())),
+    );
+}
+
+void _initPlanner() async {
+  // Datasource
+
+  sl
+    ..registerFactory<PlannerRemoteDatasource>(
+      () => PlannerRemoteDatasourceImpl(sl()),
+    )
+    // Repository
+    ..registerFactory<PlannerRepository>(() => PlannerRepositoryImpl(sl()))
+    // Usecases
+    ..registerFactory(() => GenerateRecipes(sl()))
+    // Bloc
+    ..registerLazySingleton(
+      () => PlannerBloc(generateRecipes: GenerateRecipes(sl())),
     );
 }

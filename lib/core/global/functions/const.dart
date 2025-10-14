@@ -22,4 +22,9 @@ class AppConstants {
       "/api/kitchen/refresh_invitation_code";
   static const String addPantryItem = "/api/kitchen/add_items";
   static const String getPantryItems = "/api/kitchen/list_items";
+  static const String scanRecipt = "/api/scan_recipt";
+  static const String getRequestedItems =
+      "/api/kitchen/get_user_requested_items";
+  static const String getAiGeneratedList = "/api/kitchen/get_ai_generated_list";
+  static const String generateRecipes = "/api/generate_recipes";
 }

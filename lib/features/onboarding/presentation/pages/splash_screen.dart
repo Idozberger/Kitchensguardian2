@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/app/app_base.dart';
+import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/dialogs/no_internet.dart';
 import 'package:foodkitchen/features/onboarding/presentation/bloc/user_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -17,11 +19,13 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   late UserBloc userBloc;
+  late UserCubit userCubit;
 
   @override
   void initState() {
     super.initState();
     userBloc = context.read<UserBloc>();
+    userCubit = context.read<UserCubit>();
     getCurrentUser();
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
@@ -32,7 +36,11 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> getCurrentUser() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? activeKitchenId = prefs.getString('kitchen_id');
+
     userBloc.add(GetCurrentUser());
+    userCubit.updateActiveKitchenId(activeKitchenId: activeKitchenId ?? "");
   }
 
   @override
