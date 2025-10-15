@@ -1,5 +1,4 @@
 import 'package:foodkitchen/features/planner/domain/entities/ingredient_entity.dart';
-
 import '../../domain/entities/meal_type_entity.dart';
 
 class MealTypeModel extends MealTypeEntity {
@@ -12,6 +11,9 @@ class MealTypeModel extends MealTypeEntity {
     required super.cookingSteps,
     required super.ingredients,
     required super.missingItems,
+    required super.available,
+    required super.mealType,
+    required super.formatedDateString,
   });
 
   factory MealTypeModel.fromJson(Map<String, dynamic> json) {
@@ -32,6 +34,16 @@ class MealTypeModel extends MealTypeEntity {
             ),
           )
           .toList(),
+      available:
+          (json.containsKey("available") ? json["available"] : false) ?? false,
+      mealType:
+          (json.containsKey("selected_meal_type")
+              ? json["selected_meal_type"]
+              : "") ??
+          "",
+      formatedDateString:
+          (json.containsKey("selected_date") ? json["selected_date"] : "") ??
+          "",
     );
   }
 
@@ -47,6 +59,37 @@ class MealTypeModel extends MealTypeEntity {
       "ingredients": ingredients
           .map((e) => {"name": e.name, "amount": e.amount, "unit": e.unit})
           .toList(),
+      "available": available,
+      "selected_meal_type": mealType,
+      "selected_date": formatedDateString,
     };
+  }
+
+  MealTypeModel copyWith({
+    String? id,
+    String? title,
+    String? calories,
+    String? cookingTime,
+    String? recipeShortSummary,
+    List<String>? cookingSteps,
+    List<IngredientEntity>? ingredients,
+    bool? missingItems,
+    bool? available,
+    String? mealType,
+    String? formatedDateString,
+  }) {
+    return MealTypeModel(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      calories: calories ?? this.calories,
+      cookingTime: cookingTime ?? this.cookingTime,
+      recipeShortSummary: recipeShortSummary ?? this.recipeShortSummary,
+      cookingSteps: cookingSteps ?? this.cookingSteps,
+      ingredients: ingredients ?? this.ingredients,
+      missingItems: missingItems ?? this.missingItems,
+      available: available ?? this.available,
+      mealType: mealType ?? this.mealType,
+      formatedDateString: formatedDateString ?? this.formatedDateString,
+    );
   }
 }

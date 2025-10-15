@@ -13,8 +13,20 @@ import 'package:go_router/go_router.dart';
 class DayPlanTile extends StatelessWidget {
   final String dayLabel;
   final List<MealTile> meals;
+  final VoidCallback viewRecipe;
+  final VoidCallback addToCart;
+  final VoidCallback deletePlan;
+  final VoidCallback editPlan;
 
-  const DayPlanTile({super.key, required this.dayLabel, required this.meals});
+  const DayPlanTile({
+    super.key,
+    required this.dayLabel,
+    required this.meals,
+    required this.viewRecipe,
+    required this.addToCart,
+    required this.deletePlan,
+    required this.editPlan,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +56,7 @@ class DayPlanTile extends StatelessWidget {
             Text(dayLabel, style: Theme.of(context).textTheme.headlineLarge),
           ],
         ),
-        const DayPlanMenu(),
+        DayPlanMenu(deletePlan: deletePlan, editPlan: editPlan),
       ],
     );
   }

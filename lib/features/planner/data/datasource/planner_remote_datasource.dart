@@ -7,6 +7,9 @@ abstract interface class PlannerRemoteDatasource {
     required String instructions,
     required String kitchenId,
   });
+  Future<List<Map<String, dynamic>>> favouriteRecipes();
+  Future<String> addToFavourite({required String recipeId});
+  Future<String> removeFromFavourite({required String recipeId});
 }
 
 class PlannerRemoteDatasourceImpl implements PlannerRemoteDatasource {
@@ -29,6 +32,50 @@ class PlannerRemoteDatasourceImpl implements PlannerRemoteDatasource {
       } else {
         throw Exception("Invalid data");
       }
+    } on DioException catch (e) {
+      throw dio.handleError(e);
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> favouriteRecipes() async {
+    try {
+      final response = await dio.get(AppConstants.favouriteRecipes);
+      final data = response.data["favourite_recipes"];
+
+      if (data is List) {
+        return data.map((e) => Map<String, dynamic>.from(e)).toList();
+      } else {
+        throw Exception("Invalid data");
+      }
+    } on DioException catch (e) {
+      throw dio.handleError(e);
+    }
+  }
+
+  @override
+  Future<String> addToFavourite({required String recipeId}) async {
+    try {
+      final response = await dio.post(
+        AppConstants.addToFavourite,
+        data: {"_id": recipeId},
+      );
+
+      return response.data["message"];
+    } on DioException catch (e) {
+      throw dio.handleError(e);
+    }
+  }
+
+  @override
+  Future<String> removeFromFavourite({required String recipeId}) async {
+    try {
+      final response = await dio.post(
+        AppConstants.removeFromFavourite,
+        data: {"recipe_id": recipeId},
+      );
+
+      return response.data["message"];
     } on DioException catch (e) {
       throw dio.handleError(e);
     }

@@ -12,6 +12,7 @@ import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 class AddMealPage extends StatefulWidget {
   const AddMealPage({super.key});
@@ -21,9 +22,14 @@ class AddMealPage extends StatefulWidget {
 }
 
 class _AddMealPageState extends State<AddMealPage> {
+  String formatedDateString = "";
+  String selectedMealType = "Breakfast";
   int selectedIndex = 0;
 
   void updateSelectedIndex(int index) {
+    if (index == 0) selectedMealType = "Breakfast";
+    if (index == 1) selectedMealType = "Lunch";
+    if (index == 2) selectedMealType = "Dinner";
     setState(() => selectedIndex = index);
   }
 
@@ -78,7 +84,11 @@ class _AddMealPageState extends State<AddMealPage> {
   Widget _buildDatePicker() {
     return SelectDateWidget(
       startDate: DateTime.now(),
-      onChanged: (date) => print("User selected: $date"),
+      onChanged: (date) {
+        String formattedDate = DateFormat('dd/MM/yyyy').format(date);
+        formatedDateString = formattedDate;
+        setState(() {});
+      },
     );
   }
 
@@ -154,7 +164,13 @@ class _AddMealPageState extends State<AddMealPage> {
         children: [
           GenericButtonWidget(
             onPressed: () {
-              context.push(Routes.generateRecipes);
+              context.pushNamed(
+                Routes.generateRecipes,
+                extra: {
+                  "selected_date": formatedDateString,
+                  "selected_meal_type": selectedMealType,
+                },
+              );
             },
             text: "Find Recipes",
           ),

@@ -19,10 +19,9 @@ class RecipeStepTile extends StatelessWidget {
     return GestureDetector(
       onTap: callback,
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            margin: gapOnly(top: h(3)),
             width: w(18),
             height: h(18),
             decoration: BoxDecoration(

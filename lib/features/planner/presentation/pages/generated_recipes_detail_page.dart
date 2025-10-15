@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
@@ -6,15 +7,19 @@ import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
-import 'package:foodkitchen/core/widgets/generic_container_checktile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_segmented_progress_bar_widget.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
+import 'package:foodkitchen/features/planner/domain/entities/meal_type_entity.dart';
+import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
+import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dart';
+import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dart';
 import 'package:foodkitchen/features/planner/presentation/widgets/recipes_step_tile.dart';
 
 class GeneratedRecipesDetailPage extends StatefulWidget {
-  const GeneratedRecipesDetailPage({super.key});
+  final MealTypeEntity mealTypeEntity;
+  const GeneratedRecipesDetailPage({super.key, required this.mealTypeEntity});
 
   @override
   State<GeneratedRecipesDetailPage> createState() =>
@@ -23,43 +28,25 @@ class GeneratedRecipesDetailPage extends StatefulWidget {
 
 class _GeneratedRecipesDetailPageState
     extends State<GeneratedRecipesDetailPage> {
+  late PlannerBloc plannerBloc;
+  late MealTypeEntity recipe;
   bool isFav = false;
   int secondaryActionSelectedIndex = 0;
   bool startRecipe = false;
-  List<Map<String, dynamic>> steps = [
-    {
-      "step": "Preheat the oil in a deep fryer or large pot to 180°C (350°F).",
-      "completed": false,
-    },
-    {
-      "step": "Preheat the oil in a deep fryer or large pot to 180°C (350°F).",
-      "completed": false,
-    },
-    {
-      "step": "Preheat the oil in a deep fryer or large pot to 180°C (350°F).",
-      "completed": false,
-    },
-    {
-      "step": "Preheat the oil in a deep fryer or large pot to 180°C (350°F).",
-      "completed": false,
-    },
-    {
-      "step": "Preheat the oil in a deep fryer or large pot to 180°C (350°F).",
-      "completed": false,
-    },
-    {
-      "step": "Preheat the oil in a deep fryer or large pot to 180°C (350°F).",
-      "completed": false,
-    },
-    {
-      "step": "Preheat the oil in a deep fryer or large pot to 180°C (350°F).",
-      "completed": false,
-    },
-    {
-      "step": "Preheat the oil in a deep fryer or large pot to 180°C (350°F).",
-      "completed": false,
-    },
-  ];
+
+  List<Map<String, dynamic>> steps = [];
+
+  @override
+  void initState() {
+    plannerBloc = context.read<PlannerBloc>();
+    recipe = widget.mealTypeEntity;
+    isFav = recipe.available;
+    steps = recipe.cookingSteps
+        .map((step) => {"step": step, "completed": false})
+        .toList();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -82,7 +69,9 @@ class _GeneratedRecipesDetailPageState
                 if (secondaryActionSelectedIndex == 0) ...[
                   _buildIngredientsList(context),
                   gap(height: 20),
-                  _buildMissingItemsList(context),
+                  recipe.missingItems
+                      ? _buildMissingItemsList(context)
+                      : SizedBox(),
                 ] else
                   _buildRecipesAndStepList(),
               ],
@@ -90,7 +79,8 @@ class _GeneratedRecipesDetailPageState
           ),
         ),
       ),
-      bottomNavigationBar: startRecipe == false
+      bottomNavigationBar:
+          startRecipe == false || secondaryActionSelectedIndex == 0
           ? null
           : SafeArea(
               child: Padding(
@@ -108,7 +98,7 @@ class _GeneratedRecipesDetailPageState
                     Align(
                       alignment: Alignment.topRight,
                       child: Text(
-                        "${steps.length}/0${steps.where((step) => step["completed"] == true).length}",
+                        "0${steps.where((step) => step["completed"] == true).length}/0${steps.length}",
                         style: Theme.of(
                           context,
                         ).textTheme.bodySmall!.copyWith(color: Colors.grey),
@@ -142,28 +132,50 @@ class _GeneratedRecipesDetailPageState
   }
 
   Widget _buildHeaderImage() {
-    return Container(
-      padding: gapAll(15),
-      alignment: Alignment.topRight,
-      height: h(154),
-      width: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(h(10)),
-        image: DecorationImage(
-          image: AssetImage(AppAssets.onBoardingSliderBg02),
-          fit: BoxFit.cover,
-        ),
-      ),
-      child: GestureDetector(
-        onTap: () => setState(() => isFav = !isFav),
-        child: CircleAvatar(
-          backgroundColor: Colors.grey,
-          child: SvgPicture.asset(
-            isFav ? AppAssets.favouriteFilledSvg : AppAssets.favouriteSvg,
-            height: h(14),
+    return BlocBuilder<PlannerBloc, PlannerState>(
+      builder: (_, state) {
+        return Container(
+          padding: gapAll(15),
+          alignment: Alignment.topRight,
+          height: h(154),
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(h(10)),
+            image: DecorationImage(
+              image: AssetImage(AppAssets.onBoardingSliderBg02),
+              fit: BoxFit.cover,
+            ),
           ),
-        ),
-      ),
+          child: GestureDetector(
+            onTap: state.isLoading
+                ? null
+                : () {
+                    setState(() => isFav = !isFav);
+                    if (isFav) {
+                      plannerBloc.add(AddToFavouriteRecipeEvent(recipe.id));
+                    } else {
+                      plannerBloc.add(
+                        RemoveFromFavouriteRecipeEvent(recipe.id),
+                      );
+                    }
+                  },
+            child: CircleAvatar(
+              backgroundColor: Colors.grey,
+              child: state.isLoading
+                  ? Transform.scale(
+                      scale: 0.5,
+                      child: CircularProgressIndicator(),
+                    )
+                  : SvgPicture.asset(
+                      isFav
+                          ? AppAssets.favouriteFilledSvg
+                          : AppAssets.favouriteSvg,
+                      height: h(14),
+                    ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -172,29 +184,24 @@ class _GeneratedRecipesDetailPageState
       widget: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Align(
-            alignment: Alignment.topRight,
-            child: Text(
-              "Some items are missing*",
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: Colors.red,
-                fontSize: t(10),
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          Text(
-            "Crispy Fried Chicken",
-            style: Theme.of(context).textTheme.headlineLarge,
-          ),
+          recipe.missingItems
+              ? Align(
+                  alignment: Alignment.topRight,
+                  child: Text(
+                    "Some items are missing*",
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: Colors.red,
+                      fontSize: t(10),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                )
+              : SizedBox(),
+          Text(recipe.title, style: Theme.of(context).textTheme.headlineLarge),
           gap(height: 15),
-          _buildInfoRow(AppAssets.gramSvg, "250 cal per 100 grams", context),
+          _buildInfoRow(AppAssets.gramSvg, recipe.calories, context),
           gap(height: 15),
-          _buildInfoRow(
-            AppAssets.stopWatchSvg,
-            "Cooking time: 30-40 mins",
-            context,
-          ),
+          _buildInfoRow(AppAssets.stopWatchSvg, recipe.cookingTime, context),
         ],
       ),
     );
@@ -211,66 +218,84 @@ class _GeneratedRecipesDetailPageState
   }
 
   Widget _buildPrimaryActions(BuildContext context) {
-    return Column(
-      children: [
-        startRecipe
-            ? Row(
-                children: [
-                  Flexible(
-                    child: GenericButtonWidget(
-                      onPressed: () {
+    return BlocBuilder<PlannerBloc, PlannerState>(
+      builder: (_, state) {
+        return Column(
+          children: [
+            startRecipe
+                ? Row(
+                    children: [
+                      Flexible(
+                        child: GenericButtonWidget(
+                          onPressed: () {
+                            setState(() {
+                              startRecipe = false;
+                            });
+                          },
+                          text: "Finish Recipe",
+                          backgroundColor: Colors.white,
+                          color: Colors.green,
+                        ),
+                      ),
+                      SizedBox(width: w(12)),
+                      Flexible(
+                        child: GenericButtonWidget(
+                          onPressed: () {
+                            setState(() {
+                              startRecipe = false;
+                            });
+                          },
+                          text: "Cancel Recipe",
+                          backgroundColor: Colors.white,
+                          color: Colors.red,
+                        ),
+                      ),
+                    ],
+                  )
+                : GenericButtonWidget(
+                    onPressed: () {
+                      if (recipe.missingItems == false) {
                         setState(() {
-                          startRecipe = false;
+                          startRecipe = true;
+                          secondaryActionSelectedIndex = 1;
                         });
-                      },
-                      text: "Finish Recipe",
-                      backgroundColor: Colors.white,
-                      color: Colors.green,
-                    ),
+                      } else {
+                        AppToast.show(
+                          "Some ingredients are missing, so the recipe can't be started.",
+                          ToastType.error,
+                        );
+                      }
+                    },
+                    text: "Start Recipe",
                   ),
-                  SizedBox(width: w(12)),
-                  Flexible(
-                    child: GenericButtonWidget(
-                      onPressed: () {
-                        setState(() {
-                          startRecipe = false;
-                        });
-                      },
-                      text: "Cancel Recipe",
-                      backgroundColor: Colors.white,
-                      color: Colors.red,
-                    ),
-                  ),
-                ],
-              )
-            : GenericButtonWidget(
-                onPressed: () {
-                  setState(() {
-                    startRecipe = true;
-                    secondaryActionSelectedIndex = 1;
-                  });
-                },
-                text: "Start Recipe",
-              ),
 
-        gap(height: 20),
-        SizedBox(
-          width: double.infinity,
-          height: h(40),
-          child: OutlinedButton(
-            onPressed: () {
-              AppToast.show("Added to your weekly plan ", ToastType.success);
-            },
-            child: Text(
-              "Add to Weekly Meal",
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontSize: t(14),
-                color: AppColors.primaryColor,
+            gap(height: 20),
+            SizedBox(
+              width: double.infinity,
+              height: h(40),
+              child: OutlinedButton(
+                onPressed: () {
+                  plannerBloc.add(AddToWeeklyPlanEvent(recipe));
+                },
+                child: state.addingToWeeklyPlan
+                    ? Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.primaryColor,
+                        ),
+                      )
+                    : Text(
+                        "Add to Weekly Meal Plan",
+                        style: Theme.of(context).textTheme.headlineMedium
+                            ?.copyWith(
+                              fontSize: t(14),
+                              color: AppColors.primaryColor,
+                            ),
+                      ),
               ),
             ),
-          ),
-        ),
-      ],
+          ],
+        );
+      },
     );
   }
 
@@ -312,13 +337,7 @@ class _GeneratedRecipesDetailPageState
   }
 
   Widget _buildIngredientsList(BuildContext context) {
-    final ingredients = [
-      "1 kg chicken pieces (drumsticks, thighs, or wings)",
-      "1 cup all-purpose flour",
-      "1 tsp salt",
-      "1 tsp pepper",
-      "1 tsp paprika",
-    ];
+    final ingredients = recipe.ingredients;
 
     return UpperTile(
       widget: Column(
@@ -333,7 +352,7 @@ class _GeneratedRecipesDetailPageState
             (item) => Padding(
               padding: EdgeInsets.only(bottom: h(13)),
               child: Text(
-                item,
+                "${item.amount} ${item.unit} ${item.name}",
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
             ),
@@ -348,50 +367,72 @@ class _GeneratedRecipesDetailPageState
       widget: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Missing Items",
-                style: Theme.of(context).textTheme.headlineLarge,
-              ),
-              TextButton(
-                onPressed: () {},
-                child: Text(
-                  "Select All",
-                  style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                    color: AppColors.primaryColor,
-                  ),
-                ),
-              ),
-            ],
+          Text(
+            "Request List",
+            style: Theme.of(context).textTheme.headlineLarge,
           ),
-          gap(height: 14),
-          GenericCircleCheckboxTile(
-            title: '1/2 tsp cayenne pepper',
-            isChecked: true,
-            onChanged: (bool value) {},
-            activeColor: AppColors.primaryColor,
+          SizedBox(height: h(10)),
+          Text(
+            "Request host to buy missing items",
+            style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+              fontSize: t(15),
+              color: Color(0xff787878),
+            ),
           ),
-          gap(height: 14),
-          GenericCircleCheckboxTile(
-            title: '1 egg',
-            isChecked: true,
-            onChanged: (bool value) {},
-            activeColor: AppColors.primaryColor,
-          ),
-          gap(height: 14),
-          GenericCircleCheckboxTile(
-            title: '1 cup buttermilk',
-            isChecked: false,
-            onChanged: (bool value) {},
-            activeColor: AppColors.primaryColor,
-          ),
-          gap(height: 15),
-          GenericButtonWidget(onPressed: () {}, text: "Add in List"),
+          SizedBox(height: h(20)),
+          GenericButtonWidget(onPressed: () {}, text: "Request Now"),
         ],
       ),
     );
+
+    // return UpperTile(
+    //   widget: Column(
+    //     crossAxisAlignment: CrossAxisAlignment.start,
+    //     children: [
+    //       Row(
+    //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    //         children: [
+    //           Text(
+    //             "Missing Items",
+    //             style: Theme.of(context).textTheme.headlineLarge,
+    //           ),
+    //           TextButton(
+    //             onPressed: () {},
+    //             child: Text(
+    //               "Select All",
+    //               style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+    //                 color: AppColors.primaryColor,
+    //               ),
+    //             ),
+    //           ),
+    //         ],
+    //       ),
+    //       gap(height: 14),
+    //       GenericCircleCheckboxTile(
+    //         title: '1/2 tsp cayenne pepper',
+    //         isChecked: true,
+    //         onChanged: (bool value) {},
+    //         activeColor: AppColors.primaryColor,
+    //       ),
+    //       gap(height: 14),
+    //       GenericCircleCheckboxTile(
+    //         title: '1 egg',
+    //         isChecked: true,
+    //         onChanged: (bool value) {},
+    //         activeColor: AppColors.primaryColor,
+    //       ),
+    //       gap(height: 14),
+    //       GenericCircleCheckboxTile(
+    //         title: '1 cup buttermilk',
+    //         isChecked: false,
+    //         onChanged: (bool value) {},
+    //         activeColor: AppColors.primaryColor,
+    //       ),
+    //       gap(height: 15),
+    //       GenericButtonWidget(onPressed: () {}, text: "Add in List"),
+    //     ],
+    //   ),
+    // );
   }
 
   Widget _buildRecipesAndStepList() {
@@ -404,7 +445,7 @@ class _GeneratedRecipesDetailPageState
               Text("Recipe", style: Theme.of(context).textTheme.headlineLarge),
               gap(height: 12),
               Text(
-                "Crispy Fried Chicken",
+                recipe.recipeShortSummary,
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
             ],
@@ -418,7 +459,7 @@ class _GeneratedRecipesDetailPageState
               Text("Steps", style: Theme.of(context).textTheme.headlineLarge),
               gap(height: 15),
               Text(
-                "Crispy Fried Chicken",
+                recipe.title,
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
               gap(height: 25),
@@ -430,9 +471,17 @@ class _GeneratedRecipesDetailPageState
                     child: RecipeStepTile(
                       stepText: steps[index]["step"],
                       callback: () {
-                        setState(() {
-                          steps[index]["completed"] = true;
-                        });
+                        if (startRecipe) {
+                          setState(() {
+                            steps[index]["completed"] =
+                                !steps[index]["completed"];
+                          });
+                        } else {
+                          AppToast.show(
+                            "Start the recipe first before proceeding to the steps!",
+                            ToastType.warning,
+                          );
+                        }
                       },
                       isCompleted: steps[index]["completed"],
                     ),

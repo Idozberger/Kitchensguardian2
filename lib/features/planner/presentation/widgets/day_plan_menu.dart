@@ -8,7 +8,14 @@ import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:go_router/go_router.dart';
 
 class DayPlanMenu extends StatelessWidget {
-  const DayPlanMenu({super.key});
+  final VoidCallback deletePlan;
+  final VoidCallback editPlan;
+
+  const DayPlanMenu({
+    super.key,
+    required this.deletePlan,
+    required this.editPlan,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -32,8 +39,7 @@ class DayPlanMenu extends StatelessWidget {
 
             break;
           case 2:
-            debugPrint("Clear Day Plan clicked");
-            AppToast.show("Clear Day Plan", ToastType.success);
+            deletePlan();
 
             break;
         }

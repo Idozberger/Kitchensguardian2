@@ -21,6 +21,7 @@ import 'package:foodkitchen/features/onboarding/presentation/pages/splash_screen
 import 'package:foodkitchen/features/pantry/presentation/pages/add_item_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/my_pantry_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/scan_meal_page.dart';
+import 'package:foodkitchen/features/planner/domain/entities/meal_type_entity.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/add_meal_page.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/edit_meal_page.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/favourite_food_page.dart';
@@ -111,12 +112,24 @@ final GoRouter router = GoRouter(
     GoRoute(path: Routes.addMeal, builder: (context, state) => AddMealPage()),
     GoRoute(path: Routes.editMeal, builder: (context, state) => EditMealPage()),
     GoRoute(
+      name: Routes.generateRecipes,
       path: Routes.generateRecipes,
-      builder: (context, state) => GenerateRecipesPage(),
+      builder: (context, state) {
+        final Map<String, dynamic> data = state.extra as Map<String, dynamic>;
+        return GenerateRecipesPage(
+          selectedDate: data["selected_date"],
+          selectedMealType: data["selected_meal_type"],
+        );
+      },
     ),
+
     GoRoute(
+      name: Routes.generateRecipesDetails,
       path: Routes.generateRecipesDetails,
-      builder: (context, state) => GeneratedRecipesDetailPage(),
+      builder: (context, state) {
+        final MealTypeEntity mealTypeEntity = state.extra as MealTypeEntity;
+        return GeneratedRecipesDetailPage(mealTypeEntity: mealTypeEntity);
+      },
     ),
     GoRoute(
       path: Routes.favouriteFood,

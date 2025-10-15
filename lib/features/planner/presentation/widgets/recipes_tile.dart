@@ -31,7 +31,7 @@ class RecipeTile extends StatelessWidget {
       borderRadius: BorderRadius.circular(h(12)),
       onTap: onTap,
       child: Ink(
-        padding: EdgeInsets.all(h(10)),
+        padding: EdgeInsets.all(h(0)),
         decoration: BoxDecoration(
           color: selected ? Color(0xffFFFBEB) : null,
           borderRadius: BorderRadius.circular(h(12)),
@@ -70,7 +70,7 @@ class RecipeTile extends StatelessWidget {
                     subtitle,
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
-                  if (errorText != null) ...[
+                  if (errorText != null && errorText!.isNotEmpty) ...[
                     SizedBox(height: h(4)),
                     Text(
                       errorText!,

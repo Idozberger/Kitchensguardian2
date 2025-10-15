@@ -1,24 +1,40 @@
 import 'package:foodkitchen/features/planner/domain/entities/meal_type_entity.dart';
 
-sealed class PlannerState {
-  const PlannerState();
-}
-
-final class PlannerInitial extends PlannerState {}
-
-final class PlannerLoading extends PlannerState {}
-
-final class PlannerSuccess extends PlannerState {
+final class PlannerState {
+  final List<MealTypeEntity>? recipes;
+  final List<MealTypeEntity>? favouriteRecipes;
+  final List<MealTypeEntity>? getAllWeeklyPlans;
+  final bool isLoading;
+  final bool addingToWeeklyPlan;
+  final String? errorMessage;
   final String successMessage;
-  PlannerSuccess(this.successMessage);
-}
+  const PlannerState({
+    this.recipes,
+    this.favouriteRecipes,
+    this.getAllWeeklyPlans,
+    this.isLoading = false,
+    this.addingToWeeklyPlan = false,
+    this.errorMessage,
+    this.successMessage = "",
+  });
 
-final class PlannerFailure extends PlannerState {
-  final String message;
-  const PlannerFailure(this.message);
-}
-
-final class PlannerRecipesLoaded extends PlannerState {
-  final List<MealTypeEntity> recipes;
-  const PlannerRecipesLoaded(this.recipes);
+  PlannerState copyWith({
+    List<MealTypeEntity>? recipes,
+    List<MealTypeEntity>? favouriteRecipes,
+    List<MealTypeEntity>? getAllWeeklyPlans,
+    bool? isLoading,
+    bool? addingToWeeklyPlan,
+    String? errorMessage,
+    String? successMessage,
+  }) {
+    return PlannerState(
+      recipes: recipes ?? this.recipes,
+      favouriteRecipes: favouriteRecipes ?? this.favouriteRecipes,
+      getAllWeeklyPlans: getAllWeeklyPlans ?? this.getAllWeeklyPlans,
+      isLoading: isLoading ?? this.isLoading,
+      addingToWeeklyPlan: addingToWeeklyPlan ?? this.addingToWeeklyPlan,
+      errorMessage: errorMessage ?? "",
+      successMessage: successMessage ?? "",
+    );
+  }
 }

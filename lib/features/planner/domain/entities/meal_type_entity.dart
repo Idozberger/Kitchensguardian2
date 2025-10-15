@@ -2,6 +2,8 @@ import 'package:foodkitchen/features/planner/domain/entities/ingredient_entity.d
 
 class MealTypeEntity {
   final String id;
+  final String formatedDateString;
+  final String mealType;
   final String title;
   final String calories;
   final String cookingTime;
@@ -9,6 +11,7 @@ class MealTypeEntity {
   final List<String> cookingSteps;
   final List<IngredientEntity> ingredients;
   final bool missingItems;
+  final bool available;
 
   MealTypeEntity({
     required this.id,
@@ -19,5 +22,8 @@ class MealTypeEntity {
     required this.cookingSteps,
     required this.ingredients,
     required this.missingItems,
+    required this.available,
+    required this.mealType,
+    required this.formatedDateString,
   });
 }

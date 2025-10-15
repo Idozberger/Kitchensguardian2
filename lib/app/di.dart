@@ -51,10 +51,17 @@ import 'package:foodkitchen/features/pantry/domain/usecases/add_pantry_item.dart
 import 'package:foodkitchen/features/pantry/domain/usecases/get_pantry_items.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/scan_receipt.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_bloc.dart';
+import 'package:foodkitchen/features/planner/data/datasource/planner_local_datasource.dart';
 import 'package:foodkitchen/features/planner/data/datasource/planner_remote_datasource.dart';
 import 'package:foodkitchen/features/planner/data/repository/planner_repository_impl.dart';
 import 'package:foodkitchen/features/planner/domain/repository/planner_repository.dart';
+import 'package:foodkitchen/features/planner/domain/usecases/add_to_favourite_recipe.dart';
+import 'package:foodkitchen/features/planner/domain/usecases/add_to_weekly_plan.dart';
+import 'package:foodkitchen/features/planner/domain/usecases/delete_plan.dart';
+import 'package:foodkitchen/features/planner/domain/usecases/favourite_recipes.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/generate_recipes.dart';
+import 'package:foodkitchen/features/planner/domain/usecases/get_all_weekly_plans.dart';
+import 'package:foodkitchen/features/planner/domain/usecases/remove_from_favourite_recipe.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
@@ -85,8 +92,8 @@ void _dioInjection() {
     () => Dio(
       BaseOptions(
         baseUrl: AppConstants.baseUrl,
-        connectTimeout: const Duration(seconds: 20),
-        receiveTimeout: const Duration(seconds: 20),
+        connectTimeout: const Duration(seconds: 40),
+        receiveTimeout: const Duration(seconds: 40),
       ),
     ),
   );
@@ -256,12 +263,34 @@ void _initPlanner() async {
     ..registerFactory<PlannerRemoteDatasource>(
       () => PlannerRemoteDatasourceImpl(sl()),
     )
+    ..registerFactory<PlannerLocalDatasource>(
+      () => PlannerLocalDatasourceImpl(sl()),
+    )
     // Repository
-    ..registerFactory<PlannerRepository>(() => PlannerRepositoryImpl(sl()))
+    ..registerFactory<PlannerRepository>(
+      () => PlannerRepositoryImpl(
+        plannerLocalDatasource: sl(),
+        plannerRemoteDatasource: sl(),
+      ),
+    )
     // Usecases
     ..registerFactory(() => GenerateRecipes(sl()))
+    ..registerFactory(() => FavouriteRecipes(sl()))
+    ..registerFactory(() => AddToFavouriteRecipe(sl()))
+    ..registerFactory(() => RemoveFromFavouriteRecipe(sl()))
+    ..registerFactory(() => AddToWeeklyPlan(sl()))
+    ..registerFactory(() => GetAllWeeklyPlans(sl()))
+    ..registerFactory(() => DeletePlan(sl()))
     // Bloc
     ..registerLazySingleton(
-      () => PlannerBloc(generateRecipes: GenerateRecipes(sl())),
+      () => PlannerBloc(
+        generateRecipes: GenerateRecipes(sl()),
+        favouriteRecipes: FavouriteRecipes(sl()),
+        addToFavouriteRecipe: AddToFavouriteRecipe(sl()),
+        removeFromFavouriteRecipe: RemoveFromFavouriteRecipe(sl()),
+        addToWeeklyPlan: AddToWeeklyPlan(sl()),
+        getAllWeeklyPlans: GetAllWeeklyPlans(sl()),
+        deletePlan: DeletePlan(sl()),
+      ),
     );
 }

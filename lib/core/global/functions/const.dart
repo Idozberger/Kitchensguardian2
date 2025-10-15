@@ -27,4 +27,7 @@ class AppConstants {
       "/api/kitchen/get_user_requested_items";
   static const String getAiGeneratedList = "/api/kitchen/get_ai_generated_list";
   static const String generateRecipes = "/api/generate_recipes";
+  static const String favouriteRecipes = "/api/recipe/list_fav";
+  static const String removeFromFavourite = "/api/recipe/remove_from_fav";
+  static const String addToFavourite = "/api/recipe/add_to_fav";
 }
