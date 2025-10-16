@@ -34,6 +34,7 @@ import 'package:foodkitchen/features/home/data/datasource/home_remote_datasource
 import 'package:foodkitchen/features/home/data/repository/home_repository_impl.dart';
 import 'package:foodkitchen/features/home/domain/repository/home_repository.dart';
 import 'package:foodkitchen/features/home/domain/usecases/create_kitchen_usecase.dart';
+import 'package:foodkitchen/features/home/domain/usecases/get_pantries_usecase.dart';
 import 'package:foodkitchen/features/home/domain/usecases/join_kitchen_usecase.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
 import 'package:foodkitchen/features/kitchens/data/datasource/kitchen_remote_datasource.dart';
@@ -154,19 +155,21 @@ void _initHome() async {
   // Datasource
   sl
     ..registerFactory<HomeRemoteDataSource>(
-      () => HomeRemoteDataSourceImpl(sl()),
+      () => HomeRemoteDataSourceImpl(dio: sl(), sharedPreferences: sl()),
     )
     // Repository
     ..registerFactory<HomeRepository>(() => HomeRepositoryImpl(sl()))
     // Usecases
     ..registerFactory(() => CreateKitchen(sl()))
     ..registerFactory(() => JoinKitchen(sl()))
+    ..registerFactory(() => GetPantriesForHome(sl()))
     // Bloc
     ..registerLazySingleton(
       () => HomeBloc(
         createKitchen: CreateKitchen(sl()),
         joinKitchen: JoinKitchen(sl()),
         userCubit: sl(),
+        getPantriesForHome: GetPantriesForHome(sl()),
       ),
     );
 }
@@ -189,6 +192,9 @@ void _initKitchen() async {
         getKitchens: GetKitchens(sl()),
         createKitchen: CreateKitchenUseCase(sl()),
         joinKitchen: JoinKitchenUseCase(sl()),
+        homeBloc: sl(),
+        plannerBloc: sl(),
+        groceryBloc: sl(),
       ),
     );
 }

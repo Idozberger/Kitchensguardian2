@@ -66,7 +66,7 @@ Future<dynamic> showJoinKitchenDialog(BuildContext context) {
                       onPressed: () {
                         if (invitaionCode != null) {
                           context.read<HomeBloc>().add(
-                            JoinKitchenEvent(invitaionCode!),
+                            JoinKitchenEventForHome(invitaionCode!),
                           );
                         }
                       },

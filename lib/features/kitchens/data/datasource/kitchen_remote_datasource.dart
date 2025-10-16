@@ -41,9 +41,11 @@ class KitchenRemoteDataSourceImpl implements KitchenRemoteDatasource {
 
       final kitchenId = data["kitchen_id"];
       final invitationCode = data["invitation_code"];
+      final role = data["role"];
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('kitchen_id', kitchenId.toString());
       await prefs.setString('invitation_code', invitationCode.toString());
+      await prefs.setString('role', role.toString());
       return response.data["message"];
     } on DioException catch (e) {
       throw dio.handleError(e);

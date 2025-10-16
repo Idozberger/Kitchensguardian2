@@ -1,11 +1,16 @@
 sealed class HomeEvent {}
 
-class CreateKitchenEvent extends HomeEvent {
+class CreateKitchenEventForHome extends HomeEvent {
   final String kitchenName;
-  CreateKitchenEvent(this.kitchenName);
+  CreateKitchenEventForHome(this.kitchenName);
 }
 
-class JoinKitchenEvent extends HomeEvent {
+class JoinKitchenEventForHome extends HomeEvent {
   final String invitationCode;
-  JoinKitchenEvent(this.invitationCode);
+  JoinKitchenEventForHome(this.invitationCode);
+}
+
+final class GetPantriesItemsEventForHome extends HomeEvent {
+  final String kitchenId;
+  GetPantriesItemsEventForHome({required this.kitchenId});
 }

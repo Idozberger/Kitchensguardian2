@@ -2,18 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
+import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:intl/intl.dart';
 
 class SelectDateWidget extends StatefulWidget {
   final DateTime startDate;
+
   final ValueChanged<DateTime> onChanged;
+  final bool entitlementIsActive;
 
   const SelectDateWidget({
     super.key,
     required this.startDate,
     required this.onChanged,
+
+    required this.entitlementIsActive,
   });
 
   @override
@@ -39,52 +44,71 @@ class _SelectDateWidgetState extends State<SelectDateWidget> {
         Text("Select Date", style: Theme.of(context).textTheme.headlineLarge),
         gap(height: 7),
         UpperTile(
+          horizontalPadding: 14,
           widget: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: _days.map((date) {
+            children: _days.asMap().entries.map((entry) {
+              final index = entry.key;
+              final date = entry.value;
               final isSelected = _isSameDate(date, _selectedDate);
+              final isLocked = !widget.entitlementIsActive && index > 2;
 
               return GestureDetector(
                 onTap: () {
+                  if (isLocked) {
+                    AppToast.show(
+                      "Only premium users can select more days",
+                      ToastType.error,
+                    );
+                    return;
+                  }
                   setState(() {
                     _selectedDate = date;
                   });
                   widget.onChanged(date);
                 },
-                child: Container(
-                  padding: gapSymmetric(vertical: 10, horizontal: 7),
-                  decoration: BoxDecoration(
-                    color: isSelected ? const Color(0xffFFFBEB) : Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: isSelected ? AppColors.primaryColor : Colors.white,
+                child: Opacity(
+                  opacity: isLocked ? 0.4 : 1,
+                  child: Container(
+                    width: w(40),
+                    padding: gapSymmetric(vertical: 10),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? const Color(0xffFFFBEB)
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isSelected
+                            ? AppColors.primaryColor
+                            : Colors.white,
+                      ),
                     ),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        date.day.toString(),
-                        style: Theme.of(context).textTheme.headlineMedium!
-                            .copyWith(
-                              color: isSelected
-                                  ? AppColors.primaryColor
-                                  : Colors.black,
-                              fontSize: t(15),
-                            ),
-                      ),
-                      gap(height: 4),
-                      Text(
-                        DateFormat('EEE').format(date),
-                        style: Theme.of(context).textTheme.headlineMedium!
-                            .copyWith(
-                              color: isSelected
-                                  ? AppColors.primaryColor
-                                  : Colors.black,
-                              fontSize: t(15),
-                            ),
-                      ),
-                    ],
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          date.day.toString(),
+                          style: Theme.of(context).textTheme.headlineMedium!
+                              .copyWith(
+                                color: isSelected
+                                    ? AppColors.primaryColor
+                                    : Colors.black,
+                                fontSize: t(12),
+                              ),
+                        ),
+                        gap(height: 4),
+                        Text(
+                          DateFormat('EEE').format(date),
+                          style: Theme.of(context).textTheme.headlineMedium!
+                              .copyWith(
+                                color: isSelected
+                                    ? AppColors.primaryColor
+                                    : Colors.black,
+                                fontSize: t(12),
+                              ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );

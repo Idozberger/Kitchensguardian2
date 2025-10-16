@@ -20,8 +20,18 @@ class UserCubit extends Cubit<UserState> {
     );
   }
 
-  void updateActiveKitchenId({required String activeKitchenId}) {
-    emit(state.copyWith(activeKitchenId: activeKitchenId));
+  void updateActiveKitchenIdInvitationCodeAndRole({
+    required String activeKitchenId,
+    required String invitationCode,
+    required String role,
+  }) {
+    emit(
+      state.copyWith(
+        activeKitchenId: activeKitchenId,
+        invitationCode: invitationCode,
+        role: role,
+      ),
+    );
   }
 
   void toggleLoading(bool value) {

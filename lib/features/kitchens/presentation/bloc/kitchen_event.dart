@@ -36,3 +36,8 @@ class JoinKitchenEvent extends KitchenEvent {
   final String invitationCode;
   JoinKitchenEvent(this.invitationCode);
 }
+
+class SwitchKitchenEvent extends KitchenEvent {
+  final String kitchenId;
+  SwitchKitchenEvent(this.kitchenId);
+}

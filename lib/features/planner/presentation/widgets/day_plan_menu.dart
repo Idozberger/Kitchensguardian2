@@ -31,13 +31,9 @@ class DayPlanMenu extends StatelessWidget {
         switch (value) {
           case 0:
             debugPrint("Edit Day Plan clicked");
-            context.push(Routes.editMeal);
+            editPlan();
             break;
-          case 1:
-            debugPrint("Share Day Plan clicked");
-            AppToast.show("Share Day Plan", ToastType.success);
 
-            break;
           case 2:
             deletePlan();
 
@@ -52,13 +48,7 @@ class DayPlanMenu extends StatelessWidget {
           label: "Edit Day Plan",
           textColor: Colors.black,
         ),
-        _menuItem(
-          context,
-          value: 1,
-          icon: AppAssets.shareSvg,
-          label: "Share Day Plan",
-          textColor: Colors.black,
-        ),
+
         _menuItem(
           context,
           value: 2,

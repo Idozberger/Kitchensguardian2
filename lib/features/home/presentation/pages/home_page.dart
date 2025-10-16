@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/dialogs/join_kitchen.dart';
@@ -12,6 +13,7 @@ import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
+import 'package:foodkitchen/features/home/presentation/bloc/home_event.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_state.dart';
 import 'package:foodkitchen/features/home/presentation/dialogs/create_kitchen.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/no_kitchen_found.dart';
@@ -20,6 +22,7 @@ import 'package:foodkitchen/features/home/presentation/widgets/rounded_text_cont
 import 'package:foodkitchen/features/home/presentation/widgets/tonight_recipe.dart';
 import 'package:foodkitchen/features/pantry/presentation/widgets/list_tile.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -29,6 +32,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  late UserCubit userCubit;
+  late HomeBloc homeBloc;
   final List<String> ingredients = [
     "Tomatoes",
     "Olive Oil",
@@ -36,9 +41,23 @@ class _HomePageState extends State<HomePage> {
     "Onions",
     "Cheese",
   ];
-  bool isJoinedKitched = false;
-  bool isClickedPantryAction = false;
+
   bool isGeneratedRecipes = false;
+  bool isClickedPantryAction = false;
+  @override
+  void initState() {
+    userCubit = context.read<UserCubit>();
+    homeBloc = context.read<HomeBloc>();
+    getUserPantries();
+    super.initState();
+  }
+
+  void getUserPantries() {
+    String activeKitchenId = userCubit.state.activeKitchenId;
+    if (activeKitchenId.isNotEmpty) {
+      homeBloc.add(GetPantriesItemsEventForHome(kitchenId: activeKitchenId));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,40 +81,57 @@ class _HomePageState extends State<HomePage> {
         return ListView(
           padding: gapOnly(left: 20, right: 20, bottom: 20, top: 10),
           children: [
-            if (isJoinedKitched) ...[
-              if (isClickedPantryAction)
-                _buildTextAndButtonTile(
-                  context,
-                  title: "Scan to log in your food!",
-                  buttonText: "Scan",
-                  svgPath: AppAssets.scanSvg,
-                  callback: () {
-                    context.push(Routes.scanMeal);
-                  },
-                ),
-              SizedBox(height: h(20)),
-
-              _buildPantryTile(context),
-              SizedBox(height: h(20)),
+            if (userCubit.state.activeKitchenId.isNotEmpty) ...[
+              _buildTextAndButtonTile(
+                context,
+                title: "Scan to log in your food!",
+                buttonText: "Scan",
+                svgPath: AppAssets.scanSvg,
+                callback: () {
+                  context.push(Routes.scanMeal);
+                },
+              ),
+              SizedBox(height: h(15)),
+              homeState.isLoading
+                  ? UpperTile(
+                      widget: Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.primaryColor,
+                        ),
+                      ),
+                    )
+                  : _buildPantryTile(context, homeState),
+              SizedBox(height: h(15)),
               _buildTextAndButtonTile(
                 context,
                 title: "Find Recipes",
                 buttonText: "Find Recipes",
                 svgPath: AppAssets.findRecipesSvg,
                 callback: () {
-                  // context.push(Routes.scanMeal);
+                  String formattedDate = DateFormat(
+                    'dd/MM/yyyy',
+                  ).format(DateTime.now());
+
+                  context.pushNamed(
+                    Routes.generateRecipes,
+                    extra: {
+                      "selected_date": formattedDate,
+                      "selected_meal_type": "Breakfast",
+                      "is_plan": false,
+                    },
+                  );
                 },
               ),
-              SizedBox(height: h(20)),
+              SizedBox(height: h(15)),
               UpperTile(widget: RecommendedRecipes(), horizontalPadding: 0),
-              SizedBox(height: h(20)),
+              SizedBox(height: h(15)),
               _buildSmartCartTile(context),
               if (isGeneratedRecipes) ...[
-                SizedBox(height: h(20)),
+                SizedBox(height: h(15)),
                 UpperTile(widget: TonightRecipeWidget(), horizontalPadding: 0),
               ],
             ],
-            if (isJoinedKitched == false) ...[
+            if (userCubit.state.activeKitchenId.isEmpty) ...[
               _buildHomeUpperTile(context),
               SizedBox(height: h(140)),
               EmptyStateWidget(
@@ -127,13 +163,7 @@ class _HomePageState extends State<HomePage> {
                 child: GenericButtonWidget(
                   isOutlined: true,
                   onPressed: () async {
-                    final result = await showCreateKitchenDialog(context);
-
-                    if (result == true || result == false) {
-                      setState(() {
-                        isJoinedKitched = true;
-                      });
-                    }
+                    await showCreateKitchenDialog(context);
                   },
                   text: "Create",
                 ),
@@ -142,12 +172,7 @@ class _HomePageState extends State<HomePage> {
               Flexible(
                 child: GenericButtonWidget(
                   onPressed: () async {
-                    final result = await showJoinKitchenDialog(context);
-                    if (result == true || result == false) {
-                      setState(() {
-                        isJoinedKitched = true;
-                      });
-                    }
+                    await showJoinKitchenDialog(context);
                   },
                   text: "Join",
                 ),
@@ -159,7 +184,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildPantryTile(BuildContext context) {
+  Widget _buildPantryTile(BuildContext context, HomeState state) {
     return UpperTile(
       widget: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -176,7 +201,7 @@ class _HomePageState extends State<HomePage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              if (isClickedPantryAction == false) ...[
+              if (state.pantryItems.isEmpty) ...[
                 Flexible(
                   child: SizedBox(
                     width: double.infinity,
@@ -223,9 +248,11 @@ class _HomePageState extends State<HomePage> {
           ),
 
           SizedBox(height: h(15)),
-          if (isClickedPantryAction) ...[
+          if (state.pantryItems.isNotEmpty) ...[
             ListView.separated(
-              itemCount: 3,
+              itemCount: state.pantryItems.length < 4
+                  ? state.pantryItems.length
+                  : 3,
               shrinkWrap: true,
 
               separatorBuilder: (context, index) {
@@ -236,12 +263,13 @@ class _HomePageState extends State<HomePage> {
               },
               padding: gapZero,
               itemBuilder: (context, index) {
+                var pantry = state.pantryItems[index];
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Flexible(
                       child: ListItemWidget(
-                        text: "Item ${index + 1}",
+                        text: pantry.name,
                         textStyle: Theme.of(context).textTheme.headlineSmall!
                             .copyWith(
                               fontSize: t(13),
@@ -251,7 +279,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     Text(
-                      "${index + 1}d left",
+                      pantry.quantity.toString(),
                       style: Theme.of(context).textTheme.headlineMedium!
                           .copyWith(fontSize: t(13), color: Color(0xff787878)),
                     ),

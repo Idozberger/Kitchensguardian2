@@ -38,9 +38,15 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> getCurrentUser() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? activeKitchenId = prefs.getString('kitchen_id');
+    final String? invitationCode = prefs.getString('invitation_code');
+    final String? role = prefs.getString('role');
 
     userBloc.add(GetCurrentUser());
-    userCubit.updateActiveKitchenId(activeKitchenId: activeKitchenId ?? "");
+    userCubit.updateActiveKitchenIdInvitationCodeAndRole(
+      activeKitchenId: activeKitchenId ?? "",
+      invitationCode: invitationCode ?? "",
+      role: role ?? "member",
+    );
   }
 
   @override

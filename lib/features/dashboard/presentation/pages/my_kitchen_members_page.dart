@@ -17,7 +17,7 @@ import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_ico
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MyKitchenMembersPage extends StatefulWidget {
-  MyKitchenMembersPage({super.key});
+  const MyKitchenMembersPage({super.key});
 
   @override
   State<MyKitchenMembersPage> createState() => _MyKitchenMembersPageState();
@@ -147,16 +147,53 @@ class _MyKitchenMembersPageState extends State<MyKitchenMembersPage> {
                             );
                           },
                         ),
-                        gap(height: 20),
-
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Flexible(
-                              child: SizedBox(
-                                width: double.infinity,
-                                height: h(40),
-                                child: OutlinedButton(
+                        if (userCubit.state.role != "member") gap(height: 20),
+                        if (userCubit.state.role != "member")
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Flexible(
+                                child: SizedBox(
+                                  width: double.infinity,
+                                  height: h(40),
+                                  child: OutlinedButton(
+                                    onPressed: selectedMemberIndex == null
+                                        ? () {
+                                            AppToast.show(
+                                              "Select Member First",
+                                              ToastType.info,
+                                            );
+                                          }
+                                        : () {
+                                            final member = state
+                                                .kitchenMembers[selectedMemberIndex!];
+                                            dashboardBloc.add(
+                                              KickMemberEvent(
+                                                activeKitchenId: userCubit
+                                                    .state
+                                                    .activeKitchenId,
+                                                memberId: member.userId,
+                                              ),
+                                            );
+                                          },
+                                    child: Text(
+                                      "Kick",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .headlineMedium!
+                                          .copyWith(
+                                            fontSize: t(13),
+                                            color: selectedMemberIndex == null
+                                                ? Colors.grey
+                                                : AppColors.primaryColor,
+                                          ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: w(10)),
+                              Flexible(
+                                child: GenericButtonWidget(
                                   onPressed: selectedMemberIndex == null
                                       ? () {
                                           AppToast.show(
@@ -168,7 +205,7 @@ class _MyKitchenMembersPageState extends State<MyKitchenMembersPage> {
                                           final member = state
                                               .kitchenMembers[selectedMemberIndex!];
                                           dashboardBloc.add(
-                                            KickMemberEvent(
+                                            MakeCohostEvent(
                                               activeKitchenId: userCubit
                                                   .state
                                                   .activeKitchenId,
@@ -176,47 +213,11 @@ class _MyKitchenMembersPageState extends State<MyKitchenMembersPage> {
                                             ),
                                           );
                                         },
-                                  child: Text(
-                                    "Kick",
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .headlineMedium!
-                                        .copyWith(
-                                          fontSize: t(13),
-                                          color: selectedMemberIndex == null
-                                              ? Colors.grey
-                                              : AppColors.primaryColor,
-                                        ),
-                                  ),
+                                  text: "Make Co-Host",
                                 ),
                               ),
-                            ),
-                            SizedBox(width: w(10)),
-                            Flexible(
-                              child: GenericButtonWidget(
-                                onPressed: selectedMemberIndex == null
-                                    ? () {
-                                        AppToast.show(
-                                          "Select Member First",
-                                          ToastType.info,
-                                        );
-                                      }
-                                    : () {
-                                        final member = state
-                                            .kitchenMembers[selectedMemberIndex!];
-                                        dashboardBloc.add(
-                                          MakeCohostEvent(
-                                            activeKitchenId:
-                                                userCubit.state.activeKitchenId,
-                                            memberId: member.userId,
-                                          ),
-                                        );
-                                      },
-                                text: "Make Co-Host",
-                              ),
-                            ),
-                          ],
-                        ),
+                            ],
+                          ),
                       ],
                     ),
                   ),

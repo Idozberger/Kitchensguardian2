@@ -1,4 +1,5 @@
 class AppConstants {
+  static const bool entitlementIsActive = false;
   static const String baseUrl = 'https://kitchen-guardian-apis.replit.app';
 
   static const String login = '/api/login';

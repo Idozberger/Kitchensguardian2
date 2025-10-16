@@ -15,6 +15,13 @@ class PlannerLocalDatasourceImpl implements PlannerLocalDatasource {
   Future<String> addToWeeklyPlan({required MealTypeModel newPlan}) async {
     try {
       final currentList = await getWeeklyPlans();
+      final alreadyExists = currentList.any(
+        (plan) => plan.formatedDateString == newPlan.formatedDateString,
+      );
+
+      if (alreadyExists) {
+        return "Already added for this date";
+      }
       currentList.add(newPlan);
 
       await saveThings(currentList);

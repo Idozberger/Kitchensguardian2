@@ -104,7 +104,7 @@ class _PantryItemCardState extends State<PantryItemCard> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  _circleButton(AppAssets.editSvg, () {}),
+                  // _circleButton(AppAssets.editSvg, () {}),
                   _circleButton(AppAssets.cartSvg, () {}),
                   _circleButton(AppAssets.listCheckedSvg, () {}),
                   _circleButton(AppAssets.deleteSvg, () {

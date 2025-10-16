@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
-
+import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
@@ -15,6 +16,8 @@ import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_state.da
 import 'package:foodkitchen/features/kitchens/presentation/dialogs/create_kitchen.dart';
 import 'package:foodkitchen/features/kitchens/presentation/dialogs/join_kitchen.dart';
 import 'package:foodkitchen/features/kitchens/presentation/widgets/kitchen_tile.dart';
+import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class KitchenPage extends StatefulWidget {
   const KitchenPage({super.key});
@@ -25,9 +28,11 @@ class KitchenPage extends StatefulWidget {
 
 class _KitchenPageState extends State<KitchenPage> {
   late KitchenBloc kitchenBloc;
+  late UserCubit userCubit;
   @override
   void initState() {
     kitchenBloc = context.read<KitchenBloc>();
+    userCubit = context.read<UserCubit>();
     fetchAllKitchens();
     super.initState();
   }
@@ -42,7 +47,7 @@ class _KitchenPageState extends State<KitchenPage> {
       backgroundColor: const Color(0xffF9F9F9),
       appBar: _buildAppBar(context),
       body: BlocConsumer<KitchenBloc, KitchenState>(
-        listener: (context, state) {
+        listener: (_, state) {
           if (state is KitchenSuccess) {
             AppToast.show(state.successMessage, ToastType.success);
             fetchAllKitchens();
@@ -104,8 +109,7 @@ class _KitchenPageState extends State<KitchenPage> {
 
   Widget _buildSectionTitle(BuildContext context, KitchensLoaded kitchenState) {
     final kitchensWithoutInvitationCode = kitchenState.kitchens
-        // ignore: unnecessary_null_comparison
-        .where((kitchen) => kitchen.role == "member")
+        .where((kitchen) => kitchen.role != "host")
         .toList();
 
     return UpperTile(
@@ -135,6 +139,30 @@ class _KitchenPageState extends State<KitchenPage> {
                 return Padding(
                   padding: gapOnly(bottom: 4),
                   child: KitchenTile(
+                    onButtonPressed: () async {
+                      if (kitchen.kitchenId.isEmpty) {
+                        AppToast.show("Invalid kitchen ID", ToastType.error);
+                        return;
+                      }
+
+                      final prefs = await SharedPreferences.getInstance();
+
+                      await prefs.setString("kitchen_id", kitchen.kitchenId);
+                      await prefs.setString("role", kitchen.role);
+
+                      userCubit.updateActiveKitchenIdInvitationCodeAndRole(
+                        activeKitchenId: kitchen.kitchenId,
+                        invitationCode: kitchen.invitationCode,
+                        role: kitchen.role,
+                      );
+
+                      AppToast.show(
+                        "Kitchen switched to ${kitchen.kitchenName}",
+                        ToastType.success,
+                      );
+                      // kitchenBloc.add(SwitchKitchenEvent(kitchen.kitchenId));
+                      context.go(Routes.splash);
+                    },
                     imagePath: AppAssets.avatar,
                     title: kitchen.kitchenName,
                     email: kitchen.invitationCode,
@@ -221,13 +249,36 @@ class _KitchenPageState extends State<KitchenPage> {
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
               itemCount: kitchenState.kitchens.length,
-              itemBuilder: (BuildContext context, int index) {
+              itemBuilder: (BuildContext _, int index) {
                 final kitchen = kitchenState.kitchens[index];
 
                 return Padding(
                   padding: gapOnly(bottom: 4),
                   child: KitchenTile(
-                    onButtonPressed: () {},
+                    onButtonPressed: () async {
+                      if (kitchen.kitchenId.isEmpty) {
+                        AppToast.show("Invalid kitchen ID", ToastType.error);
+                        return;
+                      }
+
+                      final prefs = await SharedPreferences.getInstance();
+
+                      await prefs.setString("kitchen_id", kitchen.kitchenId);
+                      await prefs.setString("role", kitchen.role);
+
+                      userCubit.updateActiveKitchenIdInvitationCodeAndRole(
+                        activeKitchenId: kitchen.kitchenId,
+                        invitationCode: kitchen.invitationCode,
+                        role: kitchen.role,
+                      );
+
+                      AppToast.show(
+                        "Kitchen switched to ${kitchen.kitchenName}",
+                        ToastType.success,
+                      );
+                      // kitchenBloc.add(SwitchKitchenEvent(kitchen.kitchenId));
+                      context.go(Routes.splash);
+                    },
                     imagePath: AppAssets.avatar,
                     title: kitchen.kitchenName,
                     email: kitchen.invitationCode,

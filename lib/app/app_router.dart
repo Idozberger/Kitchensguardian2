@@ -110,7 +110,14 @@ final GoRouter router = GoRouter(
       builder: (context, state) => ChangePasswordPage(),
     ),
     GoRoute(path: Routes.addMeal, builder: (context, state) => AddMealPage()),
-    GoRoute(path: Routes.editMeal, builder: (context, state) => EditMealPage()),
+    GoRoute(
+      name: Routes.editMeal,
+      path: Routes.editMeal,
+      builder: (context, state) {
+        final MealTypeEntity mealTypeEntity = state.extra as MealTypeEntity;
+        return EditMealPage(mealTypeEntity: mealTypeEntity);
+      },
+    ),
     GoRoute(
       name: Routes.generateRecipes,
       path: Routes.generateRecipes,
@@ -119,6 +126,7 @@ final GoRouter router = GoRouter(
         return GenerateRecipesPage(
           selectedDate: data["selected_date"],
           selectedMealType: data["selected_meal_type"],
+          isPlan: data["is_plan"],
         );
       },
     ),
@@ -127,8 +135,13 @@ final GoRouter router = GoRouter(
       name: Routes.generateRecipesDetails,
       path: Routes.generateRecipesDetails,
       builder: (context, state) {
-        final MealTypeEntity mealTypeEntity = state.extra as MealTypeEntity;
-        return GeneratedRecipesDetailPage(mealTypeEntity: mealTypeEntity);
+        final Map<String, dynamic> data = state.extra as Map<String, dynamic>;
+        MealTypeEntity mealTypeEntity = data["meal_type_entity"];
+        bool isPlan = data["is_plan"];
+        return GeneratedRecipesDetailPage(
+          mealTypeEntity: mealTypeEntity,
+          isPlan: isPlan,
+        );
       },
     ),
     GoRoute(

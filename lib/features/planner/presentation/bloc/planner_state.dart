@@ -3,7 +3,8 @@ import 'package:foodkitchen/features/planner/domain/entities/meal_type_entity.da
 final class PlannerState {
   final List<MealTypeEntity>? recipes;
   final List<MealTypeEntity>? favouriteRecipes;
-  final List<MealTypeEntity>? getAllWeeklyPlans;
+  final List<MealTypeEntity> getAllWeeklyPlans;
+  final MealTypeEntity? dateBasedPlan;
   final bool isLoading;
   final bool addingToWeeklyPlan;
   final String? errorMessage;
@@ -11,17 +12,19 @@ final class PlannerState {
   const PlannerState({
     this.recipes,
     this.favouriteRecipes,
-    this.getAllWeeklyPlans,
+    this.getAllWeeklyPlans = const [],
     this.isLoading = false,
     this.addingToWeeklyPlan = false,
     this.errorMessage,
     this.successMessage = "",
+    this.dateBasedPlan,
   });
 
   PlannerState copyWith({
     List<MealTypeEntity>? recipes,
     List<MealTypeEntity>? favouriteRecipes,
     List<MealTypeEntity>? getAllWeeklyPlans,
+    MealTypeEntity? dateBasedPlan,
     bool? isLoading,
     bool? addingToWeeklyPlan,
     String? errorMessage,
@@ -35,6 +38,7 @@ final class PlannerState {
       addingToWeeklyPlan: addingToWeeklyPlan ?? this.addingToWeeklyPlan,
       errorMessage: errorMessage ?? "",
       successMessage: successMessage ?? "",
+      dateBasedPlan: dateBasedPlan ?? this.dateBasedPlan,
     );
   }
 }

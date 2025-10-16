@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
+import 'package:foodkitchen/core/global/functions/const.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
@@ -11,20 +12,36 @@ import 'package:foodkitchen/core/widgets/generic_date_picker_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
+import 'package:foodkitchen/features/planner/domain/entities/meal_type_entity.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 class EditMealPage extends StatefulWidget {
-  const EditMealPage({super.key});
+  final MealTypeEntity mealTypeEntity;
+  const EditMealPage({super.key, required this.mealTypeEntity});
 
   @override
   State<EditMealPage> createState() => _EditMealPageState();
 }
 
 class _EditMealPageState extends State<EditMealPage> {
+  late MealTypeEntity mealTypeEntity;
+  late DateTime previousSelectedDate;
+  late DateTime date;
   int selectedIndex = 0;
 
   void updateSelectedIndex(int index) {
     setState(() => selectedIndex = index);
+  }
+
+  @override
+  void initState() {
+    mealTypeEntity = widget.mealTypeEntity;
+    date = DateTime.now();
+    previousSelectedDate = DateFormat(
+      'dd/MM/yyyy',
+    ).parse(mealTypeEntity.formatedDateString);
+    super.initState();
   }
 
   @override
@@ -77,8 +94,14 @@ class _EditMealPageState extends State<EditMealPage> {
 
   Widget _buildDatePicker() {
     return SelectDateWidget(
-      startDate: DateTime.now(),
-      onChanged: (date) => print("User selected: $date"),
+      entitlementIsActive: AppConstants.entitlementIsActive,
+      startDate: date,
+      onChanged: (newDate) {
+        print("User selected: $date");
+        setState(() {
+          date = newDate;
+        });
+      },
     );
   }
 
@@ -154,7 +177,16 @@ class _EditMealPageState extends State<EditMealPage> {
         children: [
           GenericButtonWidget(
             onPressed: () {
-              context.push(Routes.generateRecipes);
+              String formattedDate = DateFormat('dd/MM/yyyy').format(date);
+
+              context.pushNamed(
+                Routes.generateRecipes,
+                extra: {
+                  "selected_date": formattedDate,
+                  "selected_meal_type": mealTypeEntity.mealType,
+                  "is_plan": true,
+                },
+              );
             },
             text: "Generate Recipes",
           ),

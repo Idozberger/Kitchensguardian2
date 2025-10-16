@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
+import 'package:foodkitchen/core/config/routes.dart';
+import 'package:foodkitchen/core/global/functions/const.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
@@ -16,10 +18,16 @@ import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dart';
 import 'package:foodkitchen/features/planner/presentation/widgets/recipes_step_tile.dart';
+import 'package:go_router/go_router.dart';
 
 class GeneratedRecipesDetailPage extends StatefulWidget {
   final MealTypeEntity mealTypeEntity;
-  const GeneratedRecipesDetailPage({super.key, required this.mealTypeEntity});
+  final bool isPlan;
+  const GeneratedRecipesDetailPage({
+    super.key,
+    required this.mealTypeEntity,
+    required this.isPlan,
+  });
 
   @override
   State<GeneratedRecipesDetailPage> createState() =>
@@ -269,30 +277,42 @@ class _GeneratedRecipesDetailPageState
                     text: "Start Recipe",
                   ),
 
-            gap(height: 20),
-            SizedBox(
-              width: double.infinity,
-              height: h(40),
-              child: OutlinedButton(
-                onPressed: () {
-                  plannerBloc.add(AddToWeeklyPlanEvent(recipe));
-                },
-                child: state.addingToWeeklyPlan
-                    ? Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.primaryColor,
+            if (widget.isPlan) ...[
+              gap(height: 20),
+              SizedBox(
+                width: double.infinity,
+                height: h(40),
+                child: OutlinedButton(
+                  onPressed: () {
+                    if (AppConstants.entitlementIsActive) {
+                      plannerBloc.add(AddToWeeklyPlanEvent(recipe));
+                    } else if (state.getAllWeeklyPlans.length < 3) {
+                      plannerBloc.add(AddToWeeklyPlanEvent(recipe));
+                    } else {
+                      AppToast.show(
+                        "You can only add up to 3 weekly plans.",
+                        ToastType.error,
+                      );
+                      context.push(Routes.subscription);
+                    }
+                  },
+                  child: state.addingToWeeklyPlan
+                      ? Center(
+                          child: CircularProgressIndicator(
+                            color: AppColors.primaryColor,
+                          ),
+                        )
+                      : Text(
+                          "Add to Weekly Meal Plan",
+                          style: Theme.of(context).textTheme.headlineMedium
+                              ?.copyWith(
+                                fontSize: t(14),
+                                color: AppColors.primaryColor,
+                              ),
                         ),
-                      )
-                    : Text(
-                        "Add to Weekly Meal Plan",
-                        style: Theme.of(context).textTheme.headlineMedium
-                            ?.copyWith(
-                              fontSize: t(14),
-                              color: AppColors.primaryColor,
-                            ),
-                      ),
+                ),
               ),
-            ),
+            ],
           ],
         );
       },

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
+import 'package:foodkitchen/core/global/functions/const.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
@@ -22,15 +23,18 @@ class AddMealPage extends StatefulWidget {
 }
 
 class _AddMealPageState extends State<AddMealPage> {
-  String formatedDateString = "";
-  String selectedMealType = "Breakfast";
+  late DateTime dateTime;
+  List<String> mealString = ["Breakfast", "Lunch", "Dinner"];
   int selectedIndex = 0;
 
   void updateSelectedIndex(int index) {
-    if (index == 0) selectedMealType = "Breakfast";
-    if (index == 1) selectedMealType = "Lunch";
-    if (index == 2) selectedMealType = "Dinner";
     setState(() => selectedIndex = index);
+  }
+
+  @override
+  void initState() {
+    dateTime = DateTime.now();
+    super.initState();
   }
 
   @override
@@ -50,8 +54,8 @@ class _AddMealPageState extends State<AddMealPage> {
                 _buildMealTypeSection(),
                 gap(height: 20),
                 _buildCaloriesSection(),
-                gap(height: 18),
-                _buildActionButtons(),
+                // gap(height: 18),
+                // _buildActionButtons(),
               ],
             ),
           ),
@@ -83,12 +87,13 @@ class _AddMealPageState extends State<AddMealPage> {
 
   Widget _buildDatePicker() {
     return SelectDateWidget(
-      startDate: DateTime.now(),
+      startDate: dateTime,
       onChanged: (date) {
-        String formattedDate = DateFormat('dd/MM/yyyy').format(date);
-        formatedDateString = formattedDate;
+        dateTime = date;
+
         setState(() {});
       },
+      entitlementIsActive: AppConstants.entitlementIsActive,
     );
   }
 
@@ -164,11 +169,14 @@ class _AddMealPageState extends State<AddMealPage> {
         children: [
           GenericButtonWidget(
             onPressed: () {
+              String formattedDate = DateFormat('dd/MM/yyyy').format(dateTime);
+
               context.pushNamed(
                 Routes.generateRecipes,
                 extra: {
-                  "selected_date": formatedDateString,
-                  "selected_meal_type": selectedMealType,
+                  "selected_date": formattedDate,
+                  "selected_meal_type": mealString[selectedIndex],
+                  "is_plan": true,
                 },
               );
             },
@@ -177,7 +185,7 @@ class _AddMealPageState extends State<AddMealPage> {
           gap(height: 16),
           Row(
             children: [
-              const Text("Estimated Calories (Optional)"),
+              const Text("Estimated"),
               SizedBox(width: w(5)),
               Image.asset(AppAssets.crownImage, height: h(22)),
             ],

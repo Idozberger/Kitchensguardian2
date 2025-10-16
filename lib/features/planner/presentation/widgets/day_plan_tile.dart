@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
-import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
@@ -8,7 +7,6 @@ import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/planner/presentation/widgets/day_plan_menu.dart';
 import 'package:foodkitchen/features/planner/presentation/widgets/meal_tile.dart';
-import 'package:go_router/go_router.dart';
 
 class DayPlanTile extends StatelessWidget {
   final String dayLabel;
@@ -68,9 +66,7 @@ class DayPlanTile extends StatelessWidget {
           child: SizedBox(
             height: h(40),
             child: OutlinedButton(
-              onPressed: () {
-                context.push(Routes.generateRecipes);
-              },
+              onPressed: () => viewRecipe(),
               child: Text(
                 "View Recipe",
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
@@ -86,9 +82,7 @@ class DayPlanTile extends StatelessWidget {
           child: SizedBox(
             height: h(40),
             child: ElevatedButton(
-              onPressed: () {
-                AppToast.show("Added to cart", ToastType.success);
-              },
+              onPressed: () => addToCart(),
               child: Text(
                 "Add to Cart",
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(

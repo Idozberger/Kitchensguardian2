@@ -67,7 +67,9 @@ Future<dynamic> showCreateKitchenDialog(BuildContext context) {
                       onPressed: () async {
                         if (kitchenNameController.text.isNotEmpty) {
                           context.read<HomeBloc>().add(
-                            CreateKitchenEvent(kitchenNameController.text),
+                            CreateKitchenEventForHome(
+                              kitchenNameController.text,
+                            ),
                           );
                         } else {
                           AppToast.show(

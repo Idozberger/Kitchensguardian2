@@ -12,7 +12,6 @@ import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_event.dart'
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_state.dart';
 import 'package:foodkitchen/features/pantry/presentation/widgets/custom_appbar.dart';
 import 'package:foodkitchen/features/pantry/presentation/widgets/pantry_item_card.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class MyPantryPage extends StatefulWidget {
   const MyPantryPage({super.key});
@@ -32,11 +31,18 @@ class _MyPantryPageState extends State<MyPantryPage> {
     super.initState();
   }
 
-  void getPantryItems() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? activeKitchenId = prefs.getString('kitchen_id');
+  void getPantryItems() {
+    final kitchenId = userCubit.state.activeKitchenId.trim();
 
-    pantryBloc.add(GetPantryItemsEvent(kitchenId: activeKitchenId ?? ""));
+    if (kitchenId.isEmpty) {
+      AppToast.show(
+        "Please join a kitchen before adding pantry items.",
+        ToastType.warning,
+      );
+      return;
+    }
+
+    pantryBloc.add(GetPantryItemsEvent(kitchenId: kitchenId));
   }
 
   @override
@@ -80,17 +86,32 @@ class _MyPantryPageState extends State<MyPantryPage> {
 
                   Expanded(
                     child: state is PantryLoaded
-                        ? TabBarView(
-                            children: [
-                              _buildItemList(
-                                context,
-                                requestButton: true,
-                                pantryLoaded: state,
-                              ),
-                              _buildItemList(context, pantryLoaded: state),
-                              _buildItemList(context, pantryLoaded: state),
-                            ],
-                          )
+                        ? state.pantryItems.isEmpty
+                              ? Center(
+                                  child: Text(
+                                    "No Items found",
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.headlineMedium,
+                                  ),
+                                )
+                              : TabBarView(
+                                  children: [
+                                    _buildItemList(
+                                      context,
+                                      requestButton: true,
+                                      pantryLoaded: state,
+                                    ),
+                                    _buildItemList(
+                                      context,
+                                      pantryLoaded: state,
+                                    ),
+                                    _buildItemList(
+                                      context,
+                                      pantryLoaded: state,
+                                    ),
+                                  ],
+                                )
                         : Center(
                             child: CircularProgressIndicator(
                               color: AppColors.primaryColor,
@@ -102,41 +123,43 @@ class _MyPantryPageState extends State<MyPantryPage> {
             );
           },
         ),
-        bottomNavigationBar: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: gapSymmetric(horizontal: 20, vertical: 10),
-                child: UpperTile(
-                  widget: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Request List",
-                        style: Theme.of(context).textTheme.headlineLarge,
-                      ),
-                      SizedBox(height: h(10)),
-                      Text(
-                        "Request host to buy groceries or dinner",
-                        style: Theme.of(context).textTheme.headlineMedium!
-                            .copyWith(
-                              fontSize: t(15),
-                              color: Color(0xff787878),
+        bottomNavigationBar: userCubit.state.role != "member"
+            ? null
+            : SafeArea(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: gapSymmetric(horizontal: 20, vertical: 10),
+                      child: UpperTile(
+                        widget: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Request List",
+                              style: Theme.of(context).textTheme.headlineLarge,
                             ),
+                            SizedBox(height: h(10)),
+                            Text(
+                              "Request host to buy groceries or dinner",
+                              style: Theme.of(context).textTheme.headlineMedium!
+                                  .copyWith(
+                                    fontSize: t(15),
+                                    color: Color(0xff787878),
+                                  ),
+                            ),
+                            SizedBox(height: h(20)),
+                            GenericButtonWidget(
+                              onPressed: () {},
+                              text: "Request Now",
+                            ),
+                          ],
+                        ),
                       ),
-                      SizedBox(height: h(20)),
-                      GenericButtonWidget(
-                        onPressed: () {},
-                        text: "Request Now",
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-        ),
       ),
     );
   }

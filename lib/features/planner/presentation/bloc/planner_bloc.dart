@@ -45,7 +45,9 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     on<AddToWeeklyPlanEvent>(_onAddToWeeklyPlan);
     on<GetAllWeeklyPlansEvent>(_onGetAllWeeklyPlans);
     on<DeletePlanEvent>(_onDeletePlan);
+    on<GetDateBasedPlans>(_onGetDateBasedPlans);
   }
+
   Future<void> _onGetFavouriteRecipes(
     GetFavouriteRecipesEvent event,
     Emitter<PlannerState> emit,
@@ -199,7 +201,25 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
       (successMessage) {
         AppToast.show(successMessage, ToastType.success);
         add(GetAllWeeklyPlansEvent());
+        add(GetDateBasedPlans(event.dateString));
       },
+    );
+  }
+
+  Future<void> _onGetDateBasedPlans(
+    GetDateBasedPlans event,
+    Emitter<PlannerState> emit,
+  ) async {
+    emit(state.copyWith(isLoading: true));
+    final allPlans = state.getAllWeeklyPlans;
+    List dateBasedPlan = allPlans
+        .where((plan) => plan.formatedDateString == event.dateString)
+        .toList();
+    emit(
+      state.copyWith(
+        dateBasedPlan: dateBasedPlan.isNotEmpty ? dateBasedPlan[0] : null,
+        isLoading: false,
+      ),
     );
   }
 }

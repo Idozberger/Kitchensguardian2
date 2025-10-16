@@ -23,10 +23,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 class GenerateRecipesPage extends StatefulWidget {
   final String selectedDate;
   final String selectedMealType;
+  final bool isPlan;
   const GenerateRecipesPage({
     super.key,
     required this.selectedDate,
     required this.selectedMealType,
+    required this.isPlan,
   });
 
   @override
@@ -179,7 +181,12 @@ class _GenerateRecipesPageState extends State<GenerateRecipesPage> {
                                                       context.pushNamed(
                                                         Routes
                                                             .generateRecipesDetails,
-                                                        extra: updatedRecipe,
+                                                        extra: {
+                                                          "meal_type_entity":
+                                                              updatedRecipe,
+                                                          "is_plan":
+                                                              widget.isPlan,
+                                                        },
                                                       );
                                                     },
                                                     title: recipe.title
@@ -211,7 +218,12 @@ class _GenerateRecipesPageState extends State<GenerateRecipesPage> {
                                                       context.pushNamed(
                                                         Routes
                                                             .generateRecipesDetails,
-                                                        extra: updatedRecipe,
+                                                        extra: {
+                                                          "meal_type_entity":
+                                                              updatedRecipe,
+                                                          "is_plan":
+                                                              widget.isPlan,
+                                                        },
                                                       );
                                                     },
                                                   );
@@ -263,7 +275,11 @@ class _GenerateRecipesPageState extends State<GenerateRecipesPage> {
                                                       );
                                               context.pushNamed(
                                                 Routes.generateRecipesDetails,
-                                                extra: updatedRecipe,
+                                                extra: {
+                                                  "meal_type_entity":
+                                                      updatedRecipe,
+                                                  "is_plan": widget.isPlan,
+                                                },
                                               );
                                             },
                                             title: recipe.title.toString(),
@@ -288,7 +304,11 @@ class _GenerateRecipesPageState extends State<GenerateRecipesPage> {
                                                       );
                                               context.pushNamed(
                                                 Routes.generateRecipesDetails,
-                                                extra: updatedRecipe,
+                                                extra: {
+                                                  "meal_type_entity":
+                                                      updatedRecipe,
+                                                  "is_plan": widget.isPlan,
+                                                },
                                               );
                                             },
                                           );

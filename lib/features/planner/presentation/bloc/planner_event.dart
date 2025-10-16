@@ -34,3 +34,8 @@ final class DeletePlanEvent extends PlannerEvent {
   final String dateString;
   DeletePlanEvent(this.dateString);
 }
+
+final class GetDateBasedPlans extends PlannerEvent {
+  final String dateString;
+  GetDateBasedPlans(this.dateString);
+}
