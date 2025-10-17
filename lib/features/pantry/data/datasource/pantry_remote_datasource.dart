@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
+import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
 import 'package:foodkitchen/features/pantry/data/model/pantry_model.dart';
 
@@ -9,6 +10,7 @@ abstract interface class PantryRemoteDatasource {
     required String kitchenId,
   });
   Future<Map<String, dynamic>> scanRecipt({required String filePath});
+  Future<String> requestItems({required PantryModel pantryModel});
 }
 
 class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
@@ -69,6 +71,23 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
             ? items.map((e) => Map<String, dynamic>.from(e)).toList()
             : [],
       };
+    } on DioException catch (e) {
+      throw dio.handleError(e);
+    }
+  }
+
+  @override
+  Future<String> requestItems({required PantryModel pantryModel}) async {
+    try {
+      Map<String, dynamic> data = {
+        "kitchen_id": pantryModel.kitchenId,
+        "name": pantryModel.items[0].name,
+        "quantity": pantryModel.items[0].quantity.toString(),
+        "unit": pantryModel.items[0].unit,
+      };
+      logError(data);
+      final response = await dio.post(AppConstants.requestItems, data: data);
+      return response.data["message"];
     } on DioException catch (e) {
       throw dio.handleError(e);
     }

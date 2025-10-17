@@ -1,7 +1,11 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
+import 'package:foodkitchen/core/common/data/model/meal_type_model.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
 import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract interface class HomeRemoteDataSource {
@@ -10,6 +14,7 @@ abstract interface class HomeRemoteDataSource {
   Future<List<Map<String, dynamic>>> getPantriesItems({
     required String kitchenId,
   });
+  Future<List<MealTypeModel>> getWeeklyPlans();
 }
 
 class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
@@ -71,5 +76,36 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
     } on DioException catch (e) {
       throw dio.handleError(e);
     }
+  }
+
+  @override
+  Future<List<MealTypeModel>> getWeeklyPlans() async {
+    DateTime today = DateTime.now().subtract(Duration(days: 1));
+
+    final prefs = await SharedPreferences.getInstance();
+    final List<String> jsonList = prefs.getStringList('weekly_plan') ?? [];
+
+    List<MealTypeModel> allPlans = jsonList
+        .map((jsonString) => MealTypeModel.fromJson(jsonDecode(jsonString)))
+        .toList();
+    List<MealTypeModel> filteredPlans = [];
+    for (var i = 0; i < allPlans.length; i++) {
+      final parsedDate = parseDate(allPlans[i].formatedDateString);
+      final planDate = DateTime(
+        parsedDate.year,
+        parsedDate.month,
+        parsedDate.day,
+      );
+
+      if (planDate.isAfter(today)) {
+        filteredPlans.add(allPlans[i]);
+      }
+    }
+
+    return filteredPlans;
+  }
+
+  DateTime parseDate(String formattedDateString) {
+    return DateFormat("dd/MM/yyyy").parse(formattedDateString);
   }
 }

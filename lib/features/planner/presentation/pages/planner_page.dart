@@ -1,18 +1,19 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
+import 'package:foodkitchen/core/utils/date_format_to_string.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_date_picker_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/no_kitchen_found.dart';
-import 'package:foodkitchen/features/planner/domain/entities/meal_type_entity.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dart';
@@ -40,13 +41,11 @@ class _PlannerPageState extends State<PlannerPage> {
   }
 
   void _fetchInitialPlans() {
-    final formattedDate = _formatDate(_selectedDate);
+    final formattedDate = formatDate(_selectedDate);
     _plannerBloc
       ..add(GetAllWeeklyPlansEvent())
       ..add(GetDateBasedPlans(formattedDate));
   }
-
-  String _formatDate(DateTime date) => DateFormat('dd/MM/yyyy').format(date);
 
   String _formatReadableDate(String dateString) {
     final date = DateFormat('dd/MM/yyyy').parse(dateString);
@@ -60,7 +59,8 @@ class _PlannerPageState extends State<PlannerPage> {
       body: SafeArea(
         child: Padding(
           padding: gapSymmetric(horizontal: 20, vertical: 14),
-          child: BlocBuilder<PlannerBloc, PlannerState>(
+          child: BlocConsumer<PlannerBloc, PlannerState>(
+            listener: (context, state) {},
             builder: (_, state) {
               final plan = state.dateBasedPlan;
 
@@ -81,15 +81,14 @@ class _PlannerPageState extends State<PlannerPage> {
                         startDate: _selectedDate,
                         onChanged: (date) {
                           setState(() => _selectedDate = date);
-                          _plannerBloc.add(
-                            GetDateBasedPlans(_formatDate(date)),
-                          );
+                          _plannerBloc.add(GetDateBasedPlans(formatDate(date)));
                         },
                       ),
                       gap(height: 15),
-                      if (plan != null &&
-                          plan.formatedDateString == _formatDate(_selectedDate))
-                        _buildPlanSection(plan)
+                      if (plan.isNotEmpty &&
+                          plan[0].formatedDateString ==
+                              formatDate(_selectedDate))
+                        _buildPlanSection(plan[0])
                       else
                         Padding(
                           padding: gapOnly(top: 64),
@@ -134,7 +133,7 @@ class _PlannerPageState extends State<PlannerPage> {
           }
         },
 
-        deletePlan: () {
+        deletePlan: () async {
           _plannerBloc.add(DeletePlanEvent(plan.formatedDateString));
         },
         editPlan: () => context.pushNamed(Routes.editMeal, extra: plan),
@@ -161,7 +160,12 @@ class _PlannerPageState extends State<PlannerPage> {
         ),
         gap(height: 15),
         GenericButtonWidget(
-          onPressed: () => context.push(Routes.addMeal),
+          onPressed: () {
+            context.push(Routes.addMeal);
+            setState(() {
+              _selectedDate = DateTime.now();
+            });
+          },
           text: "+ Add Meal",
         ),
       ],

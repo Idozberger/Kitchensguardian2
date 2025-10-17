@@ -1,5 +1,5 @@
+import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
 import 'package:foodkitchen/features/planner/domain/entities/ingredient_entity.dart';
-import '../../domain/entities/meal_type_entity.dart';
 
 class MealTypeModel extends MealTypeEntity {
   MealTypeModel({

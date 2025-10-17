@@ -92,7 +92,7 @@ class AppDrawer extends StatelessWidget {
           title: "Get Referral Code",
           iconPath: AppAssets.referralSvg,
           onTap: () {
-            const referralCode = "REF12345";
+            var referralCode = context.read<UserCubit>().state.invitationCode;
             final message = "Use my referral code: $referralCode";
             // ignore: deprecated_member_use
             Share.share(message, subject: "Kitchen Guardian");

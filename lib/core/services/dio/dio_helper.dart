@@ -1,5 +1,8 @@
 import 'dart:developer';
 import 'package:dio/dio.dart';
+import 'package:foodkitchen/app/app_router.dart';
+import 'package:foodkitchen/core/utils/show_toast.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/core/global/functions/logs.dart';
@@ -38,12 +41,26 @@ class DioHelper {
           );
           return handler.next(response);
         },
-        onError: (DioException e, handler) {
+        onError: (DioException e, handler) async {
           if (e.response != null) {
             logError("❌ [ERROR RESPONSE]");
             logError("Data: ${e.response?.data}");
+
             logError("Status: ${e.response?.statusCode}");
             logError("Message: ${e.response?.statusMessage}");
+            if (e.response?.statusCode == 401) {
+              AppToast.show(
+                "Session expired. Please log in again.",
+                ToastType.error,
+              );
+
+              final context = rootNavigatorKey.currentContext;
+              if (context != null) {
+                context.go('/login');
+              }
+
+              return handler.reject(e);
+            }
           } else {
             logError("❌ [DIO ERROR] ${e.message}");
           }

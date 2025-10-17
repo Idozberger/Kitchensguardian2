@@ -45,26 +45,31 @@ class KitchenTile extends StatelessWidget {
           children: [
             Image.asset(imagePath, width: w(40), height: h(38)),
             SizedBox(width: w(5)),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextspanWidget(
-                  callback: onTileTap ?? () {},
-                  text: title,
-                  buttonText: membersText,
-                  buttonColor: membersColor,
-                  fontSize: t(fontSize),
-                  fontSizeTitle: t(titleFontSize),
-                  titleFontWeight: titleFontWeight,
-                ),
-                Text(
-                  email,
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                    fontSize: t(11),
+            SizedBox(
+              width: w(144),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextspanWidget(
+                    callback: onTileTap ?? () {},
+                    text: title,
+                    buttonText: membersText,
+                    buttonColor: membersColor,
+                    fontSize: t(fontSize),
+                    fontSizeTitle: t(titleFontSize),
+                    titleFontWeight: titleFontWeight,
+                    textAlign: TextAlign.left,
                   ),
-                ),
-              ],
+                  Text(
+                    email,
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      fontSize: t(11),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),

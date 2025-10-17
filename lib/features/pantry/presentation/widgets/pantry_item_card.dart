@@ -55,9 +55,14 @@ class _PantryItemCardState extends State<PantryItemCard> {
               children: [
                 Row(
                   children: [
-                    Text(
-                      widget.title,
-                      style: Theme.of(context).textTheme.headlineLarge,
+                    SizedBox(
+                      width: w(54),
+                      child: Text(
+                        widget.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.headlineLarge,
+                      ),
                     ),
                     if (!_isExpanded) ...[
                       SizedBox(width: w(12)),
@@ -82,11 +87,11 @@ class _PantryItemCardState extends State<PantryItemCard> {
               SizedBox(height: h(15)),
               Row(
                 children: [
-                  _buildInlineInfo(widget.quantity),
+                  _buildInlineInfo(widget.quantity, isExpanded: _isExpanded),
                   _dot(),
-                  _buildInlineInfo(widget.unit),
+                  _buildInlineInfo(widget.unit, isExpanded: _isExpanded),
                   _dot(),
-                  _buildInlineInfo(widget.pantry),
+                  _buildInlineInfo(widget.pantry, isExpanded: _isExpanded),
                 ],
               ),
               SizedBox(height: h(10)),
@@ -119,15 +124,33 @@ class _PantryItemCardState extends State<PantryItemCard> {
     );
   }
 
-  Widget _buildInlineInfo(String text) {
-    return Text(
-      text,
-      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-        fontSize: t(14),
-        color: const Color(0xff787878),
-        fontWeight: FontWeight.w400,
-      ),
-    );
+  Widget _buildInlineInfo(String text, {bool isExpanded = false}) {
+    if (isExpanded) {
+      return Text(
+        text,
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
+        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+          fontSize: t(14),
+          color: const Color(0xff787878),
+          fontWeight: FontWeight.w400,
+        ),
+      );
+    } else {
+      return SizedBox(
+        width: w(50),
+        child: Text(
+          text,
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            fontSize: t(14),
+            color: const Color(0xff787878),
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+      );
+    }
   }
 
   Widget _dot() => Padding(

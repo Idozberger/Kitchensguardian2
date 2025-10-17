@@ -4,6 +4,7 @@ import 'package:foodkitchen/core/theme/app_theme.dart';
 
 final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
     GlobalKey<ScaffoldMessengerState>();
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class AppBase extends StatelessWidget {
   const AppBase({super.key});

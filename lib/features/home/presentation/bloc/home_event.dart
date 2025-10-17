@@ -14,3 +14,5 @@ final class GetPantriesItemsEventForHome extends HomeEvent {
   final String kitchenId;
   GetPantriesItemsEventForHome({required this.kitchenId});
 }
+
+final class GetAllWeeklyPlansEventForHome extends HomeEvent {}

@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
 import 'package:foodkitchen/core/dialogs/logout.dart';
 import 'package:foodkitchen/core/dialogs/no_internet.dart';
 import 'package:foodkitchen/core/dialogs/not_found_404.dart';
@@ -20,8 +22,8 @@ import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/features/onboarding/presentation/pages/splash_screen.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/add_item_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/my_pantry_page.dart';
+import 'package:foodkitchen/features/pantry/presentation/pages/request_now_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/scan_meal_page.dart';
-import 'package:foodkitchen/features/planner/domain/entities/meal_type_entity.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/add_meal_page.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/edit_meal_page.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/favourite_food_page.dart';
@@ -33,7 +35,10 @@ import 'package:foodkitchen/features/profile/presentation/pages/profile_page.dar
 import 'package:foodkitchen/features/subscription/presentation/pages/subscription_page.dart';
 import 'package:go_router/go_router.dart';
 
+final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
+
 final GoRouter router = GoRouter(
+  navigatorKey: rootNavigatorKey,
   initialLocation: Routes.splash,
   routes: [
     GoRoute(
@@ -160,6 +165,10 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: Routes.notFound404,
       builder: (context, state) => NotFound404Dialog(),
+    ),
+    GoRoute(
+      path: Routes.requestNow,
+      builder: (context, state) => RequestNowPage(),
     ),
   ],
 );

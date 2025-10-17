@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -6,6 +7,7 @@ import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/dialogs/no_internet.dart';
+import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/features/onboarding/presentation/bloc/user_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -21,18 +23,40 @@ class _SplashScreenState extends State<SplashScreen> {
   late UserBloc userBloc;
   late UserCubit userCubit;
 
+  String fullText = "FOOD KITCHEN";
+  List<bool> visibleLetters = [];
+  int _charIndex = 0;
+  Timer? _timer;
+
   @override
   void initState() {
     super.initState();
     userBloc = context.read<UserBloc>();
     userCubit = context.read<UserCubit>();
     getCurrentUser();
+    visibleLetters = List.filled(fullText.length, false);
+    _startTextAnimation();
+
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.dark,
       ),
     );
+  }
+
+  void _startTextAnimation() {
+    const duration = Duration(milliseconds: 150);
+    _timer = Timer.periodic(duration, (timer) {
+      if (_charIndex < fullText.length) {
+        setState(() {
+          visibleLetters[_charIndex] = true;
+          _charIndex++;
+        });
+      } else {
+        timer.cancel();
+      }
+    });
   }
 
   Future<void> getCurrentUser() async {
@@ -47,6 +71,12 @@ class _SplashScreenState extends State<SplashScreen> {
       invitationCode: invitationCode ?? "",
       role: role ?? "member",
     );
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -82,6 +112,7 @@ class _SplashScreenState extends State<SplashScreen> {
           }
 
           return Container(
+            alignment: Alignment.center,
             width: double.infinity,
             height: double.infinity,
             decoration: BoxDecoration(
@@ -89,6 +120,24 @@ class _SplashScreenState extends State<SplashScreen> {
                 image: AssetImage(AppAssets.onBoardingBg),
                 fit: BoxFit.cover,
               ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(fullText.length, (index) {
+                final letter = fullText[index];
+                return AnimatedOpacity(
+                  opacity: visibleLetters[index] ? 1 : 0,
+                  duration: const Duration(milliseconds: 200),
+                  child: Text(
+                    letter,
+                    style: Theme.of(context).textTheme.headlineLarge!.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: t(28),
+                      color: Colors.black87,
+                    ),
+                  ),
+                );
+              }),
             ),
           );
         },

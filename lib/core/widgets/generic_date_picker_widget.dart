@@ -26,13 +26,12 @@ class SelectDateWidget extends StatefulWidget {
 }
 
 class _SelectDateWidgetState extends State<SelectDateWidget> {
-  late DateTime _selectedDate;
   late List<DateTime> _days;
 
   @override
   void initState() {
     super.initState();
-    _selectedDate = widget.startDate;
+
     _days = List.generate(7, (i) => widget.startDate.add(Duration(days: i)));
   }
 
@@ -50,7 +49,7 @@ class _SelectDateWidgetState extends State<SelectDateWidget> {
             children: _days.asMap().entries.map((entry) {
               final index = entry.key;
               final date = entry.value;
-              final isSelected = _isSameDate(date, _selectedDate);
+              final isSelected = _isSameDate(date, widget.startDate);
               final isLocked = !widget.entitlementIsActive && index > 2;
 
               return GestureDetector(
@@ -62,9 +61,7 @@ class _SelectDateWidgetState extends State<SelectDateWidget> {
                     );
                     return;
                   }
-                  setState(() {
-                    _selectedDate = date;
-                  });
+
                   widget.onChanged(date);
                 },
                 child: Opacity(

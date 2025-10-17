@@ -4,7 +4,7 @@ class RequestedItemEntity {
   final String itemId;
   final String kitchenId;
   final String name;
-  final num quantity;
+  final String quantity;
   final String unit;
   final String userId;
   final DateTime requestedAt;

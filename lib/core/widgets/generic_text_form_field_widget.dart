@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/extensions/theme_extension.dart';
+import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 
@@ -17,12 +18,14 @@ class AppTextField extends StatelessWidget {
   final Color? color;
   final Color? fillColor;
   final Widget? prefixIcon;
+  final EdgeInsetsGeometry? contentPadding;
   final bool textAlignCentered;
   const AppTextField({
     super.key,
     required this.label,
     required this.hintText,
     required this.controller,
+    this.contentPadding,
     this.errorText,
     this.obscureText = false,
     this.keyboardType = TextInputType.text,
@@ -58,6 +61,7 @@ class AppTextField extends StatelessWidget {
           decoration: InputDecoration(
             filled: isFilled,
             fillColor: fillColor,
+            contentPadding: gapAll(12),
             hintText: hintText,
             hintStyle: Theme.of(
               context,
@@ -95,6 +99,7 @@ OutlineInputBorder outlineInputBorder(BuildContext context) {
     borderRadius: BorderRadius.circular(h(10)),
     borderSide: BorderSide(
       color: context.isDarkTheme ? Colors.white : AppColors.greyColor,
+      width: 1.2,
     ),
   );
 }

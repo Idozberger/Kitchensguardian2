@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
+import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
@@ -12,6 +13,7 @@ import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_event.dart'
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_state.dart';
 import 'package:foodkitchen/features/pantry/presentation/widgets/custom_appbar.dart';
 import 'package:foodkitchen/features/pantry/presentation/widgets/pantry_item_card.dart';
+import 'package:go_router/go_router.dart';
 
 class MyPantryPage extends StatefulWidget {
   const MyPantryPage({super.key});
@@ -123,43 +125,10 @@ class _MyPantryPageState extends State<MyPantryPage> {
             );
           },
         ),
+        // TODO Change Condition to Member
         bottomNavigationBar: userCubit.state.role != "member"
             ? null
-            : SafeArea(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Padding(
-                      padding: gapSymmetric(horizontal: 20, vertical: 10),
-                      child: UpperTile(
-                        widget: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Request List",
-                              style: Theme.of(context).textTheme.headlineLarge,
-                            ),
-                            SizedBox(height: h(10)),
-                            Text(
-                              "Request host to buy groceries or dinner",
-                              style: Theme.of(context).textTheme.headlineMedium!
-                                  .copyWith(
-                                    fontSize: t(15),
-                                    color: Color(0xff787878),
-                                  ),
-                            ),
-                            SizedBox(height: h(20)),
-                            GenericButtonWidget(
-                              onPressed: () {},
-                              text: "Request Now",
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            : _requestNow(context),
       ),
     );
   }
@@ -185,6 +154,45 @@ class _MyPantryPageState extends State<MyPantryPage> {
           expiry: "Expires in ${index + 1} days",
         );
       },
+    );
+  }
+
+  SafeArea _requestNow(BuildContext context) {
+    return SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: gapSymmetric(horizontal: 20, vertical: 10),
+            child: UpperTile(
+              widget: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Request List",
+                    style: Theme.of(context).textTheme.headlineLarge,
+                  ),
+                  SizedBox(height: h(10)),
+                  Text(
+                    "Request host to buy groceries or dinner",
+                    style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                      fontSize: t(15),
+                      color: Color(0xff787878),
+                    ),
+                  ),
+                  SizedBox(height: h(20)),
+                  GenericButtonWidget(
+                    onPressed: () {
+                      context.push(Routes.requestNow);
+                    },
+                    text: "Request Now",
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1,6 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/domain/usecase/get_current_user.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
+import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
+import 'package:foodkitchen/features/home/presentation/bloc/home_event.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/add_to_favourite_recipe.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/add_to_weekly_plan.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/delete_plan.dart';
@@ -12,6 +14,7 @@ import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dar
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dart';
 
 class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
+  final HomeBloc _homeBloc;
   final GenerateRecipes _generateRecipes;
   final FavouriteRecipes _favouriteRecipes;
   final AddToFavouriteRecipe _addToFavouriteRecipe;
@@ -21,6 +24,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
   final DeletePlan _deletePlan;
 
   PlannerBloc({
+    required HomeBloc homeBloc,
     required GenerateRecipes generateRecipes,
     required FavouriteRecipes favouriteRecipes,
     required AddToFavouriteRecipe addToFavouriteRecipe,
@@ -35,6 +39,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
        _addToWeeklyPlan = addToWeeklyPlan,
        _getAllWeeklyPlans = getAllWeeklyPlans,
        _deletePlan = deletePlan,
+       _homeBloc = homeBloc,
 
        super(PlannerState()) {
     on<GetFavouriteRecipesEvent>(_onGetFavouriteRecipes);
@@ -153,7 +158,11 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
         );
       },
       (successMessage) {
-        AppToast.show(successMessage, ToastType.success);
+        if (successMessage == "Already added for this date") {
+          AppToast.show(successMessage, ToastType.error);
+        } else {
+          AppToast.show(successMessage, ToastType.success);
+        }
         emit(
           state.copyWith(
             successMessage: successMessage,
@@ -176,7 +185,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
       (failure) {
         emit(state.copyWith(errorMessage: failure.message, isLoading: false));
       },
-      (getAllWeeklyPlans) {
+      (getAllWeeklyPlans) async {
         emit(
           state.copyWith(
             getAllWeeklyPlans: getAllWeeklyPlans,
@@ -198,10 +207,11 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
       (failure) {
         emit(state.copyWith(errorMessage: failure.message, isLoading: false));
       },
-      (successMessage) {
-        AppToast.show(successMessage, ToastType.success);
+      (successMessage) async {
         add(GetAllWeeklyPlansEvent());
+        await Future.delayed(Duration(milliseconds: 300));
         add(GetDateBasedPlans(event.dateString));
+        AppToast.show(successMessage, ToastType.success);
       },
     );
   }
@@ -211,15 +221,31 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     Emitter<PlannerState> emit,
   ) async {
     emit(state.copyWith(isLoading: true));
+
     final allPlans = state.getAllWeeklyPlans;
     List dateBasedPlan = allPlans
         .where((plan) => plan.formatedDateString == event.dateString)
         .toList();
     emit(
       state.copyWith(
-        dateBasedPlan: dateBasedPlan.isNotEmpty ? dateBasedPlan[0] : null,
+        dateBasedPlan: dateBasedPlan.isNotEmpty ? [dateBasedPlan[0]] : [],
         isLoading: false,
       ),
     );
+  }
+
+  Future<void> refreshList(Emitter emit, String dateString) async {
+    emit(state.copyWith(isLoading: true));
+    final res = await _getAllWeeklyPlans(NoParams());
+    res.fold(
+      (failure) {
+        emit(state.copyWith(errorMessage: failure.message, isLoading: false));
+      },
+      (getAllWeeklyPlans) {
+        emit(state.copyWith(getAllWeeklyPlans: getAllWeeklyPlans));
+      },
+    );
+    await Future.delayed(Duration(milliseconds: 300));
+    add(GetDateBasedPlans(dateString));
   }
 }

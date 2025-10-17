@@ -57,14 +57,13 @@ class _PopupDropdownFieldState extends State<PopupDropdownField> {
             ),
           ),
 
-          // Your dropdown overlay
           Positioned(
             width: size.width,
             left: position.dx,
             top: position.dy + size.height + h(5),
             child: CompositedTransformFollower(
               link: _layerLink,
-              offset: Offset(w(-12), size.height + h(-12)),
+              offset: Offset(w(2), size.height + h(4)),
               showWhenUnlinked: false,
               child: Material(
                 elevation: 4,

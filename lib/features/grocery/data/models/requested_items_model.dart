@@ -19,7 +19,7 @@ class RequestedItemModel extends RequestedItemEntity {
       itemId: json['item_id'] ?? '',
       kitchenId: json['kitchen_id'] ?? '',
       name: json['name'] ?? '',
-      quantity: json['quantity'] ?? 0,
+      quantity: json['quantity'] ?? "0",
       unit: json['unit'] ?? '',
       userId: json['user_id'] ?? '',
       requestedAt:

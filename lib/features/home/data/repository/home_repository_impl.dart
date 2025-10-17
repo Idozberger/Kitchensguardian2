@@ -1,3 +1,4 @@
+import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
 import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/features/home/data/datasource/home_remote_datasource.dart';
 import 'package:foodkitchen/features/home/data/models/kitchen_model.dart';
@@ -61,6 +62,19 @@ class HomeRepositoryImpl implements HomeRepository {
           .toList();
 
       return Right(pantryItems);
+    } on Failure catch (f) {
+      return Left(f);
+    } catch (e) {
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<MealTypeEntity>>> getAllWeeklyPlans() async {
+    try {
+      final response = await homeRemoteDataSource.getWeeklyPlans();
+
+      return Right(response);
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {

@@ -1,10 +1,10 @@
-import 'package:foodkitchen/features/planner/domain/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
 
 final class PlannerState {
   final List<MealTypeEntity>? recipes;
   final List<MealTypeEntity>? favouriteRecipes;
   final List<MealTypeEntity> getAllWeeklyPlans;
-  final MealTypeEntity? dateBasedPlan;
+  final List<MealTypeEntity> dateBasedPlan;
   final bool isLoading;
   final bool addingToWeeklyPlan;
   final String? errorMessage;
@@ -17,14 +17,14 @@ final class PlannerState {
     this.addingToWeeklyPlan = false,
     this.errorMessage,
     this.successMessage = "",
-    this.dateBasedPlan,
+    this.dateBasedPlan = const [],
   });
 
   PlannerState copyWith({
     List<MealTypeEntity>? recipes,
     List<MealTypeEntity>? favouriteRecipes,
     List<MealTypeEntity>? getAllWeeklyPlans,
-    MealTypeEntity? dateBasedPlan,
+    List<MealTypeEntity>? dateBasedPlan,
     bool? isLoading,
     bool? addingToWeeklyPlan,
     String? errorMessage,

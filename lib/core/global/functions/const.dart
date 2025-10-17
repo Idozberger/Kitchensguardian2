@@ -31,4 +31,5 @@ class AppConstants {
   static const String favouriteRecipes = "/api/recipe/list_fav";
   static const String removeFromFavourite = "/api/recipe/remove_from_fav";
   static const String addToFavourite = "/api/recipe/add_to_fav";
+  static const String requestItems = "/api/kitchen/request_item";
 }

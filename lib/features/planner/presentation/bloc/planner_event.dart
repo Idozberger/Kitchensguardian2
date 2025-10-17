@@ -1,4 +1,4 @@
-import 'package:foodkitchen/features/planner/domain/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
 
 sealed class PlannerEvent {}
 

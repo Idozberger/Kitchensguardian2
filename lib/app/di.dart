@@ -34,6 +34,7 @@ import 'package:foodkitchen/features/home/data/datasource/home_remote_datasource
 import 'package:foodkitchen/features/home/data/repository/home_repository_impl.dart';
 import 'package:foodkitchen/features/home/domain/repository/home_repository.dart';
 import 'package:foodkitchen/features/home/domain/usecases/create_kitchen_usecase.dart';
+import 'package:foodkitchen/features/home/domain/usecases/get_all_weekly_plans_usecase.dart';
 import 'package:foodkitchen/features/home/domain/usecases/get_pantries_usecase.dart';
 import 'package:foodkitchen/features/home/domain/usecases/join_kitchen_usecase.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
@@ -50,6 +51,7 @@ import 'package:foodkitchen/features/pantry/data/repository/pantry_repository_im
 import 'package:foodkitchen/features/pantry/domain/repository/pantry_repository.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/add_pantry_item.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/get_pantry_items.dart';
+import 'package:foodkitchen/features/pantry/domain/usecases/request_items.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/scan_receipt.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_bloc.dart';
 import 'package:foodkitchen/features/planner/data/datasource/planner_local_datasource.dart';
@@ -163,6 +165,7 @@ void _initHome() async {
     ..registerFactory(() => CreateKitchen(sl()))
     ..registerFactory(() => JoinKitchen(sl()))
     ..registerFactory(() => GetPantriesForHome(sl()))
+    ..registerFactory(() => GetAllWeeklyPlansForHome(sl()))
     // Bloc
     ..registerLazySingleton(
       () => HomeBloc(
@@ -170,6 +173,7 @@ void _initHome() async {
         joinKitchen: JoinKitchen(sl()),
         userCubit: sl(),
         getPantriesForHome: GetPantriesForHome(sl()),
+        getAllWeeklyPlansForHome: GetAllWeeklyPlansForHome(sl()),
       ),
     );
 }
@@ -235,12 +239,16 @@ void _initPantry() async {
     ..registerFactory(() => AddPantryItem(sl()))
     ..registerFactory(() => GetPantryItems(sl()))
     ..registerFactory(() => ScanReceiptUseCase(sl()))
+    ..registerFactory(() => RequestItems(sl()))
     // Bloc
     ..registerLazySingleton(
       () => PantryBloc(
         addPantryItem: AddPantryItem(sl()),
         getPantryItems: GetPantryItems(sl()),
         scanReceipt: ScanReceiptUseCase(sl()),
+        requestItems: RequestItems(sl()),
+        homeBloc: sl(),
+        groceryBloc: sl(),
       ),
     );
 }
@@ -297,6 +305,7 @@ void _initPlanner() async {
         addToWeeklyPlan: AddToWeeklyPlan(sl()),
         getAllWeeklyPlans: GetAllWeeklyPlans(sl()),
         deletePlan: DeletePlan(sl()),
+        homeBloc: sl(),
       ),
     );
 }

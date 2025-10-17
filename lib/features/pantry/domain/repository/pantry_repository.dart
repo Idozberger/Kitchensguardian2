@@ -10,4 +10,5 @@ abstract interface class PantryRepository {
     required String kitchenId,
   });
   Future<Either<Failure, ScanReceipt>> scanRecipt({required String filePath});
+  Future<Either<Failure, String>> requestItems({required Pantry pantry});
 }

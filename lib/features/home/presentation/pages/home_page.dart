@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
@@ -17,7 +17,6 @@ import 'package:foodkitchen/features/home/presentation/bloc/home_event.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_state.dart';
 import 'package:foodkitchen/features/home/presentation/dialogs/create_kitchen.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/no_kitchen_found.dart';
-import 'package:foodkitchen/features/home/presentation/widgets/recommended_recipes.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/rounded_text_container.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/tonight_recipe.dart';
 import 'package:foodkitchen/features/pantry/presentation/widgets/list_tile.dart';
@@ -32,8 +31,11 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  late UserCubit userCubit;
-  late HomeBloc homeBloc;
+  late final UserCubit userCubit;
+  late final HomeBloc homeBloc;
+
+  bool isGeneratedRecipes = false;
+
   final List<String> ingredients = [
     "Tomatoes",
     "Olive Oil",
@@ -42,111 +44,115 @@ class _HomePageState extends State<HomePage> {
     "Cheese",
   ];
 
-  bool isGeneratedRecipes = false;
-  bool isClickedPantryAction = false;
   @override
   void initState() {
+    super.initState();
     userCubit = context.read<UserCubit>();
     homeBloc = context.read<HomeBloc>();
-    getUserPantries();
-    super.initState();
+    _getUserPantriesAndWeeklyPlans();
   }
 
-  void getUserPantries() {
-    String activeKitchenId = userCubit.state.activeKitchenId;
-    if (activeKitchenId.isNotEmpty) {
-      homeBloc.add(GetPantriesItemsEventForHome(kitchenId: activeKitchenId));
+  void _getUserPantriesAndWeeklyPlans() {
+    final kitchenId = userCubit.state.activeKitchenId;
+    if (kitchenId.isNotEmpty) {
+      homeBloc.add(GetAllWeeklyPlansEventForHome());
+      homeBloc.add(GetPantriesItemsEventForHome(kitchenId: kitchenId));
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final hasKitchen = userCubit.state.activeKitchenId.isNotEmpty;
+
     return Scaffold(
-      backgroundColor: Color(0xffF9F9F9),
-      body: _buildBody(context),
-    );
-  }
-
-  Widget _buildBody(BuildContext context) {
-    return BlocConsumer<HomeBloc, HomeState>(
-      listener: (context, state) {
-        if (state.successMessage != null) {
-          AppToast.show(state.successMessage!, ToastType.success);
-        }
-        if (state.errorMessage != null) {
-          AppToast.show(state.errorMessage!, ToastType.error);
-        }
-      },
-      builder: (_, homeState) {
-        return ListView(
+      backgroundColor: const Color(0xffF9F9F9),
+      body: BlocConsumer<HomeBloc, HomeState>(
+        listener: (_, state) {
+          if (state.successMessage != null) {
+            AppToast.show(state.successMessage!, ToastType.success);
+          }
+          if (state.errorMessage != null) {
+            AppToast.show(state.errorMessage!, ToastType.error);
+          }
+        },
+        builder: (_, state) => Padding(
           padding: gapOnly(left: 20, right: 20, bottom: 20, top: 10),
-          children: [
-            if (userCubit.state.activeKitchenId.isNotEmpty) ...[
-              _buildTextAndButtonTile(
-                context,
-                title: "Scan to log in your food!",
-                buttonText: "Scan",
-                svgPath: AppAssets.scanSvg,
-                callback: () {
-                  context.push(Routes.scanMeal);
-                },
-              ),
-              SizedBox(height: h(15)),
-              homeState.isLoading
-                  ? UpperTile(
-                      widget: Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.primaryColor,
+          child: ListView(
+            children: [
+              if (hasKitchen) ...[
+                // ActionTile(
+                //   title: "Scan to log in your food!",
+                //   buttonText: "Scan",
+                //   svgPath: AppAssets.scanSvg,
+                //   onTap: () => context.push(Routes.scanMeal),
+                // ),
+                gap(height: 15),
+                state.isLoading
+                    ? UpperTile(
+                        widget: Center(
+                          child: CircularProgressIndicator(
+                            color: AppColors.primaryColor,
+                          ),
                         ),
-                      ),
-                    )
-                  : _buildPantryTile(context, homeState),
-              SizedBox(height: h(15)),
-              _buildTextAndButtonTile(
-                context,
-                title: "Find Recipes",
-                buttonText: "Find Recipes",
-                svgPath: AppAssets.findRecipesSvg,
-                callback: () {
-                  String formattedDate = DateFormat(
-                    'dd/MM/yyyy',
-                  ).format(DateTime.now());
-
-                  context.pushNamed(
-                    Routes.generateRecipes,
-                    extra: {
-                      "selected_date": formattedDate,
-                      "selected_meal_type": "Breakfast",
-                      "is_plan": false,
-                    },
-                  );
-                },
-              ),
-              SizedBox(height: h(15)),
-              UpperTile(widget: RecommendedRecipes(), horizontalPadding: 0),
-              SizedBox(height: h(15)),
-              _buildSmartCartTile(context),
-              if (isGeneratedRecipes) ...[
-                SizedBox(height: h(15)),
-                UpperTile(widget: TonightRecipeWidget(), horizontalPadding: 0),
+                      )
+                    : PantrySection(state: state),
+                gap(height: 15),
+                ActionTile(
+                  title: "Find Recipes",
+                  buttonText: "Find Recipes",
+                  svgPath: AppAssets.findRecipesSvg,
+                  onTap: () {
+                    final date = DateFormat(
+                      'dd/MM/yyyy',
+                    ).format(DateTime.now());
+                    context.pushNamed(
+                      Routes.generateRecipes,
+                      extra: {
+                        "selected_date": date,
+                        "selected_meal_type": "Breakfast",
+                        "is_plan": false,
+                      },
+                    );
+                  },
+                ),
+                gap(height: 15),
+                SmartCartTile(
+                  isGenerated: isGeneratedRecipes,
+                  ingredients: ingredients,
+                  onGenerate: () => setState(() => isGeneratedRecipes = true),
+                ),
+                gap(height: 15),
+                if (state.dateBasedPlan.isNotEmpty) TonightRecipeWidget(),
+              ] else ...[
+                CreateOrJoinKitchenTile(),
+                gap(height: 140),
+                EmptyStateWidget(
+                  context,
+                  imagePath: AppAssets.noKitchenFound,
+                  title: 'No Kitchen found',
+                ),
               ],
             ],
-            if (userCubit.state.activeKitchenId.isEmpty) ...[
-              _buildHomeUpperTile(context),
-              SizedBox(height: h(140)),
-              EmptyStateWidget(
-                context,
-                imagePath: AppAssets.noKitchenFound,
-                title: 'No Kitchen found',
-              ),
-            ],
-          ],
-        );
-      },
+          ),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.primaryColor,
+        shape: CircleBorder(),
+        onPressed: () {
+          context.push(Routes.scanMeal);
+        },
+        child: SvgPicture.asset(AppAssets.scanSvg, color: Colors.black),
+      ),
     );
   }
+}
 
-  Widget _buildHomeUpperTile(BuildContext context) {
+class CreateOrJoinKitchenTile extends StatelessWidget {
+  const CreateOrJoinKitchenTile({super.key});
+
+  @override
+  Widget build(BuildContext context) {
     return UpperTile(
       widget: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -155,26 +161,21 @@ class _HomePageState extends State<HomePage> {
             "Kitchen you have to:",
             style: Theme.of(context).textTheme.headlineLarge,
           ),
-          SizedBox(height: h(15)),
+          gap(height: 15),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Flexible(
+              Expanded(
                 child: GenericButtonWidget(
                   isOutlined: true,
-                  onPressed: () async {
-                    await showCreateKitchenDialog(context);
-                  },
                   text: "Create",
+                  onPressed: () => showCreateKitchenDialog(context),
                 ),
               ),
-              SizedBox(width: h(10)),
-              Flexible(
+              gap(width: 10),
+              Expanded(
                 child: GenericButtonWidget(
-                  onPressed: () async {
-                    await showJoinKitchenDialog(context);
-                  },
                   text: "Join",
+                  onPressed: () => showJoinKitchenDialog(context),
                 ),
               ),
             ],
@@ -183,155 +184,163 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+}
 
-  Widget _buildPantryTile(BuildContext context, HomeState state) {
+class PantrySection extends StatelessWidget {
+  final HomeState state;
+
+  const PantrySection({super.key, required this.state});
+
+  @override
+  Widget build(BuildContext context) {
+    final hasItems = state.pantryItems.isNotEmpty;
+
     return UpperTile(
       widget: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text("Pantry", style: Theme.of(context).textTheme.headlineLarge),
-              SvgPicture.asset(AppAssets.pantrySvg),
-            ],
-          ),
-          SizedBox(height: h(15)),
-
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              if (state.pantryItems.isEmpty) ...[
-                Flexible(
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: h(40),
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        context.push(Routes.scanMeal);
-                      },
-                      icon: SvgPicture.asset(AppAssets.scanSvg),
-                      label: Text(
-                        "Scan",
-                        style: Theme.of(context).textTheme.headlineMedium!
-                            .copyWith(
-                              fontSize: t(13),
-                              color: AppColors.primaryColor,
-                            ),
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(width: w(10)),
-              ],
-              Flexible(
-                child: SizedBox(
-                  width: double.infinity,
-                  height: h(40),
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      context.push(Routes.addItem);
-                      setState(() {
-                        isClickedPantryAction = true;
-                      });
-                    },
-                    icon: SvgPicture.asset(AppAssets.addSvg),
-                    label: Text(
-                      "Add Item",
-                      style: Theme.of(context).textTheme.headlineMedium!
-                          .copyWith(fontSize: t(13), color: Colors.black),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          SizedBox(height: h(15)),
-          if (state.pantryItems.isNotEmpty) ...[
-            ListView.separated(
-              itemCount: state.pantryItems.length < 4
-                  ? state.pantryItems.length
-                  : 3,
-              shrinkWrap: true,
-
-              separatorBuilder: (context, index) {
-                return Padding(
-                  padding: gapSymmetric(vertical: 5),
-                  child: Divider(color: Color(0xffF4F4F4)),
-                );
-              },
-              padding: gapZero,
-              itemBuilder: (context, index) {
-                var pantry = state.pantryItems[index];
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Flexible(
-                      child: ListItemWidget(
-                        text: pantry.name,
-                        textStyle: Theme.of(context).textTheme.headlineSmall!
-                            .copyWith(
-                              fontSize: t(13),
-                              color: Color(0xff787878),
-                            ),
-                        crossAlignment: CrossAxisAlignment.center,
-                      ),
-                    ),
-                    Text(
-                      pantry.quantity.toString(),
-                      style: Theme.of(context).textTheme.headlineMedium!
-                          .copyWith(fontSize: t(13), color: Color(0xff787878)),
-                    ),
-                  ],
-                );
-              },
-            ),
-            SizedBox(height: h(15)),
-            Center(
-              child: SizedBox(
-                width: w(178),
-                height: h(35),
-                child: OutlinedButton.icon(
-                  onPressed: () {
-                    context.push(Routes.myPantry);
-                  },
-                  icon: SvgPicture.asset(
-                    AppAssets.eyeSvg,
-                    color: AppColors.primaryColor,
-                    width: w(10),
-                    height: h(10),
-                  ),
-                  label: Text(
-                    "Tap to see more",
-                    style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                      fontSize: t(13),
-                      color: AppColors.primaryColor,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ] else
-            Text(
-              "No items available in Pantry",
-              style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                fontSize: t(13),
-                color: Color(0xff787878),
-              ),
-            ),
+          _header(context),
+          gap(height: 15),
+          _actionButtons(context, hasItems),
+          gap(height: 15),
+          if (hasItems) _pantryList(context) else _noItemsText(context),
         ],
       ),
     );
   }
 
-  Widget _buildTextAndButtonTile(
-    BuildContext context, {
-    required String title,
-    required String buttonText,
-    required String svgPath,
-    required VoidCallback callback,
-  }) {
+  Widget _header(BuildContext context) => Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Text("Pantry", style: Theme.of(context).textTheme.headlineLarge),
+      SvgPicture.asset(AppAssets.pantrySvg),
+    ],
+  );
+
+  Widget _actionButtons(BuildContext context, bool hasItems) => Row(
+    children: [
+      if (!hasItems)
+        Expanded(
+          child: SizedBox(
+            height: h(40),
+            child: OutlinedButton.icon(
+              onPressed: () => context.push(Routes.scanMeal),
+              icon: SvgPicture.asset(AppAssets.scanSvg),
+              label: Text(
+                "Scan",
+                style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                  fontSize: t(12),
+                  color: AppColors.primaryColor,
+                ),
+              ),
+            ),
+          ),
+        ),
+      if (!hasItems) gap(width: 10),
+      Expanded(
+        child: SizedBox(
+          height: h(40),
+          child: ElevatedButton.icon(
+            onPressed: () => context.push(Routes.addItem),
+            icon: SvgPicture.asset(AppAssets.addSvg),
+            label: Text(
+              "Add Item",
+              style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                fontSize: t(12),
+                color: Colors.black,
+              ),
+            ),
+          ),
+        ),
+      ),
+    ],
+  );
+
+  Widget _pantryList(BuildContext context) => Column(
+    children: [
+      ListView.separated(
+        shrinkWrap: true,
+        itemCount: state.pantryItems.length.clamp(0, 3),
+        separatorBuilder: (_, __) => const Divider(color: Color(0xffF4F4F4)),
+        padding: EdgeInsets.zero,
+        itemBuilder: (context, index) {
+          final pantry = state.pantryItems[index];
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: ListItemWidget(
+                  text: pantry.name,
+                  textStyle: Theme.of(context).textTheme.headlineSmall!
+                      .copyWith(
+                        fontSize: t(12),
+                        color: const Color(0xff787878),
+                      ),
+                  crossAlignment: CrossAxisAlignment.center,
+                ),
+              ),
+              Text(
+                pantry.quantity.toString(),
+                style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                  fontSize: t(12),
+                  color: const Color(0xff787878),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+      gap(height: 15),
+      Center(
+        child: SizedBox(
+          height: h(40),
+          width: w(170),
+          child: OutlinedButton.icon(
+            onPressed: () => context.push(Routes.myPantry),
+            icon: SvgPicture.asset(
+              AppAssets.eyeSvg,
+              color: AppColors.primaryColor,
+              width: w(10),
+              height: h(10),
+            ),
+            label: Text(
+              "Tap to see more",
+              style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                fontSize: t(12),
+                color: AppColors.primaryColor,
+              ),
+            ),
+          ),
+        ),
+      ),
+    ],
+  );
+
+  Widget _noItemsText(BuildContext context) => Text(
+    "No items available in Pantry",
+    style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+      fontSize: t(12),
+      color: const Color(0xff787878),
+    ),
+  );
+}
+
+class ActionTile extends StatelessWidget {
+  final String title;
+  final String buttonText;
+  final String svgPath;
+  final VoidCallback onTap;
+
+  const ActionTile({
+    super.key,
+    required this.title,
+    required this.buttonText,
+    required this.svgPath,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return UpperTile(
       widget: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -341,14 +350,12 @@ class _HomePageState extends State<HomePage> {
           SizedBox(
             height: h(40),
             child: ElevatedButton.icon(
-              onPressed: () {
-                callback();
-              },
+              onPressed: onTap,
               icon: SvgPicture.asset(svgPath, color: Colors.black),
               label: Text(
                 buttonText,
                 style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                  fontSize: t(13),
+                  fontSize: t(12),
                   color: Colors.black,
                 ),
               ),
@@ -358,74 +365,80 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+}
 
-  Widget _buildSmartCartTile(BuildContext context) {
+class SmartCartTile extends StatelessWidget {
+  final bool isGenerated;
+  final List<String> ingredients;
+  final VoidCallback onGenerate;
+
+  const SmartCartTile({
+    super.key,
+    required this.isGenerated,
+    required this.ingredients,
+    required this.onGenerate,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return UpperTile(
       widget: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Smart Cart",
-                style: Theme.of(context).textTheme.headlineLarge,
-              ),
-              SvgPicture.asset(AppAssets.pantrySvg),
-            ],
-          ),
-          SizedBox(height: h(15)),
-          if (isGeneratedRecipes)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Preview items:",
-                  style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                    fontSize: t(13),
-                    color: Color(0xff787878),
-                  ),
-                ),
-                SizedBox(height: h(15)),
-                Wrap(
-                  direction: Axis.horizontal,
-                  spacing: w(4),
-                  runSpacing: w(8),
-                  children: [
-                    for (int i = 0; i < ingredients.length && i < 3; i++)
-                      RoundedTextContainer(
-                        text: ingredients[i],
-
-                        fontWeight: FontWeight.w500,
-                      ),
-
-                    if (ingredients.length > 4)
-                      RoundedTextContainer(
-                        text: "+${ingredients.length - 3} more",
-                      ),
-                  ],
-                ),
-              ],
-            )
-          else
-            Text(
-              "No items available in Pantry",
-              style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                fontSize: t(13),
-                color: Color(0xff787878),
-              ),
-            ),
-          SizedBox(height: h(15)),
+          _header(context),
+          gap(height: 15),
+          isGenerated ? _preview(context) : _noItems(context),
+          gap(height: 15),
           GenericButtonWidget(
-            onPressed: () {
-              setState(() {
-                isGeneratedRecipes = true;
-              });
-            },
             text: "Generate Grocery List",
+            onPressed: onGenerate,
           ),
         ],
       ),
     );
   }
+
+  Widget _header(BuildContext context) => Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Text("Smart Cart", style: Theme.of(context).textTheme.headlineLarge),
+      SvgPicture.asset(AppAssets.pantrySvg),
+    ],
+  );
+
+  Widget _preview(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        "Preview items:",
+        style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+          fontSize: t(12),
+          color: const Color(0xff787878),
+        ),
+      ),
+      gap(height: 15),
+      Wrap(
+        spacing: w(4),
+        runSpacing: w(8),
+        children: [
+          ...ingredients
+              .take(3)
+              .map(
+                (e) =>
+                    RoundedTextContainer(text: e, fontWeight: FontWeight.w500),
+              ),
+          if (ingredients.length > 3)
+            RoundedTextContainer(text: "+${ingredients.length - 3} more"),
+        ],
+      ),
+    ],
+  );
+
+  Widget _noItems(BuildContext context) => Text(
+    "No items available in Pantry",
+    style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+      fontSize: t(12),
+      color: const Color(0xff787878),
+    ),
+  );
 }

@@ -20,14 +20,14 @@ import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_event.dart'
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_state.dart';
 import 'package:foodkitchen/features/pantry/presentation/models/pantry_items.dart';
 
-class AddItemPage extends StatefulWidget {
-  const AddItemPage({super.key});
+class RequestNowPage extends StatefulWidget {
+  const RequestNowPage({super.key});
 
   @override
-  State<AddItemPage> createState() => _AddItemPageState();
+  State<RequestNowPage> createState() => _RequestNowPageState();
 }
 
-class _AddItemPageState extends State<AddItemPage> {
+class _RequestNowPageState extends State<RequestNowPage> {
   late PantryBloc pantryBloc;
   late UserCubit userCubit;
   List<PantryItem> _items = [];
@@ -112,27 +112,24 @@ class _AddItemPageState extends State<AddItemPage> {
   BlocBuilder<PantryBloc, PantryState> _bottomNavBar() {
     return BlocBuilder<PantryBloc, PantryState>(
       builder: (_, state) {
-        return SafeArea(
-          child: Container(
-            width: double.infinity,
-            decoration: BoxDecoration(color: Colors.white),
-            padding: gapSymmetric(horizontal: 20, vertical: 10),
+        return Container(
+          width: double.infinity,
+          decoration: BoxDecoration(color: Colors.white),
+          padding: gapOnly(left: 20, right: 20, top: 24, bottom: 8),
+          child: SafeArea(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _addMoreButton(context),
-                SizedBox(height: h(22)),
                 GenericButtonWidget(
                   isLoading: state is PantryLoading,
-                  text: "Add Item",
+                  text: "Request Item",
                   onPressed: state is PantryLoading
                       ? () {}
                       : () {
                           for (final item in _items) {
                             if (item.nameController.text.trim().isEmpty ||
                                 item.qtyController.text.trim().isEmpty ||
-                                (item.unit?.trim().isEmpty ?? true) ||
-                                (item.pantry?.trim().isEmpty ?? true)) {
+                                (item.unit?.trim().isEmpty ?? true)) {
                               AppToast.show(
                                 "Please fill all fields before adding.",
                                 ToastType.error,
@@ -140,11 +137,9 @@ class _AddItemPageState extends State<AddItemPage> {
                               return;
                             }
                           }
-
-                          final List<PantryItemEntity> pantryItems = [];
-                          for (final item in _items) {
-                            pantryItems.add(
-                              PantryItemEntity(
+                          final List<PantryItemEntity> pantryItems = _items.map(
+                            (item) {
+                              return PantryItemEntity(
                                 name: item.nameController.text.trim(),
                                 quantity:
                                     double.tryParse(
@@ -153,9 +148,9 @@ class _AddItemPageState extends State<AddItemPage> {
                                     0,
                                 unit: item.unit ?? '',
                                 group: item.pantry ?? '',
-                              ),
-                            );
-                          }
+                              );
+                            },
+                          ).toList();
 
                           final pantryModel = Pantry(
                             kitchenId: userCubit.state.activeKitchenId,
@@ -163,7 +158,7 @@ class _AddItemPageState extends State<AddItemPage> {
                           );
 
                           pantryBloc.add(
-                            PantryAddItemEvent(pantry: pantryModel),
+                            PantryRequestItemEvent(pantry: pantryModel),
                           );
                         },
                 ),
@@ -231,23 +226,6 @@ class _AddItemPageState extends State<AddItemPage> {
                 onChanged: (val) => setState(() => item.unit = val),
               ),
             ),
-            Flexible(
-              child: PopupDropdownField(
-                label: "Pantry",
-                hint: "Select Pantry",
-                value: item.pantry,
-                items: [
-                  "Fridge",
-                  "Freezer",
-                  "Shelves",
-                  "Cabinets",
-                  "Drawers",
-                  "Cold cellar",
-                  "Butler's Pantry",
-                ],
-                onChanged: (val) => setState(() => item.pantry = val),
-              ),
-            ),
           ],
         ),
       ],
@@ -286,7 +264,6 @@ class _AddItemPageState extends State<AddItemPage> {
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
       leadingWidth: w(55),
-      centerTitle: true,
       leading: Row(
         children: [
           SizedBox(width: w(16)),
@@ -296,31 +273,10 @@ class _AddItemPageState extends State<AddItemPage> {
           ),
         ],
       ),
-      title: Text("Add Item", style: Theme.of(context).textTheme.headlineLarge),
-    );
-  }
-
-  Center _addMoreButton(BuildContext context) {
-    return Center(
-      child: SizedBox(
-        width: w(188),
-        height: h(40),
-        child: OutlinedButton.icon(
-          onPressed: _addNewItem,
-          icon: SvgPicture.asset(
-            AppAssets.addSvg,
-            color: AppColors.primaryColor,
-            width: w(18),
-            height: h(18),
-          ),
-          label: Text(
-            "Tap to add more",
-            style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-              fontSize: t(15),
-              color: AppColors.primaryColor,
-            ),
-          ),
-        ),
+      centerTitle: true,
+      title: Text(
+        "Request Item",
+        style: Theme.of(context).textTheme.headlineLarge,
       ),
     );
   }

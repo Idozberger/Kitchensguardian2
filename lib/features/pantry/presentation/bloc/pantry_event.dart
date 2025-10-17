@@ -16,3 +16,8 @@ final class ScanReceiptEvent extends PantryEvent {
   final String filePath;
   ScanReceiptEvent({required this.filePath});
 }
+
+final class PantryRequestItemEvent extends PantryEvent {
+  final Pantry pantry;
+  PantryRequestItemEvent({required this.pantry});
+}
