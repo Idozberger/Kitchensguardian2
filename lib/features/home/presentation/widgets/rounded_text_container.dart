@@ -31,24 +31,22 @@ class RoundedTextContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IntrinsicWidth(
-      child: Container(
-        padding: gapSymmetric(vertical: verticalPad, horizontal: horizontalPad),
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(h(radius)),
-          border: isBordered ? Border.all(color: borderColor!) : null,
+    return Container(
+      padding: gapSymmetric(vertical: verticalPad, horizontal: horizontalPad),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(h(radius)),
+        border: isBordered ? Border.all(color: borderColor!) : null,
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        text,
+        style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+          color: textColor,
+          fontSize: fontSize,
+          fontWeight: fontWeight,
         ),
-        alignment: Alignment.center,
-        child: Text(
-          text,
-          style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-            color: textColor,
-            fontSize: fontSize,
-            fontWeight: fontWeight,
-          ),
-          textAlign: TextAlign.center,
-        ),
+        textAlign: TextAlign.center,
       ),
     );
   }

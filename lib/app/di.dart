@@ -28,7 +28,11 @@ import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_bloc.
 import 'package:foodkitchen/features/grocery/data/datasource/grocery_remote_datasource.dart';
 import 'package:foodkitchen/features/grocery/data/repository/grocery_repository_impl.dart';
 import 'package:foodkitchen/features/grocery/domain/repository/grocery_repository.dart';
+import 'package:foodkitchen/features/grocery/domain/usecases/add_mylist_to_inventory.dart';
+import 'package:foodkitchen/features/grocery/domain/usecases/delete_kitchen_items.dart';
+import 'package:foodkitchen/features/grocery/domain/usecases/get_ai_generated_items.dart';
 import 'package:foodkitchen/features/grocery/domain/usecases/get_requested_items.dart';
+import 'package:foodkitchen/features/grocery/domain/usecases/update_bucket_type.dart';
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_bloc.dart';
 import 'package:foodkitchen/features/home/data/datasource/home_remote_datasource.dart';
 import 'package:foodkitchen/features/home/data/repository/home_repository_impl.dart';
@@ -264,9 +268,19 @@ void _initGrocery() async {
     ..registerFactory<GroceryRepository>(() => GroceryRepositoryImpl(sl()))
     // Usecases
     ..registerFactory(() => GetRequestedItems(sl()))
+    ..registerFactory(() => UpdateBucketType(sl()))
+    ..registerFactory(() => AddMylistToInventory(sl()))
+    ..registerFactory(() => GetAiGeneratedItems(sl()))
+    ..registerFactory(() => DeleteKitchenItems(sl()))
     // Bloc
     ..registerLazySingleton(
-      () => GroceryBloc(getRequestedItems: GetRequestedItems(sl())),
+      () => GroceryBloc(
+        getRequestedItems: GetRequestedItems(sl()),
+        updateBucketType: UpdateBucketType(sl()),
+        addMylistToInventory: AddMylistToInventory(sl()),
+        getAiGeneratedItems: GetAiGeneratedItems(sl()),
+        deleteKitchenItems: DeleteKitchenItems(sl()),
+      ),
     );
 }
 

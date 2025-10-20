@@ -76,10 +76,10 @@ class _GeneratedRecipesDetailPageState
                 gap(height: 20),
                 if (secondaryActionSelectedIndex == 0) ...[
                   _buildIngredientsList(context),
-                  gap(height: 20),
-                  recipe.missingItems
-                      ? _buildMissingItemsList(context)
-                      : SizedBox(),
+                  // gap(height: 20),
+                  // recipe.missingItems
+                  //     ? _buildMissingItemsList(context)
+                  //     : SizedBox(),
                 ] else
                   _buildRecipesAndStepList(),
               ],

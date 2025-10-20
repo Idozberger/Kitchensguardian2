@@ -1,5 +1,6 @@
 class RequestedItemEntity {
   final String id;
+  final bool checked;
   final String bucketType;
   final String itemId;
   final String kitchenId;
@@ -14,6 +15,7 @@ class RequestedItemEntity {
     required this.bucketType,
     required this.itemId,
     required this.kitchenId,
+    required this.checked,
     required this.name,
     required this.quantity,
     required this.unit,

@@ -9,6 +9,7 @@ import 'package:foodkitchen/features/dashboard/presentation/widgets/drawer.dart'
 import 'package:foodkitchen/features/grocery/presentation/pages/grocery_page.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_event.dart';
+
 import 'package:foodkitchen/features/home/presentation/pages/home_page.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/planner_page.dart';
 import 'package:foodkitchen/features/profile/presentation/pages/profile_page.dart';
@@ -34,20 +35,25 @@ class _DashboardPageState extends State<DashboardPage> {
   void _onItemTapped(int index) {
     setState(() {
       context.read<HomeBloc>().add(GetAllWeeklyPlansEventForHome());
-
       _selectedIndex = index;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      drawer: const AppDrawer(),
-      appBar: _buildAppBar(context),
-      body: SafeArea(
-        child: IndexedStack(index: _selectedIndex, children: _pages),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (_selectedIndex != 0) _onItemTapped(0);
+      },
+      child: Scaffold(
+        drawer: const AppDrawer(),
+        appBar: _buildAppBar(context),
+        body: SafeArea(
+          child: IndexedStack(index: _selectedIndex, children: _pages),
+        ),
+        bottomNavigationBar: _buildBottomNav(),
       ),
-      bottomNavigationBar: _buildBottomNav(),
     );
   }
 

@@ -11,19 +11,25 @@ class RequestedItemModel extends RequestedItemEntity {
     required super.unit,
     required super.userId,
     required super.requestedAt,
+    required super.checked,
   });
+
   factory RequestedItemModel.fromJson(Map<String, dynamic> json) {
     return RequestedItemModel(
-      id: json['_id'] ?? '',
-      bucketType: json['bucket_type'] ?? '',
-      itemId: json['item_id'] ?? '',
-      kitchenId: json['kitchen_id'] ?? '',
-      name: json['name'] ?? '',
-      quantity: json['quantity'] ?? "0",
-      unit: json['unit'] ?? '',
-      userId: json['user_id'] ?? '',
+      id: json['_id']?.toString() ?? '',
+      bucketType: json['bucket_type']?.toString() ?? '',
+      itemId: json['item_id']?.toString() ?? '',
+      kitchenId: json['kitchen_id']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      quantity: json['quantity']?.toString() ?? "0",
+      unit: json['unit']?.toString() ?? '',
+      userId: json['user_id']?.toString() ?? '',
+      checked: json['checked'] is bool
+          ? json['checked']
+          : json['checked']?.toString().toLowerCase() == 'true',
       requestedAt:
-          DateTime.tryParse(json['requested_at'] ?? '') ?? DateTime.now(),
+          DateTime.tryParse(json['requested_at']?.toString() ?? '') ??
+          DateTime.now(),
     );
   }
 
@@ -37,6 +43,7 @@ class RequestedItemModel extends RequestedItemEntity {
       'quantity': quantity,
       'unit': unit,
       'user_id': userId,
+      'checked': checked,
       'requested_at': requestedAt.toIso8601String(),
     };
   }

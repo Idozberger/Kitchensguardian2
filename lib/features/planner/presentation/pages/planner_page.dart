@@ -7,6 +7,7 @@ import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
+import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/date_format_to_string.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
@@ -21,6 +22,7 @@ import 'package:foodkitchen/features/planner/presentation/widgets/day_plan_tile.
 import 'package:foodkitchen/features/planner/presentation/widgets/meal_tile.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PlannerPage extends StatefulWidget {
   const PlannerPage({super.key});
@@ -30,21 +32,34 @@ class PlannerPage extends StatefulWidget {
 }
 
 class _PlannerPageState extends State<PlannerPage> {
+  bool isLoading = true;
+
   late final PlannerBloc _plannerBloc;
   late DateTime _selectedDate;
   @override
   void initState() {
     super.initState();
     _plannerBloc = context.read<PlannerBloc>();
-    _selectedDate = DateTime.now();
+
     _fetchInitialPlans();
   }
 
-  void _fetchInitialPlans() {
+  void _fetchInitialPlans() async {
+    final sharedPreferences = await SharedPreferences.getInstance();
+    String? startDate = sharedPreferences.getString("start-date");
+
+    if (startDate != null) {
+      _selectedDate = parseDate(startDate);
+    } else {
+      _selectedDate = DateTime.now();
+    }
     final formattedDate = formatDate(_selectedDate);
     _plannerBloc
       ..add(GetAllWeeklyPlansEvent())
       ..add(GetDateBasedPlans(formattedDate));
+    setState(() {
+      isLoading = false;
+    });
   }
 
   String _formatReadableDate(String dateString) {
@@ -56,52 +71,59 @@ class _PlannerPageState extends State<PlannerPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xffF9F9F9),
-      body: SafeArea(
-        child: Padding(
-          padding: gapSymmetric(horizontal: 20, vertical: 14),
-          child: BlocConsumer<PlannerBloc, PlannerState>(
-            listener: (context, state) {},
-            builder: (_, state) {
-              final plan = state.dateBasedPlan;
+      body: isLoading
+          ? Center(
+              child: CircularProgressIndicator(color: AppColors.primaryColor),
+            )
+          : SafeArea(
+              child: Padding(
+                padding: gapSymmetric(horizontal: 20, vertical: 14),
+                child: BlocConsumer<PlannerBloc, PlannerState>(
+                  listener: (context, state) {},
+                  builder: (_, state) {
+                    final plan = state.dateBasedPlan;
 
-              return SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHeader(context),
-                    gap(height: 15),
-                    if (state.getAllWeeklyPlans.isEmpty)
-                      Padding(
-                        padding: gapOnly(top: 120),
-                        child: _buildEmptyState(),
-                      )
-                    else ...[
-                      SelectDateWidget(
-                        entitlementIsActive: AppConstants.entitlementIsActive,
-                        startDate: _selectedDate,
-                        onChanged: (date) {
-                          setState(() => _selectedDate = date);
-                          _plannerBloc.add(GetDateBasedPlans(formatDate(date)));
-                        },
+                    return SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildHeader(context),
+                          gap(height: 15),
+                          if (state.getAllWeeklyPlans.isEmpty)
+                            Padding(
+                              padding: gapOnly(top: 120),
+                              child: _buildEmptyState(),
+                            )
+                          else ...[
+                            SelectDateWidget(
+                              entitlementIsActive:
+                                  AppConstants.entitlementIsActive,
+                              startDate: _selectedDate,
+                              onChanged: (date) {
+                                setState(() => _selectedDate = date);
+                                _plannerBloc.add(
+                                  GetDateBasedPlans(formatDate(date)),
+                                );
+                              },
+                            ),
+                            gap(height: 15),
+                            if (plan.isNotEmpty &&
+                                plan[0].formatedDateString ==
+                                    formatDate(_selectedDate))
+                              _buildPlanSection(plan[0])
+                            else
+                              Padding(
+                                padding: gapOnly(top: 64),
+                                child: _buildEmptyState(),
+                              ),
+                          ],
+                        ],
                       ),
-                      gap(height: 15),
-                      if (plan.isNotEmpty &&
-                          plan[0].formatedDateString ==
-                              formatDate(_selectedDate))
-                        _buildPlanSection(plan[0])
-                      else
-                        Padding(
-                          padding: gapOnly(top: 64),
-                          child: _buildEmptyState(),
-                        ),
-                    ],
-                  ],
+                    );
+                  },
                 ),
-              );
-            },
-          ),
-        ),
-      ),
+              ),
+            ),
     );
   }
 

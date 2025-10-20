@@ -1,24 +1,37 @@
 import 'package:foodkitchen/features/grocery/domain/entities/requested_item.dart';
 
-sealed class GroceryState {
-  const GroceryState();
-}
+class GroceryState {
+  final bool isLoading;
+  final String? successMessage;
+  final String? errorMessage;
+  final List<RequestedItemEntity>? requestedItemsList;
+  final List<RequestedItemEntity>? finalListItemsList;
+  final List<RequestedItemEntity>? aiGeneratedList;
 
-final class GroceryInitial extends GroceryState {}
+  const GroceryState({
+    this.isLoading = false,
+    this.successMessage,
+    this.errorMessage,
+    this.requestedItemsList,
+    this.finalListItemsList,
+    this.aiGeneratedList,
+  });
 
-final class GroceryLoading extends GroceryState {}
-
-final class GrocerySuccess extends GroceryState {
-  final String successMessage;
-  GrocerySuccess(this.successMessage);
-}
-
-final class GroceryFailure extends GroceryState {
-  final String message;
-  const GroceryFailure(this.message);
-}
-
-final class RequestedGroceryLoaded extends GroceryState {
-  final List<RequestedItemEntity> requestedItemsList;
-  const RequestedGroceryLoaded(this.requestedItemsList);
+  GroceryState copyWith({
+    bool? isLoading,
+    String? successMessage,
+    String? errorMessage,
+    List<RequestedItemEntity>? requestedItemsList,
+    List<RequestedItemEntity>? finalListItemsList,
+    List<RequestedItemEntity>? aiGeneratedList,
+  }) {
+    return GroceryState(
+      isLoading: isLoading ?? this.isLoading,
+      successMessage: successMessage,
+      errorMessage: errorMessage,
+      requestedItemsList: requestedItemsList ?? this.requestedItemsList,
+      finalListItemsList: finalListItemsList ?? this.finalListItemsList,
+      aiGeneratedList: aiGeneratedList ?? this.aiGeneratedList,
+    );
+  }
 }

@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:foodkitchen/core/common/data/model/meal_type_model.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
-import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -80,29 +80,54 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
 
   @override
   Future<List<MealTypeModel>> getWeeklyPlans() async {
-    DateTime today = DateTime.now().subtract(Duration(days: 1));
+    try {
+      final prefs = await SharedPreferences.getInstance();
 
-    final prefs = await SharedPreferences.getInstance();
-    final List<String> jsonList = prefs.getStringList('weekly_plan') ?? [];
+      final List<String> jsonList = prefs.getStringList('weekly_plan') ?? [];
 
-    List<MealTypeModel> allPlans = jsonList
-        .map((jsonString) => MealTypeModel.fromJson(jsonDecode(jsonString)))
-        .toList();
-    List<MealTypeModel> filteredPlans = [];
-    for (var i = 0; i < allPlans.length; i++) {
-      final parsedDate = parseDate(allPlans[i].formatedDateString);
-      final planDate = DateTime(
-        parsedDate.year,
-        parsedDate.month,
-        parsedDate.day,
-      );
+      List<MealTypeModel> allPlans = jsonList
+          .map((jsonString) => MealTypeModel.fromJson(jsonDecode(jsonString)))
+          .toList();
 
-      if (planDate.isAfter(today)) {
-        filteredPlans.add(allPlans[i]);
+      List<MealTypeModel> filteredPlans = [];
+
+      String? startDate = sharedPreferences.getString("start-date");
+      debugPrint("Start date from SharedPreferences: $startDate");
+
+      for (var i = 0; i < allPlans.length; i++) {
+        final plan = allPlans[i];
+        final parsedDate = parseDate(plan.formatedDateString);
+        final planDate = DateTime(
+          parsedDate.year,
+          parsedDate.month,
+          parsedDate.day,
+        );
+
+        if (startDate != null) {
+          DateTime startDateTime = parseDate(startDate);
+          final startDateTimePlanString = DateTime(
+            startDateTime.year,
+            startDateTime.month,
+            startDateTime.day,
+          ).subtract(Duration(days: 1));
+
+          if (planDate.isAfter(startDateTimePlanString)) {
+            filteredPlans.add(plan);
+          } else {
+            debugPrint("Skipped plan #$i — older than start date");
+          }
+        } else {
+          debugPrint("No start-date found, skipping filtering logic");
+        }
       }
-    }
 
-    return filteredPlans;
+      debugPrint("Filtered plans count: ${filteredPlans.length}");
+      return filteredPlans;
+    } catch (e, stack) {
+      debugPrint("Error in getWeeklyPlans(): $e");
+
+      return [];
+    }
   }
 
   DateTime parseDate(String formattedDateString) {

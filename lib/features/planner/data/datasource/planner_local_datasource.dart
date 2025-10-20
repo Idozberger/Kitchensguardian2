@@ -1,8 +1,8 @@
 import 'dart:convert';
-import 'dart:developer';
+import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/common/data/model/meal_type_model.dart';
+import 'package:foodkitchen/core/global/functions/const.dart';
 import 'package:foodkitchen/core/utils/date_format_to_string.dart';
-import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract interface class PlannerLocalDatasource {
@@ -17,7 +17,60 @@ class PlannerLocalDatasourceImpl implements PlannerLocalDatasource {
   @override
   Future<String> addToWeeklyPlan({required MealTypeModel newPlan}) async {
     try {
+      final today = DateTime(
+        DateTime.now().year,
+        DateTime.now().month,
+        DateTime.now().day,
+      );
+
       final currentList = await getWeeklyPlans();
+
+      String? getEndDateString = sharedPreferences.getString("end-date");
+      debugPrint("Stored end-date: $getEndDateString");
+
+      if (getEndDateString != null) {
+        DateTime endDateTime = parseDate(getEndDateString);
+        final endDateInDaysMonthYear = DateTime(
+          endDateTime.year,
+          endDateTime.month,
+          endDateTime.day,
+        );
+        if (endDateInDaysMonthYear.isBefore(today)) {
+          debugPrint("End date reached! Resetting start and end dates...");
+          sharedPreferences.setString("start-date", formatDate(today));
+
+          if (AppConstants.entitlementIsActive == false) {
+            final newEndDate = formatDate(
+              DateTime.now().add(Duration(days: 2)),
+            );
+            sharedPreferences.setString("end-date", newEndDate);
+            debugPrint("Free user — new end-date set to: $newEndDate");
+          } else {
+            final newEndDate = formatDate(
+              DateTime.now().add(Duration(days: 6)),
+            );
+            sharedPreferences.setString("end-date", newEndDate);
+            debugPrint("Premium user — new end-date set to: $newEndDate");
+          }
+        } else {
+          debugPrint("End date not reached yet.");
+        }
+      }
+
+      if (currentList.isEmpty) {
+        sharedPreferences.setString("start-date", formatDate(today));
+
+        if (AppConstants.entitlementIsActive == false) {
+          final newEndDate = formatDate(DateTime.now().add(Duration(days: 2)));
+          sharedPreferences.setString("end-date", newEndDate);
+          debugPrint("Free user — new end-date set to: $newEndDate");
+        } else {
+          final newEndDate = formatDate(DateTime.now().add(Duration(days: 6)));
+          sharedPreferences.setString("end-date", newEndDate);
+          debugPrint("Premium user — new end-date set to: $newEndDate");
+        }
+      }
+
       final alreadyExists = currentList.any(
         (plan) => plan.formatedDateString == newPlan.formatedDateString,
       );
@@ -25,41 +78,72 @@ class PlannerLocalDatasourceImpl implements PlannerLocalDatasource {
       if (alreadyExists) {
         return "Already added for this date";
       }
+
       currentList.add(newPlan);
 
       await saveThings(currentList);
+      debugPrint(
+        "Weekly plan list saved successfully. Total plans: ${currentList.length}",
+      );
+
       return "Added to your weekly plan";
-    } catch (e) {
+    } catch (e, stackTrace) {
+      debugPrint("❌ Error adding to weekly plan: $e");
+      debugPrint("🪜 Stack trace: $stackTrace");
       return "Something went wrong, Please try again later.";
     }
   }
 
   @override
   Future<List<MealTypeModel>> getWeeklyPlans() async {
-    DateTime today = DateTime.now().subtract(Duration(days: 1));
+    try {
+      final prefs = await SharedPreferences.getInstance();
 
-    final prefs = await SharedPreferences.getInstance();
-    final List<String> jsonList = prefs.getStringList('weekly_plan') ?? [];
+      final List<String> jsonList = prefs.getStringList('weekly_plan') ?? [];
 
-    List<MealTypeModel> allPlans = jsonList
-        .map((jsonString) => MealTypeModel.fromJson(jsonDecode(jsonString)))
-        .toList();
-    List<MealTypeModel> filteredPlans = [];
-    for (var i = 0; i < allPlans.length; i++) {
-      final parsedDate = parseDate(allPlans[i].formatedDateString);
-      final planDate = DateTime(
-        parsedDate.year,
-        parsedDate.month,
-        parsedDate.day,
-      );
-      log("parsed date = ${parsedDate}");
-      log("planDate date = ${planDate}");
-      if (planDate.isAfter(today)) {
-        filteredPlans.add(allPlans[i]);
+      List<MealTypeModel> allPlans = jsonList
+          .map((jsonString) => MealTypeModel.fromJson(jsonDecode(jsonString)))
+          .toList();
+
+      List<MealTypeModel> filteredPlans = [];
+
+      String? startDate = sharedPreferences.getString("start-date");
+      debugPrint("Start date from SharedPreferences: $startDate");
+
+      for (var i = 0; i < allPlans.length; i++) {
+        final plan = allPlans[i];
+        final parsedDate = parseDate(plan.formatedDateString);
+        final planDate = DateTime(
+          parsedDate.year,
+          parsedDate.month,
+          parsedDate.day,
+        );
+
+        if (startDate != null) {
+          DateTime startDateTime = parseDate(startDate);
+          final startDateTimePlanString = DateTime(
+            startDateTime.year,
+            startDateTime.month,
+            startDateTime.day,
+          ).subtract(Duration(days: 1));
+
+          if (planDate.isAfter(startDateTimePlanString)) {
+            filteredPlans.add(plan);
+          } else {
+            debugPrint("Skipped plan #$i — older than start date");
+          }
+        } else {
+          debugPrint("No start-date found, skipping filtering logic");
+        }
       }
-    }
 
-    return filteredPlans;
+      debugPrint("Filtered plans count: ${filteredPlans.length}");
+      return filteredPlans;
+    } catch (e, stack) {
+      debugPrint("Error in getWeeklyPlans(): $e");
+
+      return [];
+    }
   }
 
   Future<void> saveThings(List<MealTypeModel> list) async {
@@ -87,9 +171,5 @@ class PlannerLocalDatasourceImpl implements PlannerLocalDatasource {
     } catch (e) {
       return "Failed to delete plan. Please try again.";
     }
-  }
-
-  DateTime parseDate(String formattedDateString) {
-    return DateFormat("dd/MM/yyyy").parse(formattedDateString);
   }
 }

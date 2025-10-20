@@ -26,10 +26,15 @@ class AppConstants {
   static const String scanRecipt = "/api/scan_recipt";
   static const String getRequestedItems =
       "/api/kitchen/get_user_requested_items";
-  static const String getAiGeneratedList = "/api/kitchen/get_ai_generated_list";
+
   static const String generateRecipes = "/api/generate_recipes";
   static const String favouriteRecipes = "/api/recipe/list_fav";
   static const String removeFromFavourite = "/api/recipe/remove_from_fav";
   static const String addToFavourite = "/api/recipe/add_to_fav";
   static const String requestItems = "/api/kitchen/request_item";
+  static const String updateBucketType = "/api/kitchen/update_bucket_type";
+  static const String addMyListItemToKitchenInventory =
+      "/api/kitchen/add_mylist_items_to_kitchen_inventory";
+  static const String getAiGeneratedList = "/api/kitchen/get_ai_generated_list";
+  static const String deleteKitchenItems = "/api/kitchen/delete_items";
 }

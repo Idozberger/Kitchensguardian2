@@ -26,4 +26,84 @@ class GroceryRepositoryImpl implements GroceryRepository {
       return Left(UnknownFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, List<RequestedItemEntity>>> updateBucketType({
+    required String kitchenId,
+    required List<String> itemsIds,
+    required String bucketType,
+  }) async {
+    try {
+      final response = await groceryRemoteDatasource.updateBucketType(
+        kitchenId: kitchenId,
+        itemsIds: itemsIds,
+        bucketType: bucketType,
+      );
+      final data = (response as List)
+          .map((e) => RequestedItemModel.fromJson(e))
+          .toList();
+      return Right(data);
+    } on Failure catch (f) {
+      return Left(f);
+    } catch (e) {
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<RequestedItemEntity>>>
+  addMyListToKitchenInventory({required String kitchenId}) async {
+    try {
+      final response = await groceryRemoteDatasource
+          .addMyListToKitchenInventory(kitchenId: kitchenId);
+      final data = (response as List)
+          .map((e) => RequestedItemModel.fromJson(e))
+          .toList();
+      return Right(data);
+    } on Failure catch (f) {
+      return Left(f);
+    } catch (e) {
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<RequestedItemEntity>>> getAiGeneratedItems({
+    required String kitchenId,
+  }) async {
+    try {
+      final response = await groceryRemoteDatasource.getAiGeneratedItems(
+        kitchenId: kitchenId,
+      );
+      final data = (response as List)
+          .map((e) => RequestedItemModel.fromJson(e))
+          .toList();
+      return Right(data);
+    } on Failure catch (f) {
+      return Left(f);
+    } catch (e) {
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<RequestedItemEntity>>> deleteKitchenItems({
+    required String kitchenId,
+    required List<String> itemsIds,
+  }) async {
+    try {
+      final response = await groceryRemoteDatasource.deleteKitchenItems(
+        kitchenId: kitchenId,
+        itemsIds: itemsIds,
+      );
+      final data = (response as List)
+          .map((e) => RequestedItemModel.fromJson(e))
+          .toList();
+      return Right(data);
+    } on Failure catch (f) {
+      return Left(f);
+    } catch (e) {
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
 }
