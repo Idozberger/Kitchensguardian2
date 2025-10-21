@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
@@ -6,7 +5,6 @@ import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
-import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/date_format_to_string.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
@@ -193,49 +191,4 @@ class _PlannerPageState extends State<PlannerPage> {
       ],
     ),
   );
-
-  Widget _buildLockedPremiumTile(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        const DayPlanTile(
-          dayLabel: "Premium Plan (Locked)",
-          meals: [
-            MealTile(mealType: "Breakfast", mealName: "(Locked)"),
-            MealTile(mealType: "Lunch", mealName: "(Locked)"),
-            MealTile(mealType: "Dinner", mealName: "(Locked)"),
-          ],
-          viewRecipe: _noop,
-          addToCart: _noop,
-          deletePlan: _noop,
-          editPlan: _noop,
-        ),
-        Positioned.fill(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(15),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
-              child: Container(color: Colors.white.withOpacity(0.05)),
-            ),
-          ),
-        ),
-        Positioned.fill(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image.asset(AppAssets.crownImage, height: h(68)),
-              gap(height: 11),
-              GenericButtonWidget(
-                width: w(160),
-                onPressed: () => context.push(Routes.subscription),
-                text: "Unlock Premium",
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  static void _noop() {}
 }

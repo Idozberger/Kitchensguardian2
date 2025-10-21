@@ -212,25 +212,25 @@ class _AddMealPageState extends State<AddMealPage> {
                 },
               );
             },
-            text: "Find Recipes",
+            text: "Generate Recipe",
           ),
-          gap(height: 16),
-          Row(
-            children: [
-              const Text("Estimated"),
-              SizedBox(width: w(5)),
-              Image.asset(AppAssets.crownImage, height: h(22)),
-            ],
-          ),
-          gap(height: 16),
-          AppTextField(
-            hintText: "e.g., 450",
-            isLabled: false,
-            fillColor: Colors.white,
-            isFilled: true,
-            controller: TextEditingController(),
-            label: '',
-          ),
+          // gap(height: 16),
+          // Row(
+          //   children: [
+          //     const Text("Estimated"),
+          //     SizedBox(width: w(5)),
+          //     Image.asset(AppAssets.crownImage, height: h(22)),
+          //   ],
+          // ),
+          // gap(height: 16),
+          // AppTextField(
+          //   hintText: "e.g., 450",
+          //   isLabled: false,
+          //   fillColor: Colors.white,
+          //   isFilled: true,
+          //   controller: TextEditingController(),
+          //   label: '',
+          // ),
         ],
       ),
     );

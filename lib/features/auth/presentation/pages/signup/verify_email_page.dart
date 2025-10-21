@@ -12,6 +12,7 @@ import 'package:foodkitchen/core/widgets/generic_otp_widget.dart';
 import 'package:foodkitchen/features/auth/data/model/user_model.dart';
 import 'package:foodkitchen/features/auth/presentation/blocs/auth_bloc.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
+import 'package:foodkitchen/features/auth/presentation/widgets/appbar.dart';
 import 'package:foodkitchen/features/auth/presentation/widgets/textspan_widget.dart';
 import 'package:go_router/go_router.dart';
 
@@ -63,7 +64,6 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
           AppToast.show(state.successMessage, ToastType.success);
         }
         if (state is AuthUserVerified) {
-          // AppToast.show(state.successMessage, ToastType.success);
           context.go(Routes.emailVerifiedSuccess);
         }
         if (state is AuthFailure) {
@@ -72,37 +72,18 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
       },
       builder: (BuildContext context, AuthState state) {
         return Scaffold(
+          appBar: CustomAppBar(
+            title: "Verification Code",
+            subTitle: "Please type the verification code sent to",
+            centerTitle: false,
+          ),
           body: SafeArea(
             child: SingleChildScrollView(
-              padding: gapSymmetric(horizontal: 20, vertical: 35),
+              padding: gapSymmetric(horizontal: 20, vertical: 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  InkWell(
-                    borderRadius: BorderRadius.circular(h(55)),
-                    onTap: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Ink(
-                      padding: gapSymmetric(horizontal: 15, vertical: 12),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Color(0xffD4D2D2)),
-                      ),
-                      child: SvgPicture.asset(AppAssets.backArrowiOS),
-                    ),
-                  ),
-                  SizedBox(height: h(24)),
-                  Text(
-                    "Verification Code",
-                    style: Theme.of(context).textTheme.headlineLarge,
-                  ),
-                  SizedBox(height: h(5)),
-                  Text(
-                    "Please type the verification code sent to",
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
                   TextspanWidget(
                     textAlign: TextAlign.left,
                     callback: () {
@@ -115,7 +96,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                     buttonColor: AppColors.primaryColor,
                     fontWeight: FontWeight.w600,
                   ),
-                  SizedBox(height: h(20)),
+                  SizedBox(height: h(16)),
                   Form(
                     key: _formKey,
                     child: Column(

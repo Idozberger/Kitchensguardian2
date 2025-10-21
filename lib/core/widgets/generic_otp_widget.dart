@@ -5,12 +5,19 @@ import 'package:foodkitchen/core/global/functions/resize.dart';
 
 class OtpField extends StatelessWidget {
   final bool preFilledStar;
+  final bool isJoining;
   final void Function(String)? onCompleted;
 
-  const OtpField({super.key, this.onCompleted, this.preFilledStar = false});
+  OtpField({
+    super.key,
+    this.onCompleted,
+    this.preFilledStar = false,
+    this.isJoining = false,
+  });
 
   @override
   Widget build(BuildContext context) {
+    print("joining $isJoining");
     final defaultPinTheme = PinTheme(
       constraints: BoxConstraints(minWidth: w(55), minHeight: h(55)),
       textStyle: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -24,8 +31,9 @@ class OtpField extends StatelessWidget {
     );
 
     return Pinput(
-      length: 5,
-      separatorBuilder: (index) => SizedBox(width: w(15)),
+      key: ValueKey(isJoining),
+      length: isJoining ? 6 : 5,
+      separatorBuilder: (index) => SizedBox(width: w(4)),
 
       defaultPinTheme: defaultPinTheme,
       focusedPinTheme: defaultPinTheme.copyWith(
@@ -37,7 +45,7 @@ class OtpField extends StatelessWidget {
       errorPinTheme: defaultPinTheme.copyWith(
         decoration: BoxDecoration(
           border: Border.all(color: AppColors.errorColor, width: 2),
-          borderRadius: BorderRadius.circular(h(10)),
+          borderRadius: BorderRadius.circular(h(4)),
         ),
       ),
       preFilledWidget: preFilledStar

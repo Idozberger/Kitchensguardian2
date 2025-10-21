@@ -47,6 +47,8 @@ class _AddItemPageState extends State<AddItemPage> {
         PantryItem(
           nameController: TextEditingController(),
           qtyController: TextEditingController(),
+          expireDate: TextEditingController(),
+          manuFacturingDate: TextEditingController(),
         ),
       );
     });
@@ -246,6 +248,46 @@ class _AddItemPageState extends State<AddItemPage> {
                   "Butler's Pantry",
                 ],
                 onChanged: (val) => setState(() => item.pantry = val),
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: h(15)),
+        Row(
+          spacing: w(12),
+          children: [
+            Flexible(
+              child: Column(
+                children: [
+                  _formLabel(context, "Manufacturing date"),
+                  SizedBox(height: h(10)),
+                  AppTextField(
+                    controller: item.manuFacturingDate,
+                    hintText: "Manufacturing date",
+                    fillColor: const Color(0xffF9F9F9),
+                    isFilled: true,
+                    isLabled: false,
+                    keyboardType: TextInputType.text,
+                    label: "",
+                  ),
+                ],
+              ),
+            ),
+            Flexible(
+              child: Column(
+                children: [
+                  _formLabel(context, "Expiring date"),
+                  SizedBox(height: h(10)),
+                  AppTextField(
+                    controller: item.expireDate,
+                    hintText: "Expiring date",
+                    fillColor: const Color(0xffF9F9F9),
+                    isFilled: true,
+                    isLabled: false,
+                    keyboardType: TextInputType.text,
+                    label: "",
+                  ),
+                ],
               ),
             ),
           ],

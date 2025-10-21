@@ -123,7 +123,7 @@ class GroceryBloc extends Bloc<GroceryEvent, GroceryState> {
 
         emit(
           state.copyWith(
-            successMessage: "Items moved to mylist",
+            successMessage: "Items successfully added to kitchen inventory",
             requestedItemsList: requestedItems,
             finalListItemsList: finalListItems,
             isLoading: false,

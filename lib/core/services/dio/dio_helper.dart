@@ -17,7 +17,6 @@ class DioHelper {
           final prefs = await SharedPreferences.getInstance();
           final token = prefs.getString("access-token");
 
-          ///[dio.options.headers]
           if (token != null && token.isNotEmpty) {
             options.headers['Authorization'] = 'Bearer $token';
           }
@@ -34,23 +33,16 @@ class DioHelper {
         },
         onResponse: (response, handler) {
           logSuccess("✅ [RESPONSE]");
-          logSuccess(
-            "Data: ${response.data} "
-            "${response.requestOptions.uri} "
-            "${response.statusCode}",
-          );
+
           return handler.next(response);
         },
         onError: (DioException e, handler) async {
           if (e.response != null) {
-            logError("❌ [ERROR RESPONSE]");
             logError("Data: ${e.response?.data}");
 
-            logError("Status: ${e.response?.statusCode}");
-            logError("Message: ${e.response?.statusMessage}");
             if (e.response?.statusCode == 401) {
               AppToast.show(
-                "Session expired. Please log in again.",
+                "Your session has ended. You’ve been logged out, please sign in again!",
                 ToastType.error,
               );
 

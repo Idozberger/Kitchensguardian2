@@ -57,8 +57,8 @@ class _ProfileHeaderState extends State<ProfileHeader> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: const [
-              ProfileStatTile(title: "Meals Planned", value: "47"),
-              ProfileStatTile(title: "Shopping Lists", value: "89"),
+              ProfileStatTile(title: "Meals Planned", value: "12"),
+              ProfileStatTile(title: "Shopping Lists", value: "10"),
             ],
           ),
           SizedBox(height: h(15)),

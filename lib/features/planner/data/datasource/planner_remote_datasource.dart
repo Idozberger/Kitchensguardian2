@@ -23,8 +23,13 @@ class PlannerRemoteDatasourceImpl implements PlannerRemoteDatasource {
     try {
       final response = await dio.post(
         AppConstants.generateRecipes,
-        data: {"instructions": instructions, "kitchen_id": kitchenId},
+        data: {
+          "instructions":
+              "$instructions. Note: Generate recipes that have approximately mentioned calories only. Do not exceed or go below this number significantly.",
+          "kitchen_id": kitchenId,
+        },
       );
+
       final data = response.data["recipes"];
 
       if (data is List) {

@@ -7,11 +7,14 @@ import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
+import 'package:foodkitchen/core/utils/date_format_to_string.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
+import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_state.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/recipe_card.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 class TonightRecipeWidget extends StatefulWidget {
   const TonightRecipeWidget({super.key});
@@ -22,9 +25,9 @@ class TonightRecipeWidget extends StatefulWidget {
 
 class _TonightRecipeWidgetState extends State<TonightRecipeWidget> {
   late PageController _pageController;
-  int _currentPage = 0;
+  int currentPage = 0;
   final today = DateTime.now();
-  List<MealTypeEntity> filteredPlans = [];
+
   @override
   void initState() {
     super.initState();
@@ -41,6 +44,11 @@ class _TonightRecipeWidgetState extends State<TonightRecipeWidget> {
   Widget build(BuildContext context) {
     return BlocBuilder<HomeBloc, HomeState>(
       builder: (_, state) {
+        final todayFormatted = formatDate(DateTime.now());
+        final todayRecipes = state.dateBasedPlan
+            .where((recipe) => recipe.formatedDateString == todayFormatted)
+            .toList();
+
         return UpperTile(
           horizontalPadding: 0,
           widget: Column(
@@ -69,28 +77,48 @@ class _TonightRecipeWidgetState extends State<TonightRecipeWidget> {
                     color: AppColors.primaryColor,
                   ),
                 )
-              else if (state.dateBasedPlan.isEmpty)
+              else if (todayRecipes.isEmpty)
                 Center(
-                  child: Text(
-                    "No upcoming recipes found",
-                    style: Theme.of(context).textTheme.headlineMedium,
+                  child: Column(
+                    children: [
+                      Text(
+                        "No upcoming recipes found",
+                        style: Theme.of(context).textTheme.headlineMedium,
+                      ),
+                      gap(height: 4),
+                      TextButton(
+                        onPressed: () {
+                          final date = DateFormat(
+                            'dd/MM/yyyy',
+                          ).format(DateTime.now());
+                          context.pushNamed(
+                            Routes.generateRecipes,
+                            extra: {
+                              "selected_date": date,
+                              "selected_meal_type": "Breakfast",
+                              "is_plan": true,
+                            },
+                          );
+                        },
+                        child: Text("Find Recipes"),
+                      ),
+                    ],
                   ),
                 )
               else
                 SizedBox(
-                  height: h(300),
+                  height: h(280),
                   child: Align(
                     alignment: Alignment.topLeft,
                     child: PageView.builder(
                       padEnds: false,
                       controller: _pageController,
-                      itemCount: state.dateBasedPlan.length,
+                      itemCount: todayRecipes.length,
                       onPageChanged: (index) {
-                        setState(() => _currentPage = index);
+                        setState(() => currentPage = index);
                       },
                       itemBuilder: (context, index) {
-                        final recipe = state.dateBasedPlan[index];
-
+                        final recipe = todayRecipes[index];
                         return Padding(
                           padding: EdgeInsets.only(left: w(20)),
                           child: RecipeCard(
@@ -109,25 +137,6 @@ class _TonightRecipeWidgetState extends State<TonightRecipeWidget> {
                           ),
                         );
                       },
-                    ),
-                  ),
-                ),
-
-              if (filteredPlans.isNotEmpty)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(
-                    filteredPlans.length,
-                    (index) => Container(
-                      margin: EdgeInsets.symmetric(horizontal: w(4)),
-                      width: w(8),
-                      height: h(8),
-                      decoration: BoxDecoration(
-                        color: _currentPage == index
-                            ? AppColors.primaryColor
-                            : const Color(0xffD4D2D2),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
                     ),
                   ),
                 ),

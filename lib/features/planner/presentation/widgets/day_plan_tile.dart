@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
-import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/planner/presentation/widgets/day_plan_menu.dart';
@@ -60,40 +59,18 @@ class DayPlanTile extends StatelessWidget {
   }
 
   Widget _buildFooterButtons(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: SizedBox(
-            height: h(40),
-            child: OutlinedButton(
-              onPressed: () => viewRecipe(),
-              child: Text(
-                "View Recipe",
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontSize: t(14),
-                  color: AppColors.primaryColor,
-                ),
-              ),
-            ),
+    return SizedBox(
+      height: h(40),
+      child: OutlinedButton(
+        onPressed: () => viewRecipe(),
+        child: Text(
+          "View Recipe",
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+            fontSize: t(14),
+            color: AppColors.primaryColor,
           ),
         ),
-        SizedBox(width: h(10)),
-        Expanded(
-          child: SizedBox(
-            height: h(40),
-            child: ElevatedButton(
-              onPressed: () => addToCart(),
-              child: Text(
-                "Add to Cart",
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontSize: t(14),
-                  color: Colors.black,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

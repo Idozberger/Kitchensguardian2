@@ -8,6 +8,7 @@ import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
 import 'package:foodkitchen/features/auth/presentation/blocs/auth_bloc.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
+import 'package:foodkitchen/features/auth/presentation/widgets/appbar.dart';
 import 'package:go_router/go_router.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
@@ -49,50 +50,26 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       },
       builder: (BuildContext context, AuthState state) {
         return Scaffold(
+          appBar: CustomAppBar(
+            title: "Reset password",
+            subTitle: "Enter your email address to reset your password",
+            centerTitle: false,
+          ),
           body: SafeArea(
             child: SingleChildScrollView(
-              padding: gapSymmetric(horizontal: 20, vertical: 35),
+              padding: gapSymmetric(horizontal: 20, vertical: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  InkWell(
-                    borderRadius: BorderRadius.circular(h(55)),
-                    onTap: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Ink(
-                      padding: gapSymmetric(horizontal: 15, vertical: 12),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Color(0xffD4D2D2)),
-                      ),
-                      child: SvgPicture.asset(AppAssets.backArrowiOS),
-                    ),
-                  ),
-                  SizedBox(height: h(24)),
-                  Text(
-                    "Forgot Password",
-                    style: Theme.of(context).textTheme.headlineLarge,
-                  ),
-                  SizedBox(height: h(5)),
-                  Text(
-                    "Enter your email address to reset your password",
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                  SizedBox(height: h(24)),
                   Form(
                     key: _formKey,
-                    child: Column(
-                      children: [
-                        AppTextField(
-                          controller: _emailController,
-                          label: "Email address",
-                          keyboardType: TextInputType.emailAddress,
-                          // validator: emailValidator,
-                          hintText: "Enter your email",
-                        ),
-                      ],
+                    child: AppTextField(
+                      controller: _emailController,
+                      label: "Email address",
+                      keyboardType: TextInputType.emailAddress,
+                      // validator: emailValidator,
+                      hintText: "Enter your email",
                     ),
                   ),
 

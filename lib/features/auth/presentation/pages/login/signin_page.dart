@@ -86,6 +86,7 @@ class _SignInPageState extends State<SignInPage> {
       },
       builder: (BuildContext context, AuthState state) {
         return Scaffold(
+          resizeToAvoidBottomInset: false,
           body: Align(
             alignment: Alignment.bottomCenter,
             child: SingleChildScrollView(

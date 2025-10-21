@@ -50,6 +50,7 @@ Future<dynamic> showJoinKitchenDialog(BuildContext context) {
                 ),
                 SizedBox(height: h(10)),
                 OtpField(
+                  isJoining: true,
                   preFilledStar: true,
                   onCompleted: (invitationCode) {
                     invitaionCode = invitationCode;

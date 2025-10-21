@@ -56,28 +56,6 @@ class ProfilePage extends StatelessWidget {
                         context.push(Routes.logout);
                       },
                     ),
-                  ],
-                ),
-              ),
-              gap(height: 20),
-              UpperTile(
-                widget: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Account Management",
-                      style: Theme.of(context).textTheme.headlineLarge,
-                    ),
-                    gap(height: 10),
-                    _buildListTile(
-                      context,
-                      assetPath: AppAssets.favouriteSvg,
-                      title: "Food Preferences",
-                      subTitle: "Check your selected favorite food",
-                      callback: () {
-                        AppToast.show("Food Preferences", ToastType.success);
-                      },
-                    ),
                     gap(height: 5),
                     _buildListTile(
                       context,
@@ -92,6 +70,7 @@ class ProfilePage extends StatelessWidget {
                 ),
               ),
               gap(height: 20),
+
               UpperTile(
                 widget: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

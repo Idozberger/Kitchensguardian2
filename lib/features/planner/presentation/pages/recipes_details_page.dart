@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
+import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
@@ -20,22 +21,20 @@ import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dar
 import 'package:foodkitchen/features/planner/presentation/widgets/recipes_step_tile.dart';
 import 'package:go_router/go_router.dart';
 
-class GeneratedRecipesDetailPage extends StatefulWidget {
+class RecipesDetailsPage extends StatefulWidget {
   final MealTypeEntity mealTypeEntity;
   final bool isPlan;
-  const GeneratedRecipesDetailPage({
+  const RecipesDetailsPage({
     super.key,
     required this.mealTypeEntity,
     required this.isPlan,
   });
 
   @override
-  State<GeneratedRecipesDetailPage> createState() =>
-      _GeneratedRecipesDetailPageState();
+  State<RecipesDetailsPage> createState() => _RecipesDetailsPageState();
 }
 
-class _GeneratedRecipesDetailPageState
-    extends State<GeneratedRecipesDetailPage> {
+class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
   late PlannerBloc plannerBloc;
   late MealTypeEntity recipe;
   bool isFav = false;
@@ -65,21 +64,21 @@ class _GeneratedRecipesDetailPageState
           child: Padding(
             padding: gapSymmetric(horizontal: 20, vertical: 20),
             child: Column(
+              spacing: h(14),
               children: [
                 _buildHeaderImage(),
-                gap(height: 20),
+
                 _buildRecipeInfo(context),
-                gap(height: 20),
+
                 _buildPrimaryActions(context),
-                gap(height: 20),
+
                 _buildSecondaryActions(context),
-                gap(height: 20),
+
                 if (secondaryActionSelectedIndex == 0) ...[
                   _buildIngredientsList(context),
-                  // gap(height: 20),
-                  // recipe.missingItems
-                  //     ? _buildMissingItemsList(context)
-                  //     : SizedBox(),
+                  recipe.missingItems
+                      ? _buildMissingItemsList(context)
+                      : SizedBox(),
                 ] else
                   _buildRecipesAndStepList(),
               ],
@@ -90,29 +89,32 @@ class _GeneratedRecipesDetailPageState
       bottomNavigationBar:
           startRecipe == false || secondaryActionSelectedIndex == 0
           ? null
-          : SafeArea(
-              child: Padding(
-                padding: gapSymmetric(horizontal: 20, vertical: 20),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SegmentedProgressBar(
-                      total: steps.length,
-                      completed: steps
-                          .where((step) => step["completed"] == true)
-                          .length,
-                    ),
-                    gap(height: 6),
-                    Align(
-                      alignment: Alignment.topRight,
-                      child: Text(
-                        "0${steps.where((step) => step["completed"] == true).length}/0${steps.length}",
-                        style: Theme.of(
-                          context,
-                        ).textTheme.bodySmall!.copyWith(color: Colors.grey),
+          : ColoredBox(
+              color: Colors.white,
+              child: SafeArea(
+                child: Padding(
+                  padding: gapSymmetric(horizontal: 20, vertical: 12),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SegmentedProgressBar(
+                        total: steps.length,
+                        completed: steps
+                            .where((step) => step["completed"] == true)
+                            .length,
                       ),
-                    ),
-                  ],
+                      gap(height: 6),
+                      Align(
+                        alignment: Alignment.topRight,
+                        child: Text(
+                          "${steps.where((step) => step["completed"] == true).length}/${steps.length}",
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodySmall!.copyWith(color: Colors.grey),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -133,7 +135,7 @@ class _GeneratedRecipesDetailPageState
         ],
       ),
       title: Text(
-        "Generated Recipe",
+        "Recipe Details",
         style: Theme.of(context).textTheme.headlineLarge,
       ),
     );
@@ -261,6 +263,7 @@ class _GeneratedRecipesDetailPageState
                     ],
                   )
                 : GenericButtonWidget(
+                    isDisabled: recipe.missingItems,
                     onPressed: () {
                       if (recipe.missingItems == false) {
                         setState(() {
@@ -349,6 +352,7 @@ class _GeneratedRecipesDetailPageState
           label,
           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
             fontSize: t(14),
+            fontWeight: FontWeight.w400,
             color: isSelected ? Colors.black : AppColors.primaryColor,
           ),
         ),
@@ -400,70 +404,27 @@ class _GeneratedRecipesDetailPageState
             ),
           ),
           SizedBox(height: h(20)),
-          GenericButtonWidget(onPressed: () {}, text: "Request Now"),
+          GenericButtonWidget(
+            onPressed: () {
+              context.push(Routes.requestNow);
+            },
+            text: "Request Now",
+          ),
         ],
       ),
     );
-
-    // return UpperTile(
-    //   widget: Column(
-    //     crossAxisAlignment: CrossAxisAlignment.start,
-    //     children: [
-    //       Row(
-    //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    //         children: [
-    //           Text(
-    //             "Missing Items",
-    //             style: Theme.of(context).textTheme.headlineLarge,
-    //           ),
-    //           TextButton(
-    //             onPressed: () {},
-    //             child: Text(
-    //               "Select All",
-    //               style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-    //                 color: AppColors.primaryColor,
-    //               ),
-    //             ),
-    //           ),
-    //         ],
-    //       ),
-    //       gap(height: 14),
-    //       GenericCircleCheckboxTile(
-    //         title: '1/2 tsp cayenne pepper',
-    //         isChecked: true,
-    //         onChanged: (bool value) {},
-    //         activeColor: AppColors.primaryColor,
-    //       ),
-    //       gap(height: 14),
-    //       GenericCircleCheckboxTile(
-    //         title: '1 egg',
-    //         isChecked: true,
-    //         onChanged: (bool value) {},
-    //         activeColor: AppColors.primaryColor,
-    //       ),
-    //       gap(height: 14),
-    //       GenericCircleCheckboxTile(
-    //         title: '1 cup buttermilk',
-    //         isChecked: false,
-    //         onChanged: (bool value) {},
-    //         activeColor: AppColors.primaryColor,
-    //       ),
-    //       gap(height: 15),
-    //       GenericButtonWidget(onPressed: () {}, text: "Add in List"),
-    //     ],
-    //   ),
-    // );
   }
 
   Widget _buildRecipesAndStepList() {
     return Column(
       children: [
         UpperTile(
+          color: Colors.white,
           widget: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text("Recipe", style: Theme.of(context).textTheme.headlineLarge),
-              gap(height: 12),
+              gap(height: 8),
               Text(
                 recipe.recipeShortSummary,
                 style: Theme.of(context).textTheme.headlineMedium,
@@ -471,18 +432,20 @@ class _GeneratedRecipesDetailPageState
             ],
           ),
         ),
-        gap(height: 20),
+        gap(height: 15),
+
         UpperTile(
           widget: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text("Steps", style: Theme.of(context).textTheme.headlineLarge),
-              gap(height: 15),
+              gap(height: 10),
               Text(
                 recipe.title,
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
-              gap(height: 25),
+              gap(height: 10),
+
               Column(
                 children: List.generate(
                   steps.length,
@@ -490,17 +453,83 @@ class _GeneratedRecipesDetailPageState
                     padding: gapOnly(bottom: 20),
                     child: RecipeStepTile(
                       stepText: steps[index]["step"],
-                      callback: () {
-                        if (startRecipe) {
-                          setState(() {
-                            steps[index]["completed"] =
-                                !steps[index]["completed"];
-                          });
-                        } else {
+                      callback: () async {
+                        if (!startRecipe) {
                           AppToast.show(
                             "Start the recipe first before proceeding to the steps!",
                             ToastType.warning,
                           );
+                          return;
+                        }
+
+                        final isCompleted = steps[index]["completed"];
+
+                        if (isCompleted) {
+                          final shouldUncheck = await showDialog<bool>(
+                            context: context,
+                            builder: (context) => GenericDialog(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    "Uncheck Step",
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineLarge!
+                                        .copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: t(14),
+                                        ),
+                                  ),
+                                  gap(height: 12),
+                                  Text(
+                                    "Are you sure you want to mark this step as incomplete?",
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineLarge!
+                                        .copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: t(14),
+                                        ),
+                                  ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.pop(context, false),
+                                        child: const Text("Cancel"),
+                                      ),
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.pop(context, true),
+                                        child: const Text("Yes"),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+
+                          if (shouldUncheck == true) {
+                            setState(() {
+                              steps[index]["completed"] = false;
+                            });
+                          }
+                        } else {
+                          setState(() {
+                            steps[index]["completed"] = true;
+                          });
+
+                          bool allCompleted = steps.every(
+                            (step) => step["completed"] == true,
+                          );
+
+                          if (allCompleted) {
+                            _showAllStepsCompletedDialog();
+                          }
                         }
                       },
                       isCompleted: steps[index]["completed"],
@@ -512,6 +541,64 @@ class _GeneratedRecipesDetailPageState
           ),
         ),
       ],
+    );
+  }
+
+  void _showAllStepsCompletedDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => GenericDialog(
+        borderRadius: h(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              "Recipe Completed!",
+              style: Theme.of(context).textTheme.headlineLarge!.copyWith(
+                fontWeight: FontWeight.w600,
+                fontSize: t(14),
+              ),
+            ),
+            SizedBox(height: h(10)),
+            Text(
+              "You've successfully completed all the steps!",
+              style: Theme.of(context).textTheme.headlineLarge!.copyWith(
+                fontWeight: FontWeight.w600,
+                fontSize: t(12),
+              ),
+            ),
+            SizedBox(height: h(16)),
+            Align(
+              alignment: Alignment.center,
+              child: SizedBox(
+                width: w(147),
+                height: h(40),
+                child: GenericButtonWidget(
+                  isLoading: false,
+                  onPressed: () {
+                    setState(() {
+                      startRecipe = false;
+                      steps = steps.map((step) {
+                        step["completed"] = false;
+                        return step;
+                      }).toList();
+                      AppToast.show(
+                        "You’ve finished the recipe!",
+                        ToastType.success,
+                      );
+                    });
+                    context.pop();
+                  },
+
+                  text: "Ok",
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

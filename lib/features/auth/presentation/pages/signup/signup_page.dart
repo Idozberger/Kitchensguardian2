@@ -10,6 +10,7 @@ import 'package:foodkitchen/features/auth/data/model/user_model.dart';
 import 'package:foodkitchen/features/auth/presentation/blocs/auth_bloc.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
+import 'package:foodkitchen/features/auth/presentation/widgets/appbar.dart';
 import 'package:foodkitchen/features/auth/presentation/widgets/textspan_widget.dart';
 import 'package:go_router/go_router.dart';
 
@@ -68,38 +69,20 @@ class _SignUpPageState extends State<SignUpPage> {
       },
       builder: (BuildContext context, AuthState state) {
         return Scaffold(
+          appBar: CustomAppBar(
+            preferedHeight: 70,
+            title: "Join the Food Kitchen",
+            subTitle:
+                "Create an account to save your favorite recipes and start cooking like a pro",
+            centerTitle: false,
+          ),
           body: SafeArea(
             child: SingleChildScrollView(
-              padding: gapSymmetric(horizontal: 20, vertical: 35),
+              padding: gapSymmetric(horizontal: 20, vertical: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  InkWell(
-                    borderRadius: BorderRadius.circular(h(55)),
-                    onTap: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Ink(
-                      padding: gapSymmetric(horizontal: 15, vertical: 12),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Color(0xffD4D2D2)),
-                      ),
-                      child: SvgPicture.asset(AppAssets.backArrowiOS),
-                    ),
-                  ),
-                  SizedBox(height: h(24)),
-                  Text(
-                    "Join the Food Kitchen",
-                    style: Theme.of(context).textTheme.headlineLarge,
-                  ),
-                  SizedBox(height: h(5)),
-                  Text(
-                    "Create an account to save your favorite recipes and start cooking like a pro",
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                  SizedBox(height: h(39)),
                   Form(
                     key: _formKey,
                     child: Column(

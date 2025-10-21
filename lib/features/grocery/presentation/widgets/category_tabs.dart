@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
@@ -25,6 +26,7 @@ class CategoryTabs extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         itemCount: categories.length,
         shrinkWrap: true,
+        padding: gapOnly(left: 20),
         separatorBuilder: (_, __) => gap(width: 8),
         itemBuilder: (_, index) {
           return InkWell(

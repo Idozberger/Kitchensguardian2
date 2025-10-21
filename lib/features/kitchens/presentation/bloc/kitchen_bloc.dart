@@ -77,6 +77,7 @@ class KitchenBloc extends Bloc<KitchenEvent, KitchenState> {
       (failure) => emit(KitchenFailure(failure.message)),
       (message) => emit(KitchenSuccess(message)),
     );
+    add(FetchKitchens());
   }
 
   Future<void> _onSwitchKitchen(

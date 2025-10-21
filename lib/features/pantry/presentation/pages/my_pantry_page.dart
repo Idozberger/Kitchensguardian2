@@ -125,7 +125,7 @@ class _MyPantryPageState extends State<MyPantryPage> {
             );
           },
         ),
-        // TODO Change Condition to Member
+
         bottomNavigationBar: userCubit.state.role != "member"
             ? null
             : _requestNow(context),

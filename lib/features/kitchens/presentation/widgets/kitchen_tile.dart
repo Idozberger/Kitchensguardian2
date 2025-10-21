@@ -31,7 +31,7 @@ class KitchenTile extends StatelessWidget {
     this.titleFontWeight = FontWeight.w500,
     this.onTileTap,
     this.onButtonPressed,
-    this.buttonText = "Switch",
+    this.buttonText = "View",
     this.buttonWidth = 90,
     this.buttonHeight = 23,
   });

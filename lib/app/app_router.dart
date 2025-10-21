@@ -28,7 +28,7 @@ import 'package:foodkitchen/features/planner/presentation/pages/add_meal_page.da
 import 'package:foodkitchen/features/planner/presentation/pages/edit_meal_page.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/favourite_food_page.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/generate_recipes_page.dart';
-import 'package:foodkitchen/features/planner/presentation/pages/generated_recipes_detail_page.dart';
+import 'package:foodkitchen/features/planner/presentation/pages/recipes_details_page.dart';
 import 'package:foodkitchen/features/profile/presentation/pages/change_password_page.dart';
 import 'package:foodkitchen/features/profile/presentation/pages/edit_profile_page.dart';
 import 'package:foodkitchen/features/profile/presentation/pages/profile_page.dart';
@@ -143,7 +143,7 @@ final GoRouter router = GoRouter(
         final Map<String, dynamic> data = state.extra as Map<String, dynamic>;
         MealTypeEntity mealTypeEntity = data["meal_type_entity"];
         bool isPlan = data["is_plan"];
-        return GeneratedRecipesDetailPage(
+        return RecipesDetailsPage(
           mealTypeEntity: mealTypeEntity,
           isPlan: isPlan,
         );

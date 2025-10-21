@@ -131,7 +131,7 @@ class _SplashScreenState extends State<SplashScreen> {
           if (state is TokenExpired) {
             showErrorSnackBar(
               context,
-              "You are logged out, please sign-in again!",
+              "Your session has ended. You’ve been logged out, please sign in again!",
             );
             context.go(Routes.signIn);
           } else if (state is NoInternet) {
@@ -192,6 +192,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void showErrorSnackBar(BuildContext context, String message) {
     scaffoldMessengerKey.currentState!.showSnackBar(
       SnackBar(
+        key: UniqueKey(),
         content: Text(
           message,
           style: const TextStyle(

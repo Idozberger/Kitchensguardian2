@@ -14,6 +14,7 @@ class GenericButtonWidget extends StatelessWidget {
   final double? height;
   final BorderRadiusGeometry? borderRadius;
   final Color? color;
+  final bool isDisabled;
   const GenericButtonWidget({
     super.key,
     required this.onPressed,
@@ -24,6 +25,7 @@ class GenericButtonWidget extends StatelessWidget {
     this.padding,
     this.isLoading = false,
     this.height = 40,
+    this.isDisabled = false,
     this.isOutlined = false,
     this.width = double.infinity,
     this.borderRadius,
@@ -47,8 +49,11 @@ class GenericButtonWidget extends StatelessWidget {
               ),
             )
           : ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: color),
-              onPressed: onPressed,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: color,
+                disabledBackgroundColor: AppColors.disabledPrimaryColor,
+              ),
+              onPressed: isDisabled ? null : onPressed,
               child: isLoading
                   ? Transform.scale(
                       scale: 0.7,
