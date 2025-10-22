@@ -1,10 +1,10 @@
 import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/features/pantry/data/datasource/pantry_remote_datasource.dart';
-import 'package:foodkitchen/features/pantry/data/model/pantry_model.dart';
+import 'package:foodkitchen/core/common/data/model/pantry_model.dart';
 import 'package:foodkitchen/features/pantry/data/model/scan_receipt_model.dart';
 import 'package:foodkitchen/features/pantry/data/model/scan_receipt_item_model.dart';
-import 'package:foodkitchen/features/pantry/domain/entities/pantry.dart';
-import 'package:foodkitchen/features/pantry/domain/entities/pantry_item.dart';
+import 'package:foodkitchen/core/common/entities/pantry.dart';
+import 'package:foodkitchen/core/common/entities/pantry_item.dart';
 import 'package:foodkitchen/features/pantry/domain/entities/scan_receipt.dart';
 import 'package:foodkitchen/features/pantry/domain/repository/pantry_repository.dart';
 import 'package:fpdart/fpdart.dart';

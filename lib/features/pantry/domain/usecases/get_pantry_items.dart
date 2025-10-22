@@ -1,6 +1,6 @@
 import 'package:foodkitchen/core/error/failures.dart';
-import 'package:foodkitchen/core/usecase/usecase.dart';
-import 'package:foodkitchen/features/pantry/domain/entities/pantry_item.dart';
+import 'package:foodkitchen/core/common/usecase/usecase.dart';
+import 'package:foodkitchen/core/common/entities/pantry_item.dart';
 import 'package:foodkitchen/features/pantry/domain/repository/pantry_repository.dart';
 import 'package:fpdart/fpdart.dart';
 

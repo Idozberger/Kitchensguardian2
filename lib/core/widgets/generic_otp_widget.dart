@@ -19,7 +19,12 @@ class OtpField extends StatelessWidget {
   Widget build(BuildContext context) {
     print("joining $isJoining");
     final defaultPinTheme = PinTheme(
-      constraints: BoxConstraints(minWidth: w(55), minHeight: h(55)),
+      constraints: BoxConstraints(
+        minWidth: w(55),
+        minHeight: h(50),
+        maxWidth: w(55),
+        maxHeight: h(50),
+      ),
       textStyle: Theme.of(context).textTheme.headlineSmall?.copyWith(
         color: Colors.black,
         fontWeight: FontWeight.w600,
@@ -33,7 +38,7 @@ class OtpField extends StatelessWidget {
     return Pinput(
       key: ValueKey(isJoining),
       length: isJoining ? 6 : 5,
-      separatorBuilder: (index) => SizedBox(width: w(4)),
+      separatorBuilder: (index) => SizedBox(width: isJoining ? w(4) : w(20)),
 
       defaultPinTheme: defaultPinTheme,
       focusedPinTheme: defaultPinTheme.copyWith(

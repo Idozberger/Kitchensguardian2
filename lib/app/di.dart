@@ -28,12 +28,18 @@ import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_bloc.
 import 'package:foodkitchen/features/grocery/data/datasource/grocery_remote_datasource.dart';
 import 'package:foodkitchen/features/grocery/data/repository/grocery_repository_impl.dart';
 import 'package:foodkitchen/features/grocery/domain/repository/grocery_repository.dart';
+import 'package:foodkitchen/features/grocery/domain/usecases/add_custom_item.dart';
 import 'package:foodkitchen/features/grocery/domain/usecases/add_mylist_to_inventory.dart';
 import 'package:foodkitchen/features/grocery/domain/usecases/delete_kitchen_items.dart';
 import 'package:foodkitchen/features/grocery/domain/usecases/get_ai_generated_items.dart';
 import 'package:foodkitchen/features/grocery/domain/usecases/get_requested_items.dart';
 import 'package:foodkitchen/features/grocery/domain/usecases/update_bucket_type.dart';
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_bloc.dart';
+import 'package:foodkitchen/features/history/data/datasource/scan_history_remote_datasource.dart';
+import 'package:foodkitchen/features/history/data/repository/scan_history_repository_impl.dart';
+import 'package:foodkitchen/features/history/domain/repository/scan_history_repository.dart';
+import 'package:foodkitchen/features/history/domain/usecases/get_scan_history_usecase.dart';
+import 'package:foodkitchen/features/history/presentation/bloc/scan_history_cubit.dart';
 import 'package:foodkitchen/features/home/data/datasource/home_remote_datasource.dart';
 import 'package:foodkitchen/features/home/data/repository/home_repository_impl.dart';
 import 'package:foodkitchen/features/home/domain/repository/home_repository.dart';
@@ -92,6 +98,7 @@ Future<void> initDependencies() async {
   _initPantry();
   _initGrocery();
   _initPlanner();
+  _initHistory();
 }
 
 void _dioInjection() {
@@ -272,6 +279,7 @@ void _initGrocery() async {
     ..registerFactory(() => AddMylistToInventory(sl()))
     ..registerFactory(() => GetAiGeneratedItems(sl()))
     ..registerFactory(() => DeleteKitchenItems(sl()))
+    ..registerFactory(() => AddCustomItem(sl()))
     // Bloc
     ..registerLazySingleton(
       () => GroceryBloc(
@@ -280,6 +288,7 @@ void _initGrocery() async {
         addMylistToInventory: AddMylistToInventory(sl()),
         getAiGeneratedItems: GetAiGeneratedItems(sl()),
         deleteKitchenItems: DeleteKitchenItems(sl()),
+        addCustomItem: AddCustomItem(sl()),
       ),
     );
 }
@@ -321,5 +330,25 @@ void _initPlanner() async {
         deletePlan: DeletePlan(sl()),
         homeBloc: sl(),
       ),
+    );
+}
+
+void _initHistory() async {
+  // Datasource
+
+  sl
+    ..registerFactory<ScanHistoryRemoteDatasource>(
+      () => ScanHistoryRemoteDatasourceImpl(sl()),
+    )
+    // Repository
+    ..registerFactory<ScanHistoryRepository>(
+      () => ScanHistoryRepositoryImpl(sl()),
+    )
+    // Usecases
+    ..registerFactory(() => GetScanHistoryUsecase(sl()))
+    // Bloc
+    ..registerLazySingleton(
+      () =>
+          ScanHistoryCubit(getScanHistoryUseCase: GetScanHistoryUsecase(sl())),
     );
 }

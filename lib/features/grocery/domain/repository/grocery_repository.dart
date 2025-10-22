@@ -22,4 +22,12 @@ abstract interface class GroceryRepository {
     required String kitchenId,
     required List<String> itemsIds,
   });
+
+  Future<Either<Failure, List<RequestedItemEntity>>> addCustomItems({
+    required String kitchenId,
+    required String name,
+    required String quantity,
+    required String unit,
+    required String bucketType,
+  });
 }

@@ -24,21 +24,8 @@ class TonightRecipeWidget extends StatefulWidget {
 }
 
 class _TonightRecipeWidgetState extends State<TonightRecipeWidget> {
-  late PageController _pageController;
   int currentPage = 0;
   final today = DateTime.now();
-
-  @override
-  void initState() {
-    super.initState();
-    _pageController = PageController(viewportFraction: 0.88, initialPage: 0);
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -109,32 +96,18 @@ class _TonightRecipeWidgetState extends State<TonightRecipeWidget> {
                 SizedBox(
                   height: h(280),
                   child: Align(
-                    alignment: Alignment.topLeft,
-                    child: PageView.builder(
-                      padEnds: false,
-                      controller: _pageController,
-                      itemCount: todayRecipes.length,
-                      onPageChanged: (index) {
-                        setState(() => currentPage = index);
-                      },
-                      itemBuilder: (context, index) {
-                        final recipe = todayRecipes[index];
-                        return Padding(
-                          padding: EdgeInsets.only(left: w(20)),
-                          child: RecipeCard(
-                            title: recipe.title,
-                            description: recipe.recipeShortSummary,
-                            imagePath: AppAssets.onBoardingSliderBg01,
-                            onTap: () {
-                              context.pushNamed(
-                                Routes.generateRecipesDetails,
-                                extra: {
-                                  "meal_type_entity": recipe,
-                                  "is_plan": false,
-                                },
-                              );
-                            },
-                          ),
+                    alignment: Alignment.center,
+                    child: RecipeCard(
+                      title: todayRecipes[0].title,
+                      description: todayRecipes[0].recipeShortSummary,
+                      imagePath: AppAssets.onBoardingSliderBg01,
+                      onTap: () {
+                        context.pushNamed(
+                          Routes.generateRecipesDetails,
+                          extra: {
+                            "meal_type_entity": todayRecipes[0],
+                            "is_plan": false,
+                          },
                         );
                       },
                     ),

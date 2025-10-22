@@ -32,4 +32,6 @@ class Routes {
   static const String notFound404 = "/not_found_404";
   static const String noInternet = "/no_internet";
   static const String requestNow = "/request_now";
+  static const String capturedImageDetails = "/captured_image_details";
+  static const String addCustomItem = "/add_custom_item";
 }

@@ -21,6 +21,13 @@ abstract interface class GroceryRemoteDatasource {
     required String kitchenId,
     required List<String> itemsIds,
   });
+  Future<List<Map<String, dynamic>>> addCustomItems({
+    required String kitchenId,
+    required String name,
+    required String quantity,
+    required String unit,
+    required String bucketType,
+  });
 }
 
 class GroceryRemoteDatasourceImpl implements GroceryRemoteDatasource {
@@ -115,6 +122,32 @@ class GroceryRemoteDatasourceImpl implements GroceryRemoteDatasource {
       await dio.post(
         AppConstants.deleteKitchenItems,
         data: {"kitchen_id": kitchenId, "item_ids": itemsIds},
+      );
+
+      return await getUserRequestedItems(kitchenId: kitchenId);
+    } on DioException catch (e) {
+      throw dio.handleError(e);
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> addCustomItems({
+    required String kitchenId,
+    required String name,
+    required String quantity,
+    required String unit,
+    required String bucketType,
+  }) async {
+    try {
+      await dio.post(
+        AppConstants.addItemToList,
+        data: {
+          "kitchen_id": kitchenId,
+          "name": name,
+          "quantity": quantity,
+          "unit": unit,
+          "bucket_type": bucketType,
+        },
       );
 
       return await getUserRequestedItems(kitchenId: kitchenId);

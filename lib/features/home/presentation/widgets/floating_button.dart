@@ -19,6 +19,8 @@ class FloatingButton extends StatelessWidget {
           child: SizedBox(
             width: w(38),
             child: FloatingActionButton(
+              heroTag: "fab_main",
+
               key: UniqueKey(),
               elevation: 4,
               backgroundColor: AppColors.primaryColor,

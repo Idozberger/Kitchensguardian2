@@ -37,4 +37,6 @@ class AppConstants {
       "/api/kitchen/add_mylist_items_to_kitchen_inventory";
   static const String getAiGeneratedList = "/api/kitchen/get_ai_generated_list";
   static const String deleteKitchenItems = "/api/kitchen/delete_items";
+  static const String addItemToList = "/api/kitchen/add_item_to_list";
+  static const String getScanHistory = "/api/get_scan_history";
 }

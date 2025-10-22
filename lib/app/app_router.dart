@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
 import 'package:foodkitchen/core/dialogs/logout.dart';
-import 'package:foodkitchen/core/dialogs/no_internet.dart';
 import 'package:foodkitchen/core/dialogs/not_found_404.dart';
 import 'package:foodkitchen/features/auth/data/model/user_model.dart';
 import 'package:foodkitchen/features/auth/presentation/pages/login/create_new_password_page.dart';
@@ -15,6 +14,7 @@ import 'package:foodkitchen/features/auth/presentation/pages/signup/verify_email
 import 'package:foodkitchen/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:foodkitchen/features/dashboard/presentation/pages/my_kitchen_members_page.dart';
 import 'package:foodkitchen/features/dashboard/presentation/pages/notification_page.dart';
+import 'package:foodkitchen/features/grocery/presentation/pages/add_custom_items_page.dart';
 import 'package:foodkitchen/features/history/presentation/pages/history_page.dart';
 import 'package:foodkitchen/features/kitchens/presentation/pages/kitchen_page.dart';
 import 'package:foodkitchen/features/onboarding/presentation/pages/intro_page.dart';
@@ -22,13 +22,14 @@ import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/features/onboarding/presentation/pages/splash_screen.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/add_item_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/my_pantry_page.dart';
+import 'package:foodkitchen/features/pantry/presentation/pages/receipt_details/capture_details_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/request_now_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/scan_meal_page.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/add_meal_page.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/edit_meal_page.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/favourite_food_page.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/generate_recipes_page.dart';
-import 'package:foodkitchen/features/planner/presentation/pages/recipes_details_page.dart';
+import 'package:foodkitchen/features/planner/presentation/pages/recipes_details/recipes_details_page.dart';
 import 'package:foodkitchen/features/profile/presentation/pages/change_password_page.dart';
 import 'package:foodkitchen/features/profile/presentation/pages/edit_profile_page.dart';
 import 'package:foodkitchen/features/profile/presentation/pages/profile_page.dart';
@@ -169,6 +170,19 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: Routes.requestNow,
       builder: (context, state) => RequestNowPage(),
+    ),
+    GoRoute(
+      name: Routes.capturedImageDetails,
+      path: Routes.capturedImageDetails,
+      builder: (context, state) {
+        final Map<String, dynamic> data = state.extra as Map<String, dynamic>;
+        final String imagePath = data["image_path"];
+        return CaptureDetailsPage(imagePath: imagePath);
+      },
+    ),
+    GoRoute(
+      path: Routes.addCustomItem,
+      builder: (context, state) => AddCustomItemsPage(),
     ),
   ],
 );

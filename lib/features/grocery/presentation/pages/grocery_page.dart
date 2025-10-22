@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_bloc.dart';
@@ -56,17 +55,6 @@ class _GroceryPageState extends State<GroceryPage> {
               userCubit: userCubit,
               groceryBloc: groceryBloc,
               controller: _searchController,
-            ),
-            floatingActionButton: FloatingActionButton(
-              key: UniqueKey(),
-              tooltip: "Add Custom Items",
-              backgroundColor: AppColors.primaryColor,
-              shape: const CircleBorder(),
-              onPressed: () => AppToast.show(
-                "This feature is under progress.",
-                ToastType.info,
-              ),
-              child: const Icon(Icons.add, color: Colors.black),
             ),
           );
         },

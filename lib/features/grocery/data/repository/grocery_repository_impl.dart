@@ -106,4 +106,31 @@ class GroceryRepositoryImpl implements GroceryRepository {
       return Left(UnknownFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, List<RequestedItemEntity>>> addCustomItems({
+    required String kitchenId,
+    required String name,
+    required String quantity,
+    required String unit,
+    required String bucketType,
+  }) async {
+    try {
+      final response = await groceryRemoteDatasource.addCustomItems(
+        kitchenId: kitchenId,
+        name: name,
+        quantity: quantity,
+        unit: unit,
+        bucketType: bucketType,
+      );
+      final data = (response as List)
+          .map((e) => RequestedItemModel.fromJson(e))
+          .toList();
+      return Right(data);
+    } on Failure catch (f) {
+      return Left(f);
+    } catch (e) {
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
 }

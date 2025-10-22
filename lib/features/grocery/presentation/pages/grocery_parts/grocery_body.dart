@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
+import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/grocery/presentation/pages/grocery_parts/grocery_footer.dart';
 import 'package:foodkitchen/features/grocery/presentation/pages/grocery_parts/grocery_list_view.dart';
@@ -9,6 +11,7 @@ import 'package:foodkitchen/features/grocery/presentation/widgets/search_bar.dar
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_bloc.dart';
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_state.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
+import 'package:go_router/go_router.dart';
 
 enum GroceryCategory { requested, aiGenerated, finalList }
 
@@ -39,44 +42,58 @@ class _GroceryBodyState extends State<GroceryBody> {
   Widget build(BuildContext context) {
     final state = widget.state;
 
-    return SafeArea(
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: gapSymmetric(horizontal: 20, vertical: 16),
-              child: SearchBarWidget(controller: widget.controller),
-            ),
-
-            CategoryTabs(
-              categories: const [
-                "Requested Items",
-                "AI Generated List",
-                "Final List",
-              ],
-              selectedIndex: _selectedCategory.index,
-              onTabSelected: (index) {
-                _selectedCategory = GroceryCategory.values[index];
-                setState(() {});
-              },
-            ),
-            Padding(
-              padding: gapSymmetric(horizontal: 20, vertical: 16),
-              child: GroceryListView(
-                state: state,
-                selectedCategory: _selectedCategory,
-                searchController: widget.controller,
-                itemIds: itemIds,
-                finalListItems: finalListItems,
-                userCubit: widget.userCubit,
-                groceryBloc: widget.groceryBloc,
+    return Scaffold(
+      backgroundColor: const Color(0xffF9F9F9),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: gapSymmetric(horizontal: 20, vertical: 16),
+                child: SearchBarWidget(controller: widget.controller),
               ),
-            ),
-            if (state.isLoading == false) getWidgetTile(state),
-          ],
+
+              CategoryTabs(
+                categories: const [
+                  "Requested Items",
+                  "AI Generated List",
+                  "Final List",
+                ],
+                selectedIndex: _selectedCategory.index,
+                onTabSelected: (index) {
+                  _selectedCategory = GroceryCategory.values[index];
+                  setState(() {});
+                },
+              ),
+              Padding(
+                padding: gapSymmetric(horizontal: 20, vertical: 16),
+                child: GroceryListView(
+                  state: state,
+                  selectedCategory: _selectedCategory,
+                  searchController: widget.controller,
+                  itemIds: itemIds,
+                  finalListItems: finalListItems,
+                  userCubit: widget.userCubit,
+                  groceryBloc: widget.groceryBloc,
+                ),
+              ),
+              if (state.isLoading == false) getWidgetTile(state),
+            ],
+          ),
         ),
       ),
+      floatingActionButton: _selectedCategory == GroceryCategory.finalList
+          ? FloatingActionButton(
+              key: Key("final_list"),
+              heroTag: "final_list",
+              tooltip: "Add Custom Items",
+              backgroundColor: AppColors.primaryColor,
+              shape: const CircleBorder(),
+              onPressed: () => context.push(Routes.addCustomItem),
+              child: const Icon(Icons.add, color: Colors.black),
+            )
+          : null,
     );
   }
 

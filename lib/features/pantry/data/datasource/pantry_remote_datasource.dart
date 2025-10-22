@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
 import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
-import 'package:foodkitchen/features/pantry/data/model/pantry_model.dart';
+import 'package:foodkitchen/core/common/data/model/pantry_model.dart';
 
 abstract interface class PantryRemoteDatasource {
   Future<String> addPantryItem({required PantryModel pantryModel});

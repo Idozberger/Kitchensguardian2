@@ -36,3 +36,19 @@ class GetAiGeneratedItemsEvent extends GroceryEvent {
 
   GetAiGeneratedItemsEvent({required this.kitchenId});
 }
+
+class AddCustomItemEvent extends GroceryEvent {
+  final String kitchenId;
+  final String name;
+  final String unit;
+  final String bucketype;
+  final String quantity;
+
+  AddCustomItemEvent({
+    required this.kitchenId,
+    required this.bucketype,
+    required this.name,
+    required this.quantity,
+    required this.unit,
+  });
+}

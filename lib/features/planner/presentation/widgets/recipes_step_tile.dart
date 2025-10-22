@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
-import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 
 class RecipeStepTile extends StatelessWidget {

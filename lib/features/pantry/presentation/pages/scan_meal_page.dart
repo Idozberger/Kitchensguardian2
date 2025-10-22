@@ -1,14 +1,15 @@
+import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
-
+import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
-
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
-import 'package:foodkitchen/features/pantry/presentation/pages/receipt_details_page.dart';
+import 'package:foodkitchen/main.dart';
+import 'package:go_router/go_router.dart';
 
 class ScanMealPage extends StatefulWidget {
   const ScanMealPage({super.key});
@@ -17,99 +18,105 @@ class ScanMealPage extends StatefulWidget {
   State<ScanMealPage> createState() => _ScanMealPageState();
 }
 
-class _ScanMealPageState extends State<ScanMealPage> {
+class _ScanMealPageState extends State<ScanMealPage>
+    with WidgetsBindingObserver {
   CameraController? _controller;
+  bool _isCameraInitialized = false;
+  bool _isCapturing = false;
+  String? _capturedImagePath;
 
   @override
   void initState() {
-    _initCamera();
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _initCamera();
   }
 
   Future<void> _initCamera() async {
-    final cameras = await availableCameras();
-    final firstCamera = cameras.first;
+    if (cameras.isEmpty) return;
+    _controller = CameraController(
+      cameras[0],
+      ResolutionPreset.medium,
+      enableAudio: false,
+    );
 
-    _controller = CameraController(firstCamera, ResolutionPreset.medium);
+    try {
+      await _controller!.initialize();
+      if (!mounted) return;
+      setState(() => _isCameraInitialized = true);
+    } catch (e) {
+      debugPrint('Camera init error: $e');
+      _controller?.dispose();
+    }
+  }
 
-    await _controller!.initialize();
-    setState(() {});
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (_controller == null || !_controller!.value.isInitialized) return;
+    if (state == AppLifecycleState.inactive) {
+      _controller?.dispose();
+    } else if (state == AppLifecycleState.resumed) {
+      _initCamera();
+    }
+  }
+
+  Future<void> _captureImage() async {
+    if (_controller == null ||
+        !_controller!.value.isInitialized ||
+        _isCapturing) {
+      return;
+    }
+    setState(() => _isCapturing = true);
+
+    try {
+      final image = await _controller!.takePicture();
+      setState(() => _capturedImagePath = image.path);
+
+      context.pushNamed(
+        Routes.capturedImageDetails,
+        extra: {"image_path": image.path},
+      );
+    } catch (e) {
+      debugPrint("Capture error: $e");
+    } finally {
+      setState(() => _isCapturing = false);
+    }
+  }
+
+  Future<void> _toggleFlash() async {
+    if (_controller == null) return;
+    try {
+      final isTorch = _controller!.value.flashMode == FlashMode.torch;
+      await _controller!.setFlashMode(
+        isTorch ? FlashMode.off : FlashMode.torch,
+      );
+      setState(() {});
+    } catch (e) {
+      debugPrint("Flash toggle error: $e");
+    }
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _controller?.dispose();
     super.dispose();
-  }
-
-  bool _isCapturing = false;
-
-  Future<void> _captureAndNavigate() async {
-    if (_isCapturing) return;
-    _isCapturing = true;
-    try {
-      final image = await _controller!.takePicture();
-
-      if (!mounted) return;
-
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) {
-            return CaptureDetailsPage(imagePath: image.path);
-          },
-        ),
-      );
-    } catch (e) {
-      debugPrint("Error capturing image: $e");
-    } finally {
-      _isCapturing = false;
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _buildAppBar(context),
+      appBar: _buildAppBar(),
       body: SafeArea(
         child: Padding(
           padding: gapSymmetric(horizontal: 20, vertical: 20),
           child: Column(
             children: [
-              Container(
-                height: h(458),
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: BorderRadius.circular(h(20)),
-                ),
-                child: _controller == null
-                    ? const Center(child: CircularProgressIndicator())
-                    : ClipRRect(
-                        borderRadius: BorderRadius.circular(h(20)),
-                        child: CameraPreview(_controller!),
-                      ),
-              ),
+              _buildCameraPreview(),
               SizedBox(height: h(20)),
-              Text(
-                "Tap the button to scan receipt item in your pantry",
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                  fontSize: t(15),
-                  color: Colors.black,
-                ),
-              ),
+              _buildDescription(),
               SizedBox(height: h(35)),
-              GestureDetector(
-                onTap: () => _captureAndNavigate(),
-                child: Container(
-                  padding: gapAll(22),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryColor,
-                    shape: BoxShape.circle,
-                  ),
-                  child: SvgPicture.asset(AppAssets.cameraSvg),
-                ),
-              ),
+              _buildCaptureButton(),
             ],
           ),
         ),
@@ -117,7 +124,44 @@ class _ScanMealPageState extends State<ScanMealPage> {
     );
   }
 
-  AppBar _buildAppBar(BuildContext context) {
+  Widget _buildCameraPreview() {
+    return Container(
+      height: h(458),
+      width: w(400),
+      decoration: BoxDecoration(
+        color: Colors.black,
+        borderRadius: BorderRadius.circular(h(20)),
+      ),
+      child: !_isCameraInitialized
+          ? const Center(child: CircularProgressIndicator())
+          : ClipRRect(
+              borderRadius: BorderRadius.circular(h(20)),
+              child: CameraPreview(_controller!),
+            ),
+    );
+  }
+
+  Widget _buildDescription() => Text(
+    "Tap the button to scan receipt item in your pantry",
+    textAlign: TextAlign.center,
+    style: Theme.of(
+      context,
+    ).textTheme.headlineMedium!.copyWith(fontSize: t(15), color: Colors.black),
+  );
+
+  Widget _buildCaptureButton() => GestureDetector(
+    onTap: _captureImage,
+    child: Container(
+      padding: gapAll(22),
+      decoration: BoxDecoration(
+        color: AppColors.primaryColor,
+        shape: BoxShape.circle,
+      ),
+      child: SvgPicture.asset(AppAssets.cameraSvg),
+    ),
+  );
+
+  AppBar _buildAppBar() {
     return AppBar(
       leadingWidth: w(55),
       leading: Row(
@@ -136,8 +180,7 @@ class _ScanMealPageState extends State<ScanMealPage> {
         style: Theme.of(context).textTheme.headlineLarge,
       ),
       actions: [
-        SizedBox(width: w(16)),
-        CircularIconButton(iconAsset: AppAssets.flashSvg, onTap: () {}),
+        CircularIconButton(iconAsset: AppAssets.flashSvg, onTap: _toggleFlash),
         SizedBox(width: w(16)),
       ],
     );

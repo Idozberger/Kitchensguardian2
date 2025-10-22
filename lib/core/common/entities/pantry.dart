@@ -1,4 +1,4 @@
-import 'package:foodkitchen/features/pantry/domain/entities/pantry_item.dart';
+import 'package:foodkitchen/core/common/entities/pantry_item.dart';
 
 class Pantry {
   final String kitchenId;

@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:foodkitchen/app/app_router.dart';
+import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -33,7 +34,6 @@ class DioHelper {
         },
         onResponse: (response, handler) {
           logSuccess("✅ [RESPONSE]");
-
           return handler.next(response);
         },
         onError: (DioException e, handler) async {
@@ -41,17 +41,36 @@ class DioHelper {
             logError("Data: ${e.response?.data}");
 
             if (e.response?.statusCode == 401) {
-              AppToast.show(
-                "Your session has ended. You’ve been logged out, please sign in again!",
-                ToastType.error,
-              );
+              final data = e.response?.data;
+              final message = data is Map<String, dynamic>
+                  ? (data["message"] ?? data["error"] ?? "")
+                        .toString()
+                        .toLowerCase()
+                  : data.toString().toLowerCase();
 
-              final context = rootNavigatorKey.currentContext;
-              if (context != null) {
-                context.go('/login');
+              final isTokenExpired =
+                  message.contains("token expired") ||
+                  message.contains("jwt expired") ||
+                  message.contains("invalid token") ||
+                  message.contains("expired");
+
+              if (isTokenExpired) {
+                AppToast.show(
+                  "Your session has expired. Please sign in again.",
+                  ToastType.error,
+                );
+
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.remove("access-token");
+
+                final context = rootNavigatorKey.currentContext;
+                if (context != null) {
+                  // ignore: use_build_context_synchronously
+                  context.go(Routes.signIn);
+                }
+
+                return handler.reject(e);
               }
-
-              return handler.reject(e);
             }
           } else {
             logError("❌ [DIO ERROR] ${e.message}");
