@@ -31,7 +31,6 @@ class CaptureDetailsPage extends StatefulWidget {
 class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
   late UserCubit userCubit;
   late PantryBloc pantryBloc;
-  ScanReceipt? scanReceipt;
 
   @override
   void initState() {
@@ -43,25 +42,10 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
 
   void _loadScanReceipt() {
     pantryBloc.add(ScanReceiptEvent(filePath: widget.imagePath));
-    if (pantryBloc.state is ScanReceiptLoaded) {
-      scanReceipt = (pantryBloc.state as ScanReceiptLoaded).scanReceipt;
-      setState(() {});
-    }
   }
 
-  void _updateItemAmount(int index, int change) {
-    final currentAmount = int.parse(scanReceipt!.items[index].amount);
-    final newAmount = currentAmount + change;
-    if (newAmount >= 0) {
-      scanReceipt!.items[index].amount = newAmount.toString();
-      setState(() {});
-    }
-  }
-
-  void _confirmItems() {
-    if (scanReceipt == null) return;
-
-    final pantryItems = scanReceipt!.items.map((item) {
+  void _confirmItems(ScanReceiptEntity scanReceipt) {
+    final pantryItems = scanReceipt.items.map((item) {
       return PantryItemEntity(
         name: item.name,
         quantity: double.parse(item.amount),
@@ -83,7 +67,6 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
     return BlocConsumer<PantryBloc, PantryState>(
       listener: (context, state) {
         if (state is ScanReceiptLoaded) {
-          AppToast.show(state.scanReceipt.successMessage, ToastType.success);
         } else if (state is PantryFailure) {
           AppToast.show(state.errorMessage, ToastType.error);
         } else if (state is PantrySuccess) {
@@ -100,30 +83,38 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
                       color: AppColors.primaryColor,
                     ),
                   )
-                : Padding(
+                : state is ScanReceiptLoaded
+                ? Padding(
                     padding: gapAll(20),
                     child: Column(
                       children: [
                         ImagePreviewWidget(imagePath: widget.imagePath),
                         SizedBox(height: h(12)),
 
-                        if (scanReceipt != null)
+                        if (state.scanReceipt.items.isNotEmpty)
                           Expanded(
                             child: ReceiptItemsListWidget(
-                              scanReceipt: scanReceipt!,
-                              onIncrement: (index) =>
-                                  _updateItemAmount(index, 1),
-                              onDecrement: (index) =>
-                                  _updateItemAmount(index, -1),
+                              scanReceipt: state.scanReceipt,
+                              onIncrement: (int i) {
+                                pantryBloc.add(IncrementItemEvent(i));
+                              },
+                              onDecrement: (int i) {
+                                pantryBloc.add(DecrementItemEvent(i));
+                              },
                             ),
                           )
-                        else if (state is ScanReceiptLoaded)
+                        else
                           UpperTile(widget: const Text("No Data Found")),
                       ],
                     ),
-                  ),
+                  )
+                : SizedBox(),
           ),
-          bottomNavigationBar: ConfirmButtonWidget(onPressed: _confirmItems),
+          bottomNavigationBar: ConfirmButtonWidget(
+            onPressed: () {
+              if (state is ScanReceiptLoaded) _confirmItems(state.scanReceipt);
+            },
+          ),
         );
       },
     );

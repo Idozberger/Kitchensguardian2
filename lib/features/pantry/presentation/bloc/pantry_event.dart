@@ -21,3 +21,13 @@ final class PantryRequestItemEvent extends PantryEvent {
   final Pantry pantry;
   PantryRequestItemEvent({required this.pantry});
 }
+
+class IncrementItemEvent extends PantryEvent {
+  final int index;
+  IncrementItemEvent(this.index);
+}
+
+class DecrementItemEvent extends PantryEvent {
+  final int index;
+  DecrementItemEvent(this.index);
+}

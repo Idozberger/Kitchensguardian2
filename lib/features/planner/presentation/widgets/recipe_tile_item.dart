@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/features/planner/presentation/widgets/recipes_tile.dart';
@@ -9,15 +10,20 @@ import 'package:foodkitchen/core/config/routes.dart';
 class RecipeTileItem extends StatelessWidget {
   final MealTypeModel recipe;
   final String selectedDate;
-  final String selectedMealType;
+  final String? selectedMealType;
   final bool isPlan;
-
+  final bool isDeletedIcon;
+  final String svgAsset;
+  final VoidCallback? deleteCallback;
   const RecipeTileItem({
     super.key,
     required this.recipe,
     required this.selectedDate,
-    required this.selectedMealType,
+    this.selectedMealType,
     required this.isPlan,
+    this.svgAsset = "",
+    this.isDeletedIcon = false,
+    this.deleteCallback,
   });
 
   void _navigateToDetails(BuildContext context) {
@@ -25,8 +31,6 @@ class RecipeTileItem extends StatelessWidget {
       formatedDateString: selectedDate,
       mealType: selectedMealType,
     );
-
-    logError(updatedRecipe.toJson());
 
     context.pushNamed(
       Routes.generateRecipesDetails,
@@ -38,13 +42,22 @@ class RecipeTileItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return RecipeTile(
       title: recipe.title,
+      isDeletedIcon: isDeletedIcon,
       subtitle: recipe.recipeShortSummary,
       imagePath: AppAssets.onBoardingSliderBg01,
-      trailingIcon: AppAssets.arrowForwardAndroidSvg,
+      trailingIcon: svgAsset.isEmpty
+          ? AppAssets.arrowForwardAndroidSvg
+          : svgAsset,
       errorText: recipe.missingItems ? "Some items are missing" : "",
       selected: false,
       onTap: () => _navigateToDetails(context),
-      onTrailingTap: () => _navigateToDetails(context),
+      onTrailingTap: () {
+        if (isDeletedIcon) {
+          deleteCallback?.call();
+        } else {
+          _navigateToDetails(context);
+        }
+      },
     );
   }
 }

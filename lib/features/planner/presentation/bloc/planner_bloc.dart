@@ -1,9 +1,15 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:foodkitchen/core/common/data/model/meal_type_model.dart';
 import 'package:foodkitchen/core/common/domain/usecase/get_current_user.dart';
+import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/utils/date_format_to_string.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
+import 'package:foodkitchen/features/planner/data/models/merged_meal_plan_model.dart';
+import 'package:foodkitchen/features/planner/domain/entities/merged_meal_type_entity.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/add_to_favourite_recipe.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/add_to_weekly_plan.dart';
+import 'package:foodkitchen/features/planner/domain/usecases/delete_meal_type_from_weekly_plan.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/delete_plan.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/favourite_recipes.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/generate_recipes.dart';
@@ -21,6 +27,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
   final AddToWeeklyPlan _addToWeeklyPlan;
   final GetAllWeeklyPlans _getAllWeeklyPlans;
   final DeletePlan _deletePlan;
+  final DeleteMealTypeFromWeeklyPlan _deleteMealTypeFromWeeklyPlan;
 
   PlannerBloc({
     required HomeBloc homeBloc,
@@ -31,6 +38,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     required AddToWeeklyPlan addToWeeklyPlan,
     required GetAllWeeklyPlans getAllWeeklyPlans,
     required DeletePlan deletePlan,
+    required DeleteMealTypeFromWeeklyPlan deleteMealTypeFromWeeklyPlan,
   }) : _generateRecipes = generateRecipes,
        _favouriteRecipes = favouriteRecipes,
        _addToFavouriteRecipe = addToFavouriteRecipe,
@@ -39,6 +47,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
        _getAllWeeklyPlans = getAllWeeklyPlans,
        _deletePlan = deletePlan,
        _homeBloc = homeBloc,
+       _deleteMealTypeFromWeeklyPlan = deleteMealTypeFromWeeklyPlan,
 
        super(PlannerState()) {
     on<GetFavouriteRecipesEvent>(_onGetFavouriteRecipes);
@@ -50,6 +59,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     on<GetAllWeeklyPlansEvent>(_onGetAllWeeklyPlans);
     on<DeletePlanEvent>(_onDeletePlan);
     on<GetDateBasedPlans>(_onGetDateBasedPlans);
+    on<DeleteMealTypeFromWeeklyPlanEvent>(_onDeleteMealTypeFromWeeklyPlan);
   }
 
   Future<void> _onGetFavouriteRecipes(
@@ -157,7 +167,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
         );
       },
       (successMessage) {
-        if (successMessage == "Already added for this date") {
+        if (successMessage.toLowerCase().contains("already")) {
           AppToast.show(successMessage, ToastType.error);
         } else {
           AppToast.show(successMessage, ToastType.success);
@@ -185,14 +195,62 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
         emit(state.copyWith(errorMessage: failure.message, isLoading: false));
       },
       (getAllWeeklyPlans) async {
+        List<MergedMealPlanEntity> mergedMealPlanEntities =
+            mergeMealPlansByDate(getAllWeeklyPlans);
         emit(
           state.copyWith(
-            getAllWeeklyPlans: getAllWeeklyPlans,
+            getAllWeeklyPlans: mergedMealPlanEntities,
             isLoading: false,
           ),
         );
       },
     );
+  }
+
+  List<MergedMealPlanEntity> mergeMealPlansByDate(List<MealTypeEntity> meals) {
+    final List<MergedMealPlanEntity> grouped = [];
+
+    for (var i = 0; i < meals.length; i++) {
+      final currentMeal = meals[i];
+      final existingIndex = grouped.indexWhere(
+        (element) => element.date == currentMeal.formatedDateString,
+      );
+
+      if (existingIndex != -1) {
+        MergedMealPlanModel existing = MergedMealPlanModel.fromEntity(
+          grouped[existingIndex],
+        );
+
+        grouped[existingIndex] = existing.copyWith(
+          breakfast: currentMeal.mealType.toLowerCase() == "breakfast"
+              ? currentMeal
+              : existing.breakfast,
+          lunch: currentMeal.mealType.toLowerCase() == "lunch"
+              ? currentMeal
+              : existing.lunch,
+          dinner: currentMeal.mealType.toLowerCase() == "dinner"
+              ? currentMeal
+              : existing.dinner,
+        );
+      } else {
+        grouped.add(
+          MergedMealPlanEntity(
+            date: currentMeal.formatedDateString,
+            breakfast: currentMeal.mealType.toLowerCase() == "breakfast"
+                ? currentMeal
+                : null,
+            lunch: currentMeal.mealType.toLowerCase() == "lunch"
+                ? currentMeal
+                : null,
+            dinner: currentMeal.mealType.toLowerCase() == "dinner"
+                ? currentMeal
+                : null,
+          ),
+        );
+      }
+    }
+
+    return grouped;
   }
 
   Future<void> _onDeletePlan(
@@ -223,7 +281,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
 
     final allPlans = state.getAllWeeklyPlans;
     List dateBasedPlan = allPlans
-        .where((plan) => plan.formatedDateString == event.dateString)
+        .where((plan) => plan.date == event.dateString)
         .toList();
     emit(
       state.copyWith(
@@ -233,18 +291,33 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     );
   }
 
-  Future<void> refreshList(Emitter emit, String dateString) async {
+  Future<void> _onDeleteMealTypeFromWeeklyPlan(
+    DeleteMealTypeFromWeeklyPlanEvent event,
+    Emitter<PlannerState> emit,
+  ) async {
     emit(state.copyWith(isLoading: true));
-    final res = await _getAllWeeklyPlans(NoParams());
+    final res = await _deleteMealTypeFromWeeklyPlan(
+      DeleteMealTypeFromWeeklyPlanParams(
+        selectedDate: event.selectedDate,
+        mealType: event.mealType,
+      ),
+    );
+
     res.fold(
       (failure) {
         emit(state.copyWith(errorMessage: failure.message, isLoading: false));
       },
-      (getAllWeeklyPlans) {
-        emit(state.copyWith(getAllWeeklyPlans: getAllWeeklyPlans));
+      (getAllWeeklyPlans) async {
+        List<MergedMealPlanEntity> mergedMealPlanEntities =
+            mergeMealPlansByDate(getAllWeeklyPlans);
+        add(GetDateBasedPlans(event.selectedDate));
+        emit(
+          state.copyWith(
+            getAllWeeklyPlans: mergedMealPlanEntities,
+            isLoading: false,
+          ),
+        );
       },
     );
-    await Future.delayed(Duration(milliseconds: 300));
-    add(GetDateBasedPlans(dateString));
   }
 }

@@ -93,23 +93,27 @@ class _TonightRecipeWidgetState extends State<TonightRecipeWidget> {
                   ),
                 )
               else
-                SizedBox(
-                  height: h(280),
-                  child: Align(
-                    alignment: Alignment.center,
-                    child: RecipeCard(
-                      title: todayRecipes[0].title,
-                      description: todayRecipes[0].recipeShortSummary,
-                      imagePath: AppAssets.onBoardingSliderBg01,
-                      onTap: () {
-                        context.pushNamed(
-                          Routes.generateRecipesDetails,
-                          extra: {
-                            "meal_type_entity": todayRecipes[0],
-                            "is_plan": false,
-                          },
-                        );
-                      },
+                Padding(
+                  padding: gapSymmetric(horizontal: 20),
+                  child: SizedBox(
+                    height: h(280),
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: RecipeCard(
+                        width: double.maxFinite,
+                        title: todayRecipes[0].title,
+                        description: todayRecipes[0].recipeShortSummary,
+                        imagePath: AppAssets.onBoardingSliderBg01,
+                        onTap: () {
+                          context.pushNamed(
+                            Routes.generateRecipesDetails,
+                            extra: {
+                              "meal_type_entity": todayRecipes[0],
+                              "is_plan": false,
+                            },
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),

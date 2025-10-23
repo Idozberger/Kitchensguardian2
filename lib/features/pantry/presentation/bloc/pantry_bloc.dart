@@ -3,6 +3,9 @@ import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_bloc.dart
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_event.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_event.dart';
+import 'package:foodkitchen/features/pantry/data/model/scan_receipt_item_model.dart';
+import 'package:foodkitchen/features/pantry/domain/entities/scan_receipt.dart';
+import 'package:foodkitchen/features/pantry/domain/entities/scan_receipt_item.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/add_pantry_item.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/get_pantry_items.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/request_items.dart';
@@ -32,17 +35,19 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
        _groceryBloc = groceryBloc,
        _requestItems = requestItems,
        super(PantryInitial()) {
-    on<PantryEvent>((_, emit) => emit(PantryLoading()));
     on<PantryAddItemEvent>(_onAddPantryItem);
     on<GetPantryItemsEvent>(_onGetPantryItems);
     on<ScanReceiptEvent>(_onScanReceipt);
     on<PantryRequestItemEvent>(_onRequestItems);
+    on<IncrementItemEvent>(_onIncrementItem);
+    on<DecrementItemEvent>(_onDecrementItem);
   }
 
   Future<void> _onAddPantryItem(
     PantryAddItemEvent event,
     Emitter<PantryState> emit,
   ) async {
+    emit(PantryLoading());
     final res = await _addPantryItem(AddPantryItemParams(pantry: event.pantry));
 
     res.fold((failure) => emit(PantryFailure(failure.message)), (message) {
@@ -58,6 +63,7 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
     GetPantryItemsEvent event,
     Emitter<PantryState> emit,
   ) async {
+    emit(PantryLoading());
     final res = await _getPantryItems(
       GetPantryItemsParams(kitchenId: event.kitchenId),
     );
@@ -71,6 +77,7 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
     ScanReceiptEvent event,
     Emitter<PantryState> emit,
   ) async {
+    emit(PantryLoading());
     final res = await _scanReceiptUseCase(
       ScanReceiptUseCaseParams(filePath: event.filePath),
     );
@@ -86,6 +93,7 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
     PantryRequestItemEvent event,
     Emitter<PantryState> emit,
   ) async {
+    emit(PantryLoading());
     final res = await _requestItems(RequestItemsParams(pantry: event.pantry));
 
     res.fold((failure) => emit(PantryFailure(failure.message)), (message) {
@@ -95,5 +103,49 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
         RequestedGroceryEvent(kitchenId: event.pantry.kitchenId),
       );
     });
+  }
+
+  void _onIncrementItem(IncrementItemEvent event, Emitter<PantryState> emit) {
+    if (state is ScanReceiptLoaded) {
+      var currentState = state as ScanReceiptLoaded;
+      final updatedItems = List<ScanReceiptItemEntity>.from(
+        currentState.scanReceipt.items,
+      );
+
+      final item = updatedItems[event.index] as ScanReceiptItemModel;
+      String amount = (int.parse(item.amount) + 1).toString();
+      updatedItems[event.index] = item.copyWith(amount: amount);
+
+      emit(
+        currentState.copyWith(
+          scanReceipt: ScanReceiptEntity(
+            successMessage: "d",
+            items: updatedItems,
+          ),
+        ),
+      );
+    }
+  }
+
+  void _onDecrementItem(DecrementItemEvent event, Emitter<PantryState> emit) {
+    if (state is ScanReceiptLoaded) {
+      var currentState = state as ScanReceiptLoaded;
+      final updatedItems = List<ScanReceiptItemEntity>.from(
+        currentState.scanReceipt.items,
+      );
+
+      final item = updatedItems[event.index] as ScanReceiptItemModel;
+      String amount = (int.parse(item.amount) - 1).toString();
+      updatedItems[event.index] = item.copyWith(amount: amount);
+
+      emit(
+        currentState.copyWith(
+          scanReceipt: ScanReceiptEntity(
+            successMessage: "",
+            items: updatedItems,
+          ),
+        ),
+      );
+    }
   }
 }

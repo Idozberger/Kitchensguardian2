@@ -16,5 +16,9 @@ abstract interface class PlannerRepository {
     required MealTypeEntity mealTypeEntity,
   });
   Future<Either<Failure, List<MealTypeEntity>>> getAllWeeklyPlans();
+  Future<Either<Failure, List<MealTypeEntity>>> deleteMealTypeFromWeeklyPlan({
+    required String selectedDate,
+    required String mealType,
+  });
   Future<Either<Failure, String>> deletePlan({required String id});
 }

@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
@@ -8,7 +6,7 @@ import 'package:foodkitchen/features/pantry/presentation/pages/receipt_details/i
 import 'package:foodkitchen/features/pantry/presentation/widgets/list_tile.dart';
 
 class ReceiptItemsListWidget extends StatelessWidget {
-  final ScanReceipt scanReceipt;
+  final ScanReceiptEntity scanReceipt;
   final void Function(int) onIncrement;
   final void Function(int) onDecrement;
 
@@ -43,7 +41,7 @@ class ReceiptItemsListWidget extends StatelessWidget {
                 ),
                 SizedBox(width: w(8)),
                 Text(
-                  item.amount,
+                  item.amount.toString(),
                   style: Theme.of(
                     context,
                   ).textTheme.headlineMedium?.copyWith(fontSize: t(10)),

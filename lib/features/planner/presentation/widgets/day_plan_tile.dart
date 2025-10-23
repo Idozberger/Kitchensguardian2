@@ -64,7 +64,7 @@ class DayPlanTile extends StatelessWidget {
       child: OutlinedButton(
         onPressed: () => viewRecipe(),
         child: Text(
-          "View Recipe",
+          "View Plan Details",
           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
             fontSize: t(14),
             color: AppColors.primaryColor,

@@ -15,7 +15,7 @@ import 'package:foodkitchen/features/dashboard/presentation/pages/dashboard_page
 import 'package:foodkitchen/features/dashboard/presentation/pages/my_kitchen_members_page.dart';
 import 'package:foodkitchen/features/dashboard/presentation/pages/notification_page.dart';
 import 'package:foodkitchen/features/grocery/presentation/pages/add_custom_items_page.dart';
-import 'package:foodkitchen/features/history/presentation/pages/history_page.dart';
+import 'package:foodkitchen/features/history/presentation/pages/scan_history_page.dart';
 import 'package:foodkitchen/features/kitchens/presentation/pages/kitchen_page.dart';
 import 'package:foodkitchen/features/onboarding/presentation/pages/intro_page.dart';
 import 'package:foodkitchen/core/config/routes.dart';
@@ -25,11 +25,13 @@ import 'package:foodkitchen/features/pantry/presentation/pages/my_pantry_page.da
 import 'package:foodkitchen/features/pantry/presentation/pages/receipt_details/capture_details_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/request_now_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/scan_meal_page.dart';
+import 'package:foodkitchen/features/planner/domain/entities/merged_meal_type_entity.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/add_meal_page.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/edit_meal_page.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/favourite_food_page.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/generate_recipes_page.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/recipes_details/recipes_details_page.dart';
+import 'package:foodkitchen/features/planner/presentation/pages/view_plan_details_page.dart';
 import 'package:foodkitchen/features/profile/presentation/pages/change_password_page.dart';
 import 'package:foodkitchen/features/profile/presentation/pages/edit_profile_page.dart';
 import 'package:foodkitchen/features/profile/presentation/pages/profile_page.dart';
@@ -120,8 +122,9 @@ final GoRouter router = GoRouter(
       name: Routes.editMeal,
       path: Routes.editMeal,
       builder: (context, state) {
-        final MealTypeEntity mealTypeEntity = state.extra as MealTypeEntity;
-        return EditMealPage(mealTypeEntity: mealTypeEntity);
+        final MergedMealPlanEntity mergedMealPlanEntity =
+            state.extra as MergedMealPlanEntity;
+        return EditMealPage(mergedMealPlanEntity: mergedMealPlanEntity);
       },
     ),
     GoRoute(
@@ -144,6 +147,7 @@ final GoRouter router = GoRouter(
         final Map<String, dynamic> data = state.extra as Map<String, dynamic>;
         MealTypeEntity mealTypeEntity = data["meal_type_entity"];
         bool isPlan = data["is_plan"];
+
         return RecipesDetailsPage(
           mealTypeEntity: mealTypeEntity,
           isPlan: isPlan,
@@ -183,6 +187,15 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: Routes.addCustomItem,
       builder: (context, state) => AddCustomItemsPage(),
+    ),
+    GoRoute(
+      name: Routes.viewPlanDetails,
+      path: Routes.viewPlanDetails,
+      builder: (context, state) {
+        final MergedMealPlanEntity mergedMealPlanEntity =
+            state.extra as MergedMealPlanEntity;
+        return ViewPlanDetailsPage(mergedMealPlanEntity: mergedMealPlanEntity);
+      },
     ),
   ],
 );

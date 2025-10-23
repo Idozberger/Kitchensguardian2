@@ -72,6 +72,7 @@ class AppAssets {
   static String profileActiveSvg = "assets/svgs/profile_active.svg";
   static String profileInactiveSvg = "assets/svgs/profile_inactive.svg";
   static String findRecipesSvg = "assets/svgs/find_recipes.svg";
+  static String filterSvg = "assets/svgs/filter.svg";
 
   ///[DRAWERITEMS]
   static String favouriteSvg = "assets/svgs/favourite.svg";

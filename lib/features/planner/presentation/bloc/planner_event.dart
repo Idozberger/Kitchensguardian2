@@ -39,3 +39,12 @@ final class GetDateBasedPlans extends PlannerEvent {
   final String dateString;
   GetDateBasedPlans(this.dateString);
 }
+
+final class DeleteMealTypeFromWeeklyPlanEvent extends PlannerEvent {
+  final String selectedDate;
+  final String mealType;
+  DeleteMealTypeFromWeeklyPlanEvent({
+    required this.selectedDate,
+    required this.mealType,
+  });
+}

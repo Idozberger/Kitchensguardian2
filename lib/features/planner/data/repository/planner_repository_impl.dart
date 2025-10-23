@@ -131,4 +131,24 @@ class PlannerRepositoryImpl implements PlannerRepository {
       return Left(UnknownFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, List<MealTypeEntity>>> deleteMealTypeFromWeeklyPlan({
+    required String selectedDate,
+    required String mealType,
+  }) async {
+    try {
+      final response = await plannerLocalDatasource
+          .deleteMealTypeFromWeeklyPlan(
+            selectedDate: selectedDate,
+            mealType: mealType,
+          );
+
+      return Right(response);
+    } on Failure catch (f) {
+      return Left(f);
+    } catch (e) {
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
 }

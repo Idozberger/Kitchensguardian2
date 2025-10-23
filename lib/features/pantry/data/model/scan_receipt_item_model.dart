@@ -7,14 +7,13 @@ class ScanReceiptItemModel extends ScanReceiptItemEntity {
     required super.amount,
   });
 
-  factory ScanReceiptItemModel.fromJson(Map<String, dynamic> json) {
+  factory ScanReceiptItemModel.fromJson(Map<String, dynamic>? json) {
     return ScanReceiptItemModel(
-      name: json['name'] as String? ?? '',
-      unit: json['unit'] as String? ?? '',
-      amount: json['amount'] as String? ?? '',
+      name: json?['name'] as String? ?? '',
+      unit: json?['unit'] as String? ?? 'Unit',
+      amount: json?['amount'] as String? ?? '0',
     );
   }
-
   Map<String, dynamic> toJson() {
     return {'name': name, 'unit': unit, 'amount': amount};
   }

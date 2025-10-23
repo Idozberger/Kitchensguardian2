@@ -21,7 +21,7 @@ class ScanHistoryRepositoryImpl implements ScanHistoryRepository {
       final scanHistoryItems = (response as List)
           .map((e) => ScanHistoryModel.fromJson(e as Map<String, dynamic>))
           .toList();
-      logError(scanHistoryItems);
+
       return Right(scanHistoryItems);
     } on Failure catch (f) {
       return Left(f);

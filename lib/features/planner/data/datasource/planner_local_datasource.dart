@@ -9,6 +9,10 @@ abstract interface class PlannerLocalDatasource {
   Future<String> addToWeeklyPlan({required MealTypeModel newPlan});
   Future<List<MealTypeModel>> getWeeklyPlans();
   Future<String> deleteWeeklyPlan({required String selectedDate});
+  Future<List<MealTypeModel>> deleteMealTypeFromWeeklyPlan({
+    required String selectedDate,
+    required String mealType,
+  });
 }
 
 class PlannerLocalDatasourceImpl implements PlannerLocalDatasource {
@@ -27,7 +31,8 @@ class PlannerLocalDatasourceImpl implements PlannerLocalDatasource {
 
       String? getEndDateString = sharedPreferences.getString("end-date");
       debugPrint("Stored end-date: $getEndDateString");
-
+      // If the user opens the app at 11:59 PM and tries to add a new plan,
+      // this function will trigger to reset the plan dates accordingly
       if (getEndDateString != null) {
         DateTime endDateTime = parseDate(getEndDateString);
         final endDateInDaysMonthYear = DateTime(
@@ -71,22 +76,31 @@ class PlannerLocalDatasourceImpl implements PlannerLocalDatasource {
         }
       }
 
-      final alreadyExists = currentList.any(
+      final existingPlanIndex = currentList.indexWhere(
         (plan) => plan.formatedDateString == newPlan.formatedDateString,
       );
-
-      if (alreadyExists) {
-        return "Already added for this date";
+      if (existingPlanIndex != -1) {
+        if (currentList[existingPlanIndex].mealType == newPlan.mealType) {
+          return "${newPlan.mealType} meal already added for this date";
+        }
+        debugPrint(
+          "Adding new meal type '${newPlan.mealType}' for ${newPlan.formatedDateString}",
+        );
+        currentList.add(newPlan);
+      } else {
+        debugPrint(
+          "Adding new meal type '${newPlan.mealType}' for ${newPlan.formatedDateString}",
+        );
+        currentList.add(newPlan);
+        debugPrint("Added new plan for ${newPlan.formatedDateString}");
       }
-
-      currentList.add(newPlan);
 
       await saveThings(currentList);
       debugPrint(
         "Weekly plan list saved successfully. Total plans: ${currentList.length}",
       );
 
-      return "Added to your weekly plan";
+      return "Added ${newPlan.mealType} meal successfully";
     } catch (e, stackTrace) {
       debugPrint("❌ Error adding to weekly plan: $e");
       debugPrint("🪜 Stack trace: $stackTrace");
@@ -170,6 +184,36 @@ class PlannerLocalDatasourceImpl implements PlannerLocalDatasource {
       return "Plan for $selectedDate deleted successfully.";
     } catch (e) {
       return "Failed to delete plan. Please try again.";
+    }
+  }
+
+  @override
+  Future<List<MealTypeModel>> deleteMealTypeFromWeeklyPlan({
+    required String selectedDate,
+    required String mealType,
+  }) async {
+    try {
+      final currentList = await getWeeklyPlans();
+
+      final index = currentList.indexWhere(
+        (plan) =>
+            plan.formatedDateString == selectedDate &&
+            plan.mealType.toLowerCase() == mealType.toLowerCase(),
+      );
+
+      if (index != -1) {
+        currentList.removeAt(index);
+        await saveThings(currentList);
+        debugPrint("Deleted $mealType for $selectedDate successfully.");
+      } else {
+        debugPrint("No matching plan found for $mealType on $selectedDate.");
+      }
+
+      return currentList;
+    } catch (e, stack) {
+      debugPrint("Error in deleteMealTypeFromWeeklyPlan(): $e");
+      debugPrintStack(stackTrace: stack);
+      return [];
     }
   }
 }

@@ -5,12 +5,12 @@ import 'package:foodkitchen/features/pantry/domain/repository/pantry_repository.
 import 'package:fpdart/fpdart.dart';
 
 class ScanReceiptUseCase
-    implements UseCase<ScanReceipt, ScanReceiptUseCaseParams> {
+    implements UseCase<ScanReceiptEntity, ScanReceiptUseCaseParams> {
   final PantryRepository pantryRepository;
   const ScanReceiptUseCase(this.pantryRepository);
 
   @override
-  Future<Either<Failure, ScanReceipt>> call(
+  Future<Either<Failure, ScanReceiptEntity>> call(
     ScanReceiptUseCaseParams params,
   ) async {
     return await pantryRepository.scanRecipt(filePath: params.filePath);

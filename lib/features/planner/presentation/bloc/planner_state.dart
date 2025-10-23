@@ -1,10 +1,11 @@
 import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
+import 'package:foodkitchen/features/planner/domain/entities/merged_meal_type_entity.dart';
 
 final class PlannerState {
   final List<MealTypeEntity>? recipes;
   final List<MealTypeEntity>? favouriteRecipes;
-  final List<MealTypeEntity> getAllWeeklyPlans;
-  final List<MealTypeEntity> dateBasedPlan;
+  final List<MergedMealPlanEntity> getAllWeeklyPlans;
+  final List<MergedMealPlanEntity> dateBasedPlan;
   final bool isLoading;
   final bool addingToWeeklyPlan;
   final String? errorMessage;
@@ -23,8 +24,8 @@ final class PlannerState {
   PlannerState copyWith({
     List<MealTypeEntity>? recipes,
     List<MealTypeEntity>? favouriteRecipes,
-    List<MealTypeEntity>? getAllWeeklyPlans,
-    List<MealTypeEntity>? dateBasedPlan,
+    List<MergedMealPlanEntity>? getAllWeeklyPlans,
+    List<MergedMealPlanEntity>? dateBasedPlan,
     bool? isLoading,
     bool? addingToWeeklyPlan,
     String? errorMessage,

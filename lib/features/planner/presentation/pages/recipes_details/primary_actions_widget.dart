@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
-import 'package:foodkitchen/core/config/routes.dart';
-import 'package:foodkitchen/core/global/functions/const.dart';
+
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
@@ -10,9 +9,7 @@ import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
-import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dart';
-import 'package:go_router/go_router.dart';
 
 class PrimaryActionsWidget extends StatelessWidget {
   final MealTypeEntity recipe;
@@ -20,6 +17,7 @@ class PrimaryActionsWidget extends StatelessWidget {
   final bool startRecipe;
   final VoidCallback onStartRecipe;
   final VoidCallback onFinishOrCancel;
+  final VoidCallback addToWeeklyPlanCallback;
 
   const PrimaryActionsWidget({
     super.key,
@@ -27,6 +25,7 @@ class PrimaryActionsWidget extends StatelessWidget {
     required this.isPlan,
     required this.startRecipe,
     required this.onStartRecipe,
+    required this.addToWeeklyPlanCallback,
     required this.onFinishOrCancel,
   });
 
@@ -81,21 +80,7 @@ class PrimaryActionsWidget extends StatelessWidget {
                   height: h(40),
                   child: OutlinedButton(
                     onPressed: () {
-                      if (AppConstants.entitlementIsActive) {
-                        context.read<PlannerBloc>().add(
-                          AddToWeeklyPlanEvent(recipe),
-                        );
-                      } else if (state.getAllWeeklyPlans.length < 3) {
-                        context.read<PlannerBloc>().add(
-                          AddToWeeklyPlanEvent(recipe),
-                        );
-                      } else {
-                        AppToast.show(
-                          "You can only add up to 3 weekly plans.",
-                          ToastType.error,
-                        );
-                        context.push(Routes.subscription);
-                      }
+                      addToWeeklyPlanCallback();
                     },
                     child: state.addingToWeeklyPlan
                         ? Center(

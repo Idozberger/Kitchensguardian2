@@ -1,8 +1,11 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
+import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
@@ -13,6 +16,7 @@ import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_date_picker_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/no_kitchen_found.dart';
+import 'package:foodkitchen/features/planner/domain/entities/merged_meal_type_entity.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dart';
@@ -106,8 +110,7 @@ class _PlannerPageState extends State<PlannerPage> {
                             ),
                             gap(height: 15),
                             if (plan.isNotEmpty &&
-                                plan[0].formatedDateString ==
-                                    formatDate(_selectedDate))
+                                plan[0].date == formatDate(_selectedDate))
                               _buildPlanSection(plan[0])
                             else
                               Padding(
@@ -125,22 +128,26 @@ class _PlannerPageState extends State<PlannerPage> {
     );
   }
 
-  Widget _buildPlanSection(MealTypeEntity plan) {
-    final readableDate = _formatReadableDate(plan.formatedDateString);
+  Widget _buildPlanSection(MergedMealPlanEntity plan) {
+    final readableDate = _formatReadableDate(plan.date);
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: DayPlanTile(
         dayLabel: readableDate,
         meals: [
-          MealTile(mealType: "Breakfast", mealName: plan.title),
-          MealTile(mealType: "Lunch", mealName: plan.title),
-          MealTile(mealType: "Dinner", mealName: plan.title),
+          if (plan.breakfast != null)
+            MealTile(mealType: "Breakfast", mealName: plan.breakfast!.title),
+          if (plan.lunch != null)
+            MealTile(mealType: "Lunch", mealName: plan.lunch!.title),
+          if (plan.dinner != null)
+            MealTile(mealType: "Dinner", mealName: plan.dinner!.title),
         ],
         viewRecipe: () {
-          context.pushNamed(
-            Routes.generateRecipesDetails,
-            extra: {"meal_type_entity": plan, "is_plan": false},
-          );
+          context.pushNamed(Routes.viewPlanDetails, extra: plan);
+          // context.pushNamed(
+          //   Routes.generateRecipesDetails,
+          //   extra: {"meal_type_entity": plan, "is_plan": false},
+          // );
         },
         addToCart: () {
           if (AppConstants.entitlementIsActive) {
@@ -154,10 +161,31 @@ class _PlannerPageState extends State<PlannerPage> {
         },
 
         deletePlan: () async {
-          _plannerBloc.add(DeletePlanEvent(plan.formatedDateString));
+          _showDeleteDialog(context, plan: plan);
         },
         editPlan: () => context.pushNamed(Routes.editMeal, extra: plan),
       ),
+    );
+  }
+
+  Future<dynamic> _showDeleteDialog(
+    BuildContext context, {
+    required final plan,
+  }) {
+    return showCustomDeleteDialog(
+      context: context,
+      title: "Delete Plan",
+      subtitle: "Are you sure you want to delete this plan?",
+      primaryButtonText: "Yes",
+      secondaryButtonText: "Cancel",
+      onPrimaryPressed: () {
+        _plannerBloc.add(DeletePlanEvent(plan.date));
+        AppToast.show("Item removed", ToastType.success);
+        Navigator.pop(context);
+      },
+      onSecondaryPressed: () {
+        Navigator.pop(context);
+      },
     );
   }
 

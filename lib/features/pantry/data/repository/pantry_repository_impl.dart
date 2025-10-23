@@ -48,7 +48,7 @@ class PantryRepositoryImpl implements PantryRepository {
   }
 
   @override
-  Future<Either<Failure, ScanReceipt>> scanRecipt({
+  Future<Either<Failure, ScanReceiptEntity>> scanRecipt({
     required String filePath,
   }) async {
     try {
@@ -56,29 +56,43 @@ class PantryRepositoryImpl implements PantryRepository {
         filePath: filePath,
       );
 
+      print("ScanReceipt Response: $response");
+
       final itemsJson = response['items'] as List<dynamic>? ?? [];
+
+      print("Number of items found: ${itemsJson.length}");
 
       List<ScanReceiptItemModel> items = [];
 
       for (var e in itemsJson) {
+        final name = e['name'] as String? ?? '';
+        final unit = e['unit'] as String? ?? 'Unit';
+        final amount = e['amount'].toString();
+
+        print("Item parsed - name: $name, unit: $unit, amount: $amount");
+
         items.add(
           ScanReceiptItemModel(
-            name: e["name"],
-            unit: e["unit"],
-            amount: e["amount"],
+            name: name,
+            unit: unit,
+            amount: amount.isEmpty ? "1" : amount,
           ),
         );
       }
 
-      return Right(
-        ScanReceiptModel(
-          successMessage: response['message'] ?? '',
-          items: items,
-        ),
+      final receipt = ScanReceiptModel(
+        successMessage: response['message'] as String? ?? '',
+        items: items,
       );
+
+      print("ScanReceiptModel created: ${receipt.toString()}");
+
+      return Right(receipt);
     } on Failure catch (f) {
+      print("Failure caught: ${f.message}");
       return Left(f);
     } catch (e) {
+      print("Unknown error: $e");
       return Left(UnknownFailure(e.toString()));
     }
   }

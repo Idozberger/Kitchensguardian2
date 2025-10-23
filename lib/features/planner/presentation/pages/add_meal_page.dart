@@ -12,7 +12,6 @@ import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_date_picker_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
-import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dart';
@@ -214,23 +213,6 @@ class _AddMealPageState extends State<AddMealPage> {
             },
             text: "Generate Recipe",
           ),
-          // gap(height: 16),
-          // Row(
-          //   children: [
-          //     const Text("Estimated"),
-          //     SizedBox(width: w(5)),
-          //     Image.asset(AppAssets.crownImage, height: h(22)),
-          //   ],
-          // ),
-          // gap(height: 16),
-          // AppTextField(
-          //   hintText: "e.g., 450",
-          //   isLabled: false,
-          //   fillColor: Colors.white,
-          //   isFilled: true,
-          //   controller: TextEditingController(),
-          //   label: '',
-          // ),
         ],
       ),
     );

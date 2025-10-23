@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
+import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
 import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
@@ -56,11 +57,11 @@ class _PantryItemCardState extends State<PantryItemCard> {
                 Row(
                   children: [
                     SizedBox(
-                      width: w(54),
+                      width: _isExpanded ? null : w(54),
                       child: Text(
                         widget.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                        maxLines: _isExpanded ? null : 1,
+                        overflow: _isExpanded ? null : TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.headlineLarge,
                       ),
                     ),
@@ -177,73 +178,18 @@ class _PantryItemCardState extends State<PantryItemCard> {
   }
 
   Future<dynamic> _showDeleteDialog(BuildContext context) {
-    return showDialog(
+    return showCustomDeleteDialog(
       context: context,
-      barrierDismissible: true,
-      builder: (context) {
-        return GenericDialog(
-          borderRadius: h(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                "Remove Item",
-                style: Theme.of(context).textTheme.headlineLarge!.copyWith(
-                  fontWeight: FontWeight.w600,
-                  fontSize: t(14),
-                ),
-              ),
-              SizedBox(height: h(10)),
-              Text(
-                "Are you sure you want to delete this item?",
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineLarge!.copyWith(
-                  fontWeight: FontWeight.w600,
-                  fontSize: t(12),
-                  color: Color(0xff7B7B7B),
-                ),
-              ),
-              SizedBox(height: h(10)),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Flexible(
-                    child: SizedBox(
-                      height: h(40),
-                      width: double.infinity,
-                      child: OutlinedButton(
-                        onPressed: () {
-                          AppToast.show("Item removed", ToastType.success);
-                          Navigator.pop(context);
-                        },
-
-                        child: Text(
-                          "Yes",
-                          style: Theme.of(context).textTheme.headlineMedium!
-                              .copyWith(
-                                fontSize: t(12),
-                                color: AppColors.primaryColor,
-                              ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: h(10)),
-                  Flexible(
-                    child: GenericButtonWidget(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-
-                      text: "Cancel",
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
+      title: "Remove Item",
+      subtitle: "Are you sure you want to delete this item?",
+      primaryButtonText: "Yes",
+      secondaryButtonText: "Cancel",
+      onPrimaryPressed: () {
+        AppToast.show("Item removed", ToastType.success);
+        Navigator.pop(context);
+      },
+      onSecondaryPressed: () {
+        Navigator.pop(context);
       },
     );
   }

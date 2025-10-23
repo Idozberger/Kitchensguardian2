@@ -10,6 +10,8 @@ class RecipeTile extends StatelessWidget {
   final String imagePath;
   final String trailingIcon;
   final bool selected;
+  final bool isDeletedIcon;
+
   final VoidCallback? onTap;
   final VoidCallback? onTrailingTap;
 
@@ -20,6 +22,8 @@ class RecipeTile extends StatelessWidget {
     required this.imagePath,
     required this.trailingIcon,
     this.selected = false,
+    this.isDeletedIcon = false,
+
     this.errorText,
     this.onTap,
     this.onTrailingTap,
@@ -27,8 +31,7 @@ class RecipeTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(h(12)),
+    return GestureDetector(
       onTap: onTap,
       child: Ink(
         padding: EdgeInsets.all(h(0)),
@@ -61,14 +64,19 @@ class RecipeTile extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.headlineLarge!.copyWith(fontSize: t(15)),
+                    maxLines: 1,
+                    style: Theme.of(context).textTheme.headlineLarge!.copyWith(
+                      fontSize: t(15),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                   SizedBox(height: h(10)),
                   Text(
                     subtitle,
-                    style: Theme.of(context).textTheme.headlineSmall,
+                    maxLines: 3,
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                   if (errorText != null && errorText!.isNotEmpty) ...[
                     SizedBox(height: h(4)),
@@ -90,10 +98,20 @@ class RecipeTile extends StatelessWidget {
 
             GestureDetector(
               onTap: onTrailingTap,
-              child: CircleAvatar(
-                radius: h(12),
-                backgroundColor: AppColors.primaryColor,
-                child: SvgPicture.asset(trailingIcon, height: h(10)),
+              child: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: isDeletedIcon
+                      ? Border.all(color: Color(0xffD4D2D2), width: 1.5)
+                      : null,
+                ),
+                child: CircleAvatar(
+                  radius: h(12),
+                  backgroundColor: isDeletedIcon
+                      ? Colors.white
+                      : AppColors.primaryColor,
+                  child: SvgPicture.asset(trailingIcon, height: h(10)),
+                ),
               ),
             ),
           ],

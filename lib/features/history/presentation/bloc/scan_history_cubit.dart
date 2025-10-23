@@ -9,18 +9,29 @@ class ScanHistoryCubit extends Cubit<ScanHistoryState> {
     : _getScanHistoryUsecase = getScanHistoryUseCase,
       super(ScanHistoryState(isLoading: false));
 
-  Future<void> fetchHistory({required String pageNumber}) async {
+  Future<List<ScanHistoryEntity>> fetchHistory({
+    required String pageNumber,
+  }) async {
+    emit(state.copyWith(isLoading: true));
     final res = await _getScanHistoryUsecase(
       GetScanHistoryUsecaseParams(pageNumber: pageNumber),
     );
 
-    res.fold((failure) => emit(state.copyWith(error: failure.message)), (
-      newItems,
-    ) {
-      final updatedItems = List<ScanHistoryEntity>.from(state.items)
-        ..addAll(newItems);
+    res.fold(
+      (failure) =>
+          emit(state.copyWith(error: failure.message, isLoading: false)),
+      (newItems) {
+        final updatedItems = List<ScanHistoryEntity>.from(state.items)
+          ..addAll(newItems);
 
-      emit(state.copyWith(items: updatedItems, isLoading: false));
-    });
+        emit(state.copyWith(items: updatedItems, isLoading: false));
+      },
+    );
+
+    return state.items;
+  }
+
+  void clearState() {
+    emit(state.copyWith(items: []));
   }
 }

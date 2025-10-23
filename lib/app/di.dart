@@ -70,6 +70,7 @@ import 'package:foodkitchen/features/planner/data/repository/planner_repository_
 import 'package:foodkitchen/features/planner/domain/repository/planner_repository.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/add_to_favourite_recipe.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/add_to_weekly_plan.dart';
+import 'package:foodkitchen/features/planner/domain/usecases/delete_meal_type_from_weekly_plan.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/delete_plan.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/favourite_recipes.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/generate_recipes.dart';
@@ -318,6 +319,7 @@ void _initPlanner() async {
     ..registerFactory(() => AddToWeeklyPlan(sl()))
     ..registerFactory(() => GetAllWeeklyPlans(sl()))
     ..registerFactory(() => DeletePlan(sl()))
+    ..registerFactory(() => DeleteMealTypeFromWeeklyPlan(sl()))
     // Bloc
     ..registerLazySingleton(
       () => PlannerBloc(
@@ -329,6 +331,7 @@ void _initPlanner() async {
         getAllWeeklyPlans: GetAllWeeklyPlans(sl()),
         deletePlan: DeletePlan(sl()),
         homeBloc: sl(),
+        deleteMealTypeFromWeeklyPlan: DeleteMealTypeFromWeeklyPlan(sl()),
       ),
     );
 }

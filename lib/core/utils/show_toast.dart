@@ -5,7 +5,11 @@ import 'package:foodkitchen/core/global/functions/resize.dart';
 enum ToastType { success, error, warning, info }
 
 class AppToast {
-  static void show(String message, ToastType type) {
+  static void show(
+    String message,
+    ToastType type, {
+    ToastGravity gravity = ToastGravity.BOTTOM,
+  }) {
     Color bgColor;
 
     switch (type) {
@@ -29,7 +33,7 @@ class AppToast {
     Fluttertoast.showToast(
       msg: " $message",
       toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
+      gravity: gravity,
       backgroundColor: bgColor,
       textColor: Colors.white,
       fontSize: t(12),

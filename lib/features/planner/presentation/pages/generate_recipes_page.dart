@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
@@ -125,9 +127,10 @@ class _GenerateRecipesPageState extends State<GenerateRecipesPage> {
         ],
       ),
       actions: [
-        IconButton(
-          icon: const Icon(Icons.filter_list, color: Colors.black),
-          onPressed: () {
+        CircularIconButton(
+          iconAsset: AppAssets.filterSvg,
+
+          onTap: () {
             showModalBottomSheet(
               context: context,
               shape: const RoundedRectangleBorder(
@@ -148,7 +151,8 @@ class _GenerateRecipesPageState extends State<GenerateRecipesPage> {
                     if (text.isEmpty) {
                       AppToast.show(
                         "Please enter a filter value before adding.",
-                        ToastType.warning,
+                        ToastType.error,
+                        gravity: ToastGravity.TOP,
                       );
                     } else {
                       AppToast.show("Filter applied", ToastType.success);
@@ -160,7 +164,7 @@ class _GenerateRecipesPageState extends State<GenerateRecipesPage> {
             );
           },
         ),
-        gap(width: 8),
+        gap(width: 20),
       ],
       title: Text(
         "Generate Recipes",
@@ -173,8 +177,8 @@ class _GenerateRecipesPageState extends State<GenerateRecipesPage> {
     final hours = (value ~/ 60);
     final minutes = (value % 60).round();
 
-    hoursController.text = hours.toString() + " hour";
-    minController.text = minutes.toString() + " min";
+    hoursController.text = "$hours hour";
+    minController.text = "$minutes min";
   }
 
   Future<void> _generateRecipes() async {
