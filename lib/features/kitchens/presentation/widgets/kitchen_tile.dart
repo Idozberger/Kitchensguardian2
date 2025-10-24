@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
+import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/auth/presentation/widgets/textspan_widget.dart';
 import 'package:go_router/go_router.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
@@ -18,12 +19,14 @@ class KitchenTile extends StatelessWidget {
   final String buttonText;
   final double buttonWidth;
   final double buttonHeight;
-
+  final bool isMember;
+  final VoidCallback onSecondaryActionTap;
   const KitchenTile({
     super.key,
     required this.imagePath,
     required this.title,
     required this.email,
+    required this.onSecondaryActionTap,
     required this.membersText,
     this.membersColor = Colors.grey,
     this.fontSize = 10,
@@ -34,6 +37,8 @@ class KitchenTile extends StatelessWidget {
     this.buttonText = "Show",
     this.buttonWidth = 90,
     this.buttonHeight = 23,
+
+    this.isMember = false,
   });
 
   @override
@@ -73,11 +78,20 @@ class KitchenTile extends StatelessWidget {
             ),
           ],
         ),
-        GenericButtonWidget(
-          onPressed: onButtonPressed ?? () => context.pop(),
-          text: buttonText,
-          width: w(buttonWidth),
-          height: h(buttonHeight),
+        Column(
+          children: [
+            GenericButtonWidget(
+              onPressed: onButtonPressed ?? () => context.pop(),
+              text: buttonText,
+              width: w(buttonWidth),
+              height: h(buttonHeight),
+            ),
+            gap(height: 6),
+            TextButton(
+              onPressed: onSecondaryActionTap,
+              child: Text(isMember ? "Leave" : "Remove"),
+            ),
+          ],
         ),
       ],
     );

@@ -72,54 +72,81 @@ class AppDrawer extends StatelessWidget {
   }
 
   Widget _buildDrawerItems(BuildContext context) {
-    return Column(
-      children: [
-        DrawerListTile(
-          title: "Favourite",
-          iconPath: AppAssets.favouriteSvg,
-          onTap: () {
-            context.push(Routes.favouriteFood);
-          },
-        ),
-        DrawerListTile(
-          title: "My Kitchen Members",
-          iconPath: AppAssets.myKitchenMember,
-          onTap: () {
-            context.push(Routes.myKitchenMembers);
-          },
-        ),
-        DrawerListTile(
-          title: "Get Referral Code",
-          iconPath: AppAssets.referralSvg,
-          onTap: () {
-            var referralCode = context.read<UserCubit>().state.invitationCode;
-            final message = "Use my referral code: $referralCode";
-            // ignore: deprecated_member_use
-            Share.share(message, subject: "Kitchen Guardian");
-          },
-        ),
+    return BlocBuilder<UserCubit, UserState>(
+      builder: (_, state) {
+        return Column(
+          children: [
+            DrawerListTile(
+              title: "Favourite",
+              iconPath: AppAssets.favouriteSvg,
+              onTap: () {
+                context.push(Routes.favouriteFood);
+              },
+            ),
+            DrawerListTile(
+              title: "My Kitchen Members",
+              iconPath: AppAssets.myKitchenMember,
+              onTap: () {
+                if (state.activeKitchenId.isNotEmpty) {
+                  context.push(Routes.myKitchenMembers);
+                } else {
+                  AppToast.show(
+                    "Please join or create kitchen",
+                    ToastType.error,
+                  );
+                }
+              },
+            ),
+            DrawerListTile(
+              title: "Get Referral Code",
+              iconPath: AppAssets.referralSvg,
+              onTap: () async {
+                if (state.activeKitchenId.isNotEmpty) {
+                  var referralCode = state.invitationCode;
+                  final message = "Use my referral code: $referralCode";
 
-        DrawerListTile(
-          title: "Scan History",
-          iconPath: AppAssets.historySvg,
-          onTap: () => context.push(Routes.scanHistory),
-        ),
-        DrawerListTile(
-          title: "Kitchens",
-          iconPath: AppAssets.kitchenSvg,
-          onTap: () => context.push(Routes.kitchen),
-        ),
-        DrawerListTile(
-          title: "Terms & Conditions",
-          iconPath: AppAssets.termsAndConditionSvg,
-          onTap: () {
-            AppToast.show(
-              "We will navigate user to our privacypolicy and termsAndCondition page",
-              ToastType.success,
-            );
-          },
-        ),
-      ],
+                  await Share.share(message, subject: "Kitchen Guardian");
+                } else {
+                  AppToast.show(
+                    "Please join or create kitchen",
+                    ToastType.error,
+                  );
+                }
+              },
+            ),
+
+            DrawerListTile(
+              title: "Scan History",
+              iconPath: AppAssets.historySvg,
+              onTap: () {
+                if (state.activeKitchenId.isNotEmpty) {
+                  context.push(Routes.scanHistory);
+                } else {
+                  AppToast.show(
+                    "Please join or create kitchen",
+                    ToastType.error,
+                  );
+                }
+              },
+            ),
+            DrawerListTile(
+              title: "Kitchens",
+              iconPath: AppAssets.kitchenSvg,
+              onTap: () => context.push(Routes.kitchen),
+            ),
+            DrawerListTile(
+              title: "Terms & Conditions",
+              iconPath: AppAssets.termsAndConditionSvg,
+              onTap: () {
+                AppToast.show(
+                  "We will navigate user to our privacypolicy and termsAndCondition page",
+                  ToastType.success,
+                );
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 

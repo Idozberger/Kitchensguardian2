@@ -13,10 +13,11 @@ class AppConstants {
   static const String createKitchen = "/api/kitchen/create";
   static const String joinKitchen = "/api/kitchen/join_with_code";
   static const String kitchens = "/api/kitchen/list_user_kitchens";
+  static const String leaveKitchen = "/api/kitchen/leave";
   static const String getMembers = "/api/kitchen/get_members";
   static const String makeCohost = "/api/kitchen/make_cohost";
   static const String kickMember = "/api/kitchen/kick_member";
-  static const String leaveKitchen = "/api/kitchen/leave";
+
   static const String removeKitchen = "/api/kitchen/remove";
 
   static const String refreshKitchenInvitationCode =

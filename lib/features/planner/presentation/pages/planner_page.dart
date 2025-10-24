@@ -35,7 +35,7 @@ class PlannerPage extends StatefulWidget {
 
 class _PlannerPageState extends State<PlannerPage> {
   bool isLoading = true;
-
+  String? localDbPlanStartTime;
   late final PlannerBloc _plannerBloc;
   late DateTime _selectedDate;
   @override
@@ -46,16 +46,21 @@ class _PlannerPageState extends State<PlannerPage> {
     _fetchInitialPlans();
   }
 
-  void _fetchInitialPlans() async {
+  Future<String?> getStartDate() async {
     final sharedPreferences = await SharedPreferences.getInstance();
-    String? startDate = sharedPreferences.getString("start-date");
+    return sharedPreferences.getString("start-date");
+  }
 
+  void _fetchInitialPlans() async {
+    var startDate = await getStartDate();
+    localDbPlanStartTime = startDate;
     if (startDate != null) {
       _selectedDate = parseDate(startDate);
     } else {
       _selectedDate = DateTime.now();
     }
     final formattedDate = formatDate(_selectedDate);
+
     _plannerBloc
       ..add(GetAllWeeklyPlansEvent())
       ..add(GetDateBasedPlans(formattedDate));
@@ -144,10 +149,6 @@ class _PlannerPageState extends State<PlannerPage> {
         ],
         viewRecipe: () {
           context.pushNamed(Routes.viewPlanDetails, extra: plan);
-          // context.pushNamed(
-          //   Routes.generateRecipesDetails,
-          //   extra: {"meal_type_entity": plan, "is_plan": false},
-          // );
         },
         addToCart: () {
           if (AppConstants.entitlementIsActive) {
@@ -172,7 +173,7 @@ class _PlannerPageState extends State<PlannerPage> {
     BuildContext context, {
     required final plan,
   }) {
-    return showCustomDeleteDialog(
+    return showCustomGenericDialog(
       context: context,
       title: "Delete Plan",
       subtitle: "Are you sure you want to delete this plan?",
@@ -180,7 +181,7 @@ class _PlannerPageState extends State<PlannerPage> {
       secondaryButtonText: "Cancel",
       onPrimaryPressed: () {
         _plannerBloc.add(DeletePlanEvent(plan.date));
-        AppToast.show("Item removed", ToastType.success);
+
         Navigator.pop(context);
       },
       onSecondaryPressed: () {
@@ -208,10 +209,14 @@ class _PlannerPageState extends State<PlannerPage> {
         ),
         gap(height: 15),
         GenericButtonWidget(
-          onPressed: () {
+          onPressed: () async {
             context.push(Routes.addMeal);
             setState(() {
-              _selectedDate = DateTime.now();
+              if (localDbPlanStartTime != null) {
+                _selectedDate = parseDate(localDbPlanStartTime!);
+              } else {
+                _selectedDate = DateTime.now();
+              }
             });
           },
           text: "+ Add Meal",

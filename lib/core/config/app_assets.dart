@@ -1,5 +1,5 @@
 class AppAssets {
-  ///[IMAGES]
+  /////[IMAGES]
   static String onBoardingBg = "assets/images/onboarding.png";
   // Onboarding Assets
   static String onBoardingSliderBg01 = "assets/images/onboarding_bg_01.png";
@@ -14,8 +14,11 @@ class AppAssets {
   static String avatar = "assets/images/avatar.png";
   static String groceryEmpty = "assets/images/grocery_empty.png";
   static String premiumBg = "assets/images/premiumbg.png";
+  static String plannerPng = "assets/images/planner.png";
+  static String scanMealPng = "assets/images/scan_meal.png";
+  static String alertsPng = "assets/images/alerts.png";
 
-  ///[ICONS]
+  /////[ICONS]
   static String tickSvg = "assets/svgs/tick.svg";
   static String success = "assets/svgs/success.svg";
   static String downArrow = "assets/svgs/down_arrow.svg";
@@ -51,6 +54,7 @@ class AppAssets {
   static String drawerSvg = "assets/svgs/drawer.svg";
   static String popupMenuSvg = "assets/svgs/popup.svg";
   static String editSvg = "assets/svgs/edit.svg";
+  static String kickMemberSvg = "assets/svgs/kick.svg";
   static String crossSvg = "assets/svgs/cross.svg";
   static String cartSvg = "assets/svgs/cart.svg";
   static String cameraSvg = "assets/svgs/camera.svg";
@@ -59,7 +63,7 @@ class AppAssets {
   static String notificationSvg = "assets/svgs/notification.svg";
   static String cancelSvg = "assets/svgs/cancel.svg";
 
-  ///[BOTTOM NAV ICONS]
+  /////[BOTTOM NAV ICONS]
   static String homeActiveSvg = "assets/svgs/home_active.svg";
   static String homeInactiveSvg = "assets/svgs/home_inactive.svg";
 
@@ -74,7 +78,7 @@ class AppAssets {
   static String findRecipesSvg = "assets/svgs/find_recipes.svg";
   static String filterSvg = "assets/svgs/filter.svg";
 
-  ///[DRAWERITEMS]
+  /////[DRAWERITEMS]
   static String favouriteSvg = "assets/svgs/favourite.svg";
   static String favouriteFilledSvg = "assets/svgs/favourite_filled.svg";
   static String myKitchenMember = "assets/svgs/add_kitchen_member.svg";

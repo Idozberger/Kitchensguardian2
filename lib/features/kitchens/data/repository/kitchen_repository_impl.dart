@@ -55,4 +55,36 @@ class KitchenRepositoryImpl implements KitchenRepository {
       return Left(UnknownFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, String>> leaveKitchen({
+    required String kitchenId,
+  }) async {
+    try {
+      final response = await kitchenRemoteDataSource.leaveKitchen(
+        kitchenId: kitchenId,
+      );
+      return right(response);
+    } on Failure catch (f) {
+      return Left(f);
+    } catch (e) {
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, String>> removeKitchen({
+    required String kitchenId,
+  }) async {
+    try {
+      final response = await kitchenRemoteDataSource.removeKitchen(
+        kitchenId: kitchenId,
+      );
+      return right(response);
+    } on Failure catch (f) {
+      return Left(f);
+    } catch (e) {
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
 }

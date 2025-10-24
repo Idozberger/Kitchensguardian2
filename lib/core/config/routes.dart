@@ -35,4 +35,5 @@ class Routes {
   static const String capturedImageDetails = "/captured_image_details";
   static const String addCustomItem = "/add_custom_item";
   static const String viewPlanDetails = "/view_plan_details";
+  static const String introAppFeatures = "/intro_app_features";
 }

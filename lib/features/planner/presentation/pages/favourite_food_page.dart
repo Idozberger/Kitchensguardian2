@@ -118,10 +118,10 @@ class _FavouriteFoodPageState extends State<FavouriteFoodPage> {
         },
       ),
       bottomNavigationBar: ColoredBox(
-        color: Colors.white,
+        color: const Color(0xffF9F9F9),
         child: SafeArea(
           child: Padding(
-            padding: gapSymmetric(horizontal: 20, vertical: 20),
+            padding: gapOnly(left: 20, right: 20, bottom: 14, top: 14),
             child: GenericButtonWidget(
               onPressed: () {
                 context.push(Routes.generateRecipes);

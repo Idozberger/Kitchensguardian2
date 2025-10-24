@@ -103,11 +103,11 @@ class _EditMealPageState extends State<EditMealPage> {
                   mealPlan: _mealPlan,
                   selectedIndex: _selectedIndex,
                 ),
-                gap(height: 18),
-                ActionButtons(
-                  onCancel: () => context.pop(),
-                  onSave: _onSavePressed,
-                ),
+                // gap(height: 18),
+                // ActionButtons(
+                //   onCancel: () => context.pop(),
+                //   onSave: _onSavePressed,
+                // ),
               ],
             ),
           ),
@@ -355,7 +355,7 @@ class GeneratedRecipeSection extends StatelessWidget {
   }
 
   Future<dynamic> _showDeleteDialog(BuildContext context, MealTypeEntity plan) {
-    return showCustomDeleteDialog(
+    return showCustomGenericDialog(
       context: context,
       title: "Delete Plan",
       subtitle: "Are you sure you want to delete this plan?",

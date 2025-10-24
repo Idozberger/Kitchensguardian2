@@ -47,7 +47,7 @@ class IntroTextContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: gapSymmetric(horizontal: h(20)),
+      padding: gapOnly(left: 20, right: 20),
       child: Column(
         children: [
           DiscoverText(),
@@ -60,12 +60,15 @@ class IntroTextContent extends StatelessWidget {
               fontWeight: FontWeight.w400,
             ),
           ),
-          gapVertical(20),
-          GenericButtonWidget(
-            onPressed: () {
-              context.go(Routes.signIn);
-            },
-            text: "Get Started",
+
+          Padding(
+            padding: gapOnly(bottom: 14, top: 34),
+            child: GenericButtonWidget(
+              onPressed: () {
+                context.go(Routes.introAppFeatures);
+              },
+              text: "Continue",
+            ),
           ),
         ],
       ),

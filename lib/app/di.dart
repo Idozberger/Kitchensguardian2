@@ -54,6 +54,8 @@ import 'package:foodkitchen/features/kitchens/domain/repository/kitchen_reposito
 import 'package:foodkitchen/features/kitchens/domain/usecases/create_kitchen.dart';
 import 'package:foodkitchen/features/kitchens/domain/usecases/get_kitchens.dart';
 import 'package:foodkitchen/features/kitchens/domain/usecases/join_kitchen.dart';
+import 'package:foodkitchen/features/kitchens/domain/usecases/leave_kitchen.dart';
+import 'package:foodkitchen/features/kitchens/domain/usecases/remove_kitchen.dart';
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_bloc.dart';
 import 'package:foodkitchen/features/onboarding/presentation/bloc/user_bloc.dart';
 import 'package:foodkitchen/features/pantry/data/datasource/pantry_remote_datasource.dart';
@@ -202,12 +204,16 @@ void _initKitchen() async {
     ..registerFactory(() => GetKitchens(sl()))
     ..registerFactory(() => CreateKitchenUseCase(sl()))
     ..registerFactory(() => JoinKitchenUseCase(sl()))
+    ..registerFactory(() => LeaveKitchenUsecase(sl()))
+    ..registerFactory(() => RemoveKitchenUsecase(sl()))
     // Bloc
     ..registerLazySingleton(
       () => KitchenBloc(
         getKitchens: GetKitchens(sl()),
         createKitchen: CreateKitchenUseCase(sl()),
         joinKitchen: JoinKitchenUseCase(sl()),
+        leaveKitchenUsecase: LeaveKitchenUsecase(sl()),
+        removeKitchenUsecase: RemoveKitchenUsecase(sl()),
         homeBloc: sl(),
         plannerBloc: sl(),
         groceryBloc: sl(),

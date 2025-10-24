@@ -9,7 +9,7 @@ class ConfirmButtonWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: gapAll(20),
+      padding: gapOnly(left: 20, right: 20, bottom: 14, top: 14),
       child: SafeArea(
         child: GenericButtonWidget(onPressed: onPressed, text: "Confirm"),
       ),

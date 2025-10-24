@@ -20,6 +20,7 @@ class AppTextField extends StatelessWidget {
   final Widget? prefixIcon;
   final EdgeInsetsGeometry? contentPadding;
   final bool textAlignCentered;
+  final TextInputAction? textInputAction;
   const AppTextField({
     super.key,
     required this.label,
@@ -34,6 +35,7 @@ class AppTextField extends StatelessWidget {
     this.validator,
     this.isLabled = true,
     this.isFilled = false,
+    this.textInputAction = TextInputAction.done,
     this.textAlignCentered = false,
     this.fillColor,
     this.color,
@@ -57,12 +59,13 @@ class AppTextField extends StatelessWidget {
           keyboardType: keyboardType,
           style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: color),
           validator: validator,
-
+          textInputAction: textInputAction,
           decoration: InputDecoration(
             filled: isFilled,
             fillColor: fillColor,
             contentPadding: gapAll(12),
             hintText: hintText,
+
             hintStyle: Theme.of(
               context,
             ).textTheme.bodyMedium?.copyWith(color: AppColors.greyColor),

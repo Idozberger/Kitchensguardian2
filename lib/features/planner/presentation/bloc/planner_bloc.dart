@@ -1,7 +1,10 @@
+import 'dart:developer';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/data/model/meal_type_model.dart';
 import 'package:foodkitchen/core/common/domain/usecase/get_current_user.dart';
 import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/core/utils/date_format_to_string.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
@@ -17,6 +20,7 @@ import 'package:foodkitchen/features/planner/domain/usecases/get_all_weekly_plan
 import 'package:foodkitchen/features/planner/domain/usecases/remove_from_favourite_recipe.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
   final HomeBloc _homeBloc;
@@ -166,21 +170,23 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
           ),
         );
       },
-      (successMessage) {
+      (successMessage) async {
         if (successMessage.toLowerCase().contains("already")) {
           AppToast.show(successMessage, ToastType.error);
         } else {
           AppToast.show(successMessage, ToastType.success);
         }
-        emit(
-          state.copyWith(
-            successMessage: successMessage,
-            addingToWeeklyPlan: false,
-          ),
-        );
+        emit(state.copyWith(successMessage: successMessage));
         add(GetAllWeeklyPlansEvent());
+        final startDate = await getStartDate();
+        add(GetDateBasedPlans(startDate ?? formatDate(DateTime.now())));
       },
     );
+  }
+
+  Future<String?> getStartDate() async {
+    final sharedPreferences = await SharedPreferences.getInstance();
+    return sharedPreferences.getString("start-date");
   }
 
   Future<void> _onGetAllWeeklyPlans(
@@ -197,6 +203,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
       (getAllWeeklyPlans) async {
         List<MergedMealPlanEntity> mergedMealPlanEntities =
             mergeMealPlansByDate(getAllWeeklyPlans);
+
         emit(
           state.copyWith(
             getAllWeeklyPlans: mergedMealPlanEntities,
@@ -287,6 +294,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
       state.copyWith(
         dateBasedPlan: dateBasedPlan.isNotEmpty ? [dateBasedPlan[0]] : [],
         isLoading: false,
+        addingToWeeklyPlan: false,
       ),
     );
   }

@@ -110,9 +110,10 @@ class _SignInPageState extends State<SignInPage> {
                     child: Column(
                       children: [
                         AppTextField(
+                          textInputAction: TextInputAction.next,
                           controller: _emailController,
                           label: "Email address",
-                          // validator: emailValidator,
+
                           keyboardType: TextInputType.emailAddress,
                           hintText: "Enter your email address",
                         ),
@@ -121,8 +122,8 @@ class _SignInPageState extends State<SignInPage> {
                         AppTextField(
                           controller: _passwordController,
                           label: "Password",
+                          textInputAction: TextInputAction.done,
 
-                          // validator: passwordValidator,
                           hintText: "Enter your password",
                           obscureText: _isObscure,
                           suffixIcon: GestureDetector(

@@ -95,18 +95,27 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage>
                     recipe: recipe,
                     isPlan: widget.isPlan,
                     startRecipe: startRecipe,
-                    addToWeeklyPlanCallback: () {
+                    addToWeeklyPlanCallback: () async {
+                      final plannerBloc = context.read<PlannerBloc>();
+                      final existingPlans = state.getAllWeeklyPlans;
+
+                      bool exists = existingPlans.any(
+                        (plan) => plan.date == recipe.formatedDateString,
+                      );
+
                       if (AppConstants.entitlementIsActive) {
-                        context.read<PlannerBloc>().add(
-                          AddToWeeklyPlanEvent(recipe),
-                        );
-                      } else if (state.getAllWeeklyPlans.length < 3) {
-                        context.read<PlannerBloc>().add(
-                          AddToWeeklyPlanEvent(recipe),
-                        );
+                        plannerBloc.add(AddToWeeklyPlanEvent(recipe));
+                      }
+                      if (exists || existingPlans.length < 3) {
+                        // Add the recipe to weekly plan
+                        plannerBloc.add(AddToWeeklyPlanEvent(recipe));
+
+                        if (context.mounted) {
+                          context.go(Routes.dashboard);
+                        }
                       } else {
                         AppToast.show(
-                          "You can only add up to 3 weekly plans.",
+                          "You can only create plans for 3 days in advance.",
                           ToastType.error,
                         );
                         context.push(Routes.subscription);

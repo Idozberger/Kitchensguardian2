@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:developer';
 
 import 'package:foodkitchen/core/services/jwt_decoder/jwt_decoder.dart';
@@ -25,7 +24,6 @@ class CurrentUserRemoteDataSourceImpl implements CurrentUserRemoteDatasource {
       userToken: userToken,
     );
 
-    log("$decoded");
     return User.fromJson(decoded);
   }
 }

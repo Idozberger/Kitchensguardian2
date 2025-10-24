@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
@@ -5,8 +7,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 abstract interface class KitchenRemoteDatasource {
   Future<List<Map<String, dynamic>>> getKitchens();
+  Future<String> leaveKitchen({required String kitchenId});
   Future<String> createKitchen({required String kitchenName});
   Future<String> joinKitchen({required String invitationCode});
+  Future<String> removeKitchen({required String kitchenId});
 }
 
 class KitchenRemoteDataSourceImpl implements KitchenRemoteDatasource {
@@ -63,6 +67,43 @@ class KitchenRemoteDataSourceImpl implements KitchenRemoteDatasource {
       final kitchenId = data["kitchen_id"];
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('kitchen_id', kitchenId.toString());
+
+      return response.data["message"];
+    } on DioException catch (e) {
+      throw dio.handleError(e);
+    }
+  }
+
+  @override
+  Future<String> leaveKitchen({required String kitchenId}) async {
+    try {
+      final response = await dio.post(
+        AppConstants.leaveKitchen,
+        data: {"kitchen_id": kitchenId},
+      );
+      await sharedPreferences.remove('kitchen_id');
+      await sharedPreferences.remove('invitation_code');
+      await sharedPreferences.remove('role');
+      log(response.data["message"]);
+
+      return response.data["message"];
+    } on DioException catch (e) {
+      throw dio.handleError(e);
+    }
+  }
+
+  @override
+  Future<String> removeKitchen({required String kitchenId}) async {
+    try {
+      final response = await dio.post(
+        AppConstants.removeKitchen,
+        data: {"kitchen_id": kitchenId},
+      );
+      await sharedPreferences.remove('kitchen_id');
+      await sharedPreferences.remove('invitation_code');
+      await sharedPreferences.remove('role');
+
+      log(response.data["message"]);
 
       return response.data["message"];
     } on DioException catch (e) {

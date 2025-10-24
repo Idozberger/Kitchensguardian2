@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
+import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
@@ -10,6 +11,7 @@ import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
+import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_event.dart';
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_bloc.dart';
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_event.dart';
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_state.dart';
@@ -80,7 +82,19 @@ class _KitchenPageState extends State<KitchenPage> {
               ),
             );
           }
-          return Center(child: Text("Something went wrong!"));
+          return Center(
+            child: Column(
+              children: [
+                Text("Something went wrong! "),
+                TextButton(
+                  onPressed: () {
+                    fetchAllKitchens();
+                  },
+                  child: Text("Try again"),
+                ),
+              ],
+            ),
+          );
         },
       ),
     );
@@ -139,6 +153,27 @@ class _KitchenPageState extends State<KitchenPage> {
                 return Padding(
                   padding: gapOnly(bottom: 4),
                   child: KitchenTile(
+                    isMember: true,
+                    onSecondaryActionTap: () {
+                      showCustomGenericDialog(
+                        context: context,
+                        title: "Leave Kitchen",
+                        subtitle:
+                            "Are you sure you want to leave this kitchen?",
+                        primaryButtonText: "Yes",
+                        secondaryButtonText: "Cancel",
+                        onPrimaryPressed: () {
+                          context.read<KitchenBloc>().add(
+                            LeaveKitchenEvent(kitchen.kitchenId),
+                          );
+
+                          context.pop();
+                        },
+                        onSecondaryPressed: () {
+                          Navigator.pop(context);
+                        },
+                      );
+                    },
                     onButtonPressed: () async {
                       if (kitchen.kitchenId.isEmpty) {
                         AppToast.show("Invalid kitchen ID", ToastType.error);
@@ -160,7 +195,8 @@ class _KitchenPageState extends State<KitchenPage> {
                         "Kitchen switched to ${kitchen.kitchenName}",
                         ToastType.success,
                       );
-                      // kitchenBloc.add(SwitchKitchenEvent(kitchen.kitchenId));
+
+                      // ignore: use_build_context_synchronously
                       context.go(Routes.splash);
                     },
                     imagePath: AppAssets.avatar,
@@ -255,6 +291,27 @@ class _KitchenPageState extends State<KitchenPage> {
                 return Padding(
                   padding: gapOnly(bottom: 4),
                   child: KitchenTile(
+                    isMember: false,
+                    onSecondaryActionTap: () {
+                      showCustomGenericDialog(
+                        context: context,
+                        title: "Delete Kitchen",
+                        subtitle:
+                            "Are you sure you want to delete this kitchen?",
+                        primaryButtonText: "Yes",
+                        secondaryButtonText: "Cancel",
+                        onPrimaryPressed: () {
+                          context.read<KitchenBloc>().add(
+                            RemoveKitchenEvent(kitchen.kitchenId),
+                          );
+
+                          context.pop();
+                        },
+                        onSecondaryPressed: () {
+                          Navigator.pop(context);
+                        },
+                      );
+                    },
                     onButtonPressed: () async {
                       if (kitchen.kitchenId.isEmpty) {
                         AppToast.show("Invalid kitchen ID", ToastType.error);

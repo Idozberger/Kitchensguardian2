@@ -35,11 +35,11 @@ class KitchenHomeView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: gapOnly(left: 20, right: 20, bottom: 20, top: 10),
+      padding: gapOnly(left: 20, right: 20, bottom: 0, top: 0),
       child: SingleChildScrollView(
         child: Column(
           children: [
-            gap(height: 15),
+            gap(height: 14),
             PantrySection(state: state),
             gap(height: 15),
             ActionTile(
@@ -69,6 +69,7 @@ class KitchenHomeView extends StatelessWidget {
             ),
             gap(height: 15),
             if (state.dateBasedPlan.isNotEmpty) const TonightRecipeWidget(),
+            gap(height: 15),
           ],
         ),
       ),
@@ -81,7 +82,7 @@ class NoKitchenView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: gapOnly(left: 20, right: 20, bottom: 20, top: 10),
+    padding: gapOnly(left: 20, right: 20, bottom: 20, top: 14),
     child: Column(
       children: [
         const CreateOrJoinKitchenTile(),

@@ -18,10 +18,19 @@ class JoinKitchen extends KitchenEvent {
   List<Object?> get props => [invitationCode];
 }
 
-class LeaveKitchen extends KitchenEvent {
+class LeaveKitchenEvent extends KitchenEvent {
   final String kitchenId;
 
-  const LeaveKitchen(this.kitchenId);
+  const LeaveKitchenEvent(this.kitchenId);
+
+  @override
+  List<Object?> get props => [kitchenId];
+}
+
+class RemoveKitchenEvent extends KitchenEvent {
+  final String kitchenId;
+
+  const RemoveKitchenEvent(this.kitchenId);
 
   @override
   List<Object?> get props => [kitchenId];

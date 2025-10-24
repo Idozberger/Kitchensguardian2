@@ -4,6 +4,7 @@ import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/date_format_to_string.dart';
+import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
@@ -26,6 +27,7 @@ class _ScanHistoryPageState extends State<ScanHistoryPage> {
   int pageNumber = 1;
   final ScrollController _scrollController = ScrollController();
   bool isFetchingMore = false;
+  bool _isDisposed = false;
 
   @override
   void initState() {
@@ -45,24 +47,34 @@ class _ScanHistoryPageState extends State<ScanHistoryPage> {
   }
 
   Future<void> _fetchHistory(String pageNumber) async {
-    await _scanHistoryCubit.fetchHistory(pageNumber: pageNumber);
+    if (_isDisposed) return;
+    try {
+      await _scanHistoryCubit.fetchHistory(pageNumber: pageNumber);
+    } catch (e, st) {
+      debugPrint('Error fetching history: $e\n$st');
+    }
   }
 
   Future<void> _loadNextPage() async {
-    if (isFetchingMore) return;
-    isFetchingMore = true;
+    if (_isDisposed || isFetchingMore) return;
 
+    isFetchingMore = true;
     try {
       pageNumber++;
       await _fetchHistory(pageNumber.toString());
-      await Future.delayed(const Duration(seconds: 3));
+    } catch (e, st) {
+      debugPrint('Error loading next page: $e\n$st');
     } finally {
-      isFetchingMore = false;
+      if (!_isDisposed) {
+        await Future.delayed(const Duration(seconds: 3));
+        isFetchingMore = false;
+      }
     }
   }
 
   @override
   void dispose() {
+    _isDisposed = true;
     _scrollController.dispose();
     super.dispose();
   }
@@ -82,14 +94,14 @@ class _ScanHistoryPageState extends State<ScanHistoryPage> {
 
           return SafeArea(
             child: Padding(
-              padding: gapSymmetric(horizontal: 20, vertical: 20),
+              padding: gapSymmetric(horizontal: 20, vertical: 0),
               child: Column(
                 children: [
                   Expanded(
                     child: ListView.builder(
                       controller: _scrollController,
                       itemCount: state.items.length + 1,
-                      padding: gapZero,
+                      padding: gapSymmetric(vertical: 12),
                       itemBuilder: (context, index) {
                         if (index < state.items.length) {
                           final historyData = state.items[index];
@@ -123,7 +135,11 @@ class _ScanHistoryPageState extends State<ScanHistoryPage> {
                   if (pageNumber == 1)
                     GenericButtonWidget(
                       onPressed: () async {
-                        await _fetchHistory((pageNumber + 1).toString());
+                        if (pageNumber > 11) {
+                          await _fetchHistory((pageNumber + 1).toString());
+                        } else {
+                          AppToast.show("No more data", ToastType.info);
+                        }
                       },
                       text: "Load More",
                     ),

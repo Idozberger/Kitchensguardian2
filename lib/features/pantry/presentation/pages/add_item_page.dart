@@ -117,8 +117,8 @@ class _AddItemPageState extends State<AddItemPage> {
         return SafeArea(
           child: Container(
             width: double.infinity,
-            decoration: BoxDecoration(color: Colors.white),
-            padding: gapSymmetric(horizontal: 20, vertical: 10),
+            decoration: BoxDecoration(color: const Color(0xffF9F9F9)),
+            padding: gapOnly(left: 20, right: 20, bottom: 14, top: 14),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [

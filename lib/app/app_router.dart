@@ -20,6 +20,7 @@ import 'package:foodkitchen/features/kitchens/presentation/pages/kitchen_page.da
 import 'package:foodkitchen/features/onboarding/presentation/pages/intro_page.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/features/onboarding/presentation/pages/splash_screen.dart';
+import 'package:foodkitchen/features/onboarding/presentation/widgets/intro_app_features_widget.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/add_item_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/my_pantry_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/receipt_details/capture_details_page.dart';
@@ -196,6 +197,10 @@ final GoRouter router = GoRouter(
             state.extra as MergedMealPlanEntity;
         return ViewPlanDetailsPage(mergedMealPlanEntity: mergedMealPlanEntity);
       },
+    ),
+    GoRoute(
+      path: Routes.introAppFeatures,
+      builder: (context, state) => IntroAppFeaturesWidget(),
     ),
   ],
 );

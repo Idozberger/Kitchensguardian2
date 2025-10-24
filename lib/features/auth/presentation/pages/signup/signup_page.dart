@@ -28,6 +28,8 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   bool _isObscure = true;
 
@@ -90,19 +92,14 @@ class _SignUpPageState extends State<SignUpPage> {
                         AppTextField(
                           controller: _firstNameController,
                           label: "First name",
-                          // validator: (String? value) {
-                          //   return nameValidator(value, "First name");
-                          // },
+                          textInputAction: TextInputAction.next,
                           hintText: "Enter your first name",
                         ),
                         SizedBox(height: h(20)),
                         AppTextField(
                           controller: _lastNameController,
                           label: "Last name",
-
-                          // validator: (String? value) {
-                          //   return nameValidator(value, "Last name");
-                          // },
+                          textInputAction: TextInputAction.next,
                           hintText: "Enter your last name",
                         ),
                         SizedBox(height: h(20)),
@@ -110,7 +107,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           controller: _emailController,
                           label: "Email address",
                           keyboardType: TextInputType.emailAddress,
-                          // validator: emailValidator,
+                          textInputAction: TextInputAction.next,
                           hintText: "Enter your email",
                         ),
 
@@ -118,8 +115,27 @@ class _SignUpPageState extends State<SignUpPage> {
                         AppTextField(
                           controller: _passwordController,
                           label: "Password",
-
-                          // validator: passwordValidator,
+                          textInputAction: TextInputAction.next,
+                          hintText: "Enter your password",
+                          obscureText: _isObscure,
+                          suffixIcon: GestureDetector(
+                            onTap: () => updateObsecure(),
+                            child: Padding(
+                              padding: gapSymmetric(
+                                vertical: 13,
+                                horizontal: 15,
+                              ),
+                              child: SvgPicture.asset(
+                                AppAssets.eyeVisibilitySvg,
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: h(20)),
+                        AppTextField(
+                          controller: _confirmPasswordController,
+                          label: "Confirm Password",
+                          textInputAction: TextInputAction.done,
                           hintText: "Enter your password",
                           obscureText: _isObscure,
                           suffixIcon: GestureDetector(
@@ -145,6 +161,8 @@ class _SignUpPageState extends State<SignUpPage> {
                       onPressed: () {
                         String email = _emailController.text.trim();
                         String password = _passwordController.text.trim();
+                        String confirmPassword = _confirmPasswordController.text
+                            .trim();
                         String firstName = _firstNameController.text.trim();
                         String lastName = _lastNameController.text.trim();
 
@@ -202,6 +220,27 @@ class _SignUpPageState extends State<SignUpPage> {
                         if (password.length < 6) {
                           AppToast.show(
                             "Password must be at least 6 characters",
+                            ToastType.error,
+                          );
+                          return;
+                        }
+                        if (confirmPassword.isEmpty) {
+                          AppToast.show(
+                            "Confirm Password is required",
+                            ToastType.error,
+                          );
+                          return;
+                        }
+                        if (confirmPassword.length < 6) {
+                          AppToast.show(
+                            "Confirm Password must be at least 6 characters",
+                            ToastType.error,
+                          );
+                          return;
+                        }
+                        if (confirmPassword != password) {
+                          AppToast.show(
+                            "Passwords do not match",
                             ToastType.error,
                           );
                           return;

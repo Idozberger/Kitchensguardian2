@@ -4,7 +4,7 @@ import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 
-Future<dynamic> showCustomDeleteDialog({
+Future<dynamic> showCustomGenericDialog({
   required BuildContext context,
   required String title,
   required String subtitle,

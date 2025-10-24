@@ -9,7 +9,7 @@ class UserState extends Equatable {
   final String activeKitchenId;
   final String role;
   final String invitationCode;
-
+  final bool entitlementIsActive;
   const UserState({
     this.firstName = '',
     this.lastName = '',
@@ -17,12 +17,14 @@ class UserState extends Equatable {
     this.userId = '',
     this.email = '',
     this.isLoading = false,
+    this.entitlementIsActive = false,
     this.activeKitchenId = "",
     this.invitationCode = "",
   });
 
   UserState copyWith({
     String? firstName,
+    bool? entitlementIsActive,
     String? lastName,
     String? userId,
     String? activeKitchenId,
@@ -33,19 +35,21 @@ class UserState extends Equatable {
   }) {
     return UserState(
       firstName: firstName ?? this.firstName,
-      userId: userId ?? this.userId,
+      entitlementIsActive: entitlementIsActive ?? this.entitlementIsActive,
       role: role ?? this.role,
       lastName: lastName ?? this.lastName,
       email: email ?? this.email,
       isLoading: isLoading ?? this.isLoading,
       activeKitchenId: activeKitchenId ?? this.activeKitchenId,
       invitationCode: invitationCode ?? this.invitationCode,
+      userId: userId ?? this.userId,
     );
   }
 
   @override
   List<Object> get props => [
     firstName,
+    entitlementIsActive,
     lastName,
     userId,
     email,

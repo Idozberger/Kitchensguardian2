@@ -124,7 +124,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       bottomNavigationBar: ColoredBox(
         color: Colors.white,
         child: Padding(
-          padding: gapOnly(top: 20, bottom: 35, left: 20, right: 20),
+          padding: gapOnly(left: 20, right: 20, bottom: 24, top: 14),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

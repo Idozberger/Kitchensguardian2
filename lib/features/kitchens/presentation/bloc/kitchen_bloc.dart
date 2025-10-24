@@ -6,6 +6,8 @@ import 'package:foodkitchen/features/home/presentation/bloc/home_event.dart';
 import 'package:foodkitchen/features/kitchens/domain/usecases/create_kitchen.dart';
 import 'package:foodkitchen/features/kitchens/domain/usecases/get_kitchens.dart';
 import 'package:foodkitchen/features/kitchens/domain/usecases/join_kitchen.dart';
+import 'package:foodkitchen/features/kitchens/domain/usecases/leave_kitchen.dart';
+import 'package:foodkitchen/features/kitchens/domain/usecases/remove_kitchen.dart';
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_event.dart';
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_state.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
@@ -15,6 +17,8 @@ class KitchenBloc extends Bloc<KitchenEvent, KitchenState> {
   final GetKitchens _getKitchens;
   final CreateKitchenUseCase _createKitchen;
   final JoinKitchenUseCase _joinKitchen;
+  final LeaveKitchenUsecase _leaveKitchenUsecase;
+  final RemoveKitchenUsecase _removeKitchenUsecase;
   final HomeBloc _homeBloc;
   final PlannerBloc _plannerBloc;
   final GroceryBloc _groceryBloc;
@@ -26,9 +30,13 @@ class KitchenBloc extends Bloc<KitchenEvent, KitchenState> {
     required HomeBloc homeBloc,
     required PlannerBloc plannerBloc,
     required GroceryBloc groceryBloc,
+    required LeaveKitchenUsecase leaveKitchenUsecase,
+    required RemoveKitchenUsecase removeKitchenUsecase,
   }) : _getKitchens = getKitchens,
        _createKitchen = createKitchen,
        _joinKitchen = joinKitchen,
+       _leaveKitchenUsecase = leaveKitchenUsecase,
+       _removeKitchenUsecase = removeKitchenUsecase,
        _homeBloc = homeBloc,
        _plannerBloc = plannerBloc,
        _groceryBloc = groceryBloc,
@@ -38,6 +46,8 @@ class KitchenBloc extends Bloc<KitchenEvent, KitchenState> {
     on<CreateKitchenEvent>(_onCreateKitchenEvent);
     on<JoinKitchenEvent>(_onJoinKitchenEvent);
     on<SwitchKitchenEvent>(_onSwitchKitchen);
+    on<LeaveKitchenEvent>(_onLeaveKitchen);
+    on<RemoveKitchenEvent>(_onRemoveKitchen);
   }
 
   Future<void> _onFetchKitchens(
@@ -78,6 +88,32 @@ class KitchenBloc extends Bloc<KitchenEvent, KitchenState> {
       (message) => emit(KitchenSuccess(message)),
     );
     add(FetchKitchens());
+  }
+
+  Future<void> _onLeaveKitchen(
+    LeaveKitchenEvent event,
+    Emitter<KitchenState> emit,
+  ) async {
+    final res = await _leaveKitchenUsecase(
+      LeaveKitchenParams(kitchenId: event.kitchenId),
+    );
+
+    res.fold((failure) => emit(KitchenFailure(failure.message)), (message) {
+      emit(KitchenSuccess(message));
+    });
+  }
+
+  Future<void> _onRemoveKitchen(
+    RemoveKitchenEvent event,
+    Emitter<KitchenState> emit,
+  ) async {
+    final res = await _removeKitchenUsecase(
+      RemoveKitchenParams(kitchenId: event.kitchenId),
+    );
+
+    res.fold((failure) => emit(KitchenFailure(failure.message)), (message) {
+      emit(KitchenSuccess(message));
+    });
   }
 
   Future<void> _onSwitchKitchen(

@@ -22,13 +22,18 @@ Future<void> main() async {
 
   await Future.wait([
     initDependencies(),
-    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]),
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]),
   ]);
   cameras = await availableCameras();
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.white,
       statusBarIconBrightness: Brightness.dark,
+      systemNavigationBarColor: Colors.white, // change this
+      systemNavigationBarIconBrightness: Brightness.light, // icons color
     ),
   );
   runApp(

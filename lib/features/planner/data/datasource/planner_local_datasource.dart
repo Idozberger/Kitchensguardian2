@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/common/data/model/meal_type_model.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
+import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/core/utils/date_format_to_string.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -76,22 +77,27 @@ class PlannerLocalDatasourceImpl implements PlannerLocalDatasource {
         }
       }
 
-      final existingPlanIndex = currentList.indexWhere(
-        (plan) => plan.formatedDateString == newPlan.formatedDateString,
+      final matchingPlans = currentList
+          .where(
+            (plan) => plan.formatedDateString == newPlan.formatedDateString,
+          )
+          .toList();
+
+      final alreadyExists = matchingPlans.any(
+        (plan) => plan.mealType.toLowerCase() == newPlan.mealType.toLowerCase(),
       );
-      if (existingPlanIndex != -1) {
-        if (currentList[existingPlanIndex].mealType == newPlan.mealType) {
-          return "${newPlan.mealType} meal already added for this date";
-        }
-        debugPrint(
-          "Adding new meal type '${newPlan.mealType}' for ${newPlan.formatedDateString}",
-        );
-        currentList.add(newPlan);
-      } else {
-        debugPrint(
-          "Adding new meal type '${newPlan.mealType}' for ${newPlan.formatedDateString}",
-        );
-        currentList.add(newPlan);
+
+      if (alreadyExists) {
+        return "${newPlan.mealType} meal already added for this date";
+      }
+
+      debugPrint(
+        "Adding new meal type '${newPlan.mealType}' for ${newPlan.formatedDateString}",
+      );
+
+      currentList.add(newPlan);
+
+      if (matchingPlans.isEmpty) {
         debugPrint("Added new plan for ${newPlan.formatedDateString}");
       }
 

@@ -178,7 +178,7 @@ class _PantryItemCardState extends State<PantryItemCard> {
   }
 
   Future<dynamic> _showDeleteDialog(BuildContext context) {
-    return showCustomDeleteDialog(
+    return showCustomGenericDialog(
       context: context,
       title: "Remove Item",
       subtitle: "Are you sure you want to delete this item?",

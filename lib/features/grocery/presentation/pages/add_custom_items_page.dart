@@ -116,8 +116,8 @@ class _AddCustomItemsPageState extends State<AddCustomItemsPage> {
         return SafeArea(
           child: Container(
             width: double.infinity,
-            decoration: BoxDecoration(color: Colors.white),
-            padding: gapSymmetric(horizontal: 20, vertical: 10),
+            decoration: BoxDecoration(color: const Color(0xffF9F9F9)),
+            padding: gapOnly(left: 20, right: 20, bottom: 14, top: 14),
             child: GenericButtonWidget(
               isLoading: state.isLoading,
               text: "Add Item",
