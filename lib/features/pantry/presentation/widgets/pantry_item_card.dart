@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
-import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
-import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 
 class PantryItemCard extends StatefulWidget {
@@ -15,6 +13,7 @@ class PantryItemCard extends StatefulWidget {
   final String quantity;
   final String unit;
   final String pantry;
+  final VoidCallback onListCheckedCallback;
   final String expiry;
 
   const PantryItemCard({
@@ -24,6 +23,7 @@ class PantryItemCard extends StatefulWidget {
     required this.unit,
     required this.pantry,
     required this.expiry,
+    required this.onListCheckedCallback,
   });
 
   @override
@@ -112,7 +112,10 @@ class _PantryItemCardState extends State<PantryItemCard> {
                 children: [
                   // _circleButton(AppAssets.editSvg, () {}),
                   _circleButton(AppAssets.cartSvg, () {}),
-                  _circleButton(AppAssets.listCheckedSvg, () {}),
+                  _circleButton(
+                    AppAssets.listCheckedSvg,
+                    () => widget.onListCheckedCallback(),
+                  ),
                   _circleButton(AppAssets.deleteSvg, () {
                     _showDeleteDialog(context);
                   }),

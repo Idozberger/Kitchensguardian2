@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:foodkitchen/core/common/data/model/meal_type_model.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
+import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';

@@ -3,6 +3,7 @@ import 'package:foodkitchen/core/global/functions/const.dart';
 import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
 import 'package:foodkitchen/core/common/data/model/pantry_model.dart';
+import 'package:foodkitchen/core/services/notifications/flutter_local_notifications_service.dart';
 
 abstract interface class PantryRemoteDatasource {
   Future<String> addPantryItem({required PantryModel pantryModel});
@@ -11,11 +12,21 @@ abstract interface class PantryRemoteDatasource {
   });
   Future<Map<String, dynamic>> scanRecipt({required String filePath});
   Future<String> requestItems({required PantryModel pantryModel});
+  Future<String> showNotification({
+    required int id,
+    required String title,
+    required String body,
+    String? payload,
+  });
 }
 
 class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
   final DioHelper dio;
-  PantryRemoteDatasourceImpl(this.dio);
+  final NotificationService notificationService;
+  PantryRemoteDatasourceImpl({
+    required this.dio,
+    required this.notificationService,
+  });
   @override
   Future<String> addPantryItem({required PantryModel pantryModel}) async {
     try {
@@ -90,6 +101,26 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
       return response.data["message"];
     } on DioException catch (e) {
       throw dio.handleError(e);
+    }
+  }
+
+  @override
+  Future<String> showNotification({
+    required int id,
+    required String title,
+    required String body,
+    String? payload,
+  }) async {
+    try {
+      await notificationService.showNotification(
+        id: id,
+        title: title,
+        body: body,
+        payload: payload,
+      );
+      return "Notfication scheduled";
+    } catch (e) {
+      throw e.toString();
     }
   }
 }

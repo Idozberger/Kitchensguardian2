@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
@@ -68,12 +70,13 @@ class LogoutDialog extends StatelessWidget {
                 Flexible(
                   child: GenericButtonWidget(
                     onPressed: () async {
+                      UserCubit userCubit = context.read<UserCubit>();
+                      userCubit.clearUser();
                       final prefs = await SharedPreferences.getInstance();
-
-                      final token = prefs.getString('access-token');
-                      print('🧾 Current token: $token');
-
                       await prefs.remove('access-token');
+                      await prefs.remove('kitchen_id');
+                      await prefs.remove('invitation_code');
+                      await prefs.remove('role');
 
                       context.go(Routes.signIn);
                     },

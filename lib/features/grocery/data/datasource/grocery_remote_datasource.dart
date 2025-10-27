@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
 
@@ -97,19 +98,49 @@ class GroceryRemoteDatasourceImpl implements GroceryRemoteDatasource {
     required String kitchenId,
   }) async {
     try {
+      debugPrint(
+        "🔹 [getAiGeneratedItems] Request started for kitchenId: $kitchenId",
+      );
+
       final response = await dio.get(
         "${AppConstants.getAiGeneratedList}?kitchen_id=$kitchenId",
       );
 
+      debugPrint("✅ [getAiGeneratedItems] Response: ${response.data}");
+
       final data = response.data["missing_items"];
 
       if (data is List) {
-        return data.map((e) => Map<String, dynamic>.from(e)).toList();
+        final parsedList = data.map<Map<String, dynamic>>((e) {
+          if (e is Map) {
+            return Map<String, dynamic>.from(e);
+          } else if (e is String) {
+            return {"name": e};
+          } else {
+            debugPrint(
+              "⚠️ [getAiGeneratedItems] Unknown item type: ${e.runtimeType}",
+            );
+            return {"name": e.toString()};
+          }
+        }).toList();
+
+        debugPrint(
+          "📦 [getAiGeneratedItems] Parsed ${parsedList.length} items",
+        );
+        return parsedList;
       } else {
+        debugPrint(
+          "⚠️ [getAiGeneratedItems] Invalid data format: ${response.data}",
+        );
         throw Exception("Invalid data");
       }
     } on DioException catch (e) {
+      debugPrint("❌ [getAiGeneratedItems] DioException: ${e.message}");
       throw dio.handleError(e);
+    } catch (e, stackTrace) {
+      debugPrint("🚨 [getAiGeneratedItems] Unexpected error: $e");
+      debugPrint("🧩 StackTrace: $stackTrace");
+      rethrow;
     }
   }
 

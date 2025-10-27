@@ -111,4 +111,27 @@ class PantryRepositoryImpl implements PantryRepository {
       return Left(UnknownFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, String>> showNotification({
+    required int id,
+    required String title,
+    required String body,
+    String? payload,
+  }) async {
+    try {
+      String response = await pantryRemoteDatasource.showNotification(
+        id: id,
+        title: title,
+        body: body,
+        payload: payload,
+      );
+
+      return Right(response);
+    } on Failure catch (f) {
+      return Left(f);
+    } catch (e) {
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
 }

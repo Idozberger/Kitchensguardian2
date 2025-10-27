@@ -13,4 +13,10 @@ abstract interface class PantryRepository {
     required String filePath,
   });
   Future<Either<Failure, String>> requestItems({required Pantry pantry});
+  Future<Either<Failure, String>> showNotification({
+    required int id,
+    required String title,
+    required String body,
+    String? payload,
+  });
 }

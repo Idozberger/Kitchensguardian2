@@ -11,7 +11,9 @@ class PantriesItemsModel extends PantriesItemsEntity {
   factory PantriesItemsModel.fromJson(Map<String, dynamic> json) {
     return PantriesItemsModel(
       name: json['name'] as String,
-      quantity: json['quantity'] ?? 0,
+      quantity: (json['quantity'] is int || json['quantity'] is double)
+          ? (json['quantity'] as num).toDouble()
+          : 0.0,
       unit: json['unit'] as String,
       group: json['group'] as String,
     );

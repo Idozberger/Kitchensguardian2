@@ -189,7 +189,7 @@ class _AddCustomItemsPageState extends State<AddCustomItemsPage> {
           fillColor: const Color(0xffF9F9F9),
           isFilled: true,
           isLabled: false,
-          keyboardType: TextInputType.text,
+          keyboardType: TextInputType.number,
           label: "",
         ),
 

@@ -43,21 +43,24 @@ class GenericCircleCheckboxTile extends StatelessWidget {
           Flexible(
             child: Row(
               children: [
-                GestureDetector(
-                  onTap: () => onChanged(!isChecked),
-                  child: Container(
-                    padding: gapAll(1),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: AppColors.primaryColor,
-                        width: 2,
+                if (isFinalList)
+                  SizedBox()
+                else
+                  GestureDetector(
+                    onTap: () => onChanged(!isChecked),
+                    child: Container(
+                      padding: gapAll(1),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: AppColors.primaryColor,
+                          width: 2,
+                        ),
+                        color: isChecked ? activeColor : Colors.transparent,
                       ),
-                      color: isChecked ? activeColor : Colors.transparent,
+                      child: Icon(Icons.check, size: t(12), color: checkColor),
                     ),
-                    child: Icon(Icons.check, size: t(12), color: checkColor),
                   ),
-                ),
                 SizedBox(width: w(14)),
 
                 Expanded(
@@ -81,19 +84,19 @@ class GenericCircleCheckboxTile extends StatelessWidget {
               ],
             ),
           ),
-          if (isFinalList == false)
-            GestureDetector(
-              onTap: () => deleteCallback(),
-              child: Container(
-                padding: gapAll(6),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Color(0xffD4D2D2)),
-                  shape: BoxShape.circle,
-                ),
-
-                child: SvgPicture.asset(AppAssets.deleteSvg),
+          // if (isFinalList == false)
+          GestureDetector(
+            onTap: () => deleteCallback(),
+            child: Container(
+              padding: gapAll(6),
+              decoration: BoxDecoration(
+                border: Border.all(color: Color(0xffD4D2D2)),
+                shape: BoxShape.circle,
               ),
+
+              child: SvgPicture.asset(AppAssets.deleteSvg),
             ),
+          ),
         ],
       ),
     );

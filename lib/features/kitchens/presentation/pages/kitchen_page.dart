@@ -150,10 +150,13 @@ class _KitchenPageState extends State<KitchenPage> {
               itemCount: kitchensWithoutInvitationCode.length,
               itemBuilder: (BuildContext context, int index) {
                 final kitchen = kitchensWithoutInvitationCode[index];
+                final isActive =
+                    userCubit.state.activeKitchenId == kitchen.kitchenId;
                 return Padding(
                   padding: gapOnly(bottom: 4),
                   child: KitchenTile(
                     isMember: true,
+                    buttonText: isActive ? "Active" : "Show",
                     onSecondaryActionTap: () {
                       showCustomGenericDialog(
                         context: context,
@@ -174,31 +177,40 @@ class _KitchenPageState extends State<KitchenPage> {
                         },
                       );
                     },
-                    onButtonPressed: () async {
-                      if (kitchen.kitchenId.isEmpty) {
-                        AppToast.show("Invalid kitchen ID", ToastType.error);
-                        return;
-                      }
+                    onButtonPressed: isActive
+                        ? () {}
+                        : () async {
+                            if (kitchen.kitchenId.isEmpty) {
+                              AppToast.show(
+                                "Invalid kitchen ID",
+                                ToastType.error,
+                              );
+                              return;
+                            }
 
-                      final prefs = await SharedPreferences.getInstance();
+                            final prefs = await SharedPreferences.getInstance();
 
-                      await prefs.setString("kitchen_id", kitchen.kitchenId);
-                      await prefs.setString("role", kitchen.role);
+                            await prefs.setString(
+                              "kitchen_id",
+                              kitchen.kitchenId,
+                            );
+                            await prefs.setString("role", kitchen.role);
 
-                      userCubit.updateActiveKitchenIdInvitationCodeAndRole(
-                        activeKitchenId: kitchen.kitchenId,
-                        invitationCode: kitchen.invitationCode,
-                        role: kitchen.role,
-                      );
+                            userCubit
+                                .updateActiveKitchenIdInvitationCodeAndRole(
+                                  activeKitchenId: kitchen.kitchenId,
+                                  invitationCode: kitchen.invitationCode,
+                                  role: kitchen.role,
+                                );
 
-                      AppToast.show(
-                        "Kitchen switched to ${kitchen.kitchenName}",
-                        ToastType.success,
-                      );
+                            AppToast.show(
+                              "Kitchen switched to ${kitchen.kitchenName}",
+                              ToastType.success,
+                            );
 
-                      // ignore: use_build_context_synchronously
-                      context.go(Routes.splash);
-                    },
+                            // ignore: use_build_context_synchronously
+                            context.go(Routes.splash);
+                          },
                     imagePath: AppAssets.avatar,
                     title: kitchen.kitchenName,
                     email: kitchen.invitationCode,
@@ -274,7 +286,7 @@ class _KitchenPageState extends State<KitchenPage> {
           Text(
             kitchenState.kitchens.isNotEmpty
                 ? "${kitchenState.kitchens.length} kitchen found: "
-                : "1 kitchen found:",
+                : "No kitchen found:",
             style: Theme.of(
               context,
             ).textTheme.headlineMedium?.copyWith(fontSize: t(15)),
@@ -287,11 +299,13 @@ class _KitchenPageState extends State<KitchenPage> {
               itemCount: kitchenState.kitchens.length,
               itemBuilder: (BuildContext _, int index) {
                 final kitchen = kitchenState.kitchens[index];
-
+                final isActive =
+                    userCubit.state.activeKitchenId == kitchen.kitchenId;
                 return Padding(
                   padding: gapOnly(bottom: 4),
                   child: KitchenTile(
                     isMember: false,
+                    buttonText: isActive ? "Active" : "Show",
                     onSecondaryActionTap: () {
                       showCustomGenericDialog(
                         context: context,
@@ -312,30 +326,39 @@ class _KitchenPageState extends State<KitchenPage> {
                         },
                       );
                     },
-                    onButtonPressed: () async {
-                      if (kitchen.kitchenId.isEmpty) {
-                        AppToast.show("Invalid kitchen ID", ToastType.error);
-                        return;
-                      }
+                    onButtonPressed: isActive
+                        ? () {}
+                        : () async {
+                            if (kitchen.kitchenId.isEmpty) {
+                              AppToast.show(
+                                "Invalid kitchen ID",
+                                ToastType.error,
+                              );
+                              return;
+                            }
 
-                      final prefs = await SharedPreferences.getInstance();
+                            final prefs = await SharedPreferences.getInstance();
 
-                      await prefs.setString("kitchen_id", kitchen.kitchenId);
-                      await prefs.setString("role", kitchen.role);
+                            await prefs.setString(
+                              "kitchen_id",
+                              kitchen.kitchenId,
+                            );
+                            await prefs.setString("role", kitchen.role);
 
-                      userCubit.updateActiveKitchenIdInvitationCodeAndRole(
-                        activeKitchenId: kitchen.kitchenId,
-                        invitationCode: kitchen.invitationCode,
-                        role: kitchen.role,
-                      );
+                            userCubit
+                                .updateActiveKitchenIdInvitationCodeAndRole(
+                                  activeKitchenId: kitchen.kitchenId,
+                                  invitationCode: kitchen.invitationCode,
+                                  role: kitchen.role,
+                                );
 
-                      AppToast.show(
-                        "Kitchen switched to ${kitchen.kitchenName}",
-                        ToastType.success,
-                      );
-                      // kitchenBloc.add(SwitchKitchenEvent(kitchen.kitchenId));
-                      context.go(Routes.splash);
-                    },
+                            AppToast.show(
+                              "Kitchen switched to ${kitchen.kitchenName}",
+                              ToastType.success,
+                            );
+                            // kitchenBloc.add(SwitchKitchenEvent(kitchen.kitchenId));
+                            context.go(Routes.splash);
+                          },
                     imagePath: AppAssets.avatar,
                     title: kitchen.kitchenName,
                     email: kitchen.invitationCode,

@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/services/connection/connection_checker.dart';
 import 'package:foodkitchen/core/services/jwt_decoder/jwt_decoder.dart';
+import 'package:foodkitchen/core/services/notifications/flutter_local_notifications_service.dart';
 import 'package:foodkitchen/features/auth/data/data_source/auth_remote_datasource.dart';
 import 'package:foodkitchen/features/auth/data/repository/auth_repository_impl.dart';
 import 'package:foodkitchen/features/auth/domain/repository/auth_repository.dart';
@@ -65,6 +66,7 @@ import 'package:foodkitchen/features/pantry/domain/usecases/add_pantry_item.dart
 import 'package:foodkitchen/features/pantry/domain/usecases/get_pantry_items.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/request_items.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/scan_receipt.dart';
+import 'package:foodkitchen/features/pantry/domain/usecases/show_notification.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_bloc.dart';
 import 'package:foodkitchen/features/planner/data/datasource/planner_local_datasource.dart';
 import 'package:foodkitchen/features/planner/data/datasource/planner_remote_datasource.dart';
@@ -246,10 +248,12 @@ void _initDashboard() async {
 
 void _initPantry() async {
   // Datasource
+  sl.registerLazySingleton<NotificationService>(() => NotificationService());
 
+  await sl<NotificationService>().init();
   sl
     ..registerFactory<PantryRemoteDatasource>(
-      () => PantryRemoteDatasourceImpl(sl()),
+      () => PantryRemoteDatasourceImpl(dio: sl(), notificationService: sl()),
     )
     // Repository
     ..registerFactory<PantryRepository>(() => PantryRepositoryImpl(sl()))
@@ -258,10 +262,12 @@ void _initPantry() async {
     ..registerFactory(() => GetPantryItems(sl()))
     ..registerFactory(() => ScanReceiptUseCase(sl()))
     ..registerFactory(() => RequestItems(sl()))
+    ..registerFactory(() => ShowNotification(sl()))
     // Bloc
     ..registerLazySingleton(
       () => PantryBloc(
         addPantryItem: AddPantryItem(sl()),
+        showNotification: ShowNotification(sl()),
         getPantryItems: GetPantryItems(sl()),
         scanReceipt: ScanReceiptUseCase(sl()),
         requestItems: RequestItems(sl()),

@@ -157,8 +157,6 @@ class AppDrawer extends StatelessWidget {
       child: ElevatedButton.icon(
         onPressed: () {
           context.push(Routes.logout);
-          // context.push(Routes.noInternet);
-          // context.push(Routes.notFound404);
         },
         icon: SvgPicture.asset(AppAssets.logoutSvg),
         label: Text(

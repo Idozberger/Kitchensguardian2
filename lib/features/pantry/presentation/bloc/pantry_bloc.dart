@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_bloc.dart';
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_event.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
@@ -10,8 +11,10 @@ import 'package:foodkitchen/features/pantry/domain/usecases/add_pantry_item.dart
 import 'package:foodkitchen/features/pantry/domain/usecases/get_pantry_items.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/request_items.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/scan_receipt.dart';
+import 'package:foodkitchen/features/pantry/domain/usecases/show_notification.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_event.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_state.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class PantryBloc extends Bloc<PantryEvent, PantryState> {
   final HomeBloc _homeBloc;
@@ -20,6 +23,7 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
   final GetPantryItems _getPantryItems;
   final ScanReceiptUseCase _scanReceiptUseCase;
   final RequestItems _requestItems;
+  final ShowNotification _showNotification;
 
   PantryBloc({
     required HomeBloc homeBloc,
@@ -28,12 +32,14 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
     required GetPantryItems getPantryItems,
     required ScanReceiptUseCase scanReceipt,
     required RequestItems requestItems,
+    required ShowNotification showNotification,
   }) : _addPantryItem = addPantryItem,
        _getPantryItems = getPantryItems,
        _scanReceiptUseCase = scanReceipt,
        _homeBloc = homeBloc,
        _groceryBloc = groceryBloc,
        _requestItems = requestItems,
+       _showNotification = showNotification,
        super(PantryInitial()) {
     on<PantryAddItemEvent>(_onAddPantryItem);
     on<GetPantryItemsEvent>(_onGetPantryItems);
@@ -41,6 +47,7 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
     on<PantryRequestItemEvent>(_onRequestItems);
     on<IncrementItemEvent>(_onIncrementItem);
     on<DecrementItemEvent>(_onDecrementItem);
+    on<ShowNotificationEvent>(_onShowNotificationEvent);
   }
 
   Future<void> _onAddPantryItem(
@@ -147,5 +154,28 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
         ),
       );
     }
+  }
+
+  void _onShowNotificationEvent(
+    ShowNotificationEvent event,
+    Emitter<PantryState> emit,
+  ) async {
+    final res = await _showNotification(
+      ShowNotificationParams(
+        id: event.id,
+        title: event.title,
+        body: event.body,
+        payload: event.payload,
+      ),
+    );
+
+    res.fold(
+      (failure) {
+        AppToast.show(failure.message, ToastType.error);
+      },
+      (successMessage) {
+        AppToast.show(successMessage, ToastType.success);
+      },
+    );
   }
 }

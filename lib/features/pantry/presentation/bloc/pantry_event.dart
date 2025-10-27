@@ -31,3 +31,18 @@ class DecrementItemEvent extends PantryEvent {
   final int index;
   DecrementItemEvent(this.index);
 }
+
+class ShowNotificationEvent extends PantryEvent {
+  final int id;
+  final String title;
+  final String kitchenId;
+  final String body;
+  final String? payload;
+  ShowNotificationEvent({
+    required this.id,
+    required this.body,
+    required this.kitchenId,
+    required this.title,
+    this.payload,
+  });
+}

@@ -70,8 +70,14 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     res.fold(
       (failure) =>
           emit(state.copyWith(isLoading: false, errorMessage: failure.message)),
-      (message) =>
-          emit(state.copyWith(isLoading: false, successMessage: message)),
+      (message) {
+        add(
+          GetPantriesItemsEventForHome(
+            kitchenId: _userCubit.state.activeKitchenId,
+          ),
+        );
+        emit(state.copyWith(isLoading: false, successMessage: message));
+      },
     );
   }
 

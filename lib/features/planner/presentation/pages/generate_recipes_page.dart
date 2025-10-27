@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
@@ -64,7 +63,12 @@ class _GenerateRecipesPageState extends State<GenerateRecipesPage> {
     return Scaffold(
       backgroundColor: const Color(0xffF9F9F9),
       appBar: _buildAppBar(context, caloriesFilter),
-      body: BlocBuilder<PlannerBloc, PlannerState>(
+      body: BlocConsumer<PlannerBloc, PlannerState>(
+        listener: (context, state) {
+          if (state.errorMessage != null && state.errorMessage!.isNotEmpty) {
+            AppToast.show(state.errorMessage!, ToastType.error);
+          }
+        },
         builder: (_, state) {
           return SafeArea(
             child: SingleChildScrollView(

@@ -215,8 +215,9 @@ class _AddItemPageState extends State<AddItemPage> {
           hintText: "Enter item quantity",
           fillColor: const Color(0xffF9F9F9),
           isFilled: true,
+          keyboardType: TextInputType.number,
           isLabled: false,
-          keyboardType: TextInputType.text,
+
           label: "",
         ),
 

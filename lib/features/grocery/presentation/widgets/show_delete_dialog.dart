@@ -9,9 +9,8 @@ import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_bloc.dart
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_event.dart';
 
 Future<dynamic> showDialogForItemDeletion(
-  BuildContext context,
-  String itemId, {
-  VoidCallback? callback,
+  BuildContext context, {
+  required VoidCallback callback,
 }) {
   return showDialog(
     context: context,
@@ -68,21 +67,8 @@ Future<dynamic> showDialogForItemDeletion(
                 Flexible(
                   child: GenericButtonWidget(
                     onPressed: () {
-                      if (callback == null) {
-                        context.read<GroceryBloc>().add(
-                          DeleteKitchenItemsEvent(
-                            kitchenId: context
-                                .read<UserCubit>()
-                                .state
-                                .activeKitchenId,
-                            itemIds: [itemId],
-                          ),
-                        );
-                        Navigator.pop(context);
-                      } else {
-                        callback();
-                        Navigator.pop(context);
-                      }
+                      callback();
+                      Navigator.pop(context);
                     },
 
                     text: "Yes",

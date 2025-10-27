@@ -5,6 +5,7 @@ import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
+import 'package:foodkitchen/core/utils/date_format_to_string.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
@@ -47,7 +48,8 @@ class _FavouriteFoodPageState extends State<FavouriteFoodPage> {
                     color: AppColors.primaryColor,
                   ),
                 )
-              : state.favouriteRecipes == null
+              : state.favouriteRecipes == null ||
+                    state.favouriteRecipes!.isEmpty
               ? Center(
                   child: Text(
                     "You dont have any favourite recipes",
@@ -124,7 +126,15 @@ class _FavouriteFoodPageState extends State<FavouriteFoodPage> {
             padding: gapOnly(left: 20, right: 20, bottom: 14, top: 14),
             child: GenericButtonWidget(
               onPressed: () {
-                context.push(Routes.generateRecipes);
+                String formatedDateString = formatDate(DateTime.now());
+                context.pushNamed(
+                  Routes.generateRecipes,
+                  extra: {
+                    "selected_date": formatedDateString,
+                    "selected_meal_type": "",
+                    "is_plan": false,
+                  },
+                );
               },
               text: "Generate More",
             ),

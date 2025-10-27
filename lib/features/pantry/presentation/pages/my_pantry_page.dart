@@ -14,6 +14,7 @@ import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_state.dart'
 import 'package:foodkitchen/features/pantry/presentation/widgets/custom_appbar.dart';
 import 'package:foodkitchen/features/pantry/presentation/widgets/pantry_item_card.dart';
 import 'package:go_router/go_router.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class MyPantryPage extends StatefulWidget {
   const MyPantryPage({super.key});
@@ -152,6 +153,16 @@ class _MyPantryPageState extends State<MyPantryPage> {
           unit: pantry.unit,
           pantry: pantry.group,
           expiry: "Expires in ${index + 1} days",
+          onListCheckedCallback: () async {
+            pantryBloc.add(
+              ShowNotificationEvent(
+                id: 123,
+                body: "Body Test",
+                kitchenId: userCubit.state.activeKitchenId,
+                title: "Title Test",
+              ),
+            );
+          },
         );
       },
     );
