@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart' show AppAssets;
-import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
-import 'package:foodkitchen/core/utils/show_toast.dart';
-import 'package:go_router/go_router.dart';
 
 class DayPlanMenu extends StatelessWidget {
   final VoidCallback deletePlan;
@@ -19,45 +16,52 @@ class DayPlanMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PopupMenuButton<int>(
-      color: Colors.white,
-      offset: Offset(w(-20), 40),
-      padding: gapZero,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(h(10)),
-        side: const BorderSide(color: Color(0xffD4D2D2)),
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(
+        padding: EdgeInsets.zero,
+        viewPadding: EdgeInsets.zero,
+        viewInsets: EdgeInsets.zero,
       ),
-      onSelected: (value) {
-        switch (value) {
-          case 0:
-            debugPrint("Edit Day Plan clicked");
-            editPlan();
-            break;
-
-          case 2:
-            deletePlan();
-
-            break;
-        }
-      },
-      itemBuilder: (context) => [
-        _menuItem(
-          context,
-          value: 0,
-          icon: AppAssets.editSvg,
-          label: "Edit Day Plan",
-          textColor: Colors.black,
+      child: PopupMenuButton<int>(
+        color: Colors.white,
+        offset: Offset(w(-20), 40),
+        padding: gapZero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(h(10)),
+          side: const BorderSide(color: Color(0xffD4D2D2)),
         ),
+        onSelected: (value) {
+          switch (value) {
+            case 0:
+              debugPrint("Edit Day Plan clicked");
+              editPlan();
+              break;
 
-        _menuItem(
-          context,
-          value: 2,
-          icon: AppAssets.deleteSvg,
-          label: "Clear Day Plan",
-          textColor: Colors.red,
-        ),
-      ],
-      icon: SvgPicture.asset(AppAssets.popupMenuSvg),
+            case 2:
+              deletePlan();
+
+              break;
+          }
+        },
+        itemBuilder: (context) => [
+          _menuItem(
+            context,
+            value: 0,
+            icon: AppAssets.editSvg,
+            label: "Edit Day Plan",
+            textColor: Colors.black,
+          ),
+
+          _menuItem(
+            context,
+            value: 2,
+            icon: AppAssets.deleteSvg,
+            label: "Clear Day Plan",
+            textColor: Colors.red,
+          ),
+        ],
+        icon: SvgPicture.asset(AppAssets.popupMenuSvg),
+      ),
     );
   }
 

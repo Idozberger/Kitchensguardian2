@@ -20,7 +20,7 @@ class ProfilePage extends StatelessWidget {
       backgroundColor: const Color(0xffF9F9F9),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: gapSymmetric(horizontal: 20, vertical: 15),
+          padding: gapOnly(left: 20, right: 20, top: 14, bottom: 14),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

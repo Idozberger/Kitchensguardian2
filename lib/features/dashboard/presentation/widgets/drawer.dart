@@ -101,17 +101,7 @@ class AppDrawer extends StatelessWidget {
               title: "Get Referral Code",
               iconPath: AppAssets.referralSvg,
               onTap: () async {
-                if (state.activeKitchenId.isNotEmpty) {
-                  var referralCode = state.invitationCode;
-                  final message = "Use my referral code: $referralCode";
-
-                  await Share.share(message, subject: "Kitchen Guardian");
-                } else {
-                  AppToast.show(
-                    "Please join or create kitchen",
-                    ToastType.error,
-                  );
-                }
+                context.push(Routes.referralPage);
               },
             ),
 

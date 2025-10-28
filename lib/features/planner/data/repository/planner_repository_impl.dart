@@ -151,4 +151,23 @@ class PlannerRepositoryImpl implements PlannerRepository {
       return Left(UnknownFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, String>> markRecipeFinished({
+    required String kitchenId,
+    required String recipeId,
+  }) async {
+    try {
+      final response = await plannerRemoteDatasource.markRecipeFinished(
+        kitchenId: kitchenId,
+        recipeId: recipeId,
+      );
+
+      return Right(response);
+    } on Failure catch (f) {
+      return Left(f);
+    } catch (e) {
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
 }

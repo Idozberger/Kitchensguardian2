@@ -7,8 +7,10 @@ import 'package:foodkitchen/core/theme/app_colors.dart';
 class AppTextField extends StatelessWidget {
   final String label;
   final bool isLabled;
+  final bool enabled;
   final String hintText;
   final TextEditingController controller;
+  final void Function(String)? onFieldSubmitted;
   final String? errorText;
   final bool obscureText;
   final TextInputType keyboardType;
@@ -34,6 +36,8 @@ class AppTextField extends StatelessWidget {
     this.prefixIcon,
     this.validator,
     this.isLabled = true,
+    this.enabled = true,
+    this.onFieldSubmitted,
     this.isFilled = false,
     this.textInputAction = TextInputAction.done,
     this.textAlignCentered = false,
@@ -53,10 +57,12 @@ class AppTextField extends StatelessWidget {
         ],
 
         TextFormField(
+          enabled: enabled,
           obscuringCharacter: "*",
           controller: controller,
           obscureText: obscureText,
           keyboardType: keyboardType,
+          onFieldSubmitted: onFieldSubmitted,
           style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: color),
           validator: validator,
           textInputAction: textInputAction,
@@ -101,7 +107,9 @@ OutlineInputBorder outlineInputBorder(BuildContext context) {
   return OutlineInputBorder(
     borderRadius: BorderRadius.circular(h(10)),
     borderSide: BorderSide(
-      color: context.isDarkTheme ? Colors.white : AppColors.greyColor,
+      color: context.isDarkTheme
+          ? Colors.white
+          : AppColors.appTextFieldBorderColor,
       width: 1.2,
     ),
   );

@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/logs.dart';
+import 'package:foodkitchen/core/utils/show_toast.dart';
+import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
 import 'package:foodkitchen/features/planner/presentation/widgets/recipes_tile.dart';
 import 'package:foodkitchen/core/common/data/model/meal_type_model.dart';
 import 'package:go_router/go_router.dart';
@@ -27,15 +31,24 @@ class RecipeTileItem extends StatelessWidget {
   });
 
   void _navigateToDetails(BuildContext context) {
-    final updatedRecipe = recipe.copyWith(
-      formatedDateString: selectedDate,
-      mealType: selectedMealType,
-    );
+    if (context.read<PlannerBloc>().state.startRecipe == false) {
+      final updatedRecipe = recipe.copyWith(
+        formatedDateString: selectedDate,
+        mealType: selectedMealType,
+      );
 
-    context.pushNamed(
-      Routes.generateRecipesDetails,
-      extra: {"meal_type_entity": updatedRecipe, "is_plan": isPlan},
-    );
+      context.pushNamed(
+        Routes.generateRecipesDetails,
+        extra: {"meal_type_entity": updatedRecipe, "is_plan": isPlan},
+      );
+    } else {
+      AppToast.show(
+        "A recipe is already in progress. Please finish it first, or tap 'Go to Recipe' at the bottom.",
+        ToastType.error,
+        gravity: ToastGravity.TOP,
+        timeInSecForIosWeb: 3,
+      );
+    }
   }
 
   @override

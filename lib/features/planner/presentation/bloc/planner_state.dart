@@ -8,6 +8,8 @@ final class PlannerState {
   final List<MergedMealPlanEntity> dateBasedPlan;
   final bool isLoading;
   final bool addingToWeeklyPlan;
+  final bool startRecipe;
+  final bool isFinishingRecipe;
   final String? errorMessage;
   final String successMessage;
   const PlannerState({
@@ -15,6 +17,8 @@ final class PlannerState {
     this.favouriteRecipes,
     this.getAllWeeklyPlans = const [],
     this.isLoading = false,
+    this.startRecipe = false,
+    this.isFinishingRecipe = false,
     this.addingToWeeklyPlan = false,
     this.errorMessage,
     this.successMessage = "",
@@ -27,6 +31,8 @@ final class PlannerState {
     List<MergedMealPlanEntity>? getAllWeeklyPlans,
     List<MergedMealPlanEntity>? dateBasedPlan,
     bool? isLoading,
+    bool? isFinishingRecipe,
+    bool? startRecipe,
     bool? addingToWeeklyPlan,
     String? errorMessage,
     String? successMessage,
@@ -40,6 +46,8 @@ final class PlannerState {
       errorMessage: errorMessage ?? "",
       successMessage: successMessage ?? "",
       dateBasedPlan: dateBasedPlan ?? this.dateBasedPlan,
+      startRecipe: startRecipe ?? this.startRecipe,
+      isFinishingRecipe: isFinishingRecipe ?? this.isFinishingRecipe,
     );
   }
 }

@@ -84,7 +84,7 @@ class _PlannerPageState extends State<PlannerPage> {
             )
           : SafeArea(
               child: Padding(
-                padding: gapSymmetric(horizontal: 20, vertical: 14),
+                padding: gapOnly(left: 20, right: 20, top: 14, bottom: 14),
                 child: BlocConsumer<PlannerBloc, PlannerState>(
                   listener: (context, state) {},
                   builder: (_, state) {

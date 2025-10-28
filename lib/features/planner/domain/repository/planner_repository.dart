@@ -21,4 +21,8 @@ abstract interface class PlannerRepository {
     required String mealType,
   });
   Future<Either<Failure, String>> deletePlan({required String id});
+  Future<Either<Failure, String>> markRecipeFinished({
+    required String kitchenId,
+    required String recipeId,
+  });
 }

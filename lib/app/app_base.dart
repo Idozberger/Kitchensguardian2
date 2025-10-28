@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:foodkitchen/app/app_router.dart';
 import 'package:foodkitchen/core/theme/app_theme.dart';
 
-final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey =
     GlobalKey<ScaffoldMessengerState>();
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -12,7 +12,7 @@ class AppBase extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      scaffoldMessengerKey: scaffoldMessengerKey,
+      scaffoldMessengerKey: rootScaffoldMessengerKey,
       builder: (context, child) {
         return MediaQuery.withNoTextScaling(child: child!);
       },

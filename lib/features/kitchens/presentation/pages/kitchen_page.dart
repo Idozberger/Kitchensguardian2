@@ -11,7 +11,6 @@ import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
-import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_event.dart';
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_bloc.dart';
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_event.dart';
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_state.dart';
@@ -336,28 +335,25 @@ class _KitchenPageState extends State<KitchenPage> {
                               );
                               return;
                             }
-
                             final prefs = await SharedPreferences.getInstance();
-
                             await prefs.setString(
                               "kitchen_id",
                               kitchen.kitchenId,
                             );
                             await prefs.setString("role", kitchen.role);
-
                             userCubit
                                 .updateActiveKitchenIdInvitationCodeAndRole(
                                   activeKitchenId: kitchen.kitchenId,
                                   invitationCode: kitchen.invitationCode,
                                   role: kitchen.role,
                                 );
-
                             AppToast.show(
                               "Kitchen switched to ${kitchen.kitchenName}",
                               ToastType.success,
                             );
-                            // kitchenBloc.add(SwitchKitchenEvent(kitchen.kitchenId));
-                            context.go(Routes.splash);
+                            kitchenBloc.add(
+                              SwitchKitchenEvent(kitchen.kitchenId),
+                            );
                           },
                     imagePath: AppAssets.avatar,
                     title: kitchen.kitchenName,

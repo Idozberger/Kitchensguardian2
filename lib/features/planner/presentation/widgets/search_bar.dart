@@ -23,6 +23,7 @@ class SearchBarWidgetForGenerateRecipes extends StatelessWidget {
       isFilled: true,
       isLabled: false,
       label: "",
+      onFieldSubmitted: (_) => onSearchTap(),
       controller: controller,
       hintText: "e.g Fries",
       suffixIcon: GestureDetector(

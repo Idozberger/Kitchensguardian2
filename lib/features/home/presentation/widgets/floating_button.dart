@@ -17,39 +17,24 @@ class FloatingButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<UserCubit, UserState>(
       builder: (_, state) {
-        return Stack(
-          children: [
-            Positioned(
-              top: h(32),
-              right: w(0),
-              child: SizedBox(
-                width: w(38),
-                child: FloatingActionButton(
-                  heroTag: "fab_main",
+        return FloatingActionButton(
+          heroTag: "fab_main",
+          key: UniqueKey(),
+          elevation: 4,
+          backgroundColor: AppColors.primaryColor,
+          shape: const CircleBorder(),
+          onPressed: () {
+            if (state.role != "member") {
+              context.push(Routes.scanMeal);
+            } else {
+              AppToast.show(
+                "Only host or co-host can scan a meal",
+                ToastType.error,
+              );
+            }
+          },
 
-                  key: UniqueKey(),
-                  elevation: 4,
-                  backgroundColor: AppColors.primaryColor,
-                  shape: const CircleBorder(),
-                  onPressed: () {
-                    if (state.role != "member") {
-                      context.push(Routes.scanMeal);
-                    } else {
-                      AppToast.show(
-                        "Only host or co-host can scan a meal",
-                        ToastType.error,
-                      );
-                    }
-                  },
-
-                  child: SvgPicture.asset(
-                    AppAssets.scanSvg,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-            ),
-          ],
+          child: SvgPicture.asset(AppAssets.scanSvg, color: Colors.black),
         );
       },
     );

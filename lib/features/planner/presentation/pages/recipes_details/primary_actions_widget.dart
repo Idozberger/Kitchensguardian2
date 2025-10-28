@@ -13,20 +13,24 @@ import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dar
 
 class PrimaryActionsWidget extends StatelessWidget {
   final MealTypeEntity recipe;
+  final bool isFinishing;
   final bool isPlan;
   final bool startRecipe;
   final VoidCallback onStartRecipe;
-  final VoidCallback onFinishOrCancel;
+  final VoidCallback onFinish;
+  final VoidCallback onCancel;
   final VoidCallback addToWeeklyPlanCallback;
 
   const PrimaryActionsWidget({
     super.key,
     required this.recipe,
     required this.isPlan,
+    required this.isFinishing,
     required this.startRecipe,
     required this.onStartRecipe,
     required this.addToWeeklyPlanCallback,
-    required this.onFinishOrCancel,
+    required this.onFinish,
+    required this.onCancel,
   });
 
   @override
@@ -42,7 +46,8 @@ class PrimaryActionsWidget extends StatelessWidget {
                       children: [
                         Flexible(
                           child: GenericButtonWidget(
-                            onPressed: onFinishOrCancel,
+                            isLoading: isFinishing,
+                            onPressed: onFinish,
                             text: "Finish Recipe",
                             backgroundColor: Colors.white,
                             color: Colors.green,
@@ -51,7 +56,7 @@ class PrimaryActionsWidget extends StatelessWidget {
                         SizedBox(width: w(12)),
                         Flexible(
                           child: GenericButtonWidget(
-                            onPressed: onFinishOrCancel,
+                            onPressed: onCancel,
                             text: "Cancel Recipe",
                             backgroundColor: Colors.white,
                             color: Colors.red,

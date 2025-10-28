@@ -20,13 +20,13 @@ class CategoryTabs extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: h(44),
+      height: h(40),
       width: double.infinity,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: categories.length,
         shrinkWrap: true,
-        padding: gapOnly(left: 20),
+        padding: gapSymmetric(horizontal: 20),
         separatorBuilder: (_, __) => gap(width: 8),
         itemBuilder: (_, index) {
           return InkWell(

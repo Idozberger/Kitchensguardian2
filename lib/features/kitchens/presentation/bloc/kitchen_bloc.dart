@@ -123,5 +123,7 @@ class KitchenBloc extends Bloc<KitchenEvent, KitchenState> {
     _homeBloc.add(GetPantriesItemsEventForHome(kitchenId: event.kitchenId));
     _groceryBloc.add(RequestedGroceryEvent(kitchenId: event.kitchenId));
     _plannerBloc.add(GetAllWeeklyPlansEvent());
+
+    add(FetchKitchens());
   }
 }

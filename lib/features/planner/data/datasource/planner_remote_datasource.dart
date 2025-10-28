@@ -10,6 +10,10 @@ abstract interface class PlannerRemoteDatasource {
   Future<List<Map<String, dynamic>>> favouriteRecipes();
   Future<String> addToFavourite({required String recipeId});
   Future<String> removeFromFavourite({required String recipeId});
+  Future<String> markRecipeFinished({
+    required String kitchenId,
+    required String recipeId,
+  });
 }
 
 class PlannerRemoteDatasourceImpl implements PlannerRemoteDatasource {
@@ -78,6 +82,23 @@ class PlannerRemoteDatasourceImpl implements PlannerRemoteDatasource {
       final response = await dio.post(
         AppConstants.removeFromFavourite,
         data: {"recipe_id": recipeId},
+      );
+
+      return response.data["message"];
+    } on DioException catch (e) {
+      throw dio.handleError(e);
+    }
+  }
+
+  @override
+  Future<String> markRecipeFinished({
+    required String kitchenId,
+    required String recipeId,
+  }) async {
+    try {
+      final response = await dio.post(
+        AppConstants.markRecipeFinished,
+        data: {"recipe_id": recipeId, "kitchen_id": kitchenId},
       );
 
       return response.data["message"];

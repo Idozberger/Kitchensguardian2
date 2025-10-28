@@ -110,7 +110,14 @@ class DioHelper {
         message = data;
       }
     }
+    if (message.toLowerCase().contains("token has expired")) {
+      log("🔒 Token expired — navigating to Sign In screen...");
 
+      final context = rootNavigatorKey.currentContext;
+      if (context != null) {
+        context.go(Routes.signIn);
+      }
+    }
     switch (e.type) {
       case DioExceptionType.connectionTimeout:
         return NetworkFailure("Connection timed out");

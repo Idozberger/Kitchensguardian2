@@ -154,6 +154,7 @@ class _MyPantryPageState extends State<MyPantryPage> {
           pantry: pantry.group,
           expiry: "Expires in ${index + 1} days",
           onListCheckedCallback: () async {
+            ////TODO: Request Notification Permission
             pantryBloc.add(
               ShowNotificationEvent(
                 id: 123,

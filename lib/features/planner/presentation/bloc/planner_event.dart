@@ -48,3 +48,15 @@ final class DeleteMealTypeFromWeeklyPlanEvent extends PlannerEvent {
     required this.mealType,
   });
 }
+
+class MarkRecipeFinishedEvent extends PlannerEvent {
+  final String kitchenId;
+  final String recipeId;
+
+  MarkRecipeFinishedEvent({required this.kitchenId, required this.recipeId});
+}
+
+class UpdateStartRecipeEvent extends PlannerEvent {
+  final bool startRecipe;
+  UpdateStartRecipeEvent({required this.startRecipe});
+}

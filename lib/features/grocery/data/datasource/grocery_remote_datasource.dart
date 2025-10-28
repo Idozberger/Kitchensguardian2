@@ -98,18 +98,10 @@ class GroceryRemoteDatasourceImpl implements GroceryRemoteDatasource {
     required String kitchenId,
   }) async {
     try {
-      debugPrint(
-        "🔹 [getAiGeneratedItems] Request started for kitchenId: $kitchenId",
-      );
-
       final response = await dio.get(
         "${AppConstants.getAiGeneratedList}?kitchen_id=$kitchenId",
       );
-
-      debugPrint("✅ [getAiGeneratedItems] Response: ${response.data}");
-
       final data = response.data["missing_items"];
-
       if (data is List) {
         final parsedList = data.map<Map<String, dynamic>>((e) {
           if (e is Map) {
@@ -124,22 +116,14 @@ class GroceryRemoteDatasourceImpl implements GroceryRemoteDatasource {
           }
         }).toList();
 
-        debugPrint(
-          "📦 [getAiGeneratedItems] Parsed ${parsedList.length} items",
-        );
         return parsedList;
       } else {
-        debugPrint(
-          "⚠️ [getAiGeneratedItems] Invalid data format: ${response.data}",
-        );
         throw Exception("Invalid data");
       }
     } on DioException catch (e) {
-      debugPrint("❌ [getAiGeneratedItems] DioException: ${e.message}");
       throw dio.handleError(e);
     } catch (e, stackTrace) {
-      debugPrint("🚨 [getAiGeneratedItems] Unexpected error: $e");
-      debugPrint("🧩 StackTrace: $stackTrace");
+      debugPrint("StackTrace: $stackTrace");
       rethrow;
     }
   }

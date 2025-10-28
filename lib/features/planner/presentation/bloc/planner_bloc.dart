@@ -1,10 +1,7 @@
-import 'dart:developer';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:foodkitchen/core/common/data/model/meal_type_model.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:foodkitchen/core/common/domain/usecase/get_current_user.dart';
 import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
-import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/core/utils/date_format_to_string.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
@@ -17,6 +14,7 @@ import 'package:foodkitchen/features/planner/domain/usecases/delete_plan.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/favourite_recipes.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/generate_recipes.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/get_all_weekly_plans.dart';
+import 'package:foodkitchen/features/planner/domain/usecases/mark_recipe_finished.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/remove_from_favourite_recipe.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dart';
@@ -32,6 +30,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
   final GetAllWeeklyPlans _getAllWeeklyPlans;
   final DeletePlan _deletePlan;
   final DeleteMealTypeFromWeeklyPlan _deleteMealTypeFromWeeklyPlan;
+  final MarkRecipeFinished _markRecipeFinished;
 
   PlannerBloc({
     required HomeBloc homeBloc,
@@ -43,6 +42,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     required GetAllWeeklyPlans getAllWeeklyPlans,
     required DeletePlan deletePlan,
     required DeleteMealTypeFromWeeklyPlan deleteMealTypeFromWeeklyPlan,
+    required MarkRecipeFinished markRecipeFinished,
   }) : _generateRecipes = generateRecipes,
        _favouriteRecipes = favouriteRecipes,
        _addToFavouriteRecipe = addToFavouriteRecipe,
@@ -52,6 +52,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
        _deletePlan = deletePlan,
        _homeBloc = homeBloc,
        _deleteMealTypeFromWeeklyPlan = deleteMealTypeFromWeeklyPlan,
+       _markRecipeFinished = markRecipeFinished,
 
        super(PlannerState()) {
     on<GetFavouriteRecipesEvent>(_onGetFavouriteRecipes);
@@ -64,6 +65,8 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     on<DeletePlanEvent>(_onDeletePlan);
     on<GetDateBasedPlans>(_onGetDateBasedPlans);
     on<DeleteMealTypeFromWeeklyPlanEvent>(_onDeleteMealTypeFromWeeklyPlan);
+    on<MarkRecipeFinishedEvent>(_onMarkRecipeFinished);
+    on<UpdateStartRecipeEvent>(_onUpdateStartRecipe);
   }
 
   Future<void> _onGetFavouriteRecipes(
@@ -327,5 +330,46 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
         );
       },
     );
+  }
+
+  Future<void> _onMarkRecipeFinished(
+    MarkRecipeFinishedEvent event,
+    Emitter<PlannerState> emit,
+  ) async {
+    emit(state.copyWith(isFinishingRecipe: true));
+    final res = await _markRecipeFinished(
+      MarkRecipeFinishedParams(
+        kitchenId: event.kitchenId,
+        recipeId: event.recipeId,
+      ),
+    );
+
+    res.fold(
+      (failure) {
+        emit(
+          state.copyWith(
+            errorMessage: failure.message,
+            isFinishingRecipe: false,
+            startRecipe: false,
+          ),
+        );
+      },
+      (successMessage) async {
+        emit(state.copyWith(isFinishingRecipe: false, startRecipe: false));
+        AppToast.show(
+          successMessage,
+          ToastType.success,
+          timeInSecForIosWeb: 4,
+          gravity: ToastGravity.TOP,
+        );
+      },
+    );
+  }
+
+  Future<void> _onUpdateStartRecipe(
+    UpdateStartRecipeEvent event,
+    Emitter<PlannerState> emit,
+  ) async {
+    emit(state.copyWith(startRecipe: event.startRecipe));
   }
 }

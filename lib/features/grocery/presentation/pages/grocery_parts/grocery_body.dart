@@ -87,9 +87,12 @@ class _GroceryBodyState extends State<GroceryBody> {
               ),
             ),
           ),
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.miniStartFloat,
           floatingActionButton: selectedIndex == 2
               ? FloatingActionButton(
                   key: Key("final_list"),
+
                   heroTag: "final_list",
                   tooltip: "Add Custom Items",
                   backgroundColor: AppColors.primaryColor,

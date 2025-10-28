@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -143,26 +145,29 @@ class _GenerateRecipesPageState extends State<GenerateRecipesPage> {
               backgroundColor: Colors.white,
               isScrollControlled: true,
               builder: (context) {
-                return AddFilterBottomSheet(
-                  controller: controller,
-                  sliderValue: sliderValue,
-                  hoursController: hoursController,
-                  minController: minController,
-                  onChanged: (double value) => hourMinFormatter(value),
+                return BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 0, sigmaY: 1),
+                  child: AddFilterBottomSheet(
+                    controller: controller,
+                    sliderValue: sliderValue,
+                    hoursController: hoursController,
+                    minController: minController,
+                    onChanged: (double value) => hourMinFormatter(value),
 
-                  callback: () {
-                    final text = controller.text.trim();
-                    if (text.isEmpty) {
-                      AppToast.show(
-                        "Please enter a filter value before adding.",
-                        ToastType.error,
-                        gravity: ToastGravity.TOP,
-                      );
-                    } else {
-                      AppToast.show("Filter applied", ToastType.success);
-                      context.pop();
-                    }
-                  },
+                    callback: () {
+                      final text = controller.text.trim();
+                      if (text.isEmpty) {
+                        AppToast.show(
+                          "Please enter a filter value before adding.",
+                          ToastType.error,
+                          gravity: ToastGravity.TOP,
+                        );
+                      } else {
+                        AppToast.show("Filter applied", ToastType.success);
+                        context.pop();
+                      }
+                    },
+                  ),
                 );
               },
             );

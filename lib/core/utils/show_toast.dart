@@ -9,6 +9,7 @@ class AppToast {
     String message,
     ToastType type, {
     ToastGravity gravity = ToastGravity.BOTTOM,
+    int timeInSecForIosWeb = 1,
   }) {
     Color bgColor;
 
@@ -34,6 +35,7 @@ class AppToast {
       msg: " $message",
       toastLength: Toast.LENGTH_SHORT,
       gravity: gravity,
+      timeInSecForIosWeb: timeInSecForIosWeb,
       backgroundColor: bgColor,
       textColor: Colors.white,
       fontSize: t(12),

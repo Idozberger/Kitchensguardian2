@@ -190,7 +190,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void showErrorSnackBar(BuildContext context, String message) {
-    scaffoldMessengerKey.currentState!.showSnackBar(
+    rootScaffoldMessengerKey.currentState!.showSnackBar(
       SnackBar(
         key: UniqueKey(),
         content: Text(
