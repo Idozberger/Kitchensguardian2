@@ -20,7 +20,7 @@ class GenericDialog extends StatelessWidget {
     return BackdropFilter(
       filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
       child: Dialog(
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.white,
         insetPadding: gapSymmetric(horizontal: 20),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(borderRadius),

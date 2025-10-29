@@ -131,9 +131,7 @@ class _KitchenPageState extends State<KitchenPage> {
         children: [
           Text(
             "Kitchen You Have Joined",
-            style: Theme.of(
-              context,
-            ).textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(context).textTheme.headlineLarge,
           ),
           SizedBox(height: h(15)),
 
@@ -207,8 +205,9 @@ class _KitchenPageState extends State<KitchenPage> {
                               ToastType.success,
                             );
 
-                            // ignore: use_build_context_synchronously
-                            context.go(Routes.splash);
+                            kitchenBloc.add(
+                              SwitchKitchenEvent(kitchen.kitchenId),
+                            );
                           },
                     imagePath: AppAssets.avatar,
                     title: kitchen.kitchenName,
@@ -239,9 +238,7 @@ class _KitchenPageState extends State<KitchenPage> {
         children: [
           Text(
             "Create a kitchen",
-            style: Theme.of(
-              context,
-            ).textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(context).textTheme.headlineLarge,
           ),
           SizedBox(height: h(15)),
           SizedBox(
@@ -276,9 +273,7 @@ class _KitchenPageState extends State<KitchenPage> {
         children: [
           Text(
             "Kitchen you have:",
-            style: Theme.of(
-              context,
-            ).textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(context).textTheme.headlineLarge,
           ),
           SizedBox(height: h(15)),
 

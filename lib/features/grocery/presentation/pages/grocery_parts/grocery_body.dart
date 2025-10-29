@@ -6,7 +6,6 @@ import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
-import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/grocery/domain/entities/requested_item.dart';
@@ -14,7 +13,6 @@ import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_event.dar
 import 'package:foodkitchen/features/grocery/presentation/pages/grocery_parts/grocery_list_item.dart';
 import 'package:foodkitchen/features/grocery/presentation/widgets/category_tabs.dart';
 import 'package:foodkitchen/features/grocery/presentation/widgets/final_list_footer.dart';
-
 import 'package:foodkitchen/features/grocery/presentation/widgets/search_bar.dart';
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_bloc.dart';
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_state.dart';
@@ -43,8 +41,11 @@ class GroceryBody extends StatefulWidget {
 class _GroceryBodyState extends State<GroceryBody> {
   final List<String> requestedAndAiGeneratedSelectedList = [];
   final List<String> finalListSelectedItems = [];
+
+  List<RequestedItemEntity> currentList = [];
   int selectedIndex = 0;
-  updateIndex(int index) {
+  String searchQuery = "";
+  void updateIndex(int index) {
     selectedIndex = index;
     setState(() {});
   }
@@ -67,7 +68,14 @@ class _GroceryBodyState extends State<GroceryBody> {
                 children: [
                   Padding(
                     padding: gapSymmetric(horizontal: 20, vertical: 16),
-                    child: SearchBarWidget(controller: widget.controller),
+                    child: SearchBarWidget(
+                      controller: widget.controller,
+                      onChanged: (String query) {
+                        setState(() {
+                          searchQuery = query;
+                        });
+                      },
+                    ),
                   ),
 
                   CategoryTabs(
@@ -107,16 +115,20 @@ class _GroceryBodyState extends State<GroceryBody> {
   }
 
   Widget _buildListWidget(GroceryState state) {
-    List<RequestedItemEntity> currentList = switch (selectedIndex) {
+    currentList = switch (selectedIndex) {
       0 => state.requestedItemsList ?? [],
       1 => state.aiGeneratedList ?? [],
       2 => state.finalListItemsList ?? [],
 
       int() => [],
     };
+    final filteredList = currentList.where((item) {
+      return item.name.toLowerCase().contains(searchQuery);
+    }).toList();
+
     return Padding(
       padding: gapSymmetric(horizontal: 16),
-      child: currentList.isEmpty
+      child: filteredList.isEmpty
           ? Center(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -136,36 +148,18 @@ class _GroceryBodyState extends State<GroceryBody> {
             )
           : Column(
               children: [
-                if (selectedIndex == 2)
-                  Padding(
-                    padding: gapOnly(bottom: 14),
-                    child: GenericButtonWidget(
-                      isLoading: widget.state.isLoading,
-                      onPressed: () {
-                        if (currentList.isNotEmpty) {
-                          widget.groceryBloc.add(
-                            AddMylistToInventoryEvent(
-                              kitchenId: widget.userCubit.state.activeKitchenId,
-                            ),
-                          );
-                        }
-                      },
-                      text: "+ Add to Inventory",
-                    ),
-                  ),
-
                 UpperTile(
                   verticalPadding: 8,
                   widget: Column(
-                    children: List.generate(currentList.length, (index) {
-                      final item = currentList[index];
+                    children: List.generate(filteredList.length, (index) {
+                      final item = filteredList[index];
                       return GroceryListItem(
                         grocery: item,
                         isChecked: _isChecked(item.itemId),
                         isFinalList: selectedIndex == 2,
                         onChanged: (val) => _toggle(item.itemId, state),
                         onDelete: () => _delete(context, item.itemId),
-                        showDivider: index != currentList.length - 1,
+                        showDivider: index != filteredList.length - 1,
                       );
                     }),
                   ),

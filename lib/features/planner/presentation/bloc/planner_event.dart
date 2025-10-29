@@ -60,3 +60,5 @@ class UpdateStartRecipeEvent extends PlannerEvent {
   final bool startRecipe;
   UpdateStartRecipeEvent({required this.startRecipe});
 }
+
+final class ResetPlannerStateEvent extends PlannerEvent {}

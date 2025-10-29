@@ -23,6 +23,8 @@ class AppTextField extends StatelessWidget {
   final EdgeInsetsGeometry? contentPadding;
   final bool textAlignCentered;
   final TextInputAction? textInputAction;
+  final void Function(String)? onChanged;
+  final VoidCallback? onTap;
   const AppTextField({
     super.key,
     required this.label,
@@ -41,8 +43,10 @@ class AppTextField extends StatelessWidget {
     this.isFilled = false,
     this.textInputAction = TextInputAction.done,
     this.textAlignCentered = false,
+    this.onChanged,
     this.fillColor,
     this.color,
+    this.onTap,
   });
 
   @override
@@ -51,21 +55,25 @@ class AppTextField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (isLabled) ...[
-          Text(label, style: Theme.of(context).textTheme.bodyMedium),
+          Text(label, style: Theme.of(context).textTheme.headlineLarge),
 
           SizedBox(height: h(10)),
         ],
 
         TextFormField(
+          onTap: onTap,
           enabled: enabled,
           obscuringCharacter: "*",
           controller: controller,
           obscureText: obscureText,
           keyboardType: keyboardType,
           onFieldSubmitted: onFieldSubmitted,
-          style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: color),
+          style: Theme.of(
+            context,
+          ).textTheme.headlineLarge!.copyWith(color: color),
           validator: validator,
           textInputAction: textInputAction,
+          onChanged: onChanged,
           decoration: InputDecoration(
             filled: isFilled,
             fillColor: fillColor,

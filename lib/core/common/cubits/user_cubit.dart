@@ -1,4 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:foodkitchen/core/global/functions/logs.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'user_state.dart';
 
 class UserCubit extends Cubit<UserState> {
@@ -24,13 +26,34 @@ class UserCubit extends Cubit<UserState> {
     required String activeKitchenId,
     required String invitationCode,
     required String role,
-  }) {
+  }) async {
+    String? filePath = await getUserPicture();
     emit(
       state.copyWith(
         activeKitchenId: activeKitchenId,
         invitationCode: invitationCode,
         role: role,
+        profilePictureFilePath: filePath,
       ),
+    );
+  }
+
+  Future<String?> getUserPicture() async {
+    final pref = await SharedPreferences.getInstance();
+    return pref.getString("profile_image_path");
+  }
+
+  Future<void> updateUserProfilePicture() async {
+    String? filePath = await getUserPicture();
+    emit(state.copyWith(profilePictureFilePath: filePath));
+  }
+
+  Future<void> updateKitchenIdAndRefferalCode(
+    String kitchenId,
+    String refferalCode,
+  ) async {
+    emit(
+      state.copyWith(activeKitchenId: kitchenId, invitationCode: refferalCode),
     );
   }
 

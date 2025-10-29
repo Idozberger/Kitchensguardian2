@@ -14,4 +14,5 @@ class AppColors {
   static Color popupMemberColor = Color(0xff787878);
 
   static Color appTextFieldBorderColor = Color(0xffD4D2D2);
+  static Color apptextFieldStyleTextColor = Color(0xff787878);
 }

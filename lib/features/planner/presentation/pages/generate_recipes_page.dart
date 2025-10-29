@@ -142,31 +142,40 @@ class _GenerateRecipesPageState extends State<GenerateRecipesPage> {
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
               ),
-              backgroundColor: Colors.white,
+              barrierColor: Colors.black.withOpacity(0.5),
               isScrollControlled: true,
               builder: (context) {
                 return BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 0, sigmaY: 1),
-                  child: AddFilterBottomSheet(
-                    controller: controller,
-                    sliderValue: sliderValue,
-                    hoursController: hoursController,
-                    minController: minController,
-                    onChanged: (double value) => hourMinFormatter(value),
+                  filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(16),
+                      ),
+                    ),
 
-                    callback: () {
-                      final text = controller.text.trim();
-                      if (text.isEmpty) {
-                        AppToast.show(
-                          "Please enter a filter value before adding.",
-                          ToastType.error,
-                          gravity: ToastGravity.TOP,
-                        );
-                      } else {
-                        AppToast.show("Filter applied", ToastType.success);
-                        context.pop();
-                      }
-                    },
+                    child: AddFilterBottomSheet(
+                      controller: controller,
+                      sliderValue: sliderValue,
+                      hoursController: hoursController,
+                      minController: minController,
+                      onChanged: (double value) => hourMinFormatter(value),
+
+                      callback: () {
+                        final text = controller.text.trim();
+                        if (text.isEmpty) {
+                          AppToast.show(
+                            "Please enter a filter value before adding.",
+                            ToastType.error,
+                            gravity: ToastGravity.TOP,
+                          );
+                        } else {
+                          AppToast.show("Filter applied", ToastType.success);
+                          context.pop();
+                        }
+                      },
+                    ),
                   ),
                 );
               },

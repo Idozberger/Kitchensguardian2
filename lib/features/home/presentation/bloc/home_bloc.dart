@@ -30,6 +30,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<GetPantriesItemsEventForHome>(_onGetPantryItems);
     on<JoinKitchenEventForHome>(_onJoinKitchenEvent);
     on<GetAllWeeklyPlansEventForHome>(_onGetAllWeeklyPlans);
+    on<ResetHomeStateEvent>(_onResetHomeState);
   }
 
   Future<void> _onCreateKitchenEvent(
@@ -123,5 +124,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         );
       },
     );
+  }
+
+  void _onResetHomeState(ResetHomeStateEvent event, Emitter<HomeState> emit) {
+    emit(state.copyWith(pantryItems: []));
   }
 }

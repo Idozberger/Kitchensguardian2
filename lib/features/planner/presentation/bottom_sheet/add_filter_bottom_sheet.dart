@@ -54,7 +54,7 @@ class _AddFilterBottomSheetState extends State<AddFilterBottomSheet> {
                     ),
                   ),
                 ),
-                gap(height: 12),
+                gap(height: 18),
                 Center(
                   child: Text(
                     "Add Filters",
@@ -64,7 +64,7 @@ class _AddFilterBottomSheetState extends State<AddFilterBottomSheet> {
                     ),
                   ),
                 ),
-                gap(height: 16),
+                gap(height: 18),
                 Row(
                   children: [
                     Text(
@@ -111,42 +111,11 @@ class _AddFilterBottomSheetState extends State<AddFilterBottomSheet> {
                 gap(height: 60),
                 GenericSlider(
                   min: 0,
-                  max: 200,
+                  max: 300,
                   value: widget.sliderValue,
                   onChanged: widget.onChanged,
                 ),
-                gap(height: 12),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  spacing: w(10),
-                  children: [
-                    SizedBox(
-                      width: w(110),
-                      child: AppTextField(
-                        isLabled: false,
-                        label: "",
-                        hintText: "Hr:",
-                        controller: widget.hoursController,
-                      ),
-                    ),
-                    Container(
-                      width: w(10),
-                      height: h(2),
-                      decoration: BoxDecoration(color: Color(0xffD9D9D9)),
-                    ),
-                    SizedBox(
-                      width: w(110),
-                      child: AppTextField(
-                        isLabled: false,
-                        label: "",
-                        hintText: "Min:",
-                        controller: widget.minController,
-                      ),
-                    ),
-                  ],
-                ),
+
                 gap(height: 22),
                 GenericButtonWidget(
                   onPressed: () {

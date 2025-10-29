@@ -14,12 +14,12 @@ class KitchensLoading extends KitchenState {}
 
 class KitchenFailure extends KitchenState {
   final String errorMessage;
-  KitchenFailure(this.errorMessage);
+  const KitchenFailure(this.errorMessage);
 }
 
 class KitchenSuccess extends KitchenState {
   final String successMessage;
-  KitchenSuccess(this.successMessage);
+  const KitchenSuccess(this.successMessage);
 }
 
 class KitchensLoaded extends KitchenState {

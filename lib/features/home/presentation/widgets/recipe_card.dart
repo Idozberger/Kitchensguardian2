@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:foodkitchen/core/config/app_assets.dart';
+import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 
@@ -9,7 +12,8 @@ class RecipeCard extends StatelessWidget {
   final String description;
   final String imagePath;
   final VoidCallback onTap;
-
+  final bool isTodayPlan;
+  final String? mealType;
   const RecipeCard({
     super.key,
     required this.title,
@@ -18,6 +22,8 @@ class RecipeCard extends StatelessWidget {
     this.width = 258,
     this.height = 144,
     required this.onTap,
+    this.isTodayPlan = false,
+    this.mealType,
   });
 
   @override
@@ -28,6 +34,7 @@ class RecipeCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
+            alignment: Alignment.topRight,
             width: w(width),
             height: h(height),
             decoration: BoxDecoration(
@@ -38,6 +45,31 @@ class RecipeCard extends StatelessWidget {
                 fit: BoxFit.cover,
               ),
             ),
+            child: isTodayPlan == false
+                ? SizedBox()
+                : Container(
+                    margin: gapOnly(top: 8, right: 8),
+                    decoration: const BoxDecoration(
+                      color: Colors.grey,
+                      shape: BoxShape.circle,
+                    ),
+                    padding: gapAll(6),
+                    child: switch (mealType) {
+                      "Breakfast" => SvgPicture.asset(
+                        AppAssets.breakfastSvg,
+                        color: Colors.black,
+                      ),
+                      "Lunch" => SvgPicture.asset(
+                        AppAssets.lunchSvg,
+                        color: Colors.black,
+                      ),
+                      "Dinner" => SvgPicture.asset(
+                        AppAssets.dinnerSvg,
+                        color: Colors.black,
+                      ),
+                      _ => const Icon(Icons.fastfood, color: Colors.white),
+                    },
+                  ),
           ),
           SizedBox(
             width: w(width),

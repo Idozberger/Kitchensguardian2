@@ -6,13 +6,17 @@ import 'package:foodkitchen/core/global/functions/resize.dart';
 class OtpField extends StatelessWidget {
   final bool preFilledStar;
   final bool isJoining;
+  final String initialString;
+  final bool enabled;
   final void Function(String)? onCompleted;
 
   OtpField({
     super.key,
     this.onCompleted,
     this.preFilledStar = false,
+    this.initialString = "",
     this.isJoining = false,
+    this.enabled = true,
   });
 
   @override
@@ -36,6 +40,7 @@ class OtpField extends StatelessWidget {
     );
 
     return Pinput(
+      enabled: enabled,
       key: ValueKey(isJoining),
       length: isJoining ? 6 : 5,
       separatorBuilder: (index) => SizedBox(width: isJoining ? w(4) : w(20)),
@@ -63,6 +68,7 @@ class OtpField extends StatelessWidget {
               ),
             )
           : null,
+      controller: TextEditingController(text: initialString),
       keyboardType: TextInputType.text,
       onCompleted: onCompleted,
     );

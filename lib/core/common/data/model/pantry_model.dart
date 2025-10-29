@@ -44,6 +44,7 @@ class PantryItemModel extends PantryItemEntity {
     required super.quantity,
     required super.unit,
     required super.group,
+    required super.expireDate,
   });
 
   factory PantryItemModel.fromJson(Map<String, dynamic> json) {
@@ -55,11 +56,18 @@ class PantryItemModel extends PantryItemEntity {
 
       unit: json['unit']?.toString() ?? '',
       group: json['group']?.toString() ?? '',
+      expireDate: '',
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {'name': name, 'quantity': quantity, 'unit': unit, 'group': group};
+    return {
+      'name': name,
+      'quantity': quantity,
+      'unit': unit,
+      'group': group,
+      "expire_date": expireDate,
+    };
   }
 
   factory PantryItemModel.fromEntity(PantryItemEntity entity) {
@@ -68,6 +76,7 @@ class PantryItemModel extends PantryItemEntity {
       quantity: entity.quantity,
       unit: entity.unit,
       group: entity.group,
+      expireDate: '',
     );
   }
 }

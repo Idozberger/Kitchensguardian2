@@ -14,5 +14,3 @@ Technologies Used
 🔥 REST APIs
 
 🧪 Unit Testing for domain logic
-
-P

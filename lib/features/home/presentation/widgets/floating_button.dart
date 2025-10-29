@@ -34,7 +34,11 @@ class FloatingButton extends StatelessWidget {
             }
           },
 
-          child: SvgPicture.asset(AppAssets.scanSvg, color: Colors.black),
+          child: SvgPicture.asset(
+            AppAssets.scanSvg,
+            color: Colors.black,
+            height: h(16),
+          ),
         );
       },
     );

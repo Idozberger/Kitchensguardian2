@@ -8,6 +8,7 @@ class UserState extends Equatable {
   final bool isLoading;
   final String activeKitchenId;
   final String role;
+  final String profilePictureFilePath;
   final String invitationCode;
   final bool entitlementIsActive;
   const UserState({
@@ -15,11 +16,12 @@ class UserState extends Equatable {
     this.lastName = '',
     this.role = 'member',
     this.userId = '',
+    this.profilePictureFilePath = '',
     this.email = '',
     this.isLoading = false,
     this.entitlementIsActive = false,
-    this.activeKitchenId = "",
-    this.invitationCode = "",
+    this.activeKitchenId = '',
+    this.invitationCode = '',
   });
 
   UserState copyWith({
@@ -30,6 +32,7 @@ class UserState extends Equatable {
     String? activeKitchenId,
     String? role,
     String? email,
+    String? profilePictureFilePath,
     bool? isLoading,
     String? invitationCode,
   }) {
@@ -43,6 +46,8 @@ class UserState extends Equatable {
       activeKitchenId: activeKitchenId ?? this.activeKitchenId,
       invitationCode: invitationCode ?? this.invitationCode,
       userId: userId ?? this.userId,
+      profilePictureFilePath:
+          profilePictureFilePath ?? this.profilePictureFilePath,
     );
   }
 
@@ -56,5 +61,6 @@ class UserState extends Equatable {
     isLoading,
     activeKitchenId,
     invitationCode,
+    profilePictureFilePath,
   ];
 }

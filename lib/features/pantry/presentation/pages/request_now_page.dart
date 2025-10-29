@@ -148,6 +148,7 @@ class _RequestNowPageState extends State<RequestNowPage> {
                                     0,
                                 unit: item.unit ?? '',
                                 group: item.pantry ?? '',
+                                expireDate: '',
                               );
                             },
                           ).toList();

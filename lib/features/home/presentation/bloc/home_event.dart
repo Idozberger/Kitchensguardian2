@@ -16,3 +16,5 @@ final class GetPantriesItemsEventForHome extends HomeEvent {
 }
 
 final class GetAllWeeklyPlansEventForHome extends HomeEvent {}
+
+final class ResetHomeStateEvent extends HomeEvent {}

@@ -67,6 +67,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     on<DeleteMealTypeFromWeeklyPlanEvent>(_onDeleteMealTypeFromWeeklyPlan);
     on<MarkRecipeFinishedEvent>(_onMarkRecipeFinished);
     on<UpdateStartRecipeEvent>(_onUpdateStartRecipe);
+    on<ResetPlannerStateEvent>(_onResetPlanner);
   }
 
   Future<void> _onGetFavouriteRecipes(
@@ -372,4 +373,9 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
   ) async {
     emit(state.copyWith(startRecipe: event.startRecipe));
   }
+
+  Future<void> _onResetPlanner(
+    ResetPlannerStateEvent event,
+    Emitter<PlannerState> emit,
+  ) async {}
 }

@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_bloc.dart';
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_event.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
@@ -20,6 +21,7 @@ class KitchenBloc extends Bloc<KitchenEvent, KitchenState> {
   final LeaveKitchenUsecase _leaveKitchenUsecase;
   final RemoveKitchenUsecase _removeKitchenUsecase;
   final HomeBloc _homeBloc;
+  final UserCubit _userCubit;
   final PlannerBloc _plannerBloc;
   final GroceryBloc _groceryBloc;
 
@@ -30,6 +32,7 @@ class KitchenBloc extends Bloc<KitchenEvent, KitchenState> {
     required HomeBloc homeBloc,
     required PlannerBloc plannerBloc,
     required GroceryBloc groceryBloc,
+    required UserCubit userCubit,
     required LeaveKitchenUsecase leaveKitchenUsecase,
     required RemoveKitchenUsecase removeKitchenUsecase,
   }) : _getKitchens = getKitchens,
@@ -38,6 +41,7 @@ class KitchenBloc extends Bloc<KitchenEvent, KitchenState> {
        _leaveKitchenUsecase = leaveKitchenUsecase,
        _removeKitchenUsecase = removeKitchenUsecase,
        _homeBloc = homeBloc,
+       _userCubit = userCubit,
        _plannerBloc = plannerBloc,
        _groceryBloc = groceryBloc,
        super(KitchenInitial()) {
@@ -48,6 +52,7 @@ class KitchenBloc extends Bloc<KitchenEvent, KitchenState> {
     on<SwitchKitchenEvent>(_onSwitchKitchen);
     on<LeaveKitchenEvent>(_onLeaveKitchen);
     on<RemoveKitchenEvent>(_onRemoveKitchen);
+    on<DeleteOrLeaveKitchenEvent>(_onDeleteOrLeaveKitchen);
   }
 
   Future<void> _onFetchKitchens(
@@ -99,6 +104,7 @@ class KitchenBloc extends Bloc<KitchenEvent, KitchenState> {
     );
 
     res.fold((failure) => emit(KitchenFailure(failure.message)), (message) {
+      add(DeleteOrLeaveKitchenEvent());
       emit(KitchenSuccess(message));
     });
   }
@@ -112,6 +118,7 @@ class KitchenBloc extends Bloc<KitchenEvent, KitchenState> {
     );
 
     res.fold((failure) => emit(KitchenFailure(failure.message)), (message) {
+      add(DeleteOrLeaveKitchenEvent());
       emit(KitchenSuccess(message));
     });
   }
@@ -123,6 +130,18 @@ class KitchenBloc extends Bloc<KitchenEvent, KitchenState> {
     _homeBloc.add(GetPantriesItemsEventForHome(kitchenId: event.kitchenId));
     _groceryBloc.add(RequestedGroceryEvent(kitchenId: event.kitchenId));
     _plannerBloc.add(GetAllWeeklyPlansEvent());
+
+    add(FetchKitchens());
+  }
+
+  Future<void> _onDeleteOrLeaveKitchen(
+    DeleteOrLeaveKitchenEvent event,
+    Emitter<KitchenState> emit,
+  ) async {
+    _userCubit.updateKitchenIdAndRefferalCode("", "");
+    _homeBloc.add(ResetHomeStateEvent());
+    _groceryBloc.add(ResetGroceryStateEvent());
+    _plannerBloc.add(ResetPlannerStateEvent());
 
     add(FetchKitchens());
   }

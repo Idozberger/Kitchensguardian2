@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
+import 'package:foodkitchen/core/common/data/datasource/profile_local_datasource.dart';
 import 'package:foodkitchen/core/services/connection/connection_checker.dart';
 import 'package:foodkitchen/core/services/jwt_decoder/jwt_decoder.dart';
 import 'package:foodkitchen/core/services/notifications/flutter_local_notifications_service.dart';
@@ -82,6 +83,11 @@ import 'package:foodkitchen/features/planner/domain/usecases/get_all_weekly_plan
 import 'package:foodkitchen/features/planner/domain/usecases/mark_recipe_finished.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/remove_from_favourite_recipe.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
+import 'package:foodkitchen/features/profile/data/repository/profile_repository_impl.dart';
+import 'package:foodkitchen/features/profile/domain/repository/profile_repository.dart';
+import 'package:foodkitchen/features/profile/domain/usecases/get_profile_picture.dart';
+import 'package:foodkitchen/features/profile/domain/usecases/set_profile_picture.dart';
+import 'package:foodkitchen/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -105,6 +111,7 @@ Future<void> initDependencies() async {
   _initGrocery();
   _initPlanner();
   _initHistory();
+  _initProfile();
 }
 
 void _dioInjection() {
@@ -212,6 +219,7 @@ void _initKitchen() async {
     // Bloc
     ..registerLazySingleton(
       () => KitchenBloc(
+        userCubit: sl(),
         getKitchens: GetKitchens(sl()),
         createKitchen: CreateKitchenUseCase(sl()),
         joinKitchen: JoinKitchenUseCase(sl()),
@@ -368,5 +376,27 @@ void _initHistory() async {
     ..registerLazySingleton(
       () =>
           ScanHistoryCubit(getScanHistoryUseCase: GetScanHistoryUsecase(sl())),
+    );
+}
+
+void _initProfile() async {
+  // Datasource
+
+  sl
+    ..registerFactory<ProfileLocalDataSource>(
+      () => ProfileLocalDatasourceImpl(sharedPreferences: sl()),
+    )
+    // Repository
+    ..registerFactory<ProfileRepository>(() => ProfileRepositoryImpl(sl()))
+    // Usecases
+    ..registerFactory(() => GetProfilePicture(sl()))
+    ..registerFactory(() => SetProfilePicture(sl()))
+    // Bloc
+    ..registerLazySingleton(
+      () => ProfileBloc(
+        getProfilePicture: GetProfilePicture(sl()),
+        setProfilePicture: SetProfilePicture(sl()),
+        userCubit: sl(),
+      ),
     );
 }

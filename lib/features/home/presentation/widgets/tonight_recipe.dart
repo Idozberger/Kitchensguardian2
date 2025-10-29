@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
@@ -14,7 +13,7 @@ import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_state.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/recipe_card.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart'; // 👈 for date formatting
 
 class TonightRecipeWidget extends StatefulWidget {
   const TonightRecipeWidget({super.key});
@@ -24,8 +23,20 @@ class TonightRecipeWidget extends StatefulWidget {
 }
 
 class _TonightRecipeWidgetState extends State<TonightRecipeWidget> {
-  int currentPage = 0;
-  final today = DateTime.now();
+  late PageController _pageController;
+  int _currentPage = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(viewportFraction: 0.88, initialPage: 0);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,35 +47,35 @@ class _TonightRecipeWidgetState extends State<TonightRecipeWidget> {
             .where((recipe) => recipe.formatedDateString == todayFormatted)
             .toList();
 
+        // Define meal order
+        const mealOrder = ["Breakfast", "Lunch", "Dinner"];
+
+        todayRecipes.sort((a, b) {
+          final aIndex = mealOrder.indexOf(a.mealType);
+          final bIndex = mealOrder.indexOf(b.mealType);
+          return aIndex.compareTo(bIndex);
+        });
+
         return UpperTile(
-          horizontalPadding: 0,
           widget: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: gapSymmetric(horizontal: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Tonight Recipes",
-                      style: Theme.of(context).textTheme.headlineLarge!
-                          .copyWith(overflow: TextOverflow.ellipsis),
-                      maxLines: 1,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Today Plan",
+                    style: Theme.of(context).textTheme.headlineLarge!.copyWith(
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    SvgPicture.asset(AppAssets.recipesSvg),
-                  ],
-                ),
+                    maxLines: 1,
+                  ),
+                  SvgPicture.asset(AppAssets.recipesSvg),
+                ],
               ),
               SizedBox(height: h(20)),
 
-              if (state.loadingWeeklyPlans)
-                Center(
-                  child: CircularProgressIndicator(
-                    color: AppColors.primaryColor,
-                  ),
-                )
-              else if (todayRecipes.isEmpty)
+              if (todayRecipes.isEmpty)
                 Center(
                   child: Column(
                     children: [
@@ -75,17 +86,7 @@ class _TonightRecipeWidgetState extends State<TonightRecipeWidget> {
                       gap(height: 4),
                       TextButton(
                         onPressed: () {
-                          final date = DateFormat(
-                            'dd/MM/yyyy',
-                          ).format(DateTime.now());
-                          context.pushNamed(
-                            Routes.generateRecipes,
-                            extra: {
-                              "selected_date": date,
-                              "selected_meal_type": "Breakfast",
-                              "is_plan": true,
-                            },
-                          );
+                          context.push(Routes.addMeal);
                         },
                         child: Text("Find Recipes"),
                       ),
@@ -93,30 +94,62 @@ class _TonightRecipeWidgetState extends State<TonightRecipeWidget> {
                   ),
                 )
               else
-                Padding(
-                  padding: gapSymmetric(horizontal: 20),
-                  child: SizedBox(
-                    height: h(280),
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: RecipeCard(
-                        width: double.maxFinite,
-                        title: todayRecipes[0].title,
-                        description: todayRecipes[0].recipeShortSummary,
-                        imagePath: AppAssets.onBoardingSliderBg01,
-                        onTap: () {
-                          context.pushNamed(
-                            Routes.generateRecipesDetails,
-                            extra: {
-                              "meal_type_entity": todayRecipes[0],
-                              "is_plan": false,
+                SizedBox(
+                  height: h(300),
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: PageView.builder(
+                      padEnds: false,
+
+                      controller: _pageController,
+                      itemCount: todayRecipes.length,
+                      onPageChanged: (index) {
+                        setState(() {
+                          _currentPage = index;
+                        });
+                      },
+                      itemBuilder: (context, index) {
+                        final recipe = todayRecipes[index];
+                        return Padding(
+                          padding: EdgeInsets.only(right: w(14)),
+                          child: RecipeCard(
+                            isTodayPlan: true,
+                            mealType: recipe.mealType,
+                            title: recipe.title,
+                            description: recipe.recipeShortSummary,
+                            imagePath: AppAssets.onBoardingSliderBg01,
+                            onTap: () {
+                              context.pushNamed(
+                                Routes.generateRecipesDetails,
+                                extra: {
+                                  "meal_type_entity": recipe,
+                                  "is_plan": false,
+                                },
+                              );
                             },
-                          );
-                        },
-                      ),
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  todayRecipes.length,
+                  (index) => Container(
+                    margin: EdgeInsets.symmetric(horizontal: w(4)),
+                    width: _currentPage == index ? w(8) : w(8),
+                    height: h(8),
+                    decoration: BoxDecoration(
+                      color: _currentPage == index
+                          ? AppColors.primaryColor
+                          : const Color(0xffD4D2D2),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         );

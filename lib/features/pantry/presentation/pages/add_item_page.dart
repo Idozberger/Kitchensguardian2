@@ -5,6 +5,8 @@ import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
+import 'package:foodkitchen/core/services/date_picker/date_picker_service.dart'
+    show DatePickerService;
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
@@ -42,6 +44,43 @@ class _AddItemPageState extends State<AddItemPage> {
   }
 
   void _addNewItem() {
+    for (final item in _items) {
+      final name = item.nameController.text.trim();
+      final qty = item.qtyController.text.trim();
+      final unit = item.unit?.trim() ?? '';
+      final pantry = item.pantry?.trim() ?? '';
+      final expireDate = item.expireDate.text.trim();
+
+      if (name.isEmpty) {
+        AppToast.show("Please enter the item name.", ToastType.error);
+        return;
+      } else if (name.length < 3) {
+        AppToast.show(
+          "Item name must be at least 3 characters long.",
+          ToastType.error,
+        );
+        return;
+      }
+      if (qty.isEmpty) {
+        AppToast.show("Please enter the quantity.", ToastType.error);
+        return;
+      }
+
+      if (unit.isEmpty) {
+        AppToast.show("Please select a unit.", ToastType.error);
+        return;
+      }
+
+      if (pantry.isEmpty) {
+        AppToast.show("Please select a pantry.", ToastType.error);
+        return;
+      }
+
+      if (expireDate.isEmpty) {
+        AppToast.show("Please select an expiry date.", ToastType.error);
+        return;
+      }
+    }
     setState(() {
       _items.add(
         PantryItem(
@@ -131,12 +170,52 @@ class _AddItemPageState extends State<AddItemPage> {
                       ? () {}
                       : () {
                           for (final item in _items) {
-                            if (item.nameController.text.trim().isEmpty ||
-                                item.qtyController.text.trim().isEmpty ||
-                                (item.unit?.trim().isEmpty ?? true) ||
-                                (item.pantry?.trim().isEmpty ?? true)) {
+                            final name = item.nameController.text.trim();
+                            final qty = item.qtyController.text.trim();
+                            final unit = item.unit?.trim() ?? '';
+                            final pantry = item.pantry?.trim() ?? '';
+                            final expireDate = item.expireDate.text.trim();
+
+                            if (name.isEmpty) {
                               AppToast.show(
-                                "Please fill all fields before adding.",
+                                "Please enter the item name.",
+                                ToastType.error,
+                              );
+                              return;
+                            } else if (name.length < 3) {
+                              AppToast.show(
+                                "Item name must be at least 3 characters long.",
+                                ToastType.error,
+                              );
+                              return;
+                            }
+                            if (qty.isEmpty) {
+                              AppToast.show(
+                                "Please enter the quantity.",
+                                ToastType.error,
+                              );
+                              return;
+                            }
+
+                            if (unit.isEmpty) {
+                              AppToast.show(
+                                "Please select a unit.",
+                                ToastType.error,
+                              );
+                              return;
+                            }
+
+                            if (pantry.isEmpty) {
+                              AppToast.show(
+                                "Please select a pantry.",
+                                ToastType.error,
+                              );
+                              return;
+                            }
+
+                            if (expireDate.isEmpty) {
+                              AppToast.show(
+                                "Please select an expiry date.",
                                 ToastType.error,
                               );
                               return;
@@ -155,6 +234,7 @@ class _AddItemPageState extends State<AddItemPage> {
                                     0,
                                 unit: item.unit ?? '',
                                 group: item.pantry ?? '',
+                                expireDate: item.expireDate.text,
                               ),
                             );
                           }
@@ -199,6 +279,7 @@ class _AddItemPageState extends State<AddItemPage> {
         ),
         SizedBox(height: h(10)),
         AppTextField(
+          color: AppColors.apptextFieldStyleTextColor,
           controller: item.nameController,
           hintText: "Enter item name",
           fillColor: const Color(0xffF9F9F9),
@@ -211,6 +292,7 @@ class _AddItemPageState extends State<AddItemPage> {
         _formLabel(context, "Quantity"),
         SizedBox(height: h(10)),
         AppTextField(
+          color: AppColors.apptextFieldStyleTextColor,
           controller: item.qtyController,
           hintText: "Enter item quantity",
           fillColor: const Color(0xffF9F9F9),
@@ -254,44 +336,29 @@ class _AddItemPageState extends State<AddItemPage> {
           ],
         ),
         SizedBox(height: h(15)),
-        Row(
-          spacing: w(12),
-          children: [
-            Flexible(
-              child: Column(
-                children: [
-                  _formLabel(context, "Manufacturing date"),
-                  SizedBox(height: h(10)),
-                  AppTextField(
-                    controller: item.manuFacturingDate,
-                    hintText: "Manufacturing date",
-                    fillColor: const Color(0xffF9F9F9),
-                    isFilled: true,
-                    isLabled: false,
-                    keyboardType: TextInputType.text,
-                    label: "",
-                  ),
-                ],
-              ),
-            ),
-            Flexible(
-              child: Column(
-                children: [
-                  _formLabel(context, "Expiring date"),
-                  SizedBox(height: h(10)),
-                  AppTextField(
-                    controller: item.expireDate,
-                    hintText: "Expiring date",
-                    fillColor: const Color(0xffF9F9F9),
-                    isFilled: true,
-                    isLabled: false,
-                    keyboardType: TextInputType.text,
-                    label: "",
-                  ),
-                ],
-              ),
-            ),
-          ],
+
+        _formLabel(context, "Expiring date"),
+        SizedBox(height: h(10)),
+        GestureDetector(
+          onTap: () async {
+            final pickedDate = await DatePickerService.pickDate(
+              context: context,
+            );
+            if (pickedDate != null) {
+              setState(() => item.expireDate.text = pickedDate);
+            }
+          },
+          child: AppTextField(
+            enabled: false,
+            color: AppColors.apptextFieldStyleTextColor,
+            controller: item.expireDate,
+            hintText: "Expiring date",
+            fillColor: const Color(0xffF9F9F9),
+            isFilled: true,
+            isLabled: false,
+            keyboardType: TextInputType.text,
+            label: "",
+          ),
         ),
       ],
     );

@@ -1,8 +1,11 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
+import 'package:foodkitchen/core/services/image_picker/image_picker_service.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
@@ -10,6 +13,9 @@ import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
+import 'package:foodkitchen/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:foodkitchen/features/profile/presentation/bloc/profile_event.dart';
+import 'package:foodkitchen/features/profile/presentation/bloc/profile_state.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
@@ -19,8 +25,21 @@ class EditProfilePage extends StatefulWidget {
 }
 
 class _EditProfilePageState extends State<EditProfilePage> {
+  late ProfileBloc profileBloc;
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
+
+  @override
+  void initState() {
+    profileBloc = context.read<ProfileBloc>();
+    getProfilePicture();
+    super.initState();
+  }
+
+  void getProfilePicture() {
+    profileBloc.add(LoadProfilePicture());
+  }
+
   @override
   void dispose() {
     _firstNameController.dispose();
@@ -28,88 +47,114 @@ class _EditProfilePageState extends State<EditProfilePage> {
     super.dispose();
   }
 
+  Future<void> _pickImage() async {
+    final image = await ImagePickerService.pickFromGallery(context);
+    if (image != null) {
+      profileBloc.add(UpdateProfilePicture(image.path));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xffF9F9F9),
-      appBar: _buildAppBar(context),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: gapSymmetric(horizontal: 20, vertical: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Center(
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      Image.asset(
-                        AppAssets.avatar,
-                        width: w(72),
-                        height: h(72),
-                      ),
-                      Positioned(
-                        bottom: h(-0),
-                        right: w(-8),
-                        child: SvgPicture.asset(
-                          AppAssets.editSvg,
-                          width: w(16),
-                          height: h(16),
-                          color: AppColors.primaryColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                gap(height: 15),
-                UpperTile(
-                  widget: Column(
-                    children: [
-                      AppTextField(
-                        controller: _firstNameController,
-                        label: "First Name",
+    return BlocBuilder<ProfileBloc, ProfileState>(
+      builder: (_, state) {
+        return Scaffold(
+          backgroundColor: const Color(0xffF9F9F9),
+          appBar: _buildAppBar(context),
+          body: SafeArea(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: gapSymmetric(horizontal: 20, vertical: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Center(
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          CircleAvatar(
+                            radius: w(36),
+                            backgroundColor: Colors.grey.shade200,
+                            backgroundImage: state.imagePath != null
+                                ? FileImage(File(state.imagePath!))
+                                : AssetImage(AppAssets.avatar) as ImageProvider,
+                          ),
 
-                        keyboardType: TextInputType.text,
-                        hintText: "Enter your first name",
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: GestureDetector(
+                              onTap: _pickImage,
+                              child: Container(
+                                padding: EdgeInsets.all(w(4)),
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white,
+                                ),
+                                child: SvgPicture.asset(
+                                  AppAssets.editSvg,
+                                  width: w(16),
+                                  height: h(16),
+                                  color: AppColors.primaryColor,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
+                    ),
+                    gap(height: 20),
 
-                      SizedBox(height: h(20)),
-                      AppTextField(
-                        controller: _lastNameController,
-                        label: "Last name",
-
-                        hintText: "Enter your last name",
+                    UpperTile(
+                      widget: Column(
+                        children: [
+                          AppTextField(
+                            controller: _firstNameController,
+                            label: "First Name",
+                            keyboardType: TextInputType.text,
+                            hintText: "Enter your first name",
+                          ),
+                          SizedBox(height: h(20)),
+                          AppTextField(
+                            controller: _lastNameController,
+                            label: "Last Name",
+                            hintText: "Enter your last name",
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+
+                    gap(height: 20),
+
+                    GenericButtonWidget(
+                      onPressed: () {
+                        if (_firstNameController.text.trim().isEmpty) {
+                          AppToast.show(
+                            "Please enter your first name",
+                            ToastType.error,
+                          );
+                        } else if (_lastNameController.text.trim().isEmpty) {
+                          AppToast.show(
+                            "Please enter your last name",
+                            ToastType.error,
+                          );
+                        } else {
+                          AppToast.show(
+                            "Successfully Changed!",
+                            ToastType.success,
+                          );
+                          Navigator.pop(context);
+                        }
+                      },
+                      text: "Save",
+                    ),
+                  ],
                 ),
-                gap(height: 20),
-                GenericButtonWidget(
-                  onPressed: () {
-                    if (_firstNameController.text.trim().isEmpty) {
-                      AppToast.show(
-                        "Please enter your first name",
-                        ToastType.error,
-                      );
-                    } else if (_lastNameController.text.trim().isEmpty) {
-                      AppToast.show(
-                        "Please enter your last name",
-                        ToastType.error,
-                      );
-                    } else {
-                      AppToast.show("Successfully Changed!", ToastType.success);
-                      Navigator.pop(context);
-                    }
-                  },
-                  text: "Save",
-                ),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 

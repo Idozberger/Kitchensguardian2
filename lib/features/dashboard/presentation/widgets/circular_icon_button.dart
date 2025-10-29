@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 
 class CircularIconButton extends StatelessWidget {
@@ -10,6 +11,7 @@ class CircularIconButton extends StatelessWidget {
   final double borderWidth;
   final VoidCallback? onTap;
   final Color? iconColor;
+  final Color? bgColor;
 
   const CircularIconButton({
     super.key,
@@ -17,6 +19,7 @@ class CircularIconButton extends StatelessWidget {
     this.size = 30,
     this.padding = 8,
     this.borderColor = const Color(0xffD4D2D2),
+    this.bgColor,
     this.borderWidth = 1.5,
     this.onTap,
     this.iconColor,

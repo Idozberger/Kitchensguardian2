@@ -37,6 +37,7 @@ class GroceryBloc extends Bloc<GroceryEvent, GroceryState> {
     on<GetAiGeneratedItemsEvent>(_onGetAiGeneratedItems);
     on<DeleteKitchenItemsEvent>(_onDeleteKitchenItems);
     on<AddCustomItemEvent>(_onAddCustomItem);
+    on<ResetGroceryStateEvent>(_onResetGroceryState);
   }
 
   Future<void> _onGetRequestedItems(
@@ -227,6 +228,20 @@ class GroceryBloc extends Bloc<GroceryEvent, GroceryState> {
           ),
         );
       },
+    );
+  }
+
+  void _onResetGroceryState(
+    ResetGroceryStateEvent event,
+    Emitter<GroceryState> emit,
+  ) {
+    emit(
+      state.copyWith(
+        aiGeneratedList: [],
+        requestedItemsList: [],
+        finalListItemsList: [],
+        isLoading: false,
+      ),
     );
   }
 }

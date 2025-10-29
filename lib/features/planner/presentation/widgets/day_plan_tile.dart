@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
+import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
@@ -28,15 +29,23 @@ class DayPlanTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return UpperTile(
+      horizontalPadding: 0,
       widget: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildHeaderRow(context),
-          gap(height: 5),
-          ...meals.map((meal) => meal),
-          const Divider(color: Color(0xffE6E6E6)),
-          gap(height: 12),
-          _buildFooterButtons(context),
+          Padding(
+            padding: gapSymmetric(horizontal: 14),
+            child: Column(
+              children: [
+                gap(height: 5),
+                ...meals.map((meal) => meal),
+                const Divider(color: Color(0xffE6E6E6)),
+                gap(height: 12),
+                _buildFooterButtons(context),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -46,12 +55,15 @@ class DayPlanTile extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          children: [
-            Image.asset(AppAssets.avatar, height: h(34)),
-            SizedBox(width: w(13)),
-            Text(dayLabel, style: Theme.of(context).textTheme.headlineLarge),
-          ],
+        Padding(
+          padding: gapOnly(left: 14),
+          child: Row(
+            children: [
+              Image.asset(AppAssets.avatar, height: h(34)),
+              SizedBox(width: w(13)),
+              Text(dayLabel, style: Theme.of(context).textTheme.headlineLarge),
+            ],
+          ),
         ),
         DayPlanMenu(deletePlan: deletePlan, editPlan: editPlan),
       ],

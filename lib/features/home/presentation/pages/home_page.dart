@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
+import 'package:foodkitchen/core/common/cubits/user_state.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
@@ -42,54 +43,57 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    bool hasKitchen = userCubit.state.activeKitchenId.isNotEmpty;
-
     return Scaffold(
       backgroundColor: const Color(0xffF9F9F9),
-      body: SingleChildScrollView(
-        child: MultiBlocListener(
-          key: UniqueKey(),
-          listeners: [
-            BlocListener<HomeBloc, HomeState>(
-              listenWhen: (previousState, currentState) =>
-                  previousState.successMessage != currentState.successMessage ||
-                  previousState.errorMessage != currentState.errorMessage,
-              listener: (_, state) {
-                if (state.successMessage != null) {
-                  AppToast.show(state.successMessage!, ToastType.success);
-                  hasKitchen = userCubit.state.activeKitchenId.isNotEmpty;
-                } else if (state.errorMessage != null) {
-                  AppToast.show(state.errorMessage!, ToastType.error);
-                }
-              },
+      body: BlocBuilder<UserCubit, UserState>(
+        builder: (context, userState) {
+          final hasKitchen = userState.activeKitchenId.isNotEmpty;
+
+          return SingleChildScrollView(
+            child: MultiBlocListener(
+              key: UniqueKey(),
+              listeners: [
+                BlocListener<HomeBloc, HomeState>(
+                  listenWhen: (previous, current) =>
+                      previous.successMessage != current.successMessage ||
+                      previous.errorMessage != current.errorMessage,
+                  listener: (_, state) {
+                    if (state.successMessage != null) {
+                      AppToast.show(state.successMessage!, ToastType.success);
+                    } else if (state.errorMessage != null) {
+                      AppToast.show(state.errorMessage!, ToastType.error);
+                    }
+                  },
+                ),
+              ],
+              child: BlocBuilder<HomeBloc, HomeState>(
+                builder: (_, state) {
+                  if (!hasKitchen) return const NoKitchenView();
+
+                  if (state.isLoading) {
+                    return Padding(
+                      padding: gapOnly(
+                        top: MediaQuery.of(context).size.height * 0.35,
+                      ),
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.primaryColor,
+                        ),
+                      ),
+                    );
+                  }
+
+                  return KitchenHomeView(
+                    state: state,
+                    isGeneratedRecipes: isGeneratedRecipes,
+                    onGeneratePressed: () =>
+                        setState(() => isGeneratedRecipes = true),
+                  );
+                },
+              ),
             ),
-          ],
-          child: BlocBuilder<HomeBloc, HomeState>(
-            builder: (_, state) {
-              if (!hasKitchen) return const NoKitchenView();
-
-              if (state.isLoading) {
-                return Padding(
-                  padding: gapOnly(
-                    top: MediaQuery.of(context).size.height * 0.35,
-                  ),
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      color: AppColors.primaryColor,
-                    ),
-                  ),
-                );
-              }
-
-              return KitchenHomeView(
-                state: state,
-                isGeneratedRecipes: isGeneratedRecipes,
-                onGeneratePressed: () =>
-                    setState(() => isGeneratedRecipes = true),
-              );
-            },
-          ),
-        ),
+          );
+        },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.miniStartFloat,
       floatingActionButton: const FloatingButton(),

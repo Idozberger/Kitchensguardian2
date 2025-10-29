@@ -48,5 +48,7 @@ class JoinKitchenEvent extends KitchenEvent {
 
 class SwitchKitchenEvent extends KitchenEvent {
   final String kitchenId;
-  SwitchKitchenEvent(this.kitchenId);
+  const SwitchKitchenEvent(this.kitchenId);
 }
+
+class DeleteOrLeaveKitchenEvent extends KitchenEvent {}

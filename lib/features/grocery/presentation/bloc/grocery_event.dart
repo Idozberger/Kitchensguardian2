@@ -52,3 +52,5 @@ class AddCustomItemEvent extends GroceryEvent {
     required this.unit,
   });
 }
+
+final class ResetGroceryStateEvent extends GroceryEvent {}
