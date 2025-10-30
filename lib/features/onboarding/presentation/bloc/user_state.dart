@@ -13,3 +13,7 @@ final class NoInternet extends UserState {}
 final class UserLoading extends UserState {}
 
 final class UserSuccess extends UserState {}
+
+final class UserGetStarted extends UserState {}
+
+final class UserOnBoarded extends UserState {}

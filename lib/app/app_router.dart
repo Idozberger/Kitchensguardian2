@@ -17,11 +17,11 @@ import 'package:foodkitchen/features/dashboard/presentation/pages/notification_p
 import 'package:foodkitchen/features/dashboard/presentation/pages/referral_code_page.dart';
 import 'package:foodkitchen/features/grocery/presentation/pages/add_custom_items_page.dart';
 import 'package:foodkitchen/features/history/presentation/pages/scan_history_page.dart';
+import 'package:foodkitchen/features/kitchens/presentation/pages/invite_member_page.dart';
 import 'package:foodkitchen/features/kitchens/presentation/pages/kitchen_page.dart';
 import 'package:foodkitchen/features/onboarding/presentation/pages/intro_page.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/features/onboarding/presentation/pages/splash_screen.dart';
-import 'package:foodkitchen/features/onboarding/presentation/widgets/intro_app_features_widget.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/add_item_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/my_pantry_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/receipt_details/capture_details_page.dart';
@@ -199,13 +199,14 @@ final GoRouter router = GoRouter(
         return ViewPlanDetailsPage(mergedMealPlanEntity: mergedMealPlanEntity);
       },
     ),
-    GoRoute(
-      path: Routes.introAppFeatures,
-      builder: (context, state) => IntroAppFeaturesWidget(),
-    ),
+
     GoRoute(
       path: Routes.referralPage,
       builder: (context, state) => ReferralCodePage(),
+    ),
+    GoRoute(
+      path: Routes.inviteMember,
+      builder: (context, state) => InviteMemberPage(),
     ),
   ],
 );

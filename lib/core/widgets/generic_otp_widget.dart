@@ -3,14 +3,14 @@ import 'package:pinput/pinput.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 
-class OtpField extends StatelessWidget {
+class OtpField extends StatefulWidget {
   final bool preFilledStar;
   final bool isJoining;
   final String initialString;
   final bool enabled;
   final void Function(String)? onCompleted;
 
-  OtpField({
+  const OtpField({
     super.key,
     this.onCompleted,
     this.preFilledStar = false,
@@ -20,8 +20,35 @@ class OtpField extends StatelessWidget {
   });
 
   @override
+  State<OtpField> createState() => _OtpFieldState();
+}
+
+class _OtpFieldState extends State<OtpField> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialString);
+  }
+
+  @override
+  void didUpdateWidget(covariant OtpField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Only update controller if the initial string actually changed
+    if (oldWidget.initialString != widget.initialString) {
+      _controller.text = widget.initialString;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    print("joining $isJoining");
     final defaultPinTheme = PinTheme(
       constraints: BoxConstraints(
         minWidth: w(55),
@@ -40,11 +67,12 @@ class OtpField extends StatelessWidget {
     );
 
     return Pinput(
-      enabled: enabled,
-      key: ValueKey(isJoining),
-      length: isJoining ? 6 : 5,
-      separatorBuilder: (index) => SizedBox(width: isJoining ? w(4) : w(20)),
-
+      enabled: widget.enabled,
+      key: ValueKey(widget.isJoining),
+      length: widget.isJoining ? 6 : 5,
+      controller: _controller,
+      separatorBuilder: (index) =>
+          SizedBox(width: widget.isJoining ? w(4) : w(20)),
       defaultPinTheme: defaultPinTheme,
       focusedPinTheme: defaultPinTheme.copyWith(
         decoration: BoxDecoration(
@@ -58,7 +86,7 @@ class OtpField extends StatelessWidget {
           borderRadius: BorderRadius.circular(h(4)),
         ),
       ),
-      preFilledWidget: preFilledStar
+      preFilledWidget: widget.preFilledStar
           ? Text(
               "*",
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -68,9 +96,8 @@ class OtpField extends StatelessWidget {
               ),
             )
           : null,
-      controller: TextEditingController(text: initialString),
       keyboardType: TextInputType.text,
-      onCompleted: onCompleted,
+      onCompleted: widget.onCompleted,
     );
   }
 }

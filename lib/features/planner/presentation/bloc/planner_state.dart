@@ -4,8 +4,10 @@ import 'package:foodkitchen/features/planner/domain/entities/merged_meal_type_en
 final class PlannerState {
   final List<MealTypeEntity>? recipes;
   final List<MealTypeEntity>? favouriteRecipes;
+  final List<MealTypeEntity> startedRecipe;
   final List<MergedMealPlanEntity> getAllWeeklyPlans;
   final List<MergedMealPlanEntity> dateBasedPlan;
+  final List<Map<String, dynamic>> doneSteps;
   final bool isLoading;
   final bool addingToWeeklyPlan;
   final bool startRecipe;
@@ -16,6 +18,7 @@ final class PlannerState {
     this.recipes,
     this.favouriteRecipes,
     this.getAllWeeklyPlans = const [],
+    this.startedRecipe = const [],
     this.isLoading = false,
     this.startRecipe = false,
     this.isFinishingRecipe = false,
@@ -23,6 +26,7 @@ final class PlannerState {
     this.errorMessage,
     this.successMessage = "",
     this.dateBasedPlan = const [],
+    this.doneSteps = const [],
   });
 
   PlannerState copyWith({
@@ -30,12 +34,14 @@ final class PlannerState {
     List<MealTypeEntity>? favouriteRecipes,
     List<MergedMealPlanEntity>? getAllWeeklyPlans,
     List<MergedMealPlanEntity>? dateBasedPlan,
+    List<MealTypeEntity>? startedRecipe,
     bool? isLoading,
     bool? isFinishingRecipe,
     bool? startRecipe,
     bool? addingToWeeklyPlan,
     String? errorMessage,
     String? successMessage,
+    List<Map<String, dynamic>>? doneSteps,
   }) {
     return PlannerState(
       recipes: recipes ?? this.recipes,
@@ -48,6 +54,8 @@ final class PlannerState {
       dateBasedPlan: dateBasedPlan ?? this.dateBasedPlan,
       startRecipe: startRecipe ?? this.startRecipe,
       isFinishingRecipe: isFinishingRecipe ?? this.isFinishingRecipe,
+      startedRecipe: startedRecipe ?? this.startedRecipe,
+      doneSteps: doneSteps ?? this.doneSteps,
     );
   }
 }

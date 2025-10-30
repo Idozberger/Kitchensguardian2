@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/domain/usecase/get_current_user.dart';
 import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
 import 'package:foodkitchen/core/utils/date_format_to_string.dart';
@@ -21,6 +22,7 @@ import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dar
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
+  final UserCubit _userCubit;
   final HomeBloc _homeBloc;
   final GenerateRecipes _generateRecipes;
   final FavouriteRecipes _favouriteRecipes;
@@ -33,6 +35,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
   final MarkRecipeFinished _markRecipeFinished;
 
   PlannerBloc({
+    required UserCubit userCubit,
     required HomeBloc homeBloc,
     required GenerateRecipes generateRecipes,
     required FavouriteRecipes favouriteRecipes,
@@ -53,6 +56,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
        _homeBloc = homeBloc,
        _deleteMealTypeFromWeeklyPlan = deleteMealTypeFromWeeklyPlan,
        _markRecipeFinished = markRecipeFinished,
+       _userCubit = userCubit,
 
        super(PlannerState()) {
     on<GetFavouriteRecipesEvent>(_onGetFavouriteRecipes);
@@ -372,6 +376,18 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     Emitter<PlannerState> emit,
   ) async {
     emit(state.copyWith(startRecipe: event.startRecipe));
+    if (event.startRecipe) {
+      emit(
+        state.copyWith(
+          startedRecipe: event.mealTypeEntity,
+          doneSteps: event.doneSteps,
+        ),
+      );
+      _userCubit.updateMealTypeEntity(event.mealTypeEntity, event.doneSteps);
+    } else {
+      emit(state.copyWith(startedRecipe: [], doneSteps: []));
+      _userCubit.updateMealTypeEntity([], []);
+    }
   }
 
   Future<void> _onResetPlanner(

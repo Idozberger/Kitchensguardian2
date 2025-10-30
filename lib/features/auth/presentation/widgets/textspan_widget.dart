@@ -1,5 +1,6 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:foodkitchen/core/global/functions/resize.dart';
+import 'package:foodkitchen/core/theme/app_colors.dart';
 
 class TextspanWidget extends StatelessWidget {
   final VoidCallback callback;
@@ -12,6 +13,8 @@ class TextspanWidget extends StatelessWidget {
   final double? fontSizeTitle;
   final FontWeight? titleFontWeight;
   final TextAlign? textAlign;
+  final bool isLoading;
+
   const TextspanWidget({
     super.key,
     required this.callback,
@@ -24,33 +27,56 @@ class TextspanWidget extends StatelessWidget {
     this.fontSizeTitle,
     this.titleFontWeight = FontWeight.w400,
     this.textAlign = TextAlign.center,
+    this.isLoading = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Text.rich(
-      TextSpan(
-        text: "$text ",
-
-        style:
-            style ??
-            Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: titleFontWeight,
-              fontSize: fontSizeTitle,
-            ),
-        children: [
-          TextSpan(
-            text: buttonText,
+    return Row(
+      mainAxisAlignment: _getTextAlignment(),
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(
+          child: Text(
+            text,
+            overflow: TextOverflow.ellipsis,
+            style:
+                style ??
+                Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: titleFontWeight,
+                  fontSize: fontSizeTitle,
+                ),
+          ),
+        ),
+        TextButton(
+          onPressed: callback,
+          style: TextButton.styleFrom(
+            padding: EdgeInsets.zero,
+            minimumSize: Size.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+          child: Text(
+            " $buttonText",
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: buttonColor,
               fontWeight: fontWeight,
               fontSize: fontSize,
             ),
-            recognizer: TapGestureRecognizer()..onTap = callback,
           ),
-        ],
-      ),
-      textAlign: textAlign,
+        ),
+      ],
     );
+  }
+
+  MainAxisAlignment _getTextAlignment() {
+    switch (textAlign) {
+      case TextAlign.left:
+        return MainAxisAlignment.start;
+      case TextAlign.right:
+        return MainAxisAlignment.end;
+      case TextAlign.center:
+      default:
+        return MainAxisAlignment.center;
+    }
   }
 }

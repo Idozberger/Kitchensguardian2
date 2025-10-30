@@ -1,6 +1,6 @@
-import 'package:equatable/equatable.dart';
+import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
 
-class UserState extends Equatable {
+class UserState {
   final String firstName;
   final String lastName;
   final String userId;
@@ -11,6 +11,8 @@ class UserState extends Equatable {
   final String profilePictureFilePath;
   final String invitationCode;
   final bool entitlementIsActive;
+  final List<MealTypeEntity> mealTypeEntity;
+  final List<Map<String, dynamic>> doneSteps;
   const UserState({
     this.firstName = '',
     this.lastName = '',
@@ -22,6 +24,8 @@ class UserState extends Equatable {
     this.entitlementIsActive = false,
     this.activeKitchenId = '',
     this.invitationCode = '',
+    this.mealTypeEntity = const [],
+    this.doneSteps = const [],
   });
 
   UserState copyWith({
@@ -35,6 +39,8 @@ class UserState extends Equatable {
     String? profilePictureFilePath,
     bool? isLoading,
     String? invitationCode,
+    List<MealTypeEntity>? mealTypeEntity,
+    List<Map<String, dynamic>>? doneSteps,
   }) {
     return UserState(
       firstName: firstName ?? this.firstName,
@@ -48,19 +54,8 @@ class UserState extends Equatable {
       userId: userId ?? this.userId,
       profilePictureFilePath:
           profilePictureFilePath ?? this.profilePictureFilePath,
+      mealTypeEntity: mealTypeEntity ?? this.mealTypeEntity,
+      doneSteps: doneSteps ?? this.doneSteps,
     );
   }
-
-  @override
-  List<Object> get props => [
-    firstName,
-    entitlementIsActive,
-    lastName,
-    userId,
-    email,
-    isLoading,
-    activeKitchenId,
-    invitationCode,
-    profilePictureFilePath,
-  ];
 }

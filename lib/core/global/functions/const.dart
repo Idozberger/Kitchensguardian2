@@ -44,4 +44,5 @@ class AppConstants {
   static const String markRecipeFinished = "/api/kitchen/mark_recipe_finished";
   static const String updateKitchenItems = "/api/kitchen/update_items";
   static const String removeItems = "/api/kitchen/remove_items";
+  static const String inviteUser = "/api/kitchen/invite";
 }

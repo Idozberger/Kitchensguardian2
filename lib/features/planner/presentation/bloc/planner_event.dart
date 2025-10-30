@@ -58,7 +58,13 @@ class MarkRecipeFinishedEvent extends PlannerEvent {
 
 class UpdateStartRecipeEvent extends PlannerEvent {
   final bool startRecipe;
-  UpdateStartRecipeEvent({required this.startRecipe});
+  final List<MealTypeEntity> mealTypeEntity;
+  final List<Map<String, dynamic>> doneSteps;
+  UpdateStartRecipeEvent({
+    required this.startRecipe,
+    required this.mealTypeEntity,
+    required this.doneSteps,
+  });
 }
 
 final class ResetPlannerStateEvent extends PlannerEvent {}

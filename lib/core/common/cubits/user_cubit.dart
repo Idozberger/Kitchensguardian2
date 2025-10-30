@@ -1,5 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:foodkitchen/core/global/functions/logs.dart';
+import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'user_state.dart';
 
@@ -55,6 +55,13 @@ class UserCubit extends Cubit<UserState> {
     emit(
       state.copyWith(activeKitchenId: kitchenId, invitationCode: refferalCode),
     );
+  }
+
+  Future<void> updateMealTypeEntity(
+    List<MealTypeEntity> mealTypeEntity,
+    List<Map<String, dynamic>> doneSteps,
+  ) async {
+    emit(state.copyWith(mealTypeEntity: mealTypeEntity, doneSteps: doneSteps));
   }
 
   void toggleLoading(bool value) {

@@ -8,6 +8,7 @@ import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/dialogs/no_internet.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
+import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/utils/date_format_to_string.dart';
 import 'package:foodkitchen/features/onboarding/presentation/bloc/user_bloc.dart';
@@ -47,46 +48,6 @@ class _SplashScreenState extends State<SplashScreen> {
     );
 
     updatePlansStartDate();
-  }
-
-  void updatePlansStartDate() async {
-    final today = DateTime(
-      DateTime.now().year,
-      DateTime.now().month,
-      DateTime.now().day,
-    );
-
-    final sharedPreferences = await SharedPreferences.getInstance();
-
-    String? endTime = sharedPreferences.getString("end-date");
-    debugPrint("Fetched end-time from prefs: $endTime");
-
-    if (endTime != null) {
-      DateTime endDateTime = parseDate(endTime);
-
-      final endDateInDaysMonthYear = DateTime(
-        endDateTime.year,
-        endDateTime.month,
-        endDateTime.day,
-      );
-
-      if (endDateInDaysMonthYear.isBefore(today)) {
-        debugPrint("End date reached! Resetting start and end dates...");
-
-        sharedPreferences.setString("start-date", formatDate(today));
-        debugPrint("Start date updated to today: ${formatDate(today)}");
-
-        if (AppConstants.entitlementIsActive == false) {
-          final newEndDate = formatDate(DateTime.now().add(Duration(days: 2)));
-          sharedPreferences.setString("end-date", newEndDate);
-          debugPrint("Free user — new end-date set to: $newEndDate");
-        } else {
-          final newEndDate = formatDate(DateTime.now().add(Duration(days: 6)));
-          sharedPreferences.setString("end-date", newEndDate);
-          debugPrint("Premium user — new end-date set to: $newEndDate");
-        }
-      }
-    }
   }
 
   void _startTextAnimation() {
@@ -138,6 +99,8 @@ class _SplashScreenState extends State<SplashScreen> {
             showErrorSnackBar(context, "No Internet Connection");
           } else if (state is UserInitial) {
             context.go(Routes.onBoarding);
+          } else if (state is UserOnBoarded) {
+            context.go(Routes.signIn);
           } else if (state is UserSuccess) {
             context.go(Routes.dashboard);
           }
@@ -206,5 +169,45 @@ class _SplashScreenState extends State<SplashScreen> {
         duration: const Duration(seconds: 3),
       ),
     );
+  }
+
+  void updatePlansStartDate() async {
+    final today = DateTime(
+      DateTime.now().year,
+      DateTime.now().month,
+      DateTime.now().day,
+    );
+
+    final sharedPreferences = await SharedPreferences.getInstance();
+
+    String? endTime = sharedPreferences.getString("end-date");
+    debugPrint("Fetched end-time from prefs: $endTime");
+
+    if (endTime != null) {
+      DateTime endDateTime = parseDate(endTime);
+
+      final endDateInDaysMonthYear = DateTime(
+        endDateTime.year,
+        endDateTime.month,
+        endDateTime.day,
+      );
+
+      if (endDateInDaysMonthYear.isBefore(today)) {
+        debugPrint("End date reached! Resetting start and end dates...");
+
+        sharedPreferences.setString("start-date", formatDate(today));
+        debugPrint("Start date updated to today: ${formatDate(today)}");
+
+        if (AppConstants.entitlementIsActive == false) {
+          final newEndDate = formatDate(DateTime.now().add(Duration(days: 2)));
+          sharedPreferences.setString("end-date", newEndDate);
+          debugPrint("Free user — new end-date set to: $newEndDate");
+        } else {
+          final newEndDate = formatDate(DateTime.now().add(Duration(days: 6)));
+          sharedPreferences.setString("end-date", newEndDate);
+          debugPrint("Premium user — new end-date set to: $newEndDate");
+        }
+      }
+    }
   }
 }

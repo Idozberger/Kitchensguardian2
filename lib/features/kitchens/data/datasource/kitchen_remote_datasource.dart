@@ -11,6 +11,7 @@ abstract interface class KitchenRemoteDatasource {
   Future<String> createKitchen({required String kitchenName});
   Future<String> joinKitchen({required String invitationCode});
   Future<String> removeKitchen({required String kitchenId});
+  Future<String> inviteUser({required String email, required String kitchenId});
 }
 
 class KitchenRemoteDataSourceImpl implements KitchenRemoteDatasource {
@@ -102,6 +103,25 @@ class KitchenRemoteDataSourceImpl implements KitchenRemoteDatasource {
       await sharedPreferences.remove('kitchen_id');
       await sharedPreferences.remove('invitation_code');
       await sharedPreferences.remove('role');
+
+      log(response.data["message"]);
+
+      return response.data["message"];
+    } on DioException catch (e) {
+      throw dio.handleError(e);
+    }
+  }
+
+  @override
+  Future<String> inviteUser({
+    required String email,
+    required String kitchenId,
+  }) async {
+    try {
+      final response = await dio.post(
+        AppConstants.inviteUser,
+        data: {"kitchen_id": kitchenId, "email": email},
+      );
 
       log(response.data["message"]);
 

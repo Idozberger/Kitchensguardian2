@@ -6,6 +6,7 @@ import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
+import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_otp_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
 import 'package:foodkitchen/features/auth/presentation/blocs/auth_bloc.dart';
@@ -54,7 +55,7 @@ class _CreateNewPasswordPageState extends State<CreateNewPasswordPage> {
 
   void onResendCode() {
     context.read<AuthBloc>().add(
-      AuthSendPasswordResetEmail(email: widget.email),
+      ResendEmailVerficationCodeEvent(email: widget.email),
     );
   }
 
@@ -75,6 +76,9 @@ class _CreateNewPasswordPageState extends State<CreateNewPasswordPage> {
         }
         if (state is AuthFailure) {
           AppToast.show(state.message, ToastType.error);
+        }
+        if (state is ResendEmailVerficationCode) {
+          _showDialog(context);
         }
       },
       builder: (BuildContext context, AuthState state) {
@@ -199,12 +203,17 @@ class _CreateNewPasswordPageState extends State<CreateNewPasswordPage> {
                     child: TextButton(
                       onPressed: () {
                         onResendCode();
-                        _showDialog(context);
                       },
-                      child: Text(
-                        "Resend code",
-                        style: Theme.of(context).textTheme.bodyMedium!,
-                      ),
+                      child: state is CodeResendLoading
+                          ? Center(
+                              child: CircularProgressIndicator(
+                                color: AppColors.primaryColor,
+                              ),
+                            )
+                          : Text(
+                              "Resend code",
+                              style: Theme.of(context).textTheme.bodyMedium!,
+                            ),
                     ),
                   ),
                 ],
@@ -236,8 +245,9 @@ class _CreateNewPasswordPageState extends State<CreateNewPasswordPage> {
               ),
               SizedBox(height: h(10)),
               Text(
-                "Your password has been updated successfully.",
-                style: Theme.of(context).textTheme.headlineSmall!,
+                "Code resent successfully",
+                style: Theme.of(context).textTheme.headlineSmall,
+                textAlign: TextAlign.center,
               ),
               SizedBox(height: h(10)),
               Align(

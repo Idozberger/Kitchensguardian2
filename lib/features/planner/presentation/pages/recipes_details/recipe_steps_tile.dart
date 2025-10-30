@@ -33,7 +33,7 @@ class RecipeStepsTile extends StatelessWidget {
             children: List.generate(
               steps.length,
               (index) => Padding(
-                padding: gapOnly(bottom: 20),
+                padding: gapOnly(top: 14),
                 child: RecipeStepTile(
                   stepText: steps[index]["step"],
                   callback: () =>
@@ -43,6 +43,7 @@ class RecipeStepsTile extends StatelessWidget {
               ),
             ),
           ),
+          gap(height: 8),
         ],
       ),
     );

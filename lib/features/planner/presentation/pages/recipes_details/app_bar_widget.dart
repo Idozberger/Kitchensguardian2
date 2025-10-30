@@ -5,7 +5,8 @@ import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_ico
 import 'package:go_router/go_router.dart';
 
 class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
-  const AppBarWidget({super.key});
+  final VoidCallback? onNavigatorback;
+  const AppBarWidget({super.key, this.onNavigatorback});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +18,7 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
           SizedBox(width: w(16)),
           CircularIconButton(
             iconAsset: AppAssets.backArrowiOS,
-            onTap: () => context.pop(),
+            onTap: () => onNavigatorback ?? context.pop(),
           ),
         ],
       ),

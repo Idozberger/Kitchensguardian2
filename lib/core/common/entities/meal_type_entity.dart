@@ -9,6 +9,7 @@ class MealTypeEntity {
   final String cookingTime;
   final String recipeShortSummary;
   final List<String> cookingSteps;
+  final List<Map<String, dynamic>> doneSteps;
   final List<IngredientEntity> ingredients;
   final bool missingItems;
   final bool available;
@@ -25,5 +26,6 @@ class MealTypeEntity {
     required this.available,
     required this.mealType,
     required this.formatedDateString,
+    this.doneSteps = const [],
   });
 }

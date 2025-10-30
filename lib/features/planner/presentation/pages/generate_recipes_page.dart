@@ -11,6 +11,7 @@ import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/date_format_to_string.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
+import 'package:foodkitchen/core/widgets/generic_recipe_is_under_progress_widget.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dart';
@@ -74,9 +75,24 @@ class _GenerateRecipesPageState extends State<GenerateRecipesPage> {
         builder: (_, state) {
           return SafeArea(
             child: SingleChildScrollView(
-              padding: gapSymmetric(horizontal: 20, vertical: 20),
+              padding: gapSymmetric(horizontal: 20, vertical: 14),
               child: Column(
                 children: [
+                  if (state.startedRecipe.isNotEmpty)
+                    RecipeInProgressNotification(
+                      onCancelRecipe: () {
+                        plannerBloc.add(
+                          UpdateStartRecipeEvent(
+                            startRecipe: false,
+                            mealTypeEntity: [],
+                            doneSteps: [],
+                          ),
+                        );
+                      },
+                      padding: gapOnly(bottom: 14),
+                      canCancel: true,
+                      mealTypeEntity: state.startedRecipe[0],
+                    ),
                   SearchBarWidgetForGenerateRecipes(
                     controller: searchController,
                     onSearchTap: _generateRecipes,

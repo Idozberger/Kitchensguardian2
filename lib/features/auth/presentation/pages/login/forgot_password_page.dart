@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
-import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
 import 'package:foodkitchen/features/auth/presentation/blocs/auth_bloc.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
@@ -76,25 +73,30 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   Padding(
                     padding: gapOnly(top: 20, bottom: 25),
                     child: GenericButtonWidget(
-                      onPressed: () {
-                        String email = _emailController.text.trim();
+                      onPressed: state is AuthLoading
+                          ? () {}
+                          : () {
+                              String email = _emailController.text.trim();
 
-                        if (email.isEmpty) {
-                          AppToast.show("Email is required", ToastType.error);
-                        } else if (!RegExp(
-                          r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$",
-                        ).hasMatch(email)) {
-                          AppToast.show(
-                            "Please enter a valid email address",
-                            ToastType.error,
-                          );
-                        } else {
-                          isNaviagted = false;
-                          context.read<AuthBloc>().add(
-                            AuthSendPasswordResetEmail(email: email),
-                          );
-                        }
-                      },
+                              if (email.isEmpty) {
+                                AppToast.show(
+                                  "Email is required",
+                                  ToastType.error,
+                                );
+                              } else if (!RegExp(
+                                r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$",
+                              ).hasMatch(email)) {
+                                AppToast.show(
+                                  "Please enter a valid email address",
+                                  ToastType.error,
+                                );
+                              } else {
+                                isNaviagted = false;
+                                context.read<AuthBloc>().add(
+                                  AuthSendPasswordResetEmail(email: email),
+                                );
+                              }
+                            },
                       text: "Send link",
                       isLoading: state is AuthLoading,
                     ),

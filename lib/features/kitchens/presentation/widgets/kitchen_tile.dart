@@ -20,7 +20,9 @@ class KitchenTile extends StatelessWidget {
   final double buttonWidth;
   final double buttonHeight;
   final bool isMember;
+  final bool allUsersView;
   final VoidCallback onSecondaryActionTap;
+
   const KitchenTile({
     super.key,
     required this.imagePath,
@@ -39,6 +41,7 @@ class KitchenTile extends StatelessWidget {
     this.buttonHeight = 23,
 
     this.isMember = false,
+    this.allUsersView = false,
   });
 
   @override
@@ -51,7 +54,7 @@ class KitchenTile extends StatelessWidget {
             Image.asset(imagePath, width: w(40), height: h(38)),
             SizedBox(width: w(5)),
             SizedBox(
-              width: w(144),
+              width: w(162),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,11 +89,15 @@ class KitchenTile extends StatelessWidget {
               width: w(buttonWidth),
               height: h(buttonHeight),
             ),
-            gap(height: 6),
-            TextButton(
-              onPressed: onSecondaryActionTap,
-              child: Text(isMember ? "Leave" : "Remove"),
-            ),
+            if (allUsersView)
+              SizedBox()
+            else ...[
+              gap(height: 6),
+              TextButton(
+                onPressed: onSecondaryActionTap,
+                child: Text(isMember ? "Leave" : "Remove"),
+              ),
+            ],
           ],
         ),
       ],

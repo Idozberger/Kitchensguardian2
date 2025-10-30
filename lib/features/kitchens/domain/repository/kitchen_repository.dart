@@ -8,4 +8,8 @@ abstract interface class KitchenRepository {
   Future<Either<Failure, String>> joinKitchen({required String invitationCode});
   Future<Either<Failure, String>> leaveKitchen({required String kitchenId});
   Future<Either<Failure, String>> removeKitchen({required String kitchenId});
+  Future<Either<Failure, String>> inviteUser({
+    required String kitchenId,
+    required String email,
+  });
 }

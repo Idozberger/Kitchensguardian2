@@ -32,9 +32,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
   String verificationCode = "";
 
   void updatePin(String code) {
-    setState(() {
-      verificationCode = code;
-    });
+    verificationCode = code;
   }
 
   @override
@@ -56,6 +54,12 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
     );
   }
 
+  void onResendCode() {
+    context.read<AuthBloc>().add(
+      ResendEmailVerficationCodeEvent(email: widget.userModel.email),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AuthBloc, AuthState>(
@@ -68,6 +72,12 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
         }
         if (state is AuthFailure) {
           AppToast.show(state.message, ToastType.error);
+        }
+        if (state is AuthFailure) {
+          AppToast.show(state.message, ToastType.error);
+        }
+        if (state is ResendEmailVerficationCode) {
+          _showDialog(context);
         }
       },
       builder: (BuildContext context, AuthState state) {
@@ -142,11 +152,10 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
 
                   Center(
                     child: TextspanWidget(
+                      isLoading: state is CodeResendLoading,
                       buttonColor: AppColors.primaryColor,
                       callback: () {
-                        sendVerificationCode();
-
-                        _showDialog(context);
+                        onResendCode();
                       },
                       text: "I don’t receive a verification code!",
                       buttonText: "Resend",

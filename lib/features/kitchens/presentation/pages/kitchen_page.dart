@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
-import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
@@ -81,19 +80,7 @@ class _KitchenPageState extends State<KitchenPage> {
               ),
             );
           }
-          return Center(
-            child: Column(
-              children: [
-                Text("Something went wrong! "),
-                TextButton(
-                  onPressed: () {
-                    fetchAllKitchens();
-                  },
-                  child: Text("Try again"),
-                ),
-              ],
-            ),
-          );
+          return EmptyUsersView(onRetry: fetchAllKitchens);
         },
       ),
     );
@@ -272,14 +259,14 @@ class _KitchenPageState extends State<KitchenPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Kitchen you have:",
+            "Kitchen you have",
             style: Theme.of(context).textTheme.headlineLarge,
           ),
           SizedBox(height: h(15)),
 
           Text(
             kitchenState.kitchens.isNotEmpty
-                ? "${kitchenState.kitchens.length} kitchen found: "
+                ? "${kitchenState.kitchens.length} kitchen found "
                 : "No kitchen found:",
             style: Theme.of(
               context,
@@ -290,11 +277,18 @@ class _KitchenPageState extends State<KitchenPage> {
             ListView.builder(
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
-              itemCount: kitchenState.kitchens.length,
+              itemCount: kitchenState.kitchens
+                  .where((kitchen) => kitchen.role.toLowerCase() != "member")
+                  .length,
               itemBuilder: (BuildContext _, int index) {
-                final kitchen = kitchenState.kitchens[index];
+                final filteredKitchens = kitchenState.kitchens
+                    .where((kitchen) => kitchen.role.toLowerCase() != "member")
+                    .toList();
+
+                final kitchen = filteredKitchens[index];
                 final isActive =
                     userCubit.state.activeKitchenId == kitchen.kitchenId;
+
                 return Padding(
                   padding: gapOnly(bottom: 4),
                   child: KitchenTile(
@@ -312,7 +306,6 @@ class _KitchenPageState extends State<KitchenPage> {
                           context.read<KitchenBloc>().add(
                             RemoveKitchenEvent(kitchen.kitchenId),
                           );
-
                           context.pop();
                         },
                         onSecondaryPressed: () {
@@ -336,16 +329,23 @@ class _KitchenPageState extends State<KitchenPage> {
                               kitchen.kitchenId,
                             );
                             await prefs.setString("role", kitchen.role);
+                            await prefs.setString(
+                              "invitation_code",
+                              kitchen.invitationCode,
+                            );
+
                             userCubit
                                 .updateActiveKitchenIdInvitationCodeAndRole(
                                   activeKitchenId: kitchen.kitchenId,
                                   invitationCode: kitchen.invitationCode,
                                   role: kitchen.role,
                                 );
+
                             AppToast.show(
                               "Kitchen switched to ${kitchen.kitchenName}",
                               ToastType.success,
                             );
+
                             kitchenBloc.add(
                               SwitchKitchenEvent(kitchen.kitchenId),
                             );
@@ -359,6 +359,40 @@ class _KitchenPageState extends State<KitchenPage> {
               },
             ),
         ],
+      ),
+    );
+  }
+}
+
+class EmptyUsersView extends StatelessWidget {
+  final VoidCallback onRetry;
+
+  const EmptyUsersView({super.key, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: gapSymmetric(horizontal: 20, vertical: 14),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "Something went wrong",
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+
+            TextButton(
+              onPressed: onRetry,
+              child: Text(
+                "Try Again",
+                style: Theme.of(
+                  context,
+                ).textTheme.headlineMedium!.copyWith(color: Colors.blueGrey),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

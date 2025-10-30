@@ -1,6 +1,15 @@
+import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:foodkitchen/app/app_router.dart';
+import 'package:foodkitchen/core/common/data/model/meal_type_model.dart';
+import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/config/routes.dart';
+import 'package:foodkitchen/core/global/functions/logs.dart';
+import 'package:go_router/go_router.dart';
+import 'package:path/path.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -32,8 +41,38 @@ class NotificationService {
     await _flutterLocalNotificationsPlugin.initialize(
       initSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) {
-        if (onNotificationResponse != null) {
-          onNotificationResponse(response);
+        logError(response.data);
+
+        if (response != null) {
+          logError("sdfasfdsfsfdsf");
+
+          if (response.payload != null) {
+            log('Valid recipe ID from payload: ${response.payload}');
+            final context = rootNavigatorKey.currentContext;
+
+            if (context != null) {
+              log(
+                'Navigating to Recipe Details with payload: ${response.payload}',
+              );
+              context.pushNamed(
+                Routes.generateRecipesDetails,
+                extra: {
+                  "meal_type_entity": MealTypeModel.fromJson(
+                    jsonDecode(response.payload!),
+                  ),
+                  "is_plan": false,
+                },
+              );
+            } else {
+              log(
+                'rootNavigatorKey.currentContext is null. Navigation skipped.',
+              );
+            }
+          } else {
+            log('⚠️ Notification payload is null');
+          }
+        } else {
+          log('⚠️ No onNotificationResponse callback provided');
         }
       },
     );
@@ -61,6 +100,37 @@ class NotificationService {
       final bool? grantedNotificationPermission = await androidImplementation
           ?.requestNotificationsPermission();
     }
+  }
+
+  Future<void> showRecipeInProgressNotification({
+    required MealTypeModel mealTypeModel,
+    required String recipeName,
+  }) async {
+    const AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
+          'recipe_progress_channel',
+          'Recipe Progress',
+          channelDescription: 'Notifies user that a recipe is in progress',
+          importance: Importance.max,
+          priority: Priority.high,
+          ongoing: true,
+          autoCancel: false,
+          playSound: false,
+          enableVibration: false,
+        );
+
+    const NotificationDetails platformDetails = NotificationDetails(
+      android: androidDetails,
+      iOS: DarwinNotificationDetails(),
+    );
+
+    await _flutterLocalNotificationsPlugin.show(
+      123,
+      'Recipe in Progress',
+      'You started "$recipeName". Tap to continue cooking!',
+      platformDetails,
+      payload: jsonEncode(mealTypeModel.toJson()),
+    );
   }
 
   Future<void> showNotification({

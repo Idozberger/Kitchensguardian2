@@ -87,4 +87,22 @@ class KitchenRepositoryImpl implements KitchenRepository {
       return Left(UnknownFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, String>> inviteUser({
+    required String kitchenId,
+    required String email,
+  }) async {
+    try {
+      final response = await kitchenRemoteDataSource.inviteUser(
+        kitchenId: kitchenId,
+        email: email,
+      );
+      return right(response);
+    } on Failure catch (f) {
+      return Left(f);
+    } catch (e) {
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
 }

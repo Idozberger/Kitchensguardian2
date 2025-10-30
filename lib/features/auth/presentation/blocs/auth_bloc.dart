@@ -39,7 +39,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
        _getCurrentUser = getCurrentUser,
 
        super(AuthInitial()) {
-    on<AuthEvent>((_, emit) => emit(AuthLoading()));
     on<AuthSignUp>(_onAuthSignUp);
     on<AuthSendUserEmailVerficationCode>(_onSendUserEmailVerficationCode);
     on<AuthSignIn>(_onAuthSignIn);
@@ -47,8 +46,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthSetUserNewPassword>(_onSetUserNewPassword);
     on<AuthVerifyEmail>(_onVerifyUserEmail);
     on<AuthGetCurrentUser>(_onGetCurrentUser);
+    on<ResendEmailVerficationCodeEvent>(_onResendEmailVerficationCode);
   }
   Future<void> _onAuthSignUp(AuthSignUp event, Emitter<AuthState> emit) async {
+    emit(AuthLoading());
     final res = await _userSignUp(
       UserSignUpParams(
         email: event.email,
@@ -67,6 +68,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthSendUserEmailVerficationCode event,
     Emitter<AuthState> emit,
   ) async {
+    emit(AuthLoading());
     final res = await _sendUserEmailVerificationCode(
       SendUserEmailVerificationCodeParams(
         email: event.email,
@@ -82,6 +84,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   void _onAuthSignIn(AuthSignIn event, Emitter<AuthState> emit) async {
+    emit(AuthLoading());
     final res = await _userSignIn(
       UserSignInParams(email: event.email, password: event.password),
     );
@@ -96,6 +99,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthVerifyEmail event,
     Emitter<AuthState> emit,
   ) async {
+    emit(AuthLoading());
     final res = await _verifyUserEmail(
       VerifyUserEmailParams(
         email: event.email,
@@ -109,10 +113,26 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
   }
 
+  void _onResendEmailVerficationCode(
+    ResendEmailVerficationCodeEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(CodeResendLoading());
+    final res = await _sendPasswordResetEmail(
+      SendPasswordResetEmailParams(email: event.email),
+    );
+
+    res.fold(
+      (failure) => emit(AuthFailure(failure.message)),
+      (message) => emit(ResendEmailVerficationCode(message)),
+    );
+  }
+
   void _onSendPasswordResetEmail(
     AuthSendPasswordResetEmail event,
     Emitter<AuthState> emit,
   ) async {
+    emit(AuthLoading());
     final res = await _sendPasswordResetEmail(
       SendPasswordResetEmailParams(email: event.email),
     );
@@ -127,6 +147,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthSetUserNewPassword event,
     Emitter<AuthState> emit,
   ) async {
+    emit(AuthLoading());
     final res = await _setUserNewPassword(
       SetUserNewPasswordParams(
         email: event.email,
@@ -145,6 +166,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthGetCurrentUser event,
     Emitter<AuthState> emit,
   ) async {
+    emit(AuthLoading());
     final res = await _getCurrentUser(NoParams());
 
     res.fold((failure) {}, (user) {

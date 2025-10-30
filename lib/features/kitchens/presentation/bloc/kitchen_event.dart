@@ -52,3 +52,16 @@ class SwitchKitchenEvent extends KitchenEvent {
 }
 
 class DeleteOrLeaveKitchenEvent extends KitchenEvent {}
+
+class FetchAllUsers extends KitchenEvent {}
+
+class InviteUserEvent extends KitchenEvent {
+  final String kitchenId;
+  final String email;
+  final int index;
+  const InviteUserEvent({
+    required this.kitchenId,
+    required this.email,
+    required this.index,
+  });
+}

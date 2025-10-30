@@ -6,6 +6,7 @@ import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
+import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_otp_widget.dart';
 import 'package:foodkitchen/features/auth/presentation/blocs/auth_bloc.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
@@ -34,7 +35,7 @@ class _ResetPasswordVerificationPageState
 
   void onResendCode() {
     context.read<AuthBloc>().add(
-      AuthSendPasswordResetEmail(email: widget.email),
+      ResendEmailVerficationCodeEvent(email: widget.email),
     );
   }
 
@@ -45,6 +46,9 @@ class _ResetPasswordVerificationPageState
         if (state is AuthForgotMailSent) {}
         if (state is AuthFailure) {
           AppToast.show(state.message, ToastType.error);
+        }
+        if (state is ResendEmailVerficationCode) {
+          _showDialog(context);
         }
       },
       builder: (BuildContext context, AuthState state) {
@@ -115,12 +119,17 @@ class _ResetPasswordVerificationPageState
                     child: TextButton(
                       onPressed: () {
                         onResendCode();
-                        _showDialog(context);
                       },
-                      child: Text(
-                        "Resend code",
-                        style: Theme.of(context).textTheme.bodyMedium!,
-                      ),
+                      child: state is CodeResendLoading
+                          ? Center(
+                              child: CircularProgressIndicator(
+                                color: AppColors.primaryColor,
+                              ),
+                            )
+                          : Text(
+                              "Resend code",
+                              style: Theme.of(context).textTheme.bodyMedium!,
+                            ),
                     ),
                   ),
                 ],

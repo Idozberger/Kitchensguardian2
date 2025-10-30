@@ -142,7 +142,7 @@ class _SignInPageState extends State<SignInPage> {
                       ],
                     ),
                   ),
-                  SizedBox(height: h(20)),
+                  SizedBox(height: h(6)),
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
@@ -157,7 +157,7 @@ class _SignInPageState extends State<SignInPage> {
                   ),
 
                   Padding(
-                    padding: gapOnly(top: 20, bottom: 25),
+                    padding: gapOnly(top: 16, bottom: 25),
                     child: GenericButtonWidget(
                       onPressed: () => onLogin(),
                       text: "Login",

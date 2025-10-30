@@ -55,6 +55,7 @@ import 'package:foodkitchen/features/kitchens/data/repository/kitchen_repository
 import 'package:foodkitchen/features/kitchens/domain/repository/kitchen_repository.dart';
 import 'package:foodkitchen/features/kitchens/domain/usecases/create_kitchen.dart';
 import 'package:foodkitchen/features/kitchens/domain/usecases/get_kitchens.dart';
+import 'package:foodkitchen/features/kitchens/domain/usecases/invite_user.dart';
 import 'package:foodkitchen/features/kitchens/domain/usecases/join_kitchen.dart';
 import 'package:foodkitchen/features/kitchens/domain/usecases/leave_kitchen.dart';
 import 'package:foodkitchen/features/kitchens/domain/usecases/remove_kitchen.dart';
@@ -144,7 +145,11 @@ void _initOnboarding() async {
     ..registerLazySingleton(() => UserCubit())
     // Bloc
     ..registerLazySingleton(
-      () => UserBloc(getCurrentUser: sl(), userCubit: sl()),
+      () => UserBloc(
+        getCurrentUser: sl(),
+        userCubit: sl(),
+        sharedPreference: sl(),
+      ),
     );
 }
 
@@ -216,6 +221,7 @@ void _initKitchen() async {
     ..registerFactory(() => JoinKitchenUseCase(sl()))
     ..registerFactory(() => LeaveKitchenUsecase(sl()))
     ..registerFactory(() => RemoveKitchenUsecase(sl()))
+    ..registerFactory(() => InviteUser(sl()))
     // Bloc
     ..registerLazySingleton(
       () => KitchenBloc(
@@ -225,6 +231,7 @@ void _initKitchen() async {
         joinKitchen: JoinKitchenUseCase(sl()),
         leaveKitchenUsecase: LeaveKitchenUsecase(sl()),
         removeKitchenUsecase: RemoveKitchenUsecase(sl()),
+        inviteUser: InviteUser(sl()),
         homeBloc: sl(),
         plannerBloc: sl(),
         groceryBloc: sl(),
@@ -345,6 +352,7 @@ void _initPlanner() async {
     // Bloc
     ..registerLazySingleton(
       () => PlannerBloc(
+        userCubit: sl(),
         generateRecipes: GenerateRecipes(sl()),
         favouriteRecipes: FavouriteRecipes(sl()),
         addToFavouriteRecipe: AddToFavouriteRecipe(sl()),

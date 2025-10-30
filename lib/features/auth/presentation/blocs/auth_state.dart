@@ -47,3 +47,10 @@ final class AuthFailure extends AuthState {
   final String message;
   const AuthFailure(this.message);
 }
+
+final class CodeResendLoading extends AuthState {}
+
+final class ResendEmailVerficationCode extends AuthState {
+  final String message;
+  const ResendEmailVerficationCode(this.message);
+}
