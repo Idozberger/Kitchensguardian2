@@ -95,7 +95,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       (failure) =>
           emit(state.copyWith(isLoading: false, errorMessage: failure.message)),
       (pantries) =>
-          emit(state.copyWith(isLoading: false, pantryItems: pantries)),
+          emit(state.copyWith(isLoading: false, pantryItems: [pantries])),
     );
   }
 

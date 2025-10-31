@@ -29,6 +29,17 @@ class NotificationService {
     tz.initializeTimeZones();
     final String localTimeZone = tz.local.name;
 
+    final NotificationAppLaunchDetails? launchDetails =
+        await _flutterLocalNotificationsPlugin
+            .getNotificationAppLaunchDetails();
+
+    if (launchDetails?.didNotificationLaunchApp ?? false) {
+      final payload = launchDetails!.notificationResponse?.payload;
+      if (payload != null) {
+        _handleNotificationPayload(payload);
+      }
+    }
+
     const AndroidInitializationSettings androidSettings =
         AndroidInitializationSettings('@mipmap/ic_launcher');
     const DarwinInitializationSettings iosSettings =
@@ -41,41 +52,35 @@ class NotificationService {
     await _flutterLocalNotificationsPlugin.initialize(
       initSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) {
-        logError(response.data);
-
-        if (response != null) {
-          logError("sdfasfdsfsfdsf");
-
-          if (response.payload != null) {
-            log('Valid recipe ID from payload: ${response.payload}');
-            final context = rootNavigatorKey.currentContext;
-
-            if (context != null) {
-              log(
-                'Navigating to Recipe Details with payload: ${response.payload}',
-              );
-              context.pushNamed(
-                Routes.generateRecipesDetails,
-                extra: {
-                  "meal_type_entity": MealTypeModel.fromJson(
-                    jsonDecode(response.payload!),
-                  ),
-                  "is_plan": false,
-                },
-              );
-            } else {
-              log(
-                'rootNavigatorKey.currentContext is null. Navigation skipped.',
-              );
-            }
-          } else {
-            log('⚠️ Notification payload is null');
-          }
+        if (response.payload != null) {
+          _handleNotificationPayload(response.payload!);
         } else {
-          log('⚠️ No onNotificationResponse callback provided');
+          log('⚠️ Notification payload is null');
         }
       },
     );
+  }
+
+  void _handleNotificationPayload(String payload) {
+    try {
+      log('Navigating to Recipe Details with payload: $payload');
+      final context = rootNavigatorKey.currentContext;
+
+      if (context != null) {
+        context.pushNamed(
+          Routes.generateRecipesDetails,
+          extra: {
+            "meal_type_entity": MealTypeModel.fromJson(jsonDecode(payload)),
+            "is_plan": false,
+          },
+        );
+      } else {
+        log('⚠️ Context is null. Will navigate later.');
+      }
+    } catch (e, st) {
+      log('Error handling notification payload: $e');
+      log('$st');
+    }
   }
 
   Future<void> _requestPermissions() async {

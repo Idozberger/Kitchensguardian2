@@ -7,6 +7,7 @@ import 'package:foodkitchen/features/home/presentation/bloc/home_state.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/action_tile.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/create_or_join_tile.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/no_kitchen_found.dart';
+import 'package:foodkitchen/features/home/presentation/widgets/pantry__storage_types_section.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/pantry_section.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/smart_cart.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/tonight_recipe.dart';
@@ -40,8 +41,10 @@ class KitchenHomeView extends StatelessWidget {
         child: Column(
           children: [
             gap(height: 14),
+            PantryStorageTypeSection(state: state),
+            gap(height: 14),
             PantrySection(state: state),
-            gap(height: 15),
+            gap(height: 14),
             ActionTile(
               title: "Find Recipes",
               buttonText: "Find Recipes",
@@ -58,7 +61,7 @@ class KitchenHomeView extends StatelessWidget {
                 );
               },
             ),
-            gap(height: 15),
+            gap(height: 14),
             SmartCartTile(
               infoText: demoIngredients.length > 3
                   ? "+${demoIngredients.length - 3} more"
@@ -67,9 +70,9 @@ class KitchenHomeView extends StatelessWidget {
               previewItems: demoIngredients.take(3).toList(),
               onGenerate: onGeneratePressed,
             ),
-            gap(height: 15),
+            gap(height: 14),
             if (state.dateBasedPlan.isNotEmpty) const TonightRecipeWidget(),
-            gap(height: 15),
+            gap(height: 14),
           ],
         ),
       ),

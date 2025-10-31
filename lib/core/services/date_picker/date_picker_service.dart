@@ -13,7 +13,7 @@ class DatePickerService {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: initialDate ?? now,
-      firstDate: firstDate ?? DateTime(2000),
+      firstDate: firstDate ?? DateTime.now(),
       lastDate: lastDate ?? DateTime(2100),
       builder: (context, child) {
         return Theme(

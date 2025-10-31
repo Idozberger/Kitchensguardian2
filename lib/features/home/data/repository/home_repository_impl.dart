@@ -3,9 +3,11 @@ import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/features/home/data/datasource/home_remote_datasource.dart';
 import 'package:foodkitchen/features/home/data/models/kitchen_model.dart';
-import 'package:foodkitchen/features/home/data/models/pantries_model.dart';
+import 'package:foodkitchen/features/home/data/models/pantries__item_model.dart';
+import 'package:foodkitchen/features/home/data/models/pantry_data_model.dart';
 import 'package:foodkitchen/features/home/domain/entities/kitchen.dart';
-import 'package:foodkitchen/features/home/domain/entities/pantries_items.dart';
+import 'package:foodkitchen/features/home/domain/entities/pantry_data.dart';
+import 'package:foodkitchen/features/home/domain/entities/pantry_items.dart';
 import 'package:foodkitchen/features/home/domain/repository/home_repository.dart';
 import 'package:fpdart/fpdart.dart';
 
@@ -51,18 +53,16 @@ class HomeRepositoryImpl implements HomeRepository {
   }
 
   @override
-  Future<Either<Failure, List<PantriesItemsEntity>>> getItems({
+  Future<Either<Failure, PantriesDataEntity>> getItems({
     required String kitchenId,
   }) async {
     try {
       final response = await homeRemoteDataSource.getPantriesItems(
         kitchenId: kitchenId,
       );
-      final pantryItems = (response as List)
-          .map((e) => PantriesItemsModel.fromJson(e as Map<String, dynamic>))
-          .toList();
+      final pantryData = PantriesDataModel.fromJson(response);
 
-      return Right(pantryItems);
+      return Right(pantryData);
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {

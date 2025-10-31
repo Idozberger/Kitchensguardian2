@@ -170,12 +170,8 @@ class _PantryItemCardState extends State<PantryItemCard> {
   );
 
   Widget _circleButton(String asset, VoidCallback onTap) {
-    return Container(
-      margin: EdgeInsets.only(left: w(8)),
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.greyColor),
-        shape: BoxShape.circle,
-      ),
+    return Padding(
+      padding: EdgeInsets.only(left: w(8)),
       child: CircularIconButton(iconAsset: asset, onTap: onTap),
     );
   }

@@ -134,27 +134,6 @@ class AppDrawer extends StatelessWidget {
                 }
               },
             ),
-            DrawerListTile(
-              title: "Invite User",
-              iconPath: AppAssets.referralSvg,
-              onTap: () async {
-                if (state.activeKitchenId.isNotEmpty) {
-                  if (state.invitationCode.isNotEmpty) {
-                    context.push(Routes.inviteMember);
-                  } else {
-                    AppToast.show(
-                      "Kitchen members cannot invite others or access the invitation code.",
-                      ToastType.error,
-                    );
-                  }
-                } else {
-                  AppToast.show(
-                    "Please join or create kitchen",
-                    ToastType.error,
-                  );
-                }
-              },
-            ),
 
             DrawerListTile(
               title: "Scan History",

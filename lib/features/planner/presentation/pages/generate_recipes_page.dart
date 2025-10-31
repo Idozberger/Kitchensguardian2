@@ -158,13 +158,14 @@ class _GenerateRecipesPageState extends State<GenerateRecipesPage> {
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
               ),
-              barrierColor: Colors.black.withOpacity(0.5),
+              barrierColor: Colors.black.withOpacity(0.4),
+              backgroundColor: Colors.transparent,
               isScrollControlled: true,
               builder: (context) {
                 return BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
                   child: Container(
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.vertical(
                         top: Radius.circular(16),

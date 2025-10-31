@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
@@ -10,23 +12,23 @@ import 'package:foodkitchen/features/home/presentation/bloc/home_state.dart';
 import 'package:foodkitchen/features/pantry/presentation/widgets/list_tile.dart';
 import 'package:go_router/go_router.dart';
 
-class PantrySection extends StatefulWidget {
+class PantryStorageTypeSection extends StatefulWidget {
   final HomeState state;
 
-  const PantrySection({super.key, required this.state});
+  const PantryStorageTypeSection({super.key, required this.state});
 
   @override
-  State<PantrySection> createState() => _PantrySectionState();
+  State<PantryStorageTypeSection> createState() =>
+      _PantryStorageTypeSectionState();
 }
 
-class _PantrySectionState extends State<PantrySection> {
+class _PantryStorageTypeSectionState extends State<PantryStorageTypeSection> {
   bool hasItems = false;
   @override
   void initState() {
     if (widget.state.pantryItems.isNotEmpty) {
-      hasItems = widget.state.pantryItems[0].items.isNotEmpty;
+      hasItems = widget.state.pantryItems[0].pantryTypes.isNotEmpty;
     }
-
     super.initState();
   }
 
@@ -49,7 +51,7 @@ class _PantrySectionState extends State<PantrySection> {
   Widget _header(BuildContext context) => Row(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
-      Text("Pantry", style: Theme.of(context).textTheme.headlineLarge),
+      Text("Pantry Types", style: Theme.of(context).textTheme.headlineLarge),
       SvgPicture.asset(AppAssets.pantrySvg),
     ],
   );
@@ -78,10 +80,10 @@ class _PantrySectionState extends State<PantrySection> {
         child: SizedBox(
           height: h(40),
           child: ElevatedButton.icon(
-            onPressed: () => context.push(Routes.addItem),
+            onPressed: () => context.push(Routes.addPantryStorageType),
             icon: SvgPicture.asset(AppAssets.addSvg),
             label: Text(
-              "Add Item",
+              "Add Area",
               style: Theme.of(context).textTheme.headlineMedium!.copyWith(
                 fontSize: t(12),
                 color: Colors.black,
@@ -96,8 +98,8 @@ class _PantrySectionState extends State<PantrySection> {
   Widget _pantryList(BuildContext context) => Column(
     children: [
       ListView.separated(
-        physics: NeverScrollableScrollPhysics(),
         shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
         itemCount: widget.state.pantryItems[0].items.length.clamp(0, 3),
         separatorBuilder: (_, __) => const Divider(color: Color(0xffF4F4F4)),
         padding: EdgeInsets.zero,
@@ -155,7 +157,7 @@ class _PantrySectionState extends State<PantrySection> {
   );
 
   Widget _noItemsText(BuildContext context) => Text(
-    "No items available in Pantry",
+    "No storage areas available",
     style: Theme.of(context).textTheme.headlineMedium!.copyWith(
       fontSize: t(12),
       color: const Color(0xff787878),

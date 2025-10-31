@@ -1,4 +1,4 @@
-import 'package:foodkitchen/features/home/domain/entities/pantries_items.dart';
+import 'package:foodkitchen/features/home/domain/entities/pantry_items.dart';
 
 class PantriesItemsModel extends PantriesItemsEntity {
   PantriesItemsModel({

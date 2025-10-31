@@ -1,8 +1,12 @@
+import 'dart:developer';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
+import 'package:foodkitchen/core/common/data/model/meal_type_model.dart';
 import 'package:foodkitchen/core/common/domain/usecase/get_current_user.dart';
 import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/core/utils/date_format_to_string.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
@@ -72,6 +76,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     on<MarkRecipeFinishedEvent>(_onMarkRecipeFinished);
     on<UpdateStartRecipeEvent>(_onUpdateStartRecipe);
     on<ResetPlannerStateEvent>(_onResetPlanner);
+    on<AddMealPlanEvent>(_onAddMealPlan);
   }
 
   Future<void> _onGetFavouriteRecipes(
@@ -286,6 +291,61 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
         AppToast.show(successMessage, ToastType.success);
       },
     );
+  }
+
+  Future<void> _onAddMealPlan(
+    AddMealPlanEvent event,
+    Emitter<PlannerState> emit,
+  ) async {
+    log(event.mealPlan.mealType);
+    if (state.mealPlans.isNotEmpty) {
+      var plans = MergedMealPlanModel.fromEntity(state.mealPlans[0]);
+
+      switch (event.mealPlan.mealType.toLowerCase()) {
+        case "breakfast":
+          plans = plans.copyWith(breakfast: event.mealPlan);
+          break;
+        case "lunch":
+          plans = plans.copyWith(lunch: event.mealPlan);
+          break;
+        case "dinner":
+          plans = plans.copyWith(dinner: event.mealPlan);
+          break;
+        default:
+      }
+      emit(
+        state.copyWith(
+          mealPlans: [
+            MergedMealPlanEntity(date: event.date, breakfast: event.mealPlan),
+          ],
+          isLoading: false,
+        ),
+      );
+    } else {
+      var plans = MergedMealPlanModel.fromEntity(
+        MergedMealPlanEntity(date: event.date),
+      );
+      switch (event.mealPlan.mealType) {
+        case "breakfast":
+          plans = plans.copyWith(breakfast: event.mealPlan);
+          break;
+        case "lunch":
+          plans = plans.copyWith(lunch: event.mealPlan);
+          break;
+        case "dinner":
+          plans = plans.copyWith(dinner: event.mealPlan);
+          break;
+        default:
+      }
+      emit(
+        state.copyWith(
+          mealPlans: [
+            MergedMealPlanEntity(date: event.date, breakfast: event.mealPlan),
+          ],
+          isLoading: false,
+        ),
+      );
+    }
   }
 
   Future<void> _onGetDateBasedPlans(

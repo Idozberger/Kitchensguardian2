@@ -30,7 +30,7 @@ class CircularIconButton extends StatelessWidget {
     return InkWell(
       borderRadius: BorderRadius.circular(h(44)),
       onTap: onTap,
-      child: Ink(
+      child: Container(
         height: h(size),
         width: w(size),
         padding: EdgeInsets.all(padding),

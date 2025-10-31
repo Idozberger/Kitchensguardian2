@@ -62,6 +62,9 @@ class DioHelper {
 
                 final prefs = await SharedPreferences.getInstance();
                 await prefs.remove("access-token");
+                await prefs.remove('kitchen_id');
+                await prefs.remove('invitation_code');
+                await prefs.remove('role');
 
                 final context = rootNavigatorKey.currentContext;
                 if (context != null) {
@@ -92,7 +95,7 @@ class DioHelper {
     return await _dio.post(path, data: data);
   }
 
-  Failure handleError(DioException e) {
+  Future<Failure> handleError(DioException e) async {
     log("❌ DioException: $e");
     String message = "Unexpected error occurred";
 
@@ -115,6 +118,12 @@ class DioHelper {
 
       final context = rootNavigatorKey.currentContext;
       if (context != null) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove("access-token");
+        await prefs.remove('kitchen_id');
+        await prefs.remove('invitation_code');
+        await prefs.remove('role');
+
         context.go(Routes.signIn);
       }
     }

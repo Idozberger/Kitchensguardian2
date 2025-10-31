@@ -31,7 +31,7 @@ class UpperTile extends StatelessWidget {
           : () {
               callback!();
             },
-      child: Ink(
+      child: Container(
         height: height,
         width: double.maxFinite,
         padding: gapSymmetric(

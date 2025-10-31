@@ -109,6 +109,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       widget: Column(
                         children: [
                           AppTextField(
+                            textInputAction: TextInputAction.next,
                             controller: _firstNameController,
                             label: "First Name",
                             keyboardType: TextInputType.text,
@@ -116,6 +117,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           ),
                           SizedBox(height: h(20)),
                           AppTextField(
+                            textInputAction: TextInputAction.done,
                             controller: _lastNameController,
                             label: "Last Name",
                             hintText: "Enter your last name",

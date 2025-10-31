@@ -1,10 +1,10 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:foodkitchen/core/common/data/model/meal_type_model.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
-import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,7 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 abstract interface class HomeRemoteDataSource {
   Future<Map<String, dynamic>> createKitchen({required String kitchenName});
   Future<String> joinKitchen({required String invitationCode});
-  Future<List<Map<String, dynamic>>> getPantriesItems({
+  Future<Map<String, List<Map<String, dynamic>>>> getPantriesItems({
     required String kitchenId,
   });
   Future<List<MealTypeModel>> getWeeklyPlans();
@@ -60,24 +60,57 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getPantriesItems({
+  Future<Map<String, List<Map<String, dynamic>>>> getPantriesItems({
     required String kitchenId,
   }) async {
     try {
       final response = await dio.get(
         "${AppConstants.getPantryItems}?kitchen_id=$kitchenId",
       );
-      final data = response.data["items"];
 
-      if (data is List) {
-        return data.map((e) => Map<String, dynamic>.from(e)).toList();
+      final items = response.data["items"];
+      final pantryTypes = response.data["pantry_types"];
+
+      if (items is List) {
+        final parsedItems = items
+            .map((e) => Map<String, dynamic>.from(e))
+            .toList();
+
+        log('✅ Parsed Items: $parsedItems');
+
+        return {"items": parsedItems, "pantry_types": []};
       } else {
-        throw Exception("Invalid data");
+        log('⚠️ Invalid data structure received from API');
+        throw Exception("Invalid data format");
       }
     } on DioException catch (e) {
       throw dio.handleError(e);
+    } catch (e, st) {
+      log('🔥 Unexpected Error: $e');
+      log('🧾 StackTrace: $st');
+      rethrow;
     }
   }
+
+  // @override
+  // Future<List<Map<String, dynamic>>> getPantriesItems({
+  //   required String kitchenId,
+  // }) async {
+  //   try {
+  //     final response = await dio.get(
+  //       "${AppConstants.getPantryItems}?kitchen_id=$kitchenId",
+  //     );
+  //     final data = response.data["items"];
+
+  //     if (data is List) {
+  //       return data.map((e) => Map<String, dynamic>.from(e)).toList();
+  //     } else {
+  //       throw Exception("Invalid data");
+  //     }
+  //   } on DioException catch (e) {
+  //     throw dio.handleError(e);
+  //   }
+  // }
 
   @override
   Future<List<MealTypeModel>> getWeeklyPlans() async {

@@ -8,6 +8,7 @@ final class PlannerState {
   final List<MergedMealPlanEntity> getAllWeeklyPlans;
   final List<MergedMealPlanEntity> dateBasedPlan;
   final List<Map<String, dynamic>> doneSteps;
+  final List<MergedMealPlanEntity> mealPlans;
   final bool isLoading;
   final bool addingToWeeklyPlan;
   final bool startRecipe;
@@ -19,6 +20,7 @@ final class PlannerState {
     this.favouriteRecipes,
     this.getAllWeeklyPlans = const [],
     this.startedRecipe = const [],
+    this.mealPlans = const [],
     this.isLoading = false,
     this.startRecipe = false,
     this.isFinishingRecipe = false,
@@ -31,6 +33,7 @@ final class PlannerState {
 
   PlannerState copyWith({
     List<MealTypeEntity>? recipes,
+    List<MergedMealPlanEntity>? mealPlans,
     List<MealTypeEntity>? favouriteRecipes,
     List<MergedMealPlanEntity>? getAllWeeklyPlans,
     List<MergedMealPlanEntity>? dateBasedPlan,
@@ -56,6 +59,7 @@ final class PlannerState {
       isFinishingRecipe: isFinishingRecipe ?? this.isFinishingRecipe,
       startedRecipe: startedRecipe ?? this.startedRecipe,
       doneSteps: doneSteps ?? this.doneSteps,
+      mealPlans: mealPlans ?? this.mealPlans,
     );
   }
 }

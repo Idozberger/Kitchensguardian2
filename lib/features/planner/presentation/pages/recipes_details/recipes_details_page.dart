@@ -1,8 +1,5 @@
-import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:foodkitchen/core/common/data/model/meal_type_model.dart';
-import 'package:foodkitchen/core/services/notifications/flutter_local_notifications_service.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/recipes_details/app_bar_widget.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/recipes_details/complete_dialog_widget.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/recipes_details/header_image_widget.dart';
@@ -18,7 +15,6 @@ import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
-import 'package:foodkitchen/core/global/functions/const.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
@@ -139,10 +135,10 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
             doneSteps: steps,
           ),
         );
-        await NotificationService().showRecipeInProgressNotification(
-          mealTypeModel: recipe as MealTypeModel,
-          recipeName: recipe.title,
-        );
+        // await NotificationService().showRecipeInProgressNotification(
+        //   mealTypeModel: recipe as MealTypeModel,
+        //   recipeName: recipe.title,
+        // );
 
         setState(() => selectedTab = 1);
       },
@@ -217,15 +213,22 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
       (plan) => plan.date == recipe.formatedDateString,
     );
 
-    if (!AppConstants.entitlementIsActive) {
-      AppToast.show("Subscription required!", ToastType.error);
-      context.push(Routes.subscription);
-      return;
-    }
+    // if (!AppConstants.entitlementIsActive) {
+    //   AppToast.show("Subscription required!", ToastType.error);
+    //   context.push(Routes.subscription);
+    //   return;
+    // }
 
     if (alreadyPlanned || existingPlans.length < 3) {
+      plannerBloc.add(
+        AddMealPlanEvent(
+          date: widget.mealTypeEntity.formatedDateString,
+          kitchenId: context.read<UserCubit>().state.activeKitchenId,
+          mealPlan: recipe,
+        ),
+      );
       plannerBloc.add(AddToWeeklyPlanEvent(recipe));
-      context.go(Routes.dashboard);
+      // context.go(Routes.dashboard);
     } else {
       AppToast.show(
         "You can only create plans for 3 days in advance.",

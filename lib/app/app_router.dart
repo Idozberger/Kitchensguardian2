@@ -23,6 +23,7 @@ import 'package:foodkitchen/features/onboarding/presentation/pages/intro_page.da
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/features/onboarding/presentation/pages/splash_screen.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/add_item_page.dart';
+import 'package:foodkitchen/features/pantry/presentation/pages/add_pantry_storage_type_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/my_pantry_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/receipt_details/capture_details_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/request_now_page.dart';
@@ -207,6 +208,10 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: Routes.inviteMember,
       builder: (context, state) => InviteMemberPage(),
+    ),
+    GoRoute(
+      path: Routes.addPantryStorageType,
+      builder: (context, state) => AddPantryStorageTypePage(),
     ),
   ],
 );

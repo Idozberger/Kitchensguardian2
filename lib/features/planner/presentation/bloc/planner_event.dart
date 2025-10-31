@@ -1,4 +1,5 @@
 import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
+import 'package:foodkitchen/features/planner/domain/entities/merged_meal_type_entity.dart';
 
 sealed class PlannerEvent {}
 
@@ -68,3 +69,14 @@ class UpdateStartRecipeEvent extends PlannerEvent {
 }
 
 final class ResetPlannerStateEvent extends PlannerEvent {}
+
+final class AddMealPlanEvent extends PlannerEvent {
+  final MealTypeEntity mealPlan;
+  final String date;
+  final String kitchenId;
+  AddMealPlanEvent({
+    required this.kitchenId,
+    required this.mealPlan,
+    required this.date,
+  });
+}

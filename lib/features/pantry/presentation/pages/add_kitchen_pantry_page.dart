@@ -22,14 +22,14 @@ import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_event.dart'
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_state.dart';
 import 'package:foodkitchen/features/pantry/presentation/models/pantry_items.dart';
 
-class AddItemPage extends StatefulWidget {
-  const AddItemPage({super.key});
+class AddKitchenPantryPage extends StatefulWidget {
+  const AddKitchenPantryPage({super.key});
 
   @override
-  State<AddItemPage> createState() => _AddItemPageState();
+  State<AddKitchenPantryPage> createState() => _AddKitchenPantryPageState();
 }
 
-class _AddItemPageState extends State<AddItemPage> {
+class _AddKitchenPantryPageState extends State<AddKitchenPantryPage> {
   late PantryBloc pantryBloc;
   late UserCubit userCubit;
   List<PantryItem> _items = [];
@@ -266,12 +266,15 @@ class _AddItemPageState extends State<AddItemPage> {
           "Item name",
           action: _items.first == item
               ? null
-              : CircularIconButton(
-                  iconAsset: AppAssets.deleteSvg,
-                  onTap: () {
-                    _items.remove(item);
-                    setState(() {});
-                  },
+              : Container(
+                  decoration: BoxDecoration(shape: BoxShape.circle),
+                  child: CircularIconButton(
+                    iconAsset: AppAssets.deleteSvg,
+                    onTap: () {
+                      _items.remove(item);
+                      setState(() {});
+                    },
+                  ),
                 ),
         ),
         SizedBox(height: h(10)),
