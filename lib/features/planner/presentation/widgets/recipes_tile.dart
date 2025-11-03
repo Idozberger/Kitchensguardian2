@@ -1,5 +1,7 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 
@@ -7,7 +9,7 @@ class RecipeTile extends StatelessWidget {
   final String title;
   final String subtitle;
   final String? errorText;
-  final String imagePath;
+  final String? imagePath;
   final String trailingIcon;
   final bool selected;
   final bool isDeletedIcon;
@@ -19,7 +21,7 @@ class RecipeTile extends StatelessWidget {
     super.key,
     required this.title,
     required this.subtitle,
-    required this.imagePath,
+    this.imagePath,
     required this.trailingIcon,
     this.selected = false,
     this.isDeletedIcon = false,
@@ -48,12 +50,14 @@ class RecipeTile extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(h(10)),
-              child: Image.asset(
-                imagePath,
-                width: w(78),
-                height: h(78),
-                fit: BoxFit.cover,
-              ),
+              child: imagePath != null && imagePath!.isNotEmpty
+                  ? CachedNetworkImage(imageUrl: imagePath!)
+                  : Image.asset(
+                      AppAssets.onBoardingSliderBg01,
+                      width: w(78),
+                      height: h(78),
+                      fit: BoxFit.cover,
+                    ),
             ),
 
             SizedBox(width: w(12)),
@@ -70,10 +74,13 @@ class RecipeTile extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  SizedBox(height: h(10)),
+                  SizedBox(height: h(2)),
+
                   Text(
                     subtitle,
-                    maxLines: 3,
+                    maxLines: errorText != null && errorText!.isNotEmpty
+                        ? 2
+                        : 3,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       overflow: TextOverflow.ellipsis,
                     ),

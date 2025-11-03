@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -32,9 +33,7 @@ class ProfileHeader extends StatelessWidget {
                       ? CircleAvatar(
                           radius: w(36),
                           backgroundColor: Colors.grey.shade200,
-                          backgroundImage: FileImage(
-                            File(profileState.imagePath!),
-                          ),
+                          backgroundImage: MemoryImage(profileState.imagePath!),
                         )
                       : Image.asset(
                           AppAssets.avatar,

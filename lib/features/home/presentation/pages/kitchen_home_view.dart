@@ -41,6 +41,7 @@ class KitchenHomeView extends StatelessWidget {
         child: Column(
           children: [
             gap(height: 14),
+
             PantryStorageTypeSection(state: state),
             gap(height: 14),
             PantrySection(state: state),

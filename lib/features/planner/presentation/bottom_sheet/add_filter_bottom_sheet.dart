@@ -46,11 +46,11 @@ class _AddFilterBottomSheetState extends State<AddFilterBottomSheet> {
               children: [
                 Center(
                   child: Container(
-                    width: w(80),
-                    height: h(4),
+                    width: w(60),
+                    height: h(3),
                     decoration: BoxDecoration(
                       color: Colors.black,
-                      borderRadius: BorderRadius.circular(h(44)),
+                      borderRadius: BorderRadius.circular(h(88)),
                     ),
                   ),
                 ),
@@ -121,7 +121,7 @@ class _AddFilterBottomSheetState extends State<AddFilterBottomSheet> {
                   onPressed: () {
                     widget.callback();
                   },
-                  text: "Add Filter",
+                  text: "Apply Filter",
                 ),
               ],
             ),

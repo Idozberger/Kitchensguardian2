@@ -16,6 +16,7 @@ class RecipeTileItem extends StatelessWidget {
   final bool isPlan;
   final bool isDeletedIcon;
   final String svgAsset;
+  final String? thumbnail;
   final VoidCallback? deleteCallback;
   const RecipeTileItem({
     super.key,
@@ -25,6 +26,7 @@ class RecipeTileItem extends StatelessWidget {
     required this.isPlan,
     this.svgAsset = "",
     this.isDeletedIcon = false,
+    this.thumbnail,
     this.deleteCallback,
   });
 
@@ -55,7 +57,7 @@ class RecipeTileItem extends StatelessWidget {
       title: recipe.title,
       isDeletedIcon: isDeletedIcon,
       subtitle: recipe.recipeShortSummary,
-      imagePath: AppAssets.onBoardingSliderBg01,
+      imagePath: thumbnail,
       trailingIcon: svgAsset.isEmpty
           ? AppAssets.arrowForwardAndroidSvg
           : svgAsset,

@@ -182,7 +182,7 @@ class _PopupDropdownFieldState extends State<PopupDropdownField> {
                       style: Theme.of(context).textTheme.headlineLarge
                           ?.copyWith(
                             color: AppColors.apptextFieldStyleTextColor,
-                            fontSize: t(16),
+                            fontSize: t(14),
                           ),
                       overflow: TextOverflow.ellipsis,
                     ),

@@ -93,16 +93,19 @@ class _AddMealPageState extends State<AddMealPage> {
                             _buildDatePicker(),
                             gap(height: 20),
                             _buildMealTypeSection(),
-                            gap(height: 20),
+
                             _buildGenerateRecipeButton(),
-                            if (state.mealPlans.isNotEmpty)
+                            if (state.mealPlans.isNotEmpty &&
+                                formatDate(dateTime) ==
+                                    state.mealPlans[0].date) ...[
                               GeneratedRecipeSection(
                                 date: formatDate(dateTime),
                                 mealPlan: state.mealPlans[0],
                                 selectedIndex: selectedIndex,
                               ),
-                            // gap(height: 18),
-                            // _buildActionButtons(),
+                              gap(height: 18),
+                              _buildActionTile(),
+                            ],
                           ],
                         ),
                       ),
@@ -136,14 +139,44 @@ class _AddMealPageState extends State<AddMealPage> {
   }
 
   Widget _buildDatePicker() {
-    return SelectDateWidget(
-      startDate: dateTime,
-      onChanged: (date) {
-        dateTime = date;
+    return BlocBuilder<PlannerBloc, PlannerState>(
+      builder: (_, state) {
+        return SelectDateWidget(
+          startDate: dateTime,
+          onChanged: (date) {
+            if (state.mealPlans.isNotEmpty &&
+                state.mealPlans[0].date != formatDate(date)) {
+              _showProgressDialog(context, () {
+                dateTime = date;
+                context.read<PlannerBloc>().add(ResetMealPlanState());
+                AppToast.show("Previous plans removed", ToastType.success);
+                context.pop();
+              });
+            } else {
+              dateTime = date;
+            }
 
-        setState(() {});
+            setState(() {});
+          },
+          entitlementIsActive: AppConstants.entitlementIsActive,
+        );
       },
-      entitlementIsActive: AppConstants.entitlementIsActive,
+    );
+  }
+
+  Future<dynamic> _showProgressDialog(
+    BuildContext context,
+    VoidCallback onDateChange,
+  ) {
+    return showCustomGenericDialog(
+      context: context,
+      title: "Change Date",
+      subtitle:
+          "Changing the date will remove your existing meal plans. Continue?",
+      primaryButtonText: "Yes",
+      secondaryButtonText: "Cancel",
+      onPrimaryPressed: onDateChange,
+      onSecondaryPressed: () => context.pop(),
     );
   }
 
@@ -181,6 +214,65 @@ class _AddMealPageState extends State<AddMealPage> {
     );
   }
 
+  Widget _buildActionTile() {
+    return BlocBuilder<PlannerBloc, PlannerState>(
+      builder: (_, state) {
+        final plan = state.mealPlans.first;
+
+        if (selectedIndex == 0 && plan.breakfast != null) {
+          return _buildActionRow();
+        } else if (selectedIndex == 1 && plan.lunch != null) {
+          return _buildActionRow();
+        } else if (selectedIndex == 2 && plan.dinner != null) {
+          return _buildActionRow();
+        } else {
+          return const SizedBox();
+        }
+      },
+    );
+  }
+
+  Widget _buildActionRow() {
+    return BlocBuilder<PlannerBloc, PlannerState>(
+      builder: (_, state) {
+        return Row(
+          spacing: w(12),
+          children: [
+            Flexible(
+              child: SizedBox(
+                height: h(40),
+                child: OutlinedButton(
+                  onPressed: () {
+                    context.pop();
+                  },
+
+                  child: Text(
+                    "Cancel",
+                    style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                      fontSize: t(12),
+                      color: AppColors.primaryColor,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Flexible(
+              child: SizedBox(
+                height: h(40),
+                child: GenericButtonWidget(
+                  onPressed: () {
+                    context.pop();
+                  },
+                  text: "Add Meal",
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildMealTile(
     int index,
     String text,
@@ -212,27 +304,43 @@ class _AddMealPageState extends State<AddMealPage> {
   }
 
   Widget _buildGenerateRecipeButton() {
-    return Padding(
-      padding: gapSymmetric(horizontal: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          GenericButtonWidget(
-            onPressed: () {
-              String formattedDate = DateFormat('dd/MM/yyyy').format(dateTime);
+    return BlocBuilder<PlannerBloc, PlannerState>(
+      builder: (_, state) {
+        if (state.mealPlans.isEmpty) {
+          return _buildGenerateButton(context);
+        } else {
+          final plan = state.mealPlans.first;
 
-              context.pushNamed(
-                Routes.generateRecipes,
-                extra: {
-                  "selected_date": formattedDate,
-                  "selected_meal_type": mealString[selectedIndex],
-                  "is_plan": true,
-                },
-              );
+          if (selectedIndex == 0 && plan.breakfast == null) {
+            return _buildGenerateButton(context);
+          } else if (selectedIndex == 1 && plan.lunch == null) {
+            return _buildGenerateButton(context);
+          } else if (selectedIndex == 2 && plan.dinner == null) {
+            return _buildGenerateButton(context);
+          } else {
+            return const SizedBox();
+          }
+        }
+      },
+    );
+  }
+
+  Widget _buildGenerateButton(BuildContext context) {
+    final formattedDate = DateFormat('dd/MM/yyyy').format(dateTime);
+    return Padding(
+      padding: gapOnly(top: 20),
+      child: GenericButtonWidget(
+        onPressed: () {
+          context.pushNamed(
+            Routes.generateRecipes,
+            extra: {
+              "selected_date": formattedDate,
+              "selected_meal_type": mealString[selectedIndex],
+              "is_plan": true,
             },
-            text: "Generate Recipe",
-          ),
-        ],
+          );
+        },
+        text: "Generate Recipe",
       ),
     );
   }
@@ -270,7 +378,7 @@ class GeneratedRecipeSection extends StatelessWidget {
 
     switch (selectedIndex) {
       case 0:
-        child = (mealPlan.breakfast != null)
+        child = (mealPlan.breakfast != null && mealPlan.date == date)
             ? RecipeTileItem(
                 isDeletedIcon: true,
                 svgAsset: AppAssets.deleteSvg,
@@ -285,7 +393,7 @@ class GeneratedRecipeSection extends StatelessWidget {
             : _emptyState(context, 'breakfast');
         break;
       case 1:
-        child = (mealPlan.lunch != null)
+        child = (mealPlan.lunch != null && mealPlan.date == date)
             ? RecipeTileItem(
                 isDeletedIcon: true,
                 svgAsset: AppAssets.deleteSvg,
@@ -301,7 +409,7 @@ class GeneratedRecipeSection extends StatelessWidget {
         break;
       case 2:
       default:
-        child = (mealPlan.dinner != null)
+        child = (mealPlan.dinner != null && mealPlan.date == date)
             ? RecipeTileItem(
                 isDeletedIcon: true,
                 svgAsset: AppAssets.deleteSvg,
@@ -317,21 +425,18 @@ class GeneratedRecipeSection extends StatelessWidget {
         break;
     }
 
-    return Padding(
-      padding: gapSymmetric(horizontal: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          gap(height: 18),
-          UpperTile(
-            horizontalPadding: 8,
-            verticalPadding: 8,
-            widget: child,
-            color: Color(0xffFFFBEB),
-            borderColor: const Color(0xffFFDD98),
-          ),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        gap(height: 18),
+        UpperTile(
+          horizontalPadding: 8,
+          verticalPadding: 8,
+          widget: child,
+          color: Color(0xffFFFBEB),
+          borderColor: const Color(0xffFFDD98),
+        ),
+      ],
     );
   }
 
@@ -343,8 +448,13 @@ class GeneratedRecipeSection extends StatelessWidget {
       primaryButtonText: "Yes",
       secondaryButtonText: "Cancel",
       onPrimaryPressed: () {
+        context.read<PlannerBloc>().add(
+          DeleteMealPlanEvent(
+            mealType: plan.mealType,
+            date: plan.formatedDateString,
+          ),
+        );
         AppToast.show("Item removed", ToastType.success);
-        context.pop();
         context.pop();
       },
       onSecondaryPressed: () {

@@ -49,7 +49,7 @@ class DayPlanMenu extends StatelessWidget {
         borderRadius: BorderRadius.circular(h(55)),
         child: Padding(
           padding: gapOnly(right: 14, left: 14, bottom: 8, top: 8),
-          child: SvgPicture.asset(AppAssets.popupMenuSvg),
+          child: SvgPicture.asset(AppAssets.popupMenuSvg, height: h(14)),
         ),
       ),
     );

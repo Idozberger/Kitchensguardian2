@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
 
 class UserState {
@@ -8,7 +9,7 @@ class UserState {
   final bool isLoading;
   final String activeKitchenId;
   final String role;
-  final String profilePictureFilePath;
+  final Uint8List? profilePictureFilePath;
   final String invitationCode;
   final bool entitlementIsActive;
   final List<MealTypeEntity> mealTypeEntity;
@@ -18,7 +19,7 @@ class UserState {
     this.lastName = '',
     this.role = 'member',
     this.userId = '',
-    this.profilePictureFilePath = '',
+    this.profilePictureFilePath,
     this.email = '',
     this.isLoading = false,
     this.entitlementIsActive = false,
@@ -36,7 +37,7 @@ class UserState {
     String? activeKitchenId,
     String? role,
     String? email,
-    String? profilePictureFilePath,
+    Uint8List? profilePictureFilePath,
     bool? isLoading,
     String? invitationCode,
     List<MealTypeEntity>? mealTypeEntity,

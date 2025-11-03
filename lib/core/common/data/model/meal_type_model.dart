@@ -14,6 +14,8 @@ class MealTypeModel extends MealTypeEntity {
     required super.available,
     required super.mealType,
     required super.formatedDateString,
+    required super.missingIngredients,
+    required super.thumbnail,
   });
 
   factory MealTypeModel.fromJson(Map<String, dynamic> json) {
@@ -25,15 +27,30 @@ class MealTypeModel extends MealTypeEntity {
       recipeShortSummary: json["recipe_short_summary"],
       cookingSteps: List<String>.from(json["cooking_steps"] ?? []),
       missingItems: json["missing_items"] ?? false,
+      thumbnail: json["thumbnail"] ?? "",
       ingredients: (json["ingredients"] as List)
           .map(
             (e) => IngredientEntity(
               name: e["name"],
-              amount: e["amount"],
+              amount: e["amount"].toString(),
               unit: e["unit"],
             ),
           )
           .toList(),
+      missingIngredients:
+          (json["missing_items_list"] != null &&
+              json["missing_items_list"] is List)
+          ? (json["missing_items_list"] as List)
+                .map(
+                  (e) => IngredientEntity(
+                    name: e["name"] ?? "",
+                    amount: e["amount"].toString(),
+                    unit: e["unit"] ?? "",
+                  ),
+                )
+                .toList()
+          : [],
+
       available:
           (json.containsKey("available") ? json["available"] : false) ?? false,
       mealType:
@@ -62,6 +79,8 @@ class MealTypeModel extends MealTypeEntity {
       "available": available,
       "selected_meal_type": mealType,
       "selected_date": formatedDateString,
+      "thumbnail": thumbnail,
+      "missing_items_list": missingIngredients,
     };
   }
 
@@ -73,10 +92,12 @@ class MealTypeModel extends MealTypeEntity {
     String? recipeShortSummary,
     List<String>? cookingSteps,
     List<IngredientEntity>? ingredients,
+    List<IngredientEntity>? missingIngredients,
     bool? missingItems,
     bool? available,
     String? mealType,
     String? formatedDateString,
+    String? thumbnail,
   }) {
     return MealTypeModel(
       id: id ?? this.id,
@@ -90,6 +111,8 @@ class MealTypeModel extends MealTypeEntity {
       available: available ?? this.available,
       mealType: mealType ?? this.mealType,
       formatedDateString: formatedDateString ?? this.formatedDateString,
+      missingIngredients: missingIngredients ?? this.missingIngredients,
+      thumbnail: thumbnail ?? this.thumbnail,
     );
   }
 }

@@ -3,12 +3,12 @@ import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
-import 'package:foodkitchen/core/common/data/model/meal_type_model.dart';
 import 'package:foodkitchen/core/common/domain/usecase/get_current_user.dart';
 import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
-import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/core/utils/date_format_to_string.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
+import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_bloc.dart';
+import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_event.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
 import 'package:foodkitchen/features/planner/data/models/merged_meal_plan_model.dart';
 import 'package:foodkitchen/features/planner/domain/entities/merged_meal_type_entity.dart';
@@ -21,6 +21,7 @@ import 'package:foodkitchen/features/planner/domain/usecases/generate_recipes.da
 import 'package:foodkitchen/features/planner/domain/usecases/get_all_weekly_plans.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/mark_recipe_finished.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/remove_from_favourite_recipe.dart';
+import 'package:foodkitchen/features/planner/domain/usecases/request_missing_items.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -28,6 +29,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
   final UserCubit _userCubit;
   final HomeBloc _homeBloc;
+  final GroceryBloc _groceryBloc;
   final GenerateRecipes _generateRecipes;
   final FavouriteRecipes _favouriteRecipes;
   final AddToFavouriteRecipe _addToFavouriteRecipe;
@@ -37,6 +39,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
   final DeletePlan _deletePlan;
   final DeleteMealTypeFromWeeklyPlan _deleteMealTypeFromWeeklyPlan;
   final MarkRecipeFinished _markRecipeFinished;
+  final RequestMissingItems _requestMissingItems;
 
   PlannerBloc({
     required UserCubit userCubit,
@@ -48,6 +51,8 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     required AddToWeeklyPlan addToWeeklyPlan,
     required GetAllWeeklyPlans getAllWeeklyPlans,
     required DeletePlan deletePlan,
+    required RequestMissingItems requestMissingItems,
+    required GroceryBloc groceryBloc,
     required DeleteMealTypeFromWeeklyPlan deleteMealTypeFromWeeklyPlan,
     required MarkRecipeFinished markRecipeFinished,
   }) : _generateRecipes = generateRecipes,
@@ -61,6 +66,8 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
        _deleteMealTypeFromWeeklyPlan = deleteMealTypeFromWeeklyPlan,
        _markRecipeFinished = markRecipeFinished,
        _userCubit = userCubit,
+       _requestMissingItems = requestMissingItems,
+       _groceryBloc = groceryBloc,
 
        super(PlannerState()) {
     on<GetFavouriteRecipesEvent>(_onGetFavouriteRecipes);
@@ -77,6 +84,9 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     on<UpdateStartRecipeEvent>(_onUpdateStartRecipe);
     on<ResetPlannerStateEvent>(_onResetPlanner);
     on<AddMealPlanEvent>(_onAddMealPlan);
+    on<RequestMissingItemsEvent>(_onRequestMissingItems);
+    on<ResetMealPlanState>(_onResetMealPlanState);
+    on<DeleteMealPlanEvent>(_onDeleteMealPlan);
   }
 
   Future<void> _onGetFavouriteRecipes(
@@ -303,48 +313,118 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
 
       switch (event.mealPlan.mealType.toLowerCase()) {
         case "breakfast":
-          plans = plans.copyWith(breakfast: event.mealPlan);
+          plans = plans.copyWith(
+            breakfast: event.mealPlan,
+            lunch: plans.lunch,
+            dinner: plans.dinner,
+            date: plans.date,
+          );
           break;
         case "lunch":
-          plans = plans.copyWith(lunch: event.mealPlan);
+          plans = plans.copyWith(
+            lunch: event.mealPlan,
+            breakfast: plans.breakfast,
+            dinner: plans.dinner,
+            date: plans.date,
+          );
           break;
         case "dinner":
-          plans = plans.copyWith(dinner: event.mealPlan);
+          plans = plans.copyWith(
+            dinner: event.mealPlan,
+            breakfast: plans.breakfast,
+            lunch: plans.lunch,
+            date: plans.date,
+          );
           break;
         default:
       }
-      emit(
-        state.copyWith(
-          mealPlans: [
-            MergedMealPlanEntity(date: event.date, breakfast: event.mealPlan),
-          ],
-          isLoading: false,
-        ),
-      );
+      emit(state.copyWith(mealPlans: [plans], isLoading: false));
     } else {
       var plans = MergedMealPlanModel.fromEntity(
         MergedMealPlanEntity(date: event.date),
       );
-      switch (event.mealPlan.mealType) {
+
+      // Update plan according to meal type
+      switch (event.mealPlan.mealType.toLowerCase()) {
         case "breakfast":
-          plans = plans.copyWith(breakfast: event.mealPlan);
+          plans = plans.copyWith(
+            breakfast: event.mealPlan,
+            lunch: null,
+            dinner: null,
+          );
+          break;
+
+        case "lunch":
+          plans = plans.copyWith(
+            breakfast: null,
+            lunch: event.mealPlan,
+            dinner: null,
+          );
+          break;
+
+        case "dinner":
+          plans = plans.copyWith(
+            breakfast: null,
+            lunch: null,
+            dinner: event.mealPlan,
+          );
+          break;
+
+        default:
+          log('Unknown meal type received: ${event.mealPlan.mealType}');
+      }
+
+      log('   - Breakfast: ${plans.breakfast != null}');
+      log('   - Lunch: ${plans.lunch != null}');
+      log('   - Dinner: ${plans.dinner != null}');
+      log('   - Plan details: $plans');
+
+      emit(state.copyWith(mealPlans: [plans], isLoading: false));
+    }
+  }
+
+  Future<void> _onResetMealPlanState(
+    ResetMealPlanState event,
+    Emitter<PlannerState> emit,
+  ) async {
+    emit(state.copyWith(mealPlans: []));
+  }
+
+  Future<void> _onDeleteMealPlan(
+    DeleteMealPlanEvent event,
+    Emitter<PlannerState> emit,
+  ) async {
+    if (state.mealPlans.isNotEmpty) {
+      var plans = MergedMealPlanModel.fromEntity(state.mealPlans[0]);
+
+      switch (event.mealType.toLowerCase()) {
+        case "breakfast":
+          plans = plans.copyWith(
+            lunch: plans.lunch,
+            breakfast: null,
+            dinner: plans.dinner,
+            date: plans.date,
+          );
           break;
         case "lunch":
-          plans = plans.copyWith(lunch: event.mealPlan);
+          plans = plans.copyWith(
+            lunch: null,
+            breakfast: plans.breakfast,
+            dinner: plans.dinner,
+            date: plans.date,
+          );
           break;
         case "dinner":
-          plans = plans.copyWith(dinner: event.mealPlan);
+          plans = plans.copyWith(
+            lunch: plans.lunch,
+            breakfast: plans.breakfast,
+            dinner: null,
+            date: plans.date,
+          );
           break;
         default:
       }
-      emit(
-        state.copyWith(
-          mealPlans: [
-            MergedMealPlanEntity(date: event.date, breakfast: event.mealPlan),
-          ],
-          isLoading: false,
-        ),
-      );
+      emit(state.copyWith(mealPlans: [plans], isLoading: false));
     }
   }
 
@@ -454,4 +534,25 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     ResetPlannerStateEvent event,
     Emitter<PlannerState> emit,
   ) async {}
+
+  Future<void> _onRequestMissingItems(
+    RequestMissingItemsEvent event,
+    Emitter<PlannerState> emit,
+  ) async {
+    emit(state.copyWith(isLoading: true));
+    final res = await _requestMissingItems(
+      RequestMissingItemsParams(pantry: event.pantry),
+    );
+
+    res.fold(
+      (failure) =>
+          emit(state.copyWith(errorMessage: failure.message, isLoading: false)),
+      (message) {
+        emit(state.copyWith(successMessage: message, isLoading: false));
+        _groceryBloc.add(
+          RequestedGroceryEvent(kitchenId: event.pantry.kitchenId),
+        );
+      },
+    );
+  }
 }

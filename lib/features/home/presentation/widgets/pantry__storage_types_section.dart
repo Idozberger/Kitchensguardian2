@@ -83,7 +83,7 @@ class _PantryStorageTypeSectionState extends State<PantryStorageTypeSection> {
             onPressed: () => context.push(Routes.addPantryStorageType),
             icon: SvgPicture.asset(AppAssets.addSvg),
             label: Text(
-              "Add Area",
+              "Add Pantry",
               style: Theme.of(context).textTheme.headlineMedium!.copyWith(
                 fontSize: t(12),
                 color: Colors.black,

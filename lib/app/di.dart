@@ -83,6 +83,7 @@ import 'package:foodkitchen/features/planner/domain/usecases/generate_recipes.da
 import 'package:foodkitchen/features/planner/domain/usecases/get_all_weekly_plans.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/mark_recipe_finished.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/remove_from_favourite_recipe.dart';
+import 'package:foodkitchen/features/planner/domain/usecases/request_missing_items.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
 import 'package:foodkitchen/features/profile/data/repository/profile_repository_impl.dart';
 import 'package:foodkitchen/features/profile/domain/repository/profile_repository.dart';
@@ -349,6 +350,7 @@ void _initPlanner() async {
     ..registerFactory(() => DeletePlan(sl()))
     ..registerFactory(() => DeleteMealTypeFromWeeklyPlan(sl()))
     ..registerFactory(() => MarkRecipeFinished(sl()))
+    ..registerFactory(() => RequestMissingItems(sl()))
     // Bloc
     ..registerLazySingleton(
       () => PlannerBloc(
@@ -363,6 +365,8 @@ void _initPlanner() async {
         homeBloc: sl(),
         deleteMealTypeFromWeeklyPlan: DeleteMealTypeFromWeeklyPlan(sl()),
         markRecipeFinished: MarkRecipeFinished(sl()),
+        requestMissingItems: RequestMissingItems(sl()),
+        groceryBloc: sl(),
       ),
     );
 }

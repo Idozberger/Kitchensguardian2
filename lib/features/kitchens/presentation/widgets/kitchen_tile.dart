@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:foodkitchen/core/config/app_assets.dart';
+import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
+import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/auth/presentation/widgets/textspan_widget.dart';
-import 'package:go_router/go_router.dart';
+import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 
 class KitchenTile extends StatelessWidget {
@@ -38,7 +41,7 @@ class KitchenTile extends StatelessWidget {
     this.onButtonPressed,
     this.buttonText = "Show",
     this.buttonWidth = 90,
-    this.buttonHeight = 23,
+    this.buttonHeight = 24,
 
     this.isMember = false,
     this.allUsersView = false,
@@ -82,20 +85,56 @@ class KitchenTile extends StatelessWidget {
           ],
         ),
         Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            GenericButtonWidget(
-              onPressed: onButtonPressed ?? () => context.pop(),
-              text: buttonText,
-              width: w(buttonWidth),
-              height: h(buttonHeight),
-            ),
+            if (buttonText.toLowerCase().trim() == "active")
+              Container(
+                padding: gapSymmetric(horizontal: 18, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryColor,
+                  borderRadius: BorderRadius.circular(w(88)),
+                ),
+                child: Text(
+                  "Active",
+                  style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                    fontSize: t(12),
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+
             if (allUsersView)
-              SizedBox()
-            else ...[
+              const SizedBox()
+            else if (buttonText.toLowerCase().trim() != "active") ...[
               gap(height: 6),
-              TextButton(
-                onPressed: onSecondaryActionTap,
-                child: Text(isMember ? "Leave" : "Remove"),
+
+              Row(
+                children: [
+                  TextButton(
+                    onPressed: onButtonPressed,
+                    child: CircularIconButton(
+                      iconAsset: AppAssets.eyeSvg,
+                      iconColor: Colors.black,
+                    ),
+                  ),
+
+                  if (isMember)
+                    GestureDetector(
+                      onTap: onSecondaryActionTap,
+                      child: CircularIconButton(
+                        iconAsset: AppAssets.logoutSvg,
+                        iconColor: Colors.red,
+                      ),
+                    )
+                  else
+                    GestureDetector(
+                      onTap: onSecondaryActionTap,
+                      child: CircularIconButton(
+                        iconAsset: AppAssets.deleteSvg,
+                        iconColor: Colors.red,
+                      ),
+                    ),
+                ],
               ),
             ],
           ],

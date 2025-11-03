@@ -17,9 +17,9 @@ class MergedMealPlanModel extends MergedMealPlanEntity {
   }) {
     return MergedMealPlanModel(
       date: date ?? this.date,
-      breakfast: breakfast ?? this.breakfast,
-      lunch: lunch ?? this.lunch,
-      dinner: dinner ?? this.dinner,
+      breakfast: breakfast,
+      lunch: lunch,
+      dinner: dinner,
     );
   }
 

@@ -8,19 +8,16 @@ class DartJwtDecoder {
   }) async {
     try {
       final decodedToken = JwtDecoder.decode(userToken);
-      logSuccess(decodedToken);
-
-      final sub = decodedToken['sub'] ?? {};
 
       final hasExpired = JwtDecoder.isExpired(userToken);
       final expirationDate = JwtDecoder.getExpirationDate(userToken);
       final formattedDate = DateFormat('dd/MM/yyyy').format(expirationDate);
 
       final Map<String, dynamic> userMap = {
-        "first_name": sub["first_name"],
-        "user_id": sub["user_id"],
-        "last_name": sub["last_name"],
-        "email": sub["email"],
+        "first_name": decodedToken["first_name"],
+        "user_id": decodedToken["user_id"],
+        "last_name": decodedToken["last_name"],
+        "email": decodedToken["email"],
         "has_expired": hasExpired,
         "expiration_date": formattedDate,
       };

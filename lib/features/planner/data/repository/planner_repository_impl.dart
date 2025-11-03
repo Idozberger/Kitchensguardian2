@@ -1,5 +1,7 @@
 import 'package:foodkitchen/core/common/data/model/meal_type_model.dart';
+import 'package:foodkitchen/core/common/data/model/pantry_model.dart';
 import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/common/entities/pantry.dart';
 import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/features/planner/data/datasource/planner_local_datasource.dart';
 import 'package:foodkitchen/features/planner/data/datasource/planner_remote_datasource.dart';
@@ -161,6 +163,21 @@ class PlannerRepositoryImpl implements PlannerRepository {
       final response = await plannerRemoteDatasource.markRecipeFinished(
         kitchenId: kitchenId,
         recipeId: recipeId,
+      );
+
+      return Right(response);
+    } on Failure catch (f) {
+      return Left(f);
+    } catch (e) {
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, String>> requestItems({required Pantry pantry}) async {
+    try {
+      String response = await plannerRemoteDatasource.requestItems(
+        pantryModel: PantryModel.fromEntity(pantry),
       );
 
       return Right(response);

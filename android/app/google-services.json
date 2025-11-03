@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "428640146273",
+    "project_id": "hide-me-d74a7",
+    "storage_bucket": "hide-me-d74a7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:428640146273:android:b9936fcd239777299e2b20",
+        "android_client_info": {
+          "package_name": "com.example.foodkitchen"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBAT1_CcBAyn3eZ3ZUBIO7W1E5WmjJ6Eyc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:428640146273:android:0ffba5f7219e6a0d9e2b20",
+        "android_client_info": {
+          "package_name": "com.quickfixtechnology.image2text"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBAT1_CcBAyn3eZ3ZUBIO7W1E5WmjJ6Eyc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

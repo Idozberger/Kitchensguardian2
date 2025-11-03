@@ -1,8 +1,5 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
@@ -210,7 +207,8 @@ class _PlannerPageState extends State<PlannerPage> {
         gap(height: 15),
         GenericButtonWidget(
           onPressed: () async {
-            context.push(Routes.addMeal);
+            _plannerBloc.add(ResetMealPlanState());
+
             setState(() {
               if (localDbPlanStartTime != null) {
                 _selectedDate = parseDate(localDbPlanStartTime!);
@@ -218,6 +216,7 @@ class _PlannerPageState extends State<PlannerPage> {
                 _selectedDate = DateTime.now();
               }
             });
+            context.push(Routes.addMeal);
           },
           text: "+ Add Meal",
         ),

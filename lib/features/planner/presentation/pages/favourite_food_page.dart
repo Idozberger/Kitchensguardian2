@@ -91,7 +91,7 @@ class _FavouriteFoodPageState extends State<FavouriteFoodPage> {
                                     },
                                     title: recipe.title.toString(),
                                     subtitle: recipe.cookingTime.toString(),
-                                    imagePath: AppAssets.onBoardingSliderBg01,
+                                    imagePath: recipe.thumbnail,
                                     trailingIcon:
                                         AppAssets.arrowForwardAndroidSvg,
                                     errorText: recipe.missingItems

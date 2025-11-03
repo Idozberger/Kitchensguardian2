@@ -11,6 +11,8 @@ class MealTypeEntity {
   final List<String> cookingSteps;
   final List<Map<String, dynamic>> doneSteps;
   final List<IngredientEntity> ingredients;
+  final List<IngredientEntity> missingIngredients;
+  final String thumbnail;
   final bool missingItems;
   final bool available;
 
@@ -26,6 +28,8 @@ class MealTypeEntity {
     required this.available,
     required this.mealType,
     required this.formatedDateString,
+    required this.thumbnail,
+    required this.missingIngredients,
     this.doneSteps = const [],
   });
 }

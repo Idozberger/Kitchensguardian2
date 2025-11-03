@@ -37,9 +37,24 @@ class _PantrySectionState extends State<PantrySection> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _header(context),
-          gap(height: 15),
+          gap(height: 14),
           _actionButtons(context, hasItems),
-          gap(height: 15),
+          gap(height: 14),
+          // SizedBox(
+          //   height: h(40),
+          //   child: ElevatedButton.icon(
+          //     onPressed: () => context.push(Routes.addPantryStorageType),
+          //     icon: SvgPicture.asset(AppAssets.addSvg),
+          //     label: Text(
+          //       "Add Pantry",
+          //       style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+          //         fontSize: t(12),
+          //         color: Colors.black,
+          //       ),
+          //     ),
+          //   ),
+          // ),
+          // gap(height: 14),
           if (hasItems) _pantryList(context) else _noItemsText(context),
         ],
       ),
@@ -61,7 +76,9 @@ class _PantrySectionState extends State<PantrySection> {
           child: SizedBox(
             height: h(40),
             child: OutlinedButton.icon(
-              onPressed: () => context.push(Routes.scanMeal),
+              onPressed: () {
+                context.push(Routes.scanMeal);
+              },
               icon: SvgPicture.asset(AppAssets.scanSvg),
               label: Text(
                 "Scan",

@@ -1,7 +1,9 @@
+import 'dart:typed_data';
+
 import 'package:equatable/equatable.dart';
 
 class ProfileState extends Equatable {
-  final String? imagePath;
+  final Uint8List? imagePath;
   final bool isLoading;
   final String? errorMessage;
 
@@ -12,7 +14,7 @@ class ProfileState extends Equatable {
   });
 
   ProfileState copyWith({
-    String? imagePath,
+    Uint8List? imagePath,
     bool? isLoading,
     String? errorMessage,
   }) {

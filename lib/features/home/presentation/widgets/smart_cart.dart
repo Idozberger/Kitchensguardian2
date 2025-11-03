@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
+import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
@@ -47,7 +48,12 @@ class SmartCartTile extends StatelessWidget {
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
       Text("Smart Cart", style: Theme.of(context).textTheme.headlineLarge),
-      SvgPicture.asset(AppAssets.pantrySvg),
+      SvgPicture.asset(
+        AppAssets.cartSvg,
+        color: AppColors.primaryColor,
+        width: w(24),
+        height: h(24),
+      ),
     ],
   );
 

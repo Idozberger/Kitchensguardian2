@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -62,8 +63,8 @@ class AppDrawer extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: h(35),
-              backgroundImage: state.profilePictureFilePath.isNotEmpty
-                  ? FileImage(File(state.profilePictureFilePath))
+              backgroundImage: state.profilePictureFilePath != null
+                  ? MemoryImage(state.profilePictureFilePath!)
                   : AssetImage(AppAssets.avatar),
             ),
             gap(height: 15),

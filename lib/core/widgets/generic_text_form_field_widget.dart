@@ -68,9 +68,9 @@ class AppTextField extends StatelessWidget {
           obscureText: obscureText,
           keyboardType: keyboardType,
           onFieldSubmitted: onFieldSubmitted,
-          style: Theme.of(
-            context,
-          ).textTheme.headlineLarge!.copyWith(color: color),
+          style: Theme.of(context).textTheme.headlineLarge!.copyWith(
+            color: AppColors.apptextFieldStyleTextColor,
+          ),
           validator: validator,
           textInputAction: textInputAction,
           onChanged: onChanged,

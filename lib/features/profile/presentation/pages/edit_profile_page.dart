@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -32,12 +33,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
   @override
   void initState() {
     profileBloc = context.read<ProfileBloc>();
-    getProfilePicture();
-    super.initState();
-  }
 
-  void getProfilePicture() {
-    profileBloc.add(LoadProfilePicture());
+    super.initState();
   }
 
   @override
@@ -72,13 +69,20 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       child: Stack(
                         clipBehavior: Clip.none,
                         children: [
-                          CircleAvatar(
-                            radius: w(36),
-                            backgroundColor: Colors.grey.shade200,
-                            backgroundImage: state.imagePath != null
-                                ? FileImage(File(state.imagePath!))
-                                : AssetImage(AppAssets.avatar) as ImageProvider,
-                          ),
+                          state.imagePath != null
+                              ? CircleAvatar(
+                                  radius: w(36),
+                                  backgroundColor: Colors.grey.shade200,
+
+                                  backgroundImage: MemoryImage(
+                                    state.imagePath!,
+                                  ),
+                                )
+                              : Image.asset(
+                                  AppAssets.avatar,
+                                  width: w(72),
+                                  height: h(72),
+                                ),
 
                           Positioned(
                             bottom: 0,

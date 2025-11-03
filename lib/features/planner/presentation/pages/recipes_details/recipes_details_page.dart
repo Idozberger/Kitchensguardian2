@@ -100,7 +100,7 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
           _buildPrimaryActions(context, state),
           _buildTabs(),
           _buildTabContent(state),
-          gap(height: 14),
+          gap(height: 18),
         ],
       ),
     );
@@ -117,6 +117,7 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
               : RemoveFromFavouriteRecipeEvent(recipe.id),
         );
       },
+      thumbnail: recipe.thumbnail,
     );
   }
 
@@ -135,10 +136,6 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
             doneSteps: steps,
           ),
         );
-        // await NotificationService().showRecipeInProgressNotification(
-        //   mealTypeModel: recipe as MealTypeModel,
-        //   recipeName: recipe.title,
-        // );
 
         setState(() => selectedTab = 1);
       },
@@ -182,7 +179,8 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
       children: [
         IngredientsListWidget(recipe: recipe),
         gap(height: 16),
-        if (recipe.missingItems) MissingItemsListWidget(),
+        if (recipe.missingItems)
+          MissingItemsListWidget(ingredients: recipe.ingredients),
       ],
     );
   }
@@ -213,12 +211,6 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
       (plan) => plan.date == recipe.formatedDateString,
     );
 
-    // if (!AppConstants.entitlementIsActive) {
-    //   AppToast.show("Subscription required!", ToastType.error);
-    //   context.push(Routes.subscription);
-    //   return;
-    // }
-
     if (alreadyPlanned || existingPlans.length < 3) {
       plannerBloc.add(
         AddMealPlanEvent(
@@ -228,7 +220,6 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
         ),
       );
       plannerBloc.add(AddToWeeklyPlanEvent(recipe));
-      // context.go(Routes.dashboard);
     } else {
       AppToast.show(
         "You can only create plans for 3 days in advance.",
@@ -316,42 +307,3 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
     );
   }
 }
-
-// void showPersistentSnackbar(BuildContext context, MealTypeEntity recipe) {
-//   rootScaffoldMessengerKey.currentState?.showSnackBar(
-//     SnackBar(
-//       shape: RoundedRectangleBorder(
-//         borderRadius: BorderRadius.circular(h(12)),
-//         side: BorderSide(color: AppColors.primaryColor),
-//       ),
-//       elevation: 1,
-//       content: Column(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           Text(
-//             'Recipe Under Making',
-//             style: Theme.of(context).textTheme.headlineLarge,
-//           ),
-//           gap(height: 4),
-//           Text(recipe.title, style: Theme.of(context).textTheme.headlineMedium),
-//         ],
-//       ),
-//       dismissDirection: DismissDirection.none,
-//       duration: const Duration(days: 1),
-//       behavior: SnackBarBehavior.fixed,
-//       backgroundColor: Colors.white,
-//       action: SnackBarAction(
-//         textColor: AppColors.primaryColor,
-//         label: 'Go to Recipe',
-//         onPressed: () {
-//           final context = rootNavigatorKey.currentContext;
-//           context!.pushNamed(
-//             Routes.generateRecipesDetails,
-//             extra: {"meal_type_entity": recipe, "is_plan": false},
-//           );
-//           rootScaffoldMessengerKey.currentState?.hideCurrentSnackBar();
-//         },
-//       ),
-//     ),
-//   );
-// }

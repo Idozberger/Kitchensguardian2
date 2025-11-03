@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/domain/usecase/get_current_user.dart';
@@ -34,8 +37,11 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     result.fold(
       (failure) =>
           emit(state.copyWith(isLoading: false, errorMessage: failure.message)),
-      (imagePath) =>
-          emit(state.copyWith(isLoading: false, imagePath: imagePath)),
+      (imagePath) {
+        emit(
+          state.copyWith(isLoading: false, imagePath: base64Decode(imagePath)),
+        );
+      },
     );
   }
 
@@ -52,7 +58,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       (failure) =>
           emit(state.copyWith(isLoading: false, errorMessage: failure.message)),
       (imagePath) {
-        emit(state.copyWith(isLoading: false, imagePath: imagePath));
+        emit(
+          state.copyWith(isLoading: false, imagePath: base64Decode(imagePath)),
+        );
         _userCubit.updateUserProfilePicture();
       },
     );

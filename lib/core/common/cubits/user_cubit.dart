@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -33,7 +35,7 @@ class UserCubit extends Cubit<UserState> {
         activeKitchenId: activeKitchenId,
         invitationCode: invitationCode,
         role: role,
-        profilePictureFilePath: filePath,
+        profilePictureFilePath: base64Decode(filePath!),
       ),
     );
   }
@@ -45,7 +47,7 @@ class UserCubit extends Cubit<UserState> {
 
   Future<void> updateUserProfilePicture() async {
     String? filePath = await getUserPicture();
-    emit(state.copyWith(profilePictureFilePath: filePath));
+    emit(state.copyWith(profilePictureFilePath: base64Decode(filePath!)));
   }
 
   Future<void> updateKitchenIdAndRefferalCode(

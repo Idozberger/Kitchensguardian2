@@ -1,10 +1,13 @@
 import 'package:camera/camera.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/app/app_base.dart';
 import 'package:foodkitchen/app/di.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
+import 'package:foodkitchen/core/services/firebase_messenging/firebase_messenging_service.dart';
 import 'package:foodkitchen/features/auth/presentation/blocs/auth_bloc.dart';
 import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_bloc.dart';
@@ -15,13 +18,18 @@ import 'package:foodkitchen/features/onboarding/presentation/bloc/user_bloc.dart
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_bloc.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
 import 'package:foodkitchen/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:foodkitchen/firebase_options.dart';
 
 List<CameraDescription> cameras = [];
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  final firebaseMessagingService = FirebaseMessagingService.instance();
 
   await Future.wait([
+    firebaseMessagingService.init(),
     initDependencies(),
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,

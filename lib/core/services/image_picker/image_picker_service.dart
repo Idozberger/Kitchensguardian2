@@ -21,18 +21,7 @@ class ImagePickerService {
 
     final XFile? image = await _picker.pickImage(
       source: ImageSource.gallery,
-      imageQuality: 85,
-    );
-    return image != null ? File(image.path) : null;
-  }
-
-  static Future<File?> pickFromCamera(BuildContext context) async {
-    final hasPermission = await _requestPermissions(context);
-    if (!hasPermission) return null;
-
-    final XFile? image = await _picker.pickImage(
-      source: ImageSource.camera,
-      imageQuality: 85,
+      imageQuality: 1,
     );
     return image != null ? File(image.path) : null;
   }

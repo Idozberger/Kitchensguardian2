@@ -1,4 +1,5 @@
 import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/common/entities/pantry.dart';
 import 'package:foodkitchen/features/planner/domain/entities/merged_meal_type_entity.dart';
 
 sealed class PlannerEvent {}
@@ -79,4 +80,18 @@ final class AddMealPlanEvent extends PlannerEvent {
     required this.mealPlan,
     required this.date,
   });
+}
+
+final class RequestMissingItemsEvent extends PlannerEvent {
+  final Pantry pantry;
+  RequestMissingItemsEvent({required this.pantry});
+}
+
+final class ResetMealPlanState extends PlannerEvent {}
+
+final class DeleteMealPlanEvent extends PlannerEvent {
+  final String mealType;
+  final String date;
+
+  DeleteMealPlanEvent({required this.mealType, required this.date});
 }

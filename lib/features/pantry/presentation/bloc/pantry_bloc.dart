@@ -14,7 +14,6 @@ import 'package:foodkitchen/features/pantry/domain/usecases/scan_receipt.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/show_notification.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_event.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_state.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class PantryBloc extends Bloc<PantryEvent, PantryState> {
   final HomeBloc _homeBloc;

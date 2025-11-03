@@ -42,6 +42,7 @@ class GeneratedRecipesSection extends StatelessWidget {
             itemBuilder: (_, index) {
               final recipe = state.recipes![index];
               return RecipeTileItem(
+                thumbnail: recipe.thumbnail,
                 recipe: recipe as MealTypeModel,
                 selectedDate: selectedDate,
                 selectedMealType: selectedMealType,

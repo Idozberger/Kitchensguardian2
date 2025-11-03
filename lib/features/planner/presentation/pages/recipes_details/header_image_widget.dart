@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -9,11 +10,13 @@ import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dar
 
 class HeaderImageWidget extends StatelessWidget {
   final bool isFav;
+  final String thumbnail;
   final VoidCallback onFavoriteToggle;
 
   const HeaderImageWidget({
     super.key,
     required this.isFav,
+    required this.thumbnail,
     required this.onFavoriteToggle,
   });
 
@@ -30,15 +33,20 @@ class HeaderImageWidget extends StatelessWidget {
             width: double.infinity,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(h(10)),
-              image: DecorationImage(
-                image: AssetImage(AppAssets.onBoardingSliderBg02),
-                fit: BoxFit.cover,
-              ),
+              image: (thumbnail.isNotEmpty)
+                  ? DecorationImage(
+                      image: CachedNetworkImageProvider(thumbnail),
+                      fit: BoxFit.cover,
+                    )
+                  : DecorationImage(
+                      image: AssetImage(AppAssets.onBoardingSliderBg02),
+                      fit: BoxFit.cover,
+                    ),
             ),
             child: GestureDetector(
               onTap: state.isLoading ? null : onFavoriteToggle,
               child: CircleAvatar(
-                backgroundColor: Colors.grey,
+                backgroundColor: Colors.grey.withOpacity(0.8),
                 child: state.isLoading
                     ? Transform.scale(
                         scale: 0.5,
