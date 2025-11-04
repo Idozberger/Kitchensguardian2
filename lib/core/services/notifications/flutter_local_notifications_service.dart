@@ -5,16 +5,12 @@ import 'dart:io';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:foodkitchen/app/app_router.dart';
 import 'package:foodkitchen/core/common/data/model/meal_type_model.dart';
-import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
 import 'package:foodkitchen/core/config/routes.dart';
-import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:go_router/go_router.dart';
-import 'package:path/path.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
 class NotificationService {
-  // Singleton instance
   NotificationService._internal();
   static final NotificationService _instance = NotificationService._internal();
   factory NotificationService() => _instance;
@@ -67,13 +63,7 @@ class NotificationService {
       final context = rootNavigatorKey.currentContext;
 
       if (context != null) {
-        context.pushNamed(
-          Routes.generateRecipesDetails,
-          extra: {
-            "meal_type_entity": MealTypeModel.fromJson(jsonDecode(payload)),
-            "is_plan": false,
-          },
-        );
+        context.push(Routes.notification);
       } else {
         log('⚠️ Context is null. Will navigate later.');
       }

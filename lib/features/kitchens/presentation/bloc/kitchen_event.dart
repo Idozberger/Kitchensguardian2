@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:foodkitchen/features/kitchens/domain/entities/kitchen.dart';
 
 abstract class KitchenEvent extends Equatable {
   const KitchenEvent();
@@ -46,9 +47,14 @@ class JoinKitchenEvent extends KitchenEvent {
   JoinKitchenEvent(this.invitationCode);
 }
 
+class MemberApprovedEvent extends KitchenEvent {
+  final String invitationCode;
+  MemberApprovedEvent(this.invitationCode);
+}
+
 class SwitchKitchenEvent extends KitchenEvent {
-  final String kitchenId;
-  const SwitchKitchenEvent(this.kitchenId);
+  final Kitchen kitchen;
+  const SwitchKitchenEvent(this.kitchen);
 }
 
 class DeleteOrLeaveKitchenEvent extends KitchenEvent {}

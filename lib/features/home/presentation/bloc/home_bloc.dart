@@ -1,12 +1,21 @@
+import 'dart:math';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/domain/usecase/get_current_user.dart';
+import 'package:foodkitchen/core/global/functions/logs.dart';
+import 'package:foodkitchen/core/services/fcm/fcm_service.dart';
+import 'package:foodkitchen/core/utils/date_format_to_string.dart';
+import 'package:foodkitchen/features/home/domain/entities/kitchen.dart';
 import 'package:foodkitchen/features/home/domain/usecases/create_kitchen_usecase.dart';
 import 'package:foodkitchen/features/home/domain/usecases/get_all_weekly_plans_usecase.dart';
 import 'package:foodkitchen/features/home/domain/usecases/get_pantries_usecase.dart';
 import 'package:foodkitchen/features/home/domain/usecases/join_kitchen_usecase.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_event.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_state.dart';
+import 'package:intl/intl.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final UserCubit _userCubit;
@@ -43,14 +52,20 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       CreateKitchenParams(kitchenName: event.kitchenName),
     );
 
-    res.fold(
-      (failure) =>
-          emit(state.copyWith(isLoading: false, errorMessage: failure.message)),
-      (kitchen) {
+    await res.fold(
+      (failure) async {
+        emit(state.copyWith(isLoading: false, errorMessage: failure.message));
+      },
+      (kitchen) async {
         _userCubit.updateActiveKitchenIdInvitationCodeAndRole(
           activeKitchenId: kitchen.kitchenId,
-          invitationCode: kitchen.invitationCard,
+          invitationCode: kitchen.invitationCode,
           role: "host",
+        );
+
+        await _saveOrUpdateUserKitchen(
+          kitchen: kitchen,
+          kitchenName: event.kitchenName,
         );
 
         emit(state.copyWith(isLoading: false, successMessage: kitchen.message));
@@ -64,22 +79,96 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   ) async {
     emit(state.copyWith(isLoading: true));
 
-    final res = await _joinKitchen(
-      JoinKitchenUsecaseParams(invitationCode: event.invitationCode),
-    );
+    try {
+      final kitchenDoc = await FirebaseFirestore.instance
+          .collection('kitchens')
+          .where('invitation_code', isEqualTo: event.invitationCode)
+          .limit(1)
+          .get();
 
-    res.fold(
-      (failure) =>
-          emit(state.copyWith(isLoading: false, errorMessage: failure.message)),
-      (message) {
-        add(
-          GetPantriesItemsEventForHome(
-            kitchenId: _userCubit.state.activeKitchenId,
+      if (kitchenDoc.docs.isEmpty) {
+        emit(
+          state.copyWith(
+            isLoading: false,
+            errorMessage: "Invitation code is not valid",
           ),
         );
-        emit(state.copyWith(isLoading: false, successMessage: message));
-      },
-    );
+        return;
+      }
+
+      final kitchenData = kitchenDoc.docs.first.data();
+      final userId = kitchenData['user_id'];
+      final kitchenName = kitchenData['kitchen_name'];
+
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get();
+
+      if (!userDoc.exists) {
+        emit(
+          state.copyWith(
+            isLoading: false,
+            errorMessage: "Kitchen host not found",
+          ),
+        );
+        return;
+      }
+
+      final userData = userDoc.data();
+      final userDeviceToken = userData?['user_device_token'];
+
+      if (userDeviceToken == null) {
+        emit(state.copyWith(isLoading: false, errorMessage: "User not found"));
+        return;
+      }
+
+      await FCMService().sendNotification(
+        userDeviceToken,
+        "Request to join your kitchen",
+        "User ${_userCubit.state.firstName} wants to join your kitchen: $kitchenName.",
+      );
+      final random = Random();
+      final notificationId = random.nextInt(999999);
+      final notificationData = {
+        "status": false,
+        'id': notificationId,
+        'title': "Request to join your kitchen",
+        'body':
+            "User ${_userCubit.state.firstName} wants to join your kitchen: $kitchenName.",
+        'host_user_id': userId,
+        'sender_user_id': _userCubit.state.userId,
+        'kitchen_id': kitchenData['kitchen_id'],
+        'date': DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
+        'sender_name':
+            "${_userCubit.state.firstName} ${_userCubit.state.lastName}",
+        'read': false,
+      };
+      print('📦 Sending notification data: $notificationData');
+
+      await FirebaseFirestore.instance
+          .collection('notifications')
+          .add(notificationData);
+
+      add(
+        GetPantriesItemsEventForHome(
+          kitchenId: _userCubit.state.activeKitchenId,
+        ),
+      );
+
+      emit(
+        state.copyWith(
+          isLoading: false,
+          successMessage: "Join request sent to the host.",
+        ),
+      );
+    } catch (e, st) {
+      emit(
+        state.copyWith(isLoading: false, errorMessage: 'An error occurred.'),
+      );
+      debugPrint('❌ Error: $e');
+      debugPrint('🧾 Stack Trace: $st');
+    }
   }
 
   Future<void> _onGetPantryItems(
@@ -128,5 +217,32 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
   void _onResetHomeState(ResetHomeStateEvent event, Emitter<HomeState> emit) {
     emit(state.copyWith(pantryItems: []));
+  }
+
+  Future<void> _saveOrUpdateUserKitchen({
+    required Kitchen kitchen,
+    String? kitchenName,
+  }) async {
+    try {
+      final _firestore = FirebaseFirestore.instance;
+
+      final kitchenRef = _firestore
+          .collection('kitchens')
+          .doc(kitchen.kitchenId);
+
+      final data = {
+        'kitchen_id': kitchen.kitchenId,
+        'user_id': _userCubit.state.userId,
+        'kitchen_name': kitchenName,
+        'role': "host",
+        'invitation_code': kitchen.invitationCode,
+        'created_at': FieldValue.serverTimestamp(),
+        'updated_at': FieldValue.serverTimestamp(),
+      };
+
+      await kitchenRef.set(data);
+    } catch (e, st) {
+      logError(st.toString());
+    }
   }
 }

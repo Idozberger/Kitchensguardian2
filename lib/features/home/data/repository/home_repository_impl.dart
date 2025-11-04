@@ -23,7 +23,7 @@ class HomeRepositoryImpl implements HomeRepository {
         kitchenName: kitchenName,
       );
       final kitchenModel = KitchenModel(
-        invitationCard: response["invitation_code"],
+        invitationCode: response["invitation_code"],
         kitchenId: response["kitchen_id"],
         message: response["message"],
       );

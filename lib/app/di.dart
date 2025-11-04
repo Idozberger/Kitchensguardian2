@@ -121,8 +121,8 @@ void _dioInjection() {
     () => Dio(
       BaseOptions(
         baseUrl: AppConstants.baseUrl,
-        connectTimeout: const Duration(seconds: 40),
-        receiveTimeout: const Duration(seconds: 40),
+        connectTimeout: const Duration(seconds: 120),
+        receiveTimeout: const Duration(seconds: 120),
       ),
     ),
   );
@@ -259,6 +259,8 @@ void _initDashboard() async {
         getMembers: GetKitchenMembers(sl()),
         makeCohost: MakeCohost(sl()),
         kickMember: KickMember(sl()),
+        userCubit: sl(),
+        kitchenBloc: sl(),
       ),
     );
 }

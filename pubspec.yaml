@@ -9,6 +9,7 @@ environment:
 dependencies:
   cached_network_image: ^3.4.1
   camera: ^0.11.2
+  cloud_firestore: ^6.1.0
   dio: ^5.9.0
   equatable: ^2.0.7
   firebase_core: ^4.2.0
@@ -24,6 +25,7 @@ dependencies:
   fpdart: ^1.1.1
   get_it: ^8.2.0
   go_router: ^16.2.4
+  googleapis_auth: ^2.0.0
   image_picker: ^1.2.0
   internet_connection_checker_plus: ^2.9.0
   intl: ^0.20.2
@@ -48,7 +50,7 @@ flutter:
 
   assets:
   - assets/images/
-  # - assets/langs/
+  - assets/services/
   - assets/fonts/
   - assets/svgs/
 

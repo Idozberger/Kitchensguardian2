@@ -35,7 +35,9 @@ class UserCubit extends Cubit<UserState> {
         activeKitchenId: activeKitchenId,
         invitationCode: invitationCode,
         role: role,
-        profilePictureFilePath: base64Decode(filePath!),
+        profilePictureFilePath: filePath == null
+            ? null
+            : base64Decode(filePath),
       ),
     );
   }

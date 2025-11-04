@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
+import 'package:foodkitchen/core/services/firebase_messenging/firebase_messenging_service.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/drawer.dart';
 import 'package:foodkitchen/features/grocery/presentation/pages/grocery_page.dart';
@@ -25,6 +27,13 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   int _selectedIndex = 0;
+  late UserCubit userCubit;
+  @override
+  void initState() {
+    userCubit = context.read<UserCubit>();
+    _initializeFirebaseMessaging(context);
+    super.initState();
+  }
 
   final List<Widget> _pages = const [
     HomePage(),
@@ -38,6 +47,26 @@ class _DashboardPageState extends State<DashboardPage> {
       context.read<HomeBloc>().add(GetAllWeeklyPlansEventForHome());
       _selectedIndex = index;
     });
+  }
+
+  Future<void> _initializeFirebaseMessaging(BuildContext context) async {
+    await Future.delayed(Duration(seconds: 3));
+    try {
+      final userState = userCubit.state;
+
+      if (userState.userId.isNotEmpty && userState.email.isNotEmpty) {
+        await FirebaseMessagingService.instance().init(
+          userId: userState.userId,
+          firstName: userState.firstName,
+          lastName: userState.lastName,
+          email: userState.email,
+        );
+      } else {
+        debugPrint('Skipping FCM init — missing userId or email.');
+      }
+    } catch (e, st) {
+      debugPrint('Stack trace: $st');
+    }
   }
 
   @override

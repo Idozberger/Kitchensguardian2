@@ -1,15 +1,18 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
+import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
+import 'package:foodkitchen/features/kitchens/domain/entities/kitchen.dart';
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_bloc.dart';
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_event.dart';
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_state.dart';
@@ -178,6 +181,7 @@ class _KitchenPageState extends State<KitchenPage> {
                               "kitchen_id",
                               kitchen.kitchenId,
                             );
+
                             await prefs.setString("role", kitchen.role);
 
                             userCubit
@@ -186,15 +190,12 @@ class _KitchenPageState extends State<KitchenPage> {
                                   invitationCode: kitchen.invitationCode,
                                   role: kitchen.role,
                                 );
-
                             AppToast.show(
                               "Kitchen switched to ${kitchen.kitchenName}",
                               ToastType.success,
                             );
 
-                            kitchenBloc.add(
-                              SwitchKitchenEvent(kitchen.kitchenId),
-                            );
+                            kitchenBloc.add(SwitchKitchenEvent(kitchen));
                           },
                     imagePath: AppAssets.avatar,
                     title: kitchen.kitchenName,
@@ -346,9 +347,7 @@ class _KitchenPageState extends State<KitchenPage> {
                               ToastType.success,
                             );
 
-                            kitchenBloc.add(
-                              SwitchKitchenEvent(kitchen.kitchenId),
-                            );
+                            kitchenBloc.add(SwitchKitchenEvent(kitchen));
                           },
                     imagePath: AppAssets.avatar,
                     title: kitchen.kitchenName,

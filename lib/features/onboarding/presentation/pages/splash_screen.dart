@@ -8,7 +8,6 @@ import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/dialogs/no_internet.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
-import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/utils/date_format_to_string.dart';
 import 'package:foodkitchen/features/onboarding/presentation/bloc/user_bloc.dart';

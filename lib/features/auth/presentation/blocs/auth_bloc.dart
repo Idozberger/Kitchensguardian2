@@ -166,7 +166,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthGetCurrentUser event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthLoading());
     final res = await _getCurrentUser(NoParams());
 
     res.fold((failure) {}, (user) {
