@@ -12,7 +12,7 @@ import 'package:foodkitchen/features/planner/presentation/pages/recipes_details/
 import 'package:foodkitchen/features/planner/presentation/pages/recipes_details/secondary_actions_widget.dart';
 import 'package:go_router/go_router.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
-import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
@@ -42,6 +42,7 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
   late final PlannerBloc plannerBloc;
   late MealTypeEntity recipe;
 
+  bool addPlanDummyLoading = false;
   bool isFav = false;
   int selectedTab = 0;
   List<Map<String, dynamic>> steps = [];
@@ -123,6 +124,7 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
 
   Widget _buildPrimaryActions(BuildContext context, PlannerState state) {
     return PrimaryActionsWidget(
+      addPlanDummyLoading: addPlanDummyLoading,
       recipe: recipe,
       isPlan: widget.isPlan,
       startRecipe: state.startRecipe,
@@ -212,6 +214,9 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
     );
 
     if (alreadyPlanned || existingPlans.length < 3) {
+      setState(() {
+        addPlanDummyLoading = true;
+      });
       plannerBloc.add(
         AddMealPlanEvent(
           date: widget.mealTypeEntity.formatedDateString,
@@ -219,7 +224,8 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
           mealPlan: recipe,
         ),
       );
-      plannerBloc.add(AddToWeeklyPlanEvent(recipe));
+      await Future.delayed(Duration(seconds: 1));
+      context.push(Routes.addMeal);
     } else {
       AppToast.show(
         "You can only create plans for 3 days in advance.",

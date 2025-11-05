@@ -200,9 +200,7 @@ class FirebaseMessagingService {
     }
   }
 
-  void _onMessageOpenedApp(RemoteMessage message) {
-    navigatorKey.currentContext?.push(Routes.notification);
-  }
+  void _onMessageOpenedApp(RemoteMessage message) {}
 }
 
 @pragma('vm:entry-point')

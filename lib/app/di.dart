@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
+import 'package:foodkitchen/core/common/data/datasource/common_remote_datasource.dart';
 import 'package:foodkitchen/core/common/data/datasource/profile_local_datasource.dart';
 import 'package:foodkitchen/core/services/connection/connection_checker.dart';
 import 'package:foodkitchen/core/services/jwt_decoder/jwt_decoder.dart';
@@ -46,6 +47,8 @@ import 'package:foodkitchen/features/home/data/datasource/home_remote_datasource
 import 'package:foodkitchen/features/home/data/repository/home_repository_impl.dart';
 import 'package:foodkitchen/features/home/domain/repository/home_repository.dart';
 import 'package:foodkitchen/features/home/domain/usecases/create_kitchen_usecase.dart';
+import 'package:foodkitchen/features/home/domain/usecases/create_pantry_usecase.dart';
+import 'package:foodkitchen/features/home/domain/usecases/get_all_pantries_usecase.dart';
 import 'package:foodkitchen/features/home/domain/usecases/get_all_weekly_plans_usecase.dart';
 import 'package:foodkitchen/features/home/domain/usecases/get_pantries_usecase.dart';
 import 'package:foodkitchen/features/home/domain/usecases/join_kitchen_usecase.dart';
@@ -114,12 +117,14 @@ Future<void> initDependencies() async {
   _initPlanner();
   _initHistory();
   _initProfile();
+  _initCommonRemoteRepo();
 }
 
 void _dioInjection() {
   sl.registerLazySingleton<Dio>(
     () => Dio(
       BaseOptions(
+        validateStatus: (status) => true,
         baseUrl: AppConstants.baseUrl,
         connectTimeout: const Duration(seconds: 120),
         receiveTimeout: const Duration(seconds: 120),
@@ -190,12 +195,19 @@ void _initHome() async {
       () => HomeRemoteDataSourceImpl(dio: sl(), sharedPreferences: sl()),
     )
     // Repository
-    ..registerFactory<HomeRepository>(() => HomeRepositoryImpl(sl()))
+    ..registerFactory<HomeRepository>(
+      () => HomeRepositoryImpl(
+        homeRemoteDataSource: sl(),
+        commonRemoteDatasource: sl(),
+      ),
+    )
     // Usecases
     ..registerFactory(() => CreateKitchen(sl()))
     ..registerFactory(() => JoinKitchen(sl()))
     ..registerFactory(() => GetPantriesForHome(sl()))
     ..registerFactory(() => GetAllWeeklyPlansForHome(sl()))
+    ..registerFactory(() => GetUserStorageArea(sl()))
+    ..registerFactory(() => CreatePantryUsecase(sl()))
     // Bloc
     ..registerLazySingleton(
       () => HomeBloc(
@@ -204,6 +216,8 @@ void _initHome() async {
         userCubit: sl(),
         getPantriesForHome: GetPantriesForHome(sl()),
         getAllWeeklyPlansForHome: GetAllWeeklyPlansForHome(sl()),
+        getUserStorageArea: GetUserStorageArea(sl()),
+        createPantryUsecase: CreatePantryUsecase(sl()),
       ),
     );
 }
@@ -413,4 +427,11 @@ void _initProfile() async {
         userCubit: sl(),
       ),
     );
+}
+
+void _initCommonRemoteRepo() async {
+  // Datasource
+  sl.registerFactory<CommonRemoteDatasource>(
+    () => CommonRemoteDatasourceImpl(dio: sl()),
+  );
 }

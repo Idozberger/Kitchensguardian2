@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
+import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/services/date_picker/date_picker_service.dart'
@@ -15,12 +16,13 @@ import 'package:foodkitchen/core/widgets/generic_dropdown_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
-import 'package:foodkitchen/core/common/entities/pantry.dart';
-import 'package:foodkitchen/core/common/entities/pantry_item.dart';
+import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
+import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_bloc.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_event.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_state.dart';
 import 'package:foodkitchen/features/pantry/presentation/models/pantry_items.dart';
+import 'package:go_router/go_router.dart';
 
 class AddItemPage extends StatefulWidget {
   const AddItemPage({super.key});
@@ -44,43 +46,6 @@ class _AddItemPageState extends State<AddItemPage> {
   }
 
   void _addNewItem() {
-    for (final item in _items) {
-      final name = item.nameController.text.trim();
-      final qty = item.qtyController.text.trim();
-      final unit = item.unit?.trim() ?? '';
-      final pantry = item.pantry?.trim() ?? '';
-      final expireDate = item.expireDate.text.trim();
-
-      if (name.isEmpty) {
-        AppToast.show("Please enter the item name.", ToastType.error);
-        return;
-      } else if (name.length < 3) {
-        AppToast.show(
-          "Item name must be at least 3 characters long.",
-          ToastType.error,
-        );
-        return;
-      }
-      if (qty.isEmpty) {
-        AppToast.show("Please enter the quantity.", ToastType.error);
-        return;
-      }
-
-      if (unit.isEmpty) {
-        AppToast.show("Please select a unit.", ToastType.error);
-        return;
-      }
-
-      if (pantry.isEmpty) {
-        AppToast.show("Please select a pantry.", ToastType.error);
-        return;
-      }
-
-      if (expireDate.isEmpty) {
-        AppToast.show("Please select an expiry date.", ToastType.error);
-        return;
-      }
-    }
     setState(() {
       _items.add(
         PantryItem(
@@ -102,51 +67,60 @@ class _AddItemPageState extends State<AddItemPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xffF9F9F9),
-      appBar: _buildAppBar(context),
-      body: BlocConsumer<PantryBloc, PantryState>(
-        listener: (context, state) {
-          if (state is PantryFailure) {
-            AppToast.show(state.errorMessage, ToastType.error);
-            resetState();
-          }
-          if (state is PantrySuccess) {
-            AppToast.show(state.successMessage, ToastType.success);
-            resetState();
-          }
-        },
-        builder: (_, state) {
-          return SafeArea(
-            child: Padding(
-              padding: gapSymmetric(horizontal: 20, vertical: 0),
-              child: Column(
-                children: [
-                  gap(height: 14),
-                  Expanded(
-                    child: ListView.builder(
-                      padding: gapZero,
-                      shrinkWrap: true,
-                      itemCount: _items.length,
-                      itemBuilder: (context, index) {
-                        final item = _items[index];
-                        return Padding(
-                          padding: gapOnly(bottom: 10),
-                          child: UpperTile(
-                            widget: _buildPantryItemForm(context, item),
-                          ),
-                        );
-                      },
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) async {
+        if (!didPop) {
+          await Future.delayed(Duration.zero);
+          _handleBackNavigation();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xffF9F9F9),
+        appBar: _buildAppBar(context),
+        body: BlocConsumer<PantryBloc, PantryState>(
+          listener: (context, state) {
+            if (state is PantryFailure) {
+              AppToast.show(state.errorMessage, ToastType.error);
+              resetState();
+            }
+            if (state is PantrySuccess) {
+              AppToast.show(state.successMessage, ToastType.success);
+              resetState();
+            }
+          },
+          builder: (_, state) {
+            return SafeArea(
+              child: Padding(
+                padding: gapSymmetric(horizontal: 20, vertical: 0),
+                child: Column(
+                  children: [
+                    gap(height: 14),
+                    Expanded(
+                      child: ListView.builder(
+                        padding: gapZero,
+                        shrinkWrap: true,
+                        itemCount: _items.length,
+                        itemBuilder: (context, index) {
+                          final item = _items[index];
+                          return Padding(
+                            padding: gapOnly(bottom: 10),
+                            child: UpperTile(
+                              widget: _buildPantryItemForm(context, item),
+                            ),
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          );
-        },
-      ),
+            );
+          },
+        ),
 
-      bottomNavigationBar: _bottomNavBar(),
+        bottomNavigationBar: _bottomNavBar(),
+      ),
     );
   }
 
@@ -276,6 +250,7 @@ class _AddItemPageState extends State<AddItemPage> {
         ),
         SizedBox(height: h(10)),
         AppTextField(
+          textInputAction: TextInputAction.next,
           color: AppColors.apptextFieldStyleTextColor,
           controller: item.nameController,
           hintText: "Enter item name",
@@ -289,6 +264,7 @@ class _AddItemPageState extends State<AddItemPage> {
         _formLabel(context, "Quantity"),
         SizedBox(height: h(10)),
         AppTextField(
+          textInputAction: TextInputAction.next,
           color: AppColors.apptextFieldStyleTextColor,
           controller: item.qtyController,
           hintText: "Enter item quantity",
@@ -346,6 +322,7 @@ class _AddItemPageState extends State<AddItemPage> {
             }
           },
           child: AppTextField(
+            textInputAction: TextInputAction.next,
             enabled: false,
             color: AppColors.apptextFieldStyleTextColor,
             controller: item.expireDate,
@@ -399,7 +376,9 @@ class _AddItemPageState extends State<AddItemPage> {
           SizedBox(width: w(16)),
           CircularIconButton(
             iconAsset: AppAssets.backArrowiOS,
-            onTap: () => Navigator.pop(context),
+            onTap: () {
+              _handleBackNavigation();
+            },
           ),
         ],
       ),
@@ -429,6 +408,51 @@ class _AddItemPageState extends State<AddItemPage> {
           ),
         ),
       ),
+    );
+  }
+
+  void _handleBackNavigation() {
+    final hasItems = _items.isNotEmpty;
+
+    void goBack() {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final router = GoRouter.of(context);
+        if (router.canPop()) {
+          router.pop();
+          router.pop();
+        } else {
+          debugPrint('⚠️ No route to pop. Ignoring.');
+        }
+      });
+    }
+
+    if (hasItems) {
+      _showConfirmDialog(
+        context,
+        title: "Go Back",
+        subtitle:
+            "If you go back, the items you just added will be removed. Continue?",
+        onConfirm: goBack,
+      );
+    } else {
+      goBack();
+    }
+  }
+
+  Future<void> _showConfirmDialog(
+    BuildContext context, {
+    required String title,
+    required String subtitle,
+    required VoidCallback onConfirm,
+  }) {
+    return showCustomGenericDialog(
+      context: context,
+      title: title,
+      subtitle: subtitle,
+      primaryButtonText: "Yes",
+      secondaryButtonText: "Cancel",
+      onPrimaryPressed: onConfirm,
+      onSecondaryPressed: () => context.pop(),
     );
   }
 }

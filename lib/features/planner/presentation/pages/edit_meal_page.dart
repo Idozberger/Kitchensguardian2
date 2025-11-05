@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:foodkitchen/core/common/data/model/meal_type_model.dart';
-import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
@@ -98,7 +98,7 @@ class _EditMealPageState extends State<EditMealPage> {
                   onSelected: _updateSelectedIndex,
                 ),
                 gap(height: 20),
-                GeneratedRecipeSection(
+                GeneratedRecipeSectionEdit(
                   date: _mealPlan.date,
                   mealPlan: _mealPlan,
                   selectedIndex: _selectedIndex,
@@ -242,11 +242,11 @@ class MealTypeTile extends StatelessWidget {
   }
 }
 
-class GeneratedRecipeSection extends StatelessWidget {
+class GeneratedRecipeSectionEdit extends StatelessWidget {
   final MergedMealPlanEntity mealPlan;
   final int selectedIndex;
   final String date;
-  const GeneratedRecipeSection({
+  const GeneratedRecipeSectionEdit({
     super.key,
     required this.mealPlan,
     required this.selectedIndex,

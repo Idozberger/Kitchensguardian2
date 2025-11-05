@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:foodkitchen/core/services/connection/connection_checker.dart';
@@ -111,7 +112,8 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource {
 
       return message ?? "Password reset code sent successfully";
     } on DioException catch (e) {
-      throw dio.handleError(e);
+      await dio.handleError(e);
+      rethrow;
     }
   }
 

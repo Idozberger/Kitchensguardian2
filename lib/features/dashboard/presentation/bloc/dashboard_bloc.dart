@@ -31,11 +31,11 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
        _userCubit = userCubit,
 
        super(DashboardInitial()) {
-    on<DashboardEvent>((_, emit) => emit(DashboardLoading()));
     on<GetKitchenMembersEvent>(_onGetDashboardMembers);
     on<MakeCohostEvent>(_onMakeCohostEvent);
     on<KickMemberEvent>(_onKickMemberEvent);
     on<ApproveRequestEvent>(_onApproveRequestEvent);
+    on<DeclineRequestEvent>(_onDeclineRequestEvent);
     // on<DeclineRequest>(_onDeclineRequest);
   }
 
@@ -43,6 +43,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     GetKitchenMembersEvent event,
     Emitter<DashboardState> emit,
   ) async {
+    emit(DashboardLoading());
     final res = await _getKitchenMembers(
       GetKitchenMembersParams(kitchenId: event.activeKitchenId),
     );
@@ -56,6 +57,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     MakeCohostEvent event,
     Emitter<DashboardState> emit,
   ) async {
+    emit(DashboardLoading());
     final res = await _makeCohost(
       MakeCohostParams(
         kitchenId: event.activeKitchenId,
@@ -72,6 +74,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     KickMemberEvent event,
     Emitter<DashboardState> emit,
   ) async {
+    emit(DashboardLoading());
     final res = await _kickMember(
       KickMemberParams(
         kitchenId: event.activeKitchenId,
@@ -88,6 +91,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     ApproveRequestEvent event,
     Emitter<DashboardState> emit,
   ) async {
+    emit(ApproveLoading());
     final userId = event.memberId;
 
     final userDoc = await FirebaseFirestore.instance
@@ -114,6 +118,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     final kitchenDoc = kitchenQuery.docs.first;
     final kitchenData = kitchenDoc.data();
     final inviteCode = kitchenData['invitation_code'] ?? '';
+    final kitchenName = kitchenData['kitchen_name'] ?? '';
 
     final userData = userDoc.data();
     final userDeviceToken = userData?['user_device_token'];
@@ -125,9 +130,9 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
 
     final notificationData = {
       "status": true,
-      'title': "Your kitchen join request is approved",
+      'title': "You have been added to the kitchen",
       'body':
-          "Your request to join the kitchen \"${event.kitchenName}\" has been approved. You can now join again using this invitation code: $inviteCode",
+          "Your request to join the kitchen \"${kitchenName}\" has been approved by the host. You are now added to the kitchen. You can access it anytime using this invitation code: $inviteCode",
       'host_user_id': userId,
       'sender_user_id': _userCubit.state.userId,
       'sender_name':
@@ -140,16 +145,87 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
 
     await FCMService().sendNotification(
       userDeviceToken,
-      "Your kitchen join request is approved",
-      "Your request to join the kitchen \"${event.kitchenName}\" has been approved. You can now join again using this invitation code: $inviteCode",
+      "You have been added to the kitchen",
+      "Your request to join the kitchen \"${kitchenName}\" has been approved by the host. You are now added to the kitchen. You can access it anytime using this invitation code: $inviteCode",
     );
-    _kitchenBloc.add(MemberApprovedEvent(inviteCode));
+
+    // _kitchenBloc.add(MemberApprovedEvent(inviteCode));
     await FirebaseFirestore.instance
         .collection('notifications')
         .add(notificationData);
     updateNotificationStatus(event.id);
     AppToast.show("Kitchen approval notification sent", ToastType.success);
     emit(DashboardSuccess("Approved"));
+  }
+
+  Future<void> _onDeclineRequestEvent(
+    DeclineRequestEvent event,
+    Emitter<DashboardState> emit,
+  ) async {
+    emit(DeclineLoading());
+    final userId = event.memberId;
+
+    final userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .get();
+
+    if (!userDoc.exists) {
+      emit(DashboardFailure("User not found"));
+      return;
+    }
+
+    final kitchenQuery = await FirebaseFirestore.instance
+        .collection('kitchens')
+        .where("user_id", isEqualTo: _userCubit.state.userId)
+        .where("kitchen_id", isEqualTo: event.kitchenId)
+        .get();
+
+    if (kitchenQuery.docs.isEmpty) {
+      emit(DashboardFailure("Kitchen not found"));
+      return;
+    }
+
+    final kitchenDoc = kitchenQuery.docs.first;
+    final kitchenData = kitchenDoc.data();
+    final inviteCode = kitchenData['invitation_code'] ?? '';
+    final kitchenName = kitchenData['kitchen_name'] ?? '';
+    final userData = userDoc.data();
+    final userDeviceToken = userData?['user_device_token'];
+
+    if (userDeviceToken == null || userDeviceToken.isEmpty) {
+      emit(DashboardFailure("User device token not found"));
+      return;
+    }
+
+    final notificationData = {
+      "status": false,
+      'title': "Your request to join the kitchen was declined",
+      'body':
+          "Your request to join the kitchen \"${kitchenName}\" has been declined by the host. You can try again later or contact the host for more details.",
+      'host_user_id': userId,
+      'sender_user_id': _userCubit.state.userId,
+      'sender_name':
+          "${_userCubit.state.firstName} ${_userCubit.state.lastName}",
+      'kitchen_id': event.kitchenId,
+      'invitation_code': inviteCode,
+      'date': DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
+      'read': false,
+    };
+
+    await FCMService().sendNotification(
+      userDeviceToken,
+      "Your request to join the kitchen was declined",
+      "Your request to join the kitchen \"${kitchenName}\" has been declined by the host. You can try again later or contact the host for more details.",
+    );
+
+    // _kitchenBloc.add(MemberApprovedEvent(inviteCode));
+    await FirebaseFirestore.instance
+        .collection('notifications')
+        .add(notificationData);
+    updateNotificationStatus(event.id);
+    AppToast.show("Request Declined Successfully", ToastType.success);
+    emit(DashboardSuccess("Declined"));
   }
 
   Future<void> updateNotificationStatus(int id) async {

@@ -1,4 +1,4 @@
-import 'package:foodkitchen/core/common/entities/user.dart';
+import 'package:foodkitchen/core/common/domain/entities/user.dart';
 import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/core/common/usecase/usecase.dart';
 import 'package:foodkitchen/core/common/domain/repository/current_user_repository.dart';

@@ -38,8 +38,6 @@ class DioHelper {
         },
         onError: (DioException e, handler) async {
           if (e.response != null) {
-            logError("Data: ${e.response?.data}");
-
             if (e.response?.statusCode == 401) {
               final data = e.response?.data;
               final message = data is Map<String, dynamic>
@@ -79,7 +77,7 @@ class DioHelper {
             logError("❌ [DIO ERROR] ${e.message}");
           }
 
-          return handler.next(e);
+          return handler.reject(e);
         },
       ),
     );
@@ -96,7 +94,6 @@ class DioHelper {
   }
 
   Future<Failure> handleError(DioException e) async {
-    log("❌ DioException: $e");
     String message = "Unexpected error occurred";
 
     if (e.response != null && e.response?.data != null) {
@@ -127,6 +124,7 @@ class DioHelper {
         context.go(Routes.signIn);
       }
     }
+
     switch (e.type) {
       case DioExceptionType.connectionTimeout:
         return NetworkFailure("Connection timed out");

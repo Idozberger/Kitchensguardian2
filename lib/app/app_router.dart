@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
 import 'package:foodkitchen/core/dialogs/logout.dart';
 import 'package:foodkitchen/core/dialogs/not_found_404.dart';
 import 'package:foodkitchen/features/auth/data/model/user_model.dart';
@@ -29,7 +29,7 @@ import 'package:foodkitchen/features/pantry/presentation/pages/receipt_details/c
 import 'package:foodkitchen/features/pantry/presentation/pages/request_now_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/scan_meal_page.dart';
 import 'package:foodkitchen/features/planner/domain/entities/merged_meal_type_entity.dart';
-import 'package:foodkitchen/features/planner/presentation/pages/add_meal_page.dart';
+import 'package:foodkitchen/features/planner/presentation/pages/add_meal_plan/pages/add_meal_page.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/edit_meal_page.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/favourite_food_page.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/generate_recipes_page.dart';
@@ -133,12 +133,15 @@ final GoRouter router = GoRouter(
     GoRoute(
       name: Routes.generateRecipes,
       path: Routes.generateRecipes,
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final Map<String, dynamic> data = state.extra as Map<String, dynamic>;
-        return GenerateRecipesPage(
-          selectedDate: data["selected_date"],
-          selectedMealType: data["selected_meal_type"],
-          isPlan: data["is_plan"],
+        return buildTransitionPage(
+          key: state.pageKey,
+          child: GenerateRecipesPage(
+            selectedDate: data["selected_date"],
+            selectedMealType: data["selected_meal_type"],
+            isPlan: data["is_plan"],
+          ),
         );
       },
     ),
@@ -211,7 +214,36 @@ final GoRouter router = GoRouter(
     ),
     GoRoute(
       path: Routes.addPantryStorageType,
-      builder: (context, state) => AddPantryStorageTypePage(),
+      pageBuilder: (context, state) => buildTransitionPage(
+        key: state.pageKey,
+        child: AddPantryStorageTypePage(),
+      ),
     ),
   ],
 );
+CustomTransitionPage buildTransitionPage({
+  required Widget child,
+  required LocalKey key,
+}) {
+  return CustomTransitionPage(
+    key: key,
+    child: child,
+    transitionDuration: const Duration(milliseconds: 300),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      final offsetAnimation = Tween<Offset>(
+        begin: const Offset(1.0, 0.0),
+        end: Offset.zero,
+      ).animate(animation);
+
+      final fadeAnimation = Tween<double>(
+        begin: 0.0,
+        end: 1.0,
+      ).animate(animation);
+
+      return FadeTransition(
+        opacity: fadeAnimation,
+        child: SlideTransition(position: offsetAnimation, child: child),
+      );
+    },
+  );
+}

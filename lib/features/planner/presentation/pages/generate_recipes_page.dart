@@ -99,7 +99,7 @@ class _GenerateRecipesPageState extends State<GenerateRecipesPage> {
                   ),
                   if (state.isLoading)
                     Padding(
-                      padding: gapOnly(top: 40),
+                      padding: gapOnly(top: 18),
                       child: Center(
                         child: CircularProgressIndicator(
                           color: AppColors.primaryColor,

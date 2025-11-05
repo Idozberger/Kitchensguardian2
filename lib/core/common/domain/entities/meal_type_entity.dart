@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:foodkitchen/features/planner/domain/entities/ingredient_entity.dart';
 
 class MealTypeEntity {
@@ -12,7 +13,7 @@ class MealTypeEntity {
   final List<Map<String, dynamic>> doneSteps;
   final List<IngredientEntity> ingredients;
   final List<IngredientEntity> missingIngredients;
-  final String thumbnail;
+  final Uint8List thumbnail;
   final bool missingItems;
   final bool available;
 

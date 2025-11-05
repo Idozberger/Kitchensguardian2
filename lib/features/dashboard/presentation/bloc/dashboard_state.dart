@@ -22,3 +22,7 @@ final class DashboardFailure extends DashboardState {
   final String message;
   const DashboardFailure(this.message);
 }
+
+final class ApproveLoading extends DashboardState {}
+
+final class DeclineLoading extends DashboardState {}

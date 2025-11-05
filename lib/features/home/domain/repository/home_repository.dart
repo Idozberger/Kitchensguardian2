@@ -1,4 +1,5 @@
-import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/common/domain/entities/pantries_entity.dart';
 import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/features/home/domain/entities/kitchen.dart';
 import 'package:foodkitchen/features/home/domain/entities/pantry_data.dart';
@@ -11,4 +12,11 @@ abstract interface class HomeRepository {
     required String kitchenId,
   });
   Future<Either<Failure, List<MealTypeEntity>>> getAllWeeklyPlans();
+  Future<Either<Failure, List<PantriesCommonEntity>>> getAllPantries({
+    required String kitchenId,
+  });
+  Future<Either<Failure, String>> createPantry({
+    required String kitchenId,
+    required List<String> pantries,
+  });
 }

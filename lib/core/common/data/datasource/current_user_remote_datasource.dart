@@ -1,6 +1,6 @@
 import 'package:foodkitchen/core/services/jwt_decoder/jwt_decoder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:foodkitchen/core/common/entities/user.dart';
+import 'package:foodkitchen/core/common/domain/entities/user.dart';
 
 abstract interface class CurrentUserRemoteDatasource {
   Future<User?> getCurrentUser();

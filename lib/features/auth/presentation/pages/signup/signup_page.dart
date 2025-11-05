@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
+import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
@@ -32,6 +33,13 @@ class _SignUpPageState extends State<SignUpPage> {
       TextEditingController();
 
   bool _isObscure = true;
+  bool _isConfirmPasswordObscure = true;
+
+  void updateIsConfirmPasswordObscure() {
+    setState(() {
+      _isConfirmPasswordObscure = !_isConfirmPasswordObscure;
+    });
+  }
 
   void updateObsecure() {
     setState(() {
@@ -126,7 +134,11 @@ class _SignUpPageState extends State<SignUpPage> {
                                 horizontal: 15,
                               ),
                               child: SvgPicture.asset(
-                                AppAssets.eyeVisibilitySvg,
+                                _isObscure == false
+                                    ? AppAssets.eyeVisibilitySvg
+                                    : AppAssets.eyeSvg,
+                                height: h(16),
+                                color: AppColors.greyColor,
                               ),
                             ),
                           ),
@@ -137,16 +149,20 @@ class _SignUpPageState extends State<SignUpPage> {
                           label: "Confirm Password",
                           textInputAction: TextInputAction.done,
                           hintText: "Enter your password",
-                          obscureText: _isObscure,
+                          obscureText: _isConfirmPasswordObscure,
                           suffixIcon: GestureDetector(
-                            onTap: () => updateObsecure(),
+                            onTap: () => updateIsConfirmPasswordObscure(),
                             child: Padding(
                               padding: gapSymmetric(
                                 vertical: 13,
                                 horizontal: 15,
                               ),
                               child: SvgPicture.asset(
-                                AppAssets.eyeVisibilitySvg,
+                                _isConfirmPasswordObscure == false
+                                    ? AppAssets.eyeVisibilitySvg
+                                    : AppAssets.eyeSvg,
+                                height: h(16),
+                                color: AppColors.greyColor,
                               ),
                             ),
                           ),

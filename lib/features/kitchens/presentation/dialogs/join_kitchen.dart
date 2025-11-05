@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
+import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_otp_widget.dart';
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_bloc.dart';
@@ -12,13 +13,14 @@ import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_state.da
 
 Future<dynamic> showJoinKitchenDialog(BuildContext context) {
   String? invitaionCode;
+
   return showDialog(
     context: context,
     barrierDismissible: true,
     builder: (context) {
       return BlocConsumer<KitchenBloc, KitchenState>(
         listener: (context, state) {
-          if (state is KitchensLoading) {
+          if (state is KitchenFailure || state is KitchenSuccess) {
             Navigator.pop(context, true);
           }
         },
@@ -52,8 +54,8 @@ Future<dynamic> showJoinKitchenDialog(BuildContext context) {
                 OtpField(
                   isJoining: true,
                   preFilledStar: true,
-                  onCompleted: (invitationCode) {
-                    invitaionCode = invitationCode;
+                  onCompleted: (invitationCodeInput) {
+                    invitaionCode = invitationCodeInput;
                   },
                 ),
                 SizedBox(height: h(10)),
@@ -65,13 +67,15 @@ Future<dynamic> showJoinKitchenDialog(BuildContext context) {
                     child: GenericButtonWidget(
                       isLoading: state is KitchensLoading,
                       onPressed: () {
-                        if (invitaionCode != null) {
+                        if (invitaionCode != null &&
+                            invitaionCode!.isNotEmpty) {
                           context.read<KitchenBloc>().add(
                             JoinKitchenEvent(invitaionCode!),
                           );
+                        } else {
+                          AppToast.show("Code is required", ToastType.error);
                         }
                       },
-
                       text: "Join",
                     ),
                   ),

@@ -1,5 +1,5 @@
-import 'package:foodkitchen/core/common/entities/pantry.dart';
-import 'package:foodkitchen/core/common/entities/pantry_item.dart';
+import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
+import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';
 
 class PantryModel extends Pantry {
   PantryModel({required super.kitchenId, required super.items});

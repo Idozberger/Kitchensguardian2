@@ -167,13 +167,46 @@ class PlannerLocalDatasourceImpl implements PlannerLocalDatasource {
   }
 
   Future<void> saveThings(List<MealTypeModel> list) async {
-    final prefs = await SharedPreferences.getInstance();
+    try {
+      final prefs = await SharedPreferences.getInstance();
 
-    final List<String> jsonList = list
-        .map((item) => jsonEncode(item.toJson()))
-        .toList();
+      // Log the list of MealTypeModel objects to be saved
+      debugPrint("Saving ${list.length} meal plans to SharedPreferences...");
 
-    await prefs.setStringList('weekly_plan', jsonList);
+      // Check if the list is empty
+      if (list.isEmpty) {
+        debugPrint("The list of meal plans is empty.");
+      }
+
+      // Map the MealTypeModel list to JSON strings
+      final List<String> jsonList = list.map((item) {
+        final jsonString = jsonEncode(
+          item.toJson(),
+        ); // Serialize the object to JSON
+        debugPrint(
+          "Serialized meal plan to JSON: $jsonString",
+        ); // Log the serialized JSON
+        return jsonString;
+      }).toList();
+
+      // Log the final JSON list before saving
+      debugPrint("Serialized JSON list to save: $jsonList");
+
+      // Save the JSON list to SharedPreferences
+      bool success = await prefs.setStringList('weekly_plan', jsonList);
+
+      // Log the success or failure of saving to SharedPreferences
+      if (success) {
+        debugPrint(
+          "Successfully saved ${jsonList.length} meal plans to SharedPreferences.",
+        );
+      } else {
+        debugPrint("Failed to save meal plans to SharedPreferences.");
+      }
+    } catch (e, stack) {
+      debugPrint("Error in saveThings(): $e");
+      debugPrint("Stack trace: $stack");
+    }
   }
 
   @override

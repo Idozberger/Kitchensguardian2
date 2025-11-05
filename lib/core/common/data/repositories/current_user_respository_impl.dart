@@ -1,4 +1,4 @@
-import 'package:foodkitchen/core/common/entities/user.dart';
+import 'package:foodkitchen/core/common/domain/entities/user.dart';
 import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/core/services/connection/connection_checker.dart';
 import 'package:foodkitchen/core/common/data/datasource/current_user_remote_datasource.dart';

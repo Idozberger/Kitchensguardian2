@@ -65,7 +65,6 @@ class FCMService {
               'color': '#FF5722',
               'icon': 'ic_notification',
               'tag': 'kitchen_alert',
-              'click_action': 'FLUTTER_NOTIFICATION_CLICK',
             },
           },
           'apns': {

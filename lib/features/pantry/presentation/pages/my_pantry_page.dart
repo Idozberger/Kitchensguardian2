@@ -4,6 +4,7 @@ import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
+import 'package:foodkitchen/core/services/fcm/fcm_service.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
@@ -154,13 +155,10 @@ class _MyPantryPageState extends State<MyPantryPage> {
           expiry: "Expires in ${index + 1} days",
           onListCheckedCallback: () async {
             ////TODO: Request Notification Permission
-            pantryBloc.add(
-              ShowNotificationEvent(
-                id: 123,
-                body: "Body Test",
-                kitchenId: userCubit.state.activeKitchenId,
-                title: "Title Test",
-              ),
+            await FCMService().sendNotification(
+              "cssg9rEJQtumlTZXIlYdNX:APA91bHXf54VEV2u5sGvVlQrmA9-aM_O4J6wMYDoHpgFLb6z7D4tr78HVVzsW_Av8XcA70a81vD3rk6G8ntrOTGqmzTlXwIY0s5mg3IrRVyGM9XpxsrJVFw",
+              "SS",
+              "sdfa",
             );
           },
         );

@@ -1,4 +1,4 @@
-import 'package:cached_network_image/cached_network_image.dart';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
@@ -9,7 +9,7 @@ class RecipeTile extends StatelessWidget {
   final String title;
   final String subtitle;
   final String? errorText;
-  final String? imagePath;
+  final Uint8List? uint8list;
   final String trailingIcon;
   final bool selected;
   final bool isDeletedIcon;
@@ -21,7 +21,7 @@ class RecipeTile extends StatelessWidget {
     super.key,
     required this.title,
     required this.subtitle,
-    this.imagePath,
+    this.uint8list,
     required this.trailingIcon,
     this.selected = false,
     this.isDeletedIcon = false,
@@ -50,8 +50,13 @@ class RecipeTile extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(h(10)),
-              child: imagePath != null && imagePath!.isNotEmpty
-                  ? CachedNetworkImage(imageUrl: imagePath!)
+              child: uint8list != null
+                  ? Image.memory(
+                      uint8list!,
+                      width: w(78),
+                      height: h(78),
+                      fit: BoxFit.cover,
+                    )
                   : Image.asset(
                       AppAssets.onBoardingSliderBg01,
                       width: w(78),

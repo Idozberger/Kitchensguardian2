@@ -47,13 +47,7 @@ class NotificationService {
 
     await _flutterLocalNotificationsPlugin.initialize(
       initSettings,
-      onDidReceiveNotificationResponse: (NotificationResponse response) {
-        if (response.payload != null) {
-          _handleNotificationPayload(response.payload!);
-        } else {
-          log('⚠️ Notification payload is null');
-        }
-      },
+      onDidReceiveNotificationResponse: notificationTapBackground,
     );
   }
 
@@ -63,28 +57,26 @@ class NotificationService {
       final context = rootNavigatorKey.currentContext;
 
       if (context != null) {
-        context.push(Routes.notification);
-      } else {
-        log('⚠️ Context is null. Will navigate later.');
-      }
+        context.go(Routes.notification);
+      } else {}
     } catch (e, st) {
-      log('Error handling notification payload: $e');
       log('$st');
     }
   }
 
   Future<void> _requestPermissions() async {
     if (Platform.isIOS) {
-      await _flutterLocalNotificationsPlugin
+      bool? permissionGranted = await _flutterLocalNotificationsPlugin
           .resolvePlatformSpecificImplementation<
             IOSFlutterLocalNotificationsPlugin
           >()
           ?.requestPermissions(alert: true, badge: true, sound: true);
-      await _flutterLocalNotificationsPlugin
-          .resolvePlatformSpecificImplementation<
-            MacOSFlutterLocalNotificationsPlugin
-          >()
-          ?.requestPermissions(alert: true, badge: true, sound: true);
+
+      if (permissionGranted != null && permissionGranted) {
+        print("iOS Notification Permission Granted");
+      } else {
+        print("iOS Notification Permission Denied");
+      }
     } else if (Platform.isAndroid) {
       final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
           _flutterLocalNotificationsPlugin
@@ -92,40 +84,22 @@ class NotificationService {
                 AndroidFlutterLocalNotificationsPlugin
               >();
 
-      final bool? grantedNotificationPermission = await androidImplementation
-          ?.requestNotificationsPermission();
+      final bool hasPermission =
+          await androidImplementation?.areNotificationsEnabled() ?? false;
+
+      if (!hasPermission) {
+        final bool? grantedNotificationPermission = await androidImplementation
+            ?.requestNotificationsPermission();
+
+        if (grantedNotificationPermission == true) {
+          print("Android Notification Permission Granted");
+        } else {
+          print("Android Notification Permission Denied");
+        }
+      } else {
+        print("Android Notification Permission Already Granted");
+      }
     }
-  }
-
-  Future<void> showRecipeInProgressNotification({
-    required MealTypeModel mealTypeModel,
-    required String recipeName,
-  }) async {
-    const AndroidNotificationDetails androidDetails =
-        AndroidNotificationDetails(
-          'recipe_progress_channel',
-          'Recipe Progress',
-          channelDescription: 'Notifies user that a recipe is in progress',
-          importance: Importance.max,
-          priority: Priority.high,
-          ongoing: true,
-          autoCancel: false,
-          playSound: false,
-          enableVibration: false,
-        );
-
-    const NotificationDetails platformDetails = NotificationDetails(
-      android: androidDetails,
-      iOS: DarwinNotificationDetails(),
-    );
-
-    await _flutterLocalNotificationsPlugin.show(
-      123,
-      'Recipe in Progress',
-      'You started "$recipeName". Tap to continue cooking!',
-      platformDetails,
-      payload: jsonEncode(mealTypeModel.toJson()),
-    );
   }
 
   Future<void> showNotification({
@@ -142,6 +116,7 @@ class NotificationService {
           importance: Importance.max,
           priority: Priority.high,
           playSound: true,
+          ongoing: true,
         );
     const NotificationDetails platformDetails = NotificationDetails(
       android: androidDetails,
@@ -241,3 +216,17 @@ class NotificationService {
     return await _flutterLocalNotificationsPlugin.pendingNotificationRequests();
   }
 }
+
+@pragma('vm:entry-point')
+void notificationTapBackground(NotificationResponse response) {
+  _handleNotificationTap(response.payload);
+}
+
+void _handleNotificationTap(String? payload) {
+  final context = rootNavigatorKey.currentContext;
+  if (context != null) {
+    context.go(Routes.notification);
+  } else {}
+}
+
+bool pendingNavigation = true;

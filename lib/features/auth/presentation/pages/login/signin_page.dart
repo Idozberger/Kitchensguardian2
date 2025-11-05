@@ -134,7 +134,11 @@ class _SignInPageState extends State<SignInPage> {
                                 horizontal: 15,
                               ),
                               child: SvgPicture.asset(
-                                AppAssets.eyeVisibilitySvg,
+                                _isObscure == false
+                                    ? AppAssets.eyeVisibilitySvg
+                                    : AppAssets.eyeSvg,
+                                height: h(16),
+                                color: AppColors.greyColor,
                               ),
                             ),
                           ),

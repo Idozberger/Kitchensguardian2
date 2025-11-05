@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,7 +12,7 @@ import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dar
 
 class HeaderImageWidget extends StatelessWidget {
   final bool isFav;
-  final String thumbnail;
+  final Uint8List thumbnail;
   final VoidCallback onFavoriteToggle;
 
   const HeaderImageWidget({
@@ -35,7 +37,7 @@ class HeaderImageWidget extends StatelessWidget {
               borderRadius: BorderRadius.circular(h(10)),
               image: (thumbnail.isNotEmpty)
                   ? DecorationImage(
-                      image: CachedNetworkImageProvider(thumbnail),
+                      image: MemoryImage(thumbnail),
                       fit: BoxFit.cover,
                     )
                   : DecorationImage(

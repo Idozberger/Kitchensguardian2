@@ -6,19 +6,21 @@ class DrawerListTile extends StatelessWidget {
   final String title;
   final String iconPath;
   final VoidCallback onTap;
+  final Color? color;
 
   const DrawerListTile({
     super.key,
     required this.title,
     required this.iconPath,
     required this.onTap,
+    this.color,
   });
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       onTap: onTap,
-      leading: SvgPicture.asset(iconPath),
+      leading: SvgPicture.asset(iconPath, color: color),
       title: Text(
         title,
         style: Theme.of(context).textTheme.headlineLarge!.copyWith(

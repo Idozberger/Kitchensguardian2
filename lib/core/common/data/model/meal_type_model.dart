@@ -1,4 +1,6 @@
-import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
+import 'dart:typed_data';
+
+import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
 import 'package:foodkitchen/features/planner/domain/entities/ingredient_entity.dart';
 
 class MealTypeModel extends MealTypeEntity {
@@ -97,7 +99,7 @@ class MealTypeModel extends MealTypeEntity {
     bool? available,
     String? mealType,
     String? formatedDateString,
-    String? thumbnail,
+    Uint8List? thumbnail,
   }) {
     return MealTypeModel(
       id: id ?? this.id,

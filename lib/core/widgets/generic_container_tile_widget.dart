@@ -24,8 +24,7 @@ class UpperTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(h(10)),
+    return GestureDetector(
       onTap: callback == null
           ? null
           : () {

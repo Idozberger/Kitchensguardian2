@@ -1,4 +1,9 @@
+import 'dart:convert';
+import 'dart:developer';
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:foodkitchen/core/common/data/model/pantry_model.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
 import 'package:foodkitchen/core/global/functions/logs.dart';
@@ -22,6 +27,7 @@ abstract interface class PlannerRemoteDatasource {
 class PlannerRemoteDatasourceImpl implements PlannerRemoteDatasource {
   final DioHelper dio;
   PlannerRemoteDatasourceImpl(this.dio);
+
   @override
   Future<List<Map<String, dynamic>>> generateRecipes({
     required String instructions,
@@ -40,9 +46,26 @@ class PlannerRemoteDatasourceImpl implements PlannerRemoteDatasource {
       final data = response.data["recipes"];
 
       if (data is List) {
-        return data.map((e) => Map<String, dynamic>.from(e)).toList();
+        return data.map<Map<String, dynamic>>((e) {
+          final recipe = Map<String, dynamic>.from(e);
+
+          final thumbnailBase64 = recipe["thumbnail"];
+
+          if (thumbnailBase64 is String && thumbnailBase64.isNotEmpty) {
+            try {
+              recipe["thumbnail"] = base64Decode(
+                thumbnailBase64.contains(",")
+                    ? thumbnailBase64.split(",").last.trim()
+                    : thumbnailBase64.trim(),
+              );
+            } catch (e) {
+              recipe["thumbnail"] = Uint8List(0);
+            }
+          }
+          return recipe;
+        }).toList();
       } else {
-        throw Exception("Invalid data");
+        throw Exception("Invalid data format for favourite_recipes");
       }
     } on DioException catch (e) {
       throw dio.handleError(e);
@@ -53,15 +76,37 @@ class PlannerRemoteDatasourceImpl implements PlannerRemoteDatasource {
   Future<List<Map<String, dynamic>>> favouriteRecipes() async {
     try {
       final response = await dio.get(AppConstants.favouriteRecipes);
+
       final data = response.data["favourite_recipes"];
 
       if (data is List) {
-        return data.map((e) => Map<String, dynamic>.from(e)).toList();
+        return data.map<Map<String, dynamic>>((e) {
+          final recipe = Map<String, dynamic>.from(e);
+
+          final thumbnailBase64 = recipe["thumbnail"];
+
+          if (thumbnailBase64 is String && thumbnailBase64.isNotEmpty) {
+            try {
+              recipe["thumbnail"] = base64Decode(
+                thumbnailBase64.contains(",")
+                    ? thumbnailBase64.split(",").last.trim()
+                    : thumbnailBase64.trim(),
+              );
+            } catch (e) {
+              recipe["thumbnail"] = Uint8List(0);
+            }
+          }
+          return recipe;
+        }).toList();
       } else {
-        throw Exception("Invalid data");
+        throw Exception("Invalid data format for favourite_recipes");
       }
     } on DioException catch (e) {
-      throw dio.handleError(e);
+      final failure = await dio.handleError(e);
+
+      throw failure;
+    } catch (e, s) {
+      rethrow;
     }
   }
 

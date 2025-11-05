@@ -1,4 +1,4 @@
-import 'package:foodkitchen/core/common/entities/pantry.dart';
+import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
 
 sealed class PantryEvent {}
 

@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
-import 'package:foodkitchen/core/common/entities/pantry_storage_type_entity.dart';
+import 'package:foodkitchen/core/common/domain/entities/pantry_storage_type_entity.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
@@ -59,7 +59,11 @@ class _AddPantryStorageTypePageState extends State<AddPantryStorageTypePage> {
       _nameController.clear();
     });
 
-    AppToast.show("Storage type added to list.", ToastType.success);
+    AppToast.show(
+      "Storage type added to list.",
+      ToastType.success,
+      gravity: ToastGravity.TOP,
+    );
   }
 
   void resetState() {
@@ -88,6 +92,7 @@ class _AddPantryStorageTypePageState extends State<AddPantryStorageTypePage> {
                       children: [
                         gap(height: 20),
                         AppTextField(
+                          onFieldSubmitted: (p0) => _addNewType(),
                           controller: _nameController,
                           label: 'Storage Type Name',
                           hintText: 'Enter storage type name',

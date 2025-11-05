@@ -1,5 +1,5 @@
-import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
-import 'package:foodkitchen/core/common/entities/pantry.dart';
+import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
 import 'package:foodkitchen/core/error/failures.dart';
 import 'package:fpdart/fpdart.dart';
 

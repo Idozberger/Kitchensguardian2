@@ -1,19 +1,23 @@
-import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/common/data/datasource/common_remote_datasource.dart';
+import 'package:foodkitchen/core/common/data/model/pantries_model.dart';
+import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/common/domain/entities/pantries_entity.dart';
 import 'package:foodkitchen/core/error/failures.dart';
-import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/features/home/data/datasource/home_remote_datasource.dart';
 import 'package:foodkitchen/features/home/data/models/kitchen_model.dart';
-import 'package:foodkitchen/features/home/data/models/pantries__item_model.dart';
 import 'package:foodkitchen/features/home/data/models/pantry_data_model.dart';
 import 'package:foodkitchen/features/home/domain/entities/kitchen.dart';
 import 'package:foodkitchen/features/home/domain/entities/pantry_data.dart';
-import 'package:foodkitchen/features/home/domain/entities/pantry_items.dart';
 import 'package:foodkitchen/features/home/domain/repository/home_repository.dart';
 import 'package:fpdart/fpdart.dart';
 
 class HomeRepositoryImpl implements HomeRepository {
   final HomeRemoteDataSource homeRemoteDataSource;
-  HomeRepositoryImpl(this.homeRemoteDataSource);
+  final CommonRemoteDatasource commonRemoteDatasource;
+  HomeRepositoryImpl({
+    required this.homeRemoteDataSource,
+    required this.commonRemoteDatasource,
+  });
   @override
   Future<Either<Failure, Kitchen>> createKitchen({
     required String kitchenName,
@@ -79,6 +83,46 @@ class HomeRepositoryImpl implements HomeRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<PantriesCommonEntity>>> getAllPantries({
+    required String kitchenId,
+  }) async {
+    try {
+      final response = await commonRemoteDatasource.getAllPantries(
+        kitchenId: kitchenId,
+      );
+
+      final pantries = response
+          .map((json) => PantriesCommonModel.fromJson(json))
+          .toList();
+
+      return Right(pantries);
+    } on Failure catch (f) {
+      return Left(f);
+    } catch (e, stack) {
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, String>> createPantry({
+    required String kitchenId,
+    required List<String> pantries,
+  }) async {
+    try {
+      final response = await commonRemoteDatasource.createPantry(
+        kitchenId: kitchenId,
+        pantries: pantries,
+      );
+
+      return Right(response);
+    } on Failure catch (f) {
+      return Left(f);
+    } catch (e, stack) {
       return Left(UnknownFailure(e.toString()));
     }
   }

@@ -31,7 +31,7 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   void initState() {
     userCubit = context.read<UserCubit>();
-    _initializeFirebaseMessaging(context);
+    _initializeFirebaseMessaging();
     super.initState();
   }
 
@@ -49,24 +49,27 @@ class _DashboardPageState extends State<DashboardPage> {
     });
   }
 
-  Future<void> _initializeFirebaseMessaging(BuildContext context) async {
-    await Future.delayed(Duration(seconds: 3));
-    try {
-      final userState = userCubit.state;
+  Future<void> _initializeFirebaseMessaging() async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Future.delayed(const Duration(seconds: 3));
 
-      if (userState.userId.isNotEmpty && userState.email.isNotEmpty) {
-        await FirebaseMessagingService.instance().init(
-          userId: userState.userId,
-          firstName: userState.firstName,
-          lastName: userState.lastName,
-          email: userState.email,
-        );
-      } else {
-        debugPrint('Skipping FCM init — missing userId or email.');
+      try {
+        final userState = userCubit.state;
+        if (userState.userId.isNotEmpty && userState.email.isNotEmpty) {
+          await FirebaseMessagingService.instance().init(
+            userId: userState.userId,
+            firstName: userState.firstName,
+            lastName: userState.lastName,
+            email: userState.email,
+          );
+        } else {
+          debugPrint('Skipping FCM init — missing userId or email.');
+        }
+      } catch (e, st) {
+        debugPrint('Error initializing FCM: $e');
+        debugPrint('Stack trace: $st');
       }
-    } catch (e, st) {
-      debugPrint('Stack trace: $st');
-    }
+    });
   }
 
   @override

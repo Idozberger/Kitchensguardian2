@@ -1,3 +1,6 @@
+import 'dart:developer';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -16,7 +19,7 @@ class RecipeTileItem extends StatelessWidget {
   final bool isPlan;
   final bool isDeletedIcon;
   final String svgAsset;
-  final String? thumbnail;
+
   final VoidCallback? deleteCallback;
   const RecipeTileItem({
     super.key,
@@ -26,7 +29,7 @@ class RecipeTileItem extends StatelessWidget {
     required this.isPlan,
     this.svgAsset = "",
     this.isDeletedIcon = false,
-    this.thumbnail,
+
     this.deleteCallback,
   });
 
@@ -54,10 +57,10 @@ class RecipeTileItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RecipeTile(
+      uint8list: recipe.thumbnail,
       title: recipe.title,
       isDeletedIcon: isDeletedIcon,
       subtitle: recipe.recipeShortSummary,
-      imagePath: thumbnail,
       trailingIcon: svgAsset.isEmpty
           ? AppAssets.arrowForwardAndroidSvg
           : svgAsset,

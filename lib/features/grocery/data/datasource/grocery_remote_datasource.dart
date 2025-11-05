@@ -101,7 +101,15 @@ class GroceryRemoteDatasourceImpl implements GroceryRemoteDatasource {
       final response = await dio.get(
         "${AppConstants.getAiGeneratedList}?kitchen_id=$kitchenId",
       );
-      final data = response.data["missing_items"];
+
+      debugPrint("🧠 [getAiGeneratedItems] Response: ${response.data}");
+
+      final data =
+          response.data["missing_items"] ??
+          response.data["data"]?["missing_items"] ??
+          response.data["missing"] ??
+          response.data;
+
       if (data is List) {
         final parsedList = data.map<Map<String, dynamic>>((e) {
           if (e is Map) {
@@ -118,12 +126,15 @@ class GroceryRemoteDatasourceImpl implements GroceryRemoteDatasource {
 
         return parsedList;
       } else {
-        throw Exception("Invalid data");
+        debugPrint("❌ Invalid data format: ${data.runtimeType}");
+        throw Exception(
+          "Invalid data format: expected List, got ${data.runtimeType}",
+        );
       }
     } on DioException catch (e) {
       throw dio.handleError(e);
     } catch (e, stackTrace) {
-      debugPrint("StackTrace: $stackTrace");
+      debugPrint("❌ Exception in getAiGeneratedItems: $e\n$stackTrace");
       rethrow;
     }
   }

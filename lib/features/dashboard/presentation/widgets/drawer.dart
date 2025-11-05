@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -89,83 +86,91 @@ class AppDrawer extends StatelessWidget {
   Widget _buildDrawerItems(BuildContext context) {
     return BlocBuilder<UserCubit, UserState>(
       builder: (_, state) {
-        return Column(
-          children: [
-            DrawerListTile(
-              title: "Favourite",
-              iconPath: AppAssets.favouriteSvg,
-              onTap: () {
-                context.push(Routes.favouriteFood);
-              },
-            ),
-            DrawerListTile(
-              title: "My Kitchen Members",
-              iconPath: AppAssets.myKitchenMember,
-              onTap: () {
-                if (state.activeKitchenId.isNotEmpty) {
-                  context.push(Routes.myKitchenMembers);
-                } else {
-                  AppToast.show(
-                    "Please join or create kitchen",
-                    ToastType.error,
-                  );
-                }
-              },
-            ),
-            DrawerListTile(
-              title: "Get Referral Code",
-              iconPath: AppAssets.referralSvg,
-              onTap: () async {
-                if (state.activeKitchenId.isNotEmpty) {
-                  if (state.invitationCode.isNotEmpty) {
-                    context.pop();
-                    logError("inivitaion code ${state.invitationCode}");
-                    _showRefferalCodeDialog(context, state.invitationCode);
+        return SingleChildScrollView(
+          child: Column(
+            children: [
+              DrawerListTile(
+                title: "Favourite",
+                iconPath: AppAssets.favouriteSvg,
+                onTap: () {
+                  context.push(Routes.favouriteFood);
+                },
+              ),
+              DrawerListTile(
+                title: "My Kitchen Members",
+                iconPath: AppAssets.myKitchenMember,
+                onTap: () {
+                  if (state.activeKitchenId.isNotEmpty) {
+                    context.push(Routes.myKitchenMembers);
                   } else {
                     AppToast.show(
-                      "Kitchen members cannot invite others or access the invitation code.",
+                      "Please join or create kitchen",
                       ToastType.error,
                     );
                   }
-                } else {
-                  AppToast.show(
-                    "Please join or create kitchen",
-                    ToastType.error,
-                  );
-                }
-              },
-            ),
+                },
+              ),
+              DrawerListTile(
+                title: "Get Referral Code",
+                iconPath: AppAssets.referralSvg,
+                onTap: () async {
+                  if (state.activeKitchenId.isNotEmpty) {
+                    if (state.invitationCode.isNotEmpty) {
+                      context.pop();
+                      logError("inivitaion code ${state.invitationCode}");
+                      _showRefferalCodeDialog(context, state.invitationCode);
+                    } else {
+                      AppToast.show(
+                        "Kitchen members cannot invite others or access the invitation code.",
+                        ToastType.error,
+                      );
+                    }
+                  } else {
+                    AppToast.show(
+                      "Please join or create kitchen",
+                      ToastType.error,
+                    );
+                  }
+                },
+              ),
 
-            DrawerListTile(
-              title: "Scan History",
-              iconPath: AppAssets.historySvg,
-              onTap: () {
-                if (state.activeKitchenId.isNotEmpty) {
-                  context.push(Routes.scanHistory);
-                } else {
+              DrawerListTile(
+                title: "Scan History",
+                iconPath: AppAssets.historySvg,
+                onTap: () {
+                  if (state.activeKitchenId.isNotEmpty) {
+                    context.push(Routes.scanHistory);
+                  } else {
+                    AppToast.show(
+                      "Please join or create kitchen",
+                      ToastType.error,
+                    );
+                  }
+                },
+              ),
+              DrawerListTile(
+                title: "Kitchens",
+                iconPath: AppAssets.kitchenSvg,
+                onTap: () => context.push(Routes.kitchen),
+              ),
+              DrawerListTile(
+                title: "Add Pantry",
+                iconPath: AppAssets.pantrySvg,
+                color: Colors.black,
+                onTap: () => context.push(Routes.addPantryStorageType),
+              ),
+              DrawerListTile(
+                title: "Terms & Conditions",
+                iconPath: AppAssets.termsAndConditionSvg,
+                onTap: () {
                   AppToast.show(
-                    "Please join or create kitchen",
-                    ToastType.error,
+                    "We will navigate user to our privacypolicy and termsAndCondition page",
+                    ToastType.success,
                   );
-                }
-              },
-            ),
-            DrawerListTile(
-              title: "Kitchens",
-              iconPath: AppAssets.kitchenSvg,
-              onTap: () => context.push(Routes.kitchen),
-            ),
-            DrawerListTile(
-              title: "Terms & Conditions",
-              iconPath: AppAssets.termsAndConditionSvg,
-              onTap: () {
-                AppToast.show(
-                  "We will navigate user to our privacypolicy and termsAndCondition page",
-                  ToastType.success,
-                );
-              },
-            ),
-          ],
+                },
+              ),
+            ],
+          ),
         );
       },
     );

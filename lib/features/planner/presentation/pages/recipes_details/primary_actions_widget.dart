@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
 
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
@@ -13,6 +13,7 @@ import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dar
 
 class PrimaryActionsWidget extends StatelessWidget {
   final MealTypeEntity recipe;
+  final bool addPlanDummyLoading;
   final bool isFinishing;
   final bool isPlan;
   final bool startRecipe;
@@ -23,6 +24,7 @@ class PrimaryActionsWidget extends StatelessWidget {
 
   const PrimaryActionsWidget({
     super.key,
+    required this.addPlanDummyLoading,
     required this.recipe,
     required this.isPlan,
     required this.isFinishing,
@@ -87,10 +89,13 @@ class PrimaryActionsWidget extends StatelessWidget {
                     onPressed: () {
                       addToWeeklyPlanCallback();
                     },
-                    child: state.addingToWeeklyPlan
-                        ? Center(
-                            child: CircularProgressIndicator(
-                              color: AppColors.primaryColor,
+                    child: state.addingToWeeklyPlan || addPlanDummyLoading
+                        ? Transform.scale(
+                            scale: 0.7,
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                color: AppColors.primaryColor,
+                              ),
                             ),
                           )
                         : Text(

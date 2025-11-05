@@ -1,5 +1,5 @@
 import 'package:foodkitchen/core/common/domain/usecase/get_current_user.dart';
-import 'package:foodkitchen/core/common/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
 import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/core/common/usecase/usecase.dart';
 import 'package:foodkitchen/features/planner/domain/repository/planner_repository.dart';
