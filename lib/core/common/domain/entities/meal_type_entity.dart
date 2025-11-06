@@ -13,7 +13,7 @@ class MealTypeEntity {
   final List<Map<String, dynamic>> doneSteps;
   final List<IngredientEntity> ingredients;
   final List<IngredientEntity> missingIngredients;
-  final Uint8List thumbnail;
+  final Uint8List? thumbnail;
   final bool missingItems;
   final bool available;
 

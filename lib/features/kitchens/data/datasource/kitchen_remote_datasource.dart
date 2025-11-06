@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
@@ -22,7 +23,14 @@ class KitchenRemoteDataSourceImpl implements KitchenRemoteDatasource {
   Future<List<Map<String, dynamic>>> getKitchens() async {
     try {
       final response = await dio.get(AppConstants.kitchens);
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
 
+        final message = data["error"];
+        throw message;
+      }
       final data = response.data["kitchens"];
 
       if (data is List) {
@@ -42,6 +50,14 @@ class KitchenRemoteDataSourceImpl implements KitchenRemoteDatasource {
         AppConstants.createKitchen,
         data: {"kitchen_name": kitchenName},
       );
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+
+        final message = data["error"];
+        throw message;
+      }
       final data = response.data;
 
       final kitchenId = data["kitchen_id"];
@@ -64,6 +80,14 @@ class KitchenRemoteDataSourceImpl implements KitchenRemoteDatasource {
         AppConstants.joinKitchen,
         data: {"invitation_code": invitationCode},
       );
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+
+        final message = data["error"];
+        throw message;
+      }
       final data = response.data;
       final kitchenId = data["kitchen_id"];
       final prefs = await SharedPreferences.getInstance();
@@ -82,6 +106,14 @@ class KitchenRemoteDataSourceImpl implements KitchenRemoteDatasource {
         AppConstants.leaveKitchen,
         data: {"kitchen_id": kitchenId},
       );
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+
+        final message = data["error"];
+        throw message;
+      }
       await sharedPreferences.remove('kitchen_id');
       await sharedPreferences.remove('invitation_code');
       await sharedPreferences.remove('role');
@@ -100,6 +132,14 @@ class KitchenRemoteDataSourceImpl implements KitchenRemoteDatasource {
         AppConstants.removeKitchen,
         data: {"kitchen_id": kitchenId},
       );
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+
+        final message = data["error"];
+        throw message;
+      }
       await sharedPreferences.remove('kitchen_id');
       await sharedPreferences.remove('invitation_code');
       await sharedPreferences.remove('role');
@@ -122,7 +162,14 @@ class KitchenRemoteDataSourceImpl implements KitchenRemoteDatasource {
         AppConstants.inviteUser,
         data: {"kitchen_id": kitchenId, "email": email},
       );
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
 
+        final message = data["error"];
+        throw message;
+      }
       log(response.data["message"]);
 
       return response.data["message"];

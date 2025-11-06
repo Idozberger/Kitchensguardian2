@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
@@ -23,7 +25,14 @@ class CommonRemoteDatasourceImpl implements CommonRemoteDatasource {
       final response = await dio.get(
         "${AppConstants.getPantries}?kitchen_id=$kitchenId",
       );
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
 
+        final message = data["error"];
+        throw message;
+      }
       final data = response.data["pantries"];
 
       if (data is List) {
@@ -48,7 +57,14 @@ class CommonRemoteDatasourceImpl implements CommonRemoteDatasource {
         AppConstants.createPantry,
         data: {"kitchen_id": kitchenId, "pantries": pantryList},
       );
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
 
+        final message = data["error"];
+        throw message;
+      }
       return response.data;
     } on DioException catch (e) {
       throw dio.handleError(e);

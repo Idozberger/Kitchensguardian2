@@ -66,7 +66,14 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource {
         AppConstants.createAccount,
         data: userModel.toJson(),
       );
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
 
+        final message = data["error"];
+        throw message;
+      }
       return response.data["message"];
     } on DioException catch (e) {
       throw dio.handleError(e);
@@ -87,7 +94,14 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource {
       final data = response.data is String
           ? jsonDecode(response.data)
           : response.data;
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
 
+        final message = data["error"];
+        throw message;
+      }
       final message = data["message"];
 
       return message ?? "Verification successful";
@@ -107,7 +121,14 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource {
       final data = response.data is String
           ? jsonDecode(response.data)
           : response.data;
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
 
+        final message = data["error"];
+        throw message;
+      }
       final message = data["message"];
 
       return message ?? "Password reset code sent successfully";
@@ -135,7 +156,14 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource {
       final data = response.data is String
           ? jsonDecode(response.data)
           : response.data;
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
 
+        final message = data["error"];
+        throw message;
+      }
       final message = data["message"];
 
       return message ?? "Password changed successfully";
@@ -154,6 +182,16 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource {
         AppConstants.login,
         data: {"email": email, "password": password},
       );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+
+        final message = data["error"];
+        throw message;
+      }
+
       final data = response.data is String
           ? jsonDecode(response.data)
           : response.data;
@@ -191,9 +229,18 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource {
         AppConstants.sendEmailVerification,
         data: userModel.toJson(),
       );
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+
+        final message = data["error"];
+        throw message;
+      }
       final data = response.data is String
           ? jsonDecode(response.data)
           : response.data;
+
       final message = data["message"];
       return message ?? "Verification Code Sent";
     } on DioException catch (e) {

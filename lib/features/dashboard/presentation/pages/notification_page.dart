@@ -126,9 +126,13 @@ class _NotificationPageState extends State<NotificationPage> {
                                     children: [
                                       Text(
                                         senderName,
-                                        style: Theme.of(
-                                          context,
-                                        ).textTheme.headlineLarge,
+                                        maxLines: 1,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .headlineLarge!
+                                            .copyWith(
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
                                       ),
                                       Text(
                                         date,

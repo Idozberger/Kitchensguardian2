@@ -34,6 +34,14 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
         AppConstants.createKitchen,
         data: {"kitchen_name": kitchenName},
       );
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+
+        final message = data["error"];
+        throw message;
+      }
       sharedPreferences.setString("kitchen_id", response.data["kitchen_id"]);
       sharedPreferences.setString(
         "invitation_code",
@@ -53,6 +61,14 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
         AppConstants.joinKitchen,
         data: {"invitation_code": invitationCode},
       );
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+
+        final message = data["error"];
+        throw message;
+      }
       return response.data["message"];
     } on DioException catch (e) {
       throw dio.handleError(e);
@@ -67,7 +83,14 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
       final response = await dio.get(
         "${AppConstants.getPantryItems}?kitchen_id=$kitchenId",
       );
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
 
+        final message = data["error"];
+        throw message;
+      }
       final items = response.data["items"];
       final pantryTypes = response.data["pantry_types"];
 

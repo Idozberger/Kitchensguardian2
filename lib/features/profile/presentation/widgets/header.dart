@@ -47,7 +47,9 @@ class ProfileHeader extends StatelessWidget {
                     children: [
                       Text(
                         "${state.firstName} ${state.lastName}",
-                        style: Theme.of(context).textTheme.headlineLarge,
+                        maxLines: 1,
+                        style: Theme.of(context).textTheme.headlineLarge!
+                            .copyWith(overflow: TextOverflow.ellipsis),
                       ),
                       Text(
                         state.email,

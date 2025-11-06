@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
@@ -19,7 +21,14 @@ class ScanHistoryRemoteDatasourceImpl implements ScanHistoryRemoteDatasource {
       final response = await dio.get(
         "${AppConstants.getScanHistory}?page=$pageNumber",
       );
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
 
+        final message = data["error"];
+        throw message;
+      }
       final data = response.data["history"];
 
       if (data is List) {

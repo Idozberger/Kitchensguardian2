@@ -1,5 +1,6 @@
-import 'dart:typed_data';
+import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
 import 'package:foodkitchen/features/planner/domain/entities/ingredient_entity.dart';
 
@@ -21,6 +22,22 @@ class MealTypeModel extends MealTypeEntity {
   });
 
   factory MealTypeModel.fromJson(Map<String, dynamic> json) {
+    Uint8List? thumbnailBytes;
+    //TODO AFTER APIS to remove this code
+    final thumbnail = json["thumbnail"];
+    if (thumbnail != null) {
+      if (thumbnail is String) {
+        try {
+          thumbnailBytes = base64Decode(thumbnail);
+        } catch (e) {
+          debugPrint("⚠️ Error decoding thumbnail base64: $e");
+        }
+      } else if (thumbnail is List) {
+        thumbnailBytes = Uint8List.fromList(thumbnail.cast<int>());
+      } else if (thumbnail is Uint8List) {
+        thumbnailBytes = thumbnail;
+      }
+    }
     return MealTypeModel(
       id: json["_id"],
       title: json["title"],
@@ -29,7 +46,7 @@ class MealTypeModel extends MealTypeEntity {
       recipeShortSummary: json["recipe_short_summary"],
       cookingSteps: List<String>.from(json["cooking_steps"] ?? []),
       missingItems: json["missing_items"] ?? false,
-      thumbnail: json["thumbnail"] ?? "",
+      thumbnail: thumbnailBytes,
       ingredients: (json["ingredients"] as List)
           .map(
             (e) => IngredientEntity(

@@ -12,7 +12,7 @@ import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dar
 
 class HeaderImageWidget extends StatelessWidget {
   final bool isFav;
-  final Uint8List thumbnail;
+  final Uint8List? thumbnail;
   final VoidCallback onFavoriteToggle;
 
   const HeaderImageWidget({
@@ -35,9 +35,9 @@ class HeaderImageWidget extends StatelessWidget {
             width: double.infinity,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(h(10)),
-              image: (thumbnail.isNotEmpty)
+              image: (thumbnail != null && thumbnail!.isNotEmpty)
                   ? DecorationImage(
-                      image: MemoryImage(thumbnail),
+                      image: MemoryImage(thumbnail!),
                       fit: BoxFit.cover,
                     )
                   : DecorationImage(

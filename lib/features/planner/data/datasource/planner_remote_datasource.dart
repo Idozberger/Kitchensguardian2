@@ -44,7 +44,14 @@ class PlannerRemoteDatasourceImpl implements PlannerRemoteDatasource {
       );
 
       final data = response.data["recipes"];
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
 
+        final message = data["error"];
+        throw message;
+      }
       if (data is List) {
         return data.map<Map<String, dynamic>>((e) {
           final recipe = Map<String, dynamic>.from(e);
@@ -78,7 +85,14 @@ class PlannerRemoteDatasourceImpl implements PlannerRemoteDatasource {
       final response = await dio.get(AppConstants.favouriteRecipes);
 
       final data = response.data["favourite_recipes"];
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
 
+        final message = data["error"];
+        throw message;
+      }
       if (data is List) {
         return data.map<Map<String, dynamic>>((e) {
           final recipe = Map<String, dynamic>.from(e);
@@ -117,7 +131,14 @@ class PlannerRemoteDatasourceImpl implements PlannerRemoteDatasource {
         AppConstants.addToFavourite,
         data: {"_id": recipeId},
       );
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
 
+        final message = data["error"];
+        throw message;
+      }
       return response.data["message"];
     } on DioException catch (e) {
       throw dio.handleError(e);
@@ -131,7 +152,14 @@ class PlannerRemoteDatasourceImpl implements PlannerRemoteDatasource {
         AppConstants.removeFromFavourite,
         data: {"recipe_id": recipeId},
       );
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
 
+        final message = data["error"];
+        throw message;
+      }
       return response.data["message"];
     } on DioException catch (e) {
       throw dio.handleError(e);
@@ -148,7 +176,14 @@ class PlannerRemoteDatasourceImpl implements PlannerRemoteDatasource {
         AppConstants.markRecipeFinished,
         data: {"recipe_id": recipeId, "kitchen_id": kitchenId},
       );
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
 
+        final message = data["error"];
+        throw message;
+      }
       return response.data["message"];
     } on DioException catch (e) {
       throw dio.handleError(e);
@@ -166,6 +201,14 @@ class PlannerRemoteDatasourceImpl implements PlannerRemoteDatasource {
       };
       logError(data);
       final response = await dio.post(AppConstants.requestItems, data: data);
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+
+        final message = data["error"];
+        throw message;
+      }
       return response.data["message"];
     } on DioException catch (e) {
       throw dio.handleError(e);

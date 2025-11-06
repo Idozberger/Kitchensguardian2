@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/common/data/model/meal_type_model.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
@@ -170,32 +171,40 @@ class PlannerLocalDatasourceImpl implements PlannerLocalDatasource {
     try {
       final prefs = await SharedPreferences.getInstance();
 
-      // Log the list of MealTypeModel objects to be saved
       debugPrint("Saving ${list.length} meal plans to SharedPreferences...");
 
-      // Check if the list is empty
       if (list.isEmpty) {
         debugPrint("The list of meal plans is empty.");
       }
 
-      // Map the MealTypeModel list to JSON strings
       final List<String> jsonList = list.map((item) {
-        final jsonString = jsonEncode(
-          item.toJson(),
-        ); // Serialize the object to JSON
-        debugPrint(
-          "Serialized meal plan to JSON: $jsonString",
-        ); // Log the serialized JSON
+        final jsonString = jsonEncode({
+          "_id": item.id,
+          "title": item.title,
+          "calories": item.calories,
+          "cooking_time": item.cookingTime,
+          "recipe_short_summary": item.recipeShortSummary,
+          "cooking_steps": item.cookingSteps,
+          "missing_items": item.missingItems,
+          "ingredients": item.ingredients
+              .map((e) => {"name": e.name, "amount": e.amount, "unit": e.unit})
+              .toList(),
+          "available": item.available,
+          "selected_meal_type": item.mealType,
+          "selected_date": item.formatedDateString,
+          "thumbnail": (item.thumbnail != null && item.thumbnail!.isNotEmpty)
+              ? base64Encode(item.thumbnail!)
+              : "",
+          "missing_items_list": item.missingIngredients,
+        });
+        debugPrint("Serialized meal plan to JSON: $jsonString");
         return jsonString;
       }).toList();
 
-      // Log the final JSON list before saving
       debugPrint("Serialized JSON list to save: $jsonList");
 
-      // Save the JSON list to SharedPreferences
       bool success = await prefs.setStringList('weekly_plan', jsonList);
 
-      // Log the success or failure of saving to SharedPreferences
       if (success) {
         debugPrint(
           "Successfully saved ${jsonList.length} meal plans to SharedPreferences.",

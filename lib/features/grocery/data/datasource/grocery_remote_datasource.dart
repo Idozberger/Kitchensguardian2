@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
@@ -42,7 +44,14 @@ class GroceryRemoteDatasourceImpl implements GroceryRemoteDatasource {
       final response = await dio.get(
         "${AppConstants.getRequestedItems}?kitchen_id=$kitchenId",
       );
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
 
+        final message = data["error"];
+        throw message;
+      }
       final data = response.data["user_items"];
 
       if (data is List) {
@@ -70,7 +79,14 @@ class GroceryRemoteDatasourceImpl implements GroceryRemoteDatasource {
           "bucket_type": bucketType,
         },
       );
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
 
+        final message = data["error"];
+        throw message;
+      }
       return await getUserRequestedItems(kitchenId: kitchenId);
     } on DioException catch (e) {
       throw dio.handleError(e);
@@ -86,7 +102,14 @@ class GroceryRemoteDatasourceImpl implements GroceryRemoteDatasource {
         AppConstants.addMyListItemToKitchenInventory,
         data: {"kitchen_id": kitchenId},
       );
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
 
+        final message = data["error"];
+        throw message;
+      }
       return await getUserRequestedItems(kitchenId: kitchenId);
     } on DioException catch (e) {
       throw dio.handleError(e);
@@ -98,44 +121,9 @@ class GroceryRemoteDatasourceImpl implements GroceryRemoteDatasource {
     required String kitchenId,
   }) async {
     try {
-      final response = await dio.get(
-        "${AppConstants.getAiGeneratedList}?kitchen_id=$kitchenId",
-      );
-
-      debugPrint("🧠 [getAiGeneratedItems] Response: ${response.data}");
-
-      final data =
-          response.data["missing_items"] ??
-          response.data["data"]?["missing_items"] ??
-          response.data["missing"] ??
-          response.data;
-
-      if (data is List) {
-        final parsedList = data.map<Map<String, dynamic>>((e) {
-          if (e is Map) {
-            return Map<String, dynamic>.from(e);
-          } else if (e is String) {
-            return {"name": e};
-          } else {
-            debugPrint(
-              "⚠️ [getAiGeneratedItems] Unknown item type: ${e.runtimeType}",
-            );
-            return {"name": e.toString()};
-          }
-        }).toList();
-
-        return parsedList;
-      } else {
-        debugPrint("❌ Invalid data format: ${data.runtimeType}");
-        throw Exception(
-          "Invalid data format: expected List, got ${data.runtimeType}",
-        );
-      }
+      return [];
     } on DioException catch (e) {
       throw dio.handleError(e);
-    } catch (e, stackTrace) {
-      debugPrint("❌ Exception in getAiGeneratedItems: $e\n$stackTrace");
-      rethrow;
     }
   }
 
@@ -145,11 +133,18 @@ class GroceryRemoteDatasourceImpl implements GroceryRemoteDatasource {
     required List<String> itemsIds,
   }) async {
     try {
-      await dio.post(
+      final response = await dio.post(
         AppConstants.deleteKitchenItems,
         data: {"kitchen_id": kitchenId, "item_ids": itemsIds},
       );
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
 
+        final message = data["error"];
+        throw message;
+      }
       return await getUserRequestedItems(kitchenId: kitchenId);
     } on DioException catch (e) {
       throw dio.handleError(e);
@@ -165,7 +160,7 @@ class GroceryRemoteDatasourceImpl implements GroceryRemoteDatasource {
     required String bucketType,
   }) async {
     try {
-      await dio.post(
+      final response = await dio.post(
         AppConstants.addItemToList,
         data: {
           "kitchen_id": kitchenId,
@@ -175,7 +170,14 @@ class GroceryRemoteDatasourceImpl implements GroceryRemoteDatasource {
           "bucket_type": bucketType,
         },
       );
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
 
+        final message = data["error"];
+        throw message;
+      }
       return await getUserRequestedItems(kitchenId: kitchenId);
     } on DioException catch (e) {
       throw dio.handleError(e);

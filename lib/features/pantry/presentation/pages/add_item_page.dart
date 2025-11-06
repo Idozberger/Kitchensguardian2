@@ -411,29 +411,42 @@ class _AddItemPageState extends State<AddItemPage> {
     );
   }
 
+  void goBack() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final router = GoRouter.of(context);
+      if (router.canPop()) {
+        router.pop();
+        router.pop();
+      } else {
+        debugPrint('⚠️ No route to pop. Ignoring.');
+      }
+    });
+  }
+
   void _handleBackNavigation() {
     final hasItems = _items.isNotEmpty;
 
-    void goBack() {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        final router = GoRouter.of(context);
-        if (router.canPop()) {
-          router.pop();
-          router.pop();
-        } else {
-          debugPrint('⚠️ No route to pop. Ignoring.');
-        }
-      });
-    }
-
     if (hasItems) {
-      _showConfirmDialog(
-        context,
-        title: "Go Back",
-        subtitle:
-            "If you go back, the items you just added will be removed. Continue?",
-        onConfirm: goBack,
+      final hasUserInput = _items.any(
+        (item) =>
+            (item.nameController.text.trim().isNotEmpty ?? false) ||
+            (item.qtyController.text.trim().isNotEmpty ?? false) ||
+            (item.unit != null && item.unit!.isNotEmpty) ||
+            (item.pantry != null && item.pantry!.isNotEmpty) ||
+            (item.expireDate.text.isNotEmpty),
       );
+
+      if (hasUserInput) {
+        _showConfirmDialog(
+          context,
+          title: "Go Back",
+          subtitle:
+              "If you go back, the items you just added will be removed. Continue?",
+          onConfirm: goBack,
+        );
+      } else {
+        goBack();
+      }
     } else {
       goBack();
     }

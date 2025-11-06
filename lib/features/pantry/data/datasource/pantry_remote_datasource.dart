@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
 import 'package:foodkitchen/core/global/functions/logs.dart';
@@ -34,6 +36,14 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
         AppConstants.addPantryItem,
         data: pantryModel.toJson(),
       );
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+
+        final message = data["error"];
+        throw message;
+      }
       return response.data["message"];
     } on DioException catch (e) {
       throw dio.handleError(e);
@@ -48,6 +58,14 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
       final response = await dio.get(
         "${AppConstants.getPantryItems}?kitchen_id=$kitchenId",
       );
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+
+        final message = data["error"];
+        throw message;
+      }
       final data = response.data["items"];
 
       if (data is List) {
@@ -72,7 +90,14 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
       });
 
       final response = await dio.post(AppConstants.scanRecipt, data: formData);
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
 
+        final message = data["error"];
+        throw message;
+      }
       final message = response.data["message"] ?? "Unknown response";
       final items = response.data["res"]["items"];
 
@@ -98,6 +123,14 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
       };
       logError(data);
       final response = await dio.post(AppConstants.requestItems, data: data);
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+
+        final message = data["error"];
+        throw message;
+      }
       return response.data["message"];
     } on DioException catch (e) {
       throw dio.handleError(e);

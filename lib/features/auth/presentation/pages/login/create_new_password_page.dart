@@ -115,6 +115,7 @@ class _CreateNewPasswordPageState extends State<CreateNewPasswordPage> {
                         ),
                         SizedBox(height: h(20)),
                         AppTextField(
+                          textInputAction: TextInputAction.next,
                           controller: _passwordController,
                           label: "New password",
                           // validator: passwordValidator,
@@ -135,6 +136,7 @@ class _CreateNewPasswordPageState extends State<CreateNewPasswordPage> {
                         ),
                         SizedBox(height: h(20)),
                         AppTextField(
+                          textInputAction: TextInputAction.done,
                           controller: _confirmPasswordController,
                           label: "Confirm new password",
                           obscureText: !_isObscureConfirmPassword,
@@ -164,8 +166,19 @@ class _CreateNewPasswordPageState extends State<CreateNewPasswordPage> {
                         String password = _passwordController.text.trim();
                         String confirmPassword = _confirmPasswordController.text
                             .trim();
+                        String pinCode = pin.trim();
 
-                        if (password.isEmpty) {
+                        if (pinCode.isEmpty) {
+                          AppToast.show(
+                            "Verification code is required",
+                            ToastType.error,
+                          );
+                        } else if (pinCode.length != 5) {
+                          AppToast.show(
+                            "Verification code must be 5 digits",
+                            ToastType.error,
+                          );
+                        } else if (password.isEmpty) {
                           AppToast.show(
                             "Password is required",
                             ToastType.error,
@@ -190,7 +203,7 @@ class _CreateNewPasswordPageState extends State<CreateNewPasswordPage> {
                             AuthSetUserNewPassword(
                               email: widget.email,
                               newPassword: password,
-                              verificationCode: pin,
+                              verificationCode: pinCode,
                             ),
                           );
                         }

@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
+import 'package:foodkitchen/core/common/data/model/meal_type_model.dart';
 import 'package:foodkitchen/core/common/domain/usecase/get_current_user.dart';
 import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
 import 'package:foodkitchen/core/utils/date_format_to_string.dart';
@@ -180,8 +181,9 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     Emitter<PlannerState> emit,
   ) async {
     emit(state.copyWith(addingToWeeklyPlan: true));
+    var plan = event.mealTypeEntity as MealTypeModel;
     final res = await _addToWeeklyPlan(
-      AddToWeeklyPlanParams(event.mealTypeEntity),
+      AddToWeeklyPlanParams(plan.copyWith(thumbnail: null)),
     );
 
     res.fold(

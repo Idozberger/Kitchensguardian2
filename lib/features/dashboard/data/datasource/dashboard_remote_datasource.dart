@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
@@ -27,7 +29,14 @@ class DashboardRemoteDatasourceImpl implements DashboardRemoteDatasource {
       final response = await dio.get(
         "${AppConstants.getMembers}?kitchen_id=$kitchenId",
       );
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
 
+        final message = data["error"];
+        throw message;
+      }
       final data = response.data["members"];
 
       if (data is List) {
@@ -50,6 +59,14 @@ class DashboardRemoteDatasourceImpl implements DashboardRemoteDatasource {
         AppConstants.kickMember,
         data: {"kitchen_id": kitchenId, "member_id": memberId},
       );
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+
+        final message = data["error"];
+        throw message;
+      }
       return response.data["message"];
     } on DioException catch (e) {
       throw dio.handleError(e);
@@ -66,6 +83,14 @@ class DashboardRemoteDatasourceImpl implements DashboardRemoteDatasource {
         AppConstants.makeCohost,
         data: {"kitchen_id": kitchenId, "member_id": memberId},
       );
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+
+        final message = data["error"];
+        throw message;
+      }
       return response.data["message"];
     } on DioException catch (e) {
       throw dio.handleError(e);

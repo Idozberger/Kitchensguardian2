@@ -67,7 +67,10 @@ class AppDrawer extends StatelessWidget {
             gap(height: 15),
             Text(
               "${state.firstName} ${state.lastName}",
-              style: Theme.of(context).textTheme.headlineLarge,
+              maxLines: 1,
+              style: Theme.of(context).textTheme.headlineLarge!.copyWith(
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
             gap(height: 5),
             Text(
