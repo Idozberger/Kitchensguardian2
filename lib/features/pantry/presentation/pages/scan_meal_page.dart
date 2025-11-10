@@ -9,6 +9,7 @@ import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:foodkitchen/main.dart';
 import 'package:go_router/go_router.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class ScanMealPage extends StatefulWidget {
   const ScanMealPage({super.key});
@@ -32,7 +33,33 @@ class _ScanMealPageState extends State<ScanMealPage>
   }
 
   Future<void> _initCamera() async {
+    final status = await Permission.camera.status;
+
+    if (status.isDenied) {
+      final result = await Permission.camera.request();
+      if (result.isGranted) {
+        _initializeCameraController();
+      } else if (result.isPermanentlyDenied) {
+        _showPermissionDialog();
+      } else {
+        _showDeniedSnackBar();
+      }
+      return;
+    }
+
+    if (status.isPermanentlyDenied) {
+      _showPermissionDialog();
+      return;
+    }
+
+    if (status.isGranted) {
+      _initializeCameraController();
+    }
+  }
+
+  Future<void> _initializeCameraController() async {
     if (cameras.isEmpty) return;
+
     _controller = CameraController(
       cameras[0],
       ResolutionPreset.medium,
@@ -47,6 +74,41 @@ class _ScanMealPageState extends State<ScanMealPage>
       debugPrint('Camera init error: $e');
       _controller?.dispose();
     }
+  }
+
+  void _showDeniedSnackBar() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Camera permission denied. Please enable it to use scanning.',
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showPermissionDialog() async {
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Camera Permission Required"),
+        content: const Text(
+          "Camera access is permanently denied. Please enable it in app settings to use this feature.",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await openAppSettings();
+            },
+            child: const Text("Open Settings"),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

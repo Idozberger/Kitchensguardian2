@@ -9,7 +9,6 @@ import 'package:foodkitchen/features/dashboard/domain/usecases/make_cohost.dart'
 import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_event.dart';
 import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_state.dart';
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_bloc.dart';
-import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_event.dart';
 import 'package:intl/intl.dart';
 
 class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {

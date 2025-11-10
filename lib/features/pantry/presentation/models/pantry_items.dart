@@ -1,6 +1,11 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class PantryItem {
+  File? file;
+  Uint8List? fileBytes;
   final TextEditingController nameController;
   final TextEditingController qtyController;
   final TextEditingController manuFacturingDate;
@@ -15,5 +20,7 @@ class PantryItem {
     required this.manuFacturingDate,
     this.unit,
     this.pantry,
+    this.file,
+    this.fileBytes,
   });
 }

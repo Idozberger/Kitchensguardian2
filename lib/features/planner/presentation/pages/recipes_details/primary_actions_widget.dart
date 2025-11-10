@@ -99,7 +99,7 @@ class PrimaryActionsWidget extends StatelessWidget {
                             ),
                           )
                         : Text(
-                            "Add to Weekly Meal Plan",
+                            "Add to Menu",
                             style: Theme.of(context).textTheme.headlineMedium
                                 ?.copyWith(
                                   fontSize: t(14),

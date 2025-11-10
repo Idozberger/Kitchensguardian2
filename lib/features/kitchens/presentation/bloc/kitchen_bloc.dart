@@ -132,7 +132,15 @@ class KitchenBloc extends Bloc<KitchenEvent, KitchenState> {
       final kitchenData = kitchenDoc.docs.first.data();
       final userId = kitchenData['user_id'];
       final kitchenName = kitchenData['kitchen_name'];
+      if (_userCubit.state.userId == userId) {
+        AppToast.show(
+          "You are the host of this kitchen: $kitchenName. You already have access.",
+          ToastType.error,
+        );
+        add(FetchKitchens());
 
+        return;
+      }
       final userDoc = await FirebaseFirestore.instance
           .collection('users')
           .doc(userId)

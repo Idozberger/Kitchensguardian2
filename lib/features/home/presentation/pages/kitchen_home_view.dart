@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
+import 'package:foodkitchen/core/theme/app_colors.dart';
+import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
+import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_state.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/action_tile.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/create_or_join_tile.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/no_kitchen_found.dart';
-import 'package:foodkitchen/features/home/presentation/widgets/pantry__storage_types_section.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/pantry_section.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/smart_cart.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/tonight_recipe.dart';
@@ -16,6 +18,7 @@ import 'package:intl/intl.dart';
 
 class KitchenHomeView extends StatelessWidget {
   final HomeState state;
+
   final bool isGeneratedRecipes;
   final VoidCallback onGeneratePressed;
 
@@ -41,8 +44,19 @@ class KitchenHomeView extends StatelessWidget {
         child: Column(
           children: [
             gap(height: 14),
-
-            PantryStorageTypeSection(state: state),
+            UpperTile(
+              color: AppColors.primaryColor.withOpacity(0.2),
+              widget: Column(
+                children: [
+                  GenericButtonWidget(
+                    onPressed: () {
+                      context.push(Routes.scanMeal);
+                    },
+                    text: "Scan Receipt",
+                  ),
+                ],
+              ),
+            ),
             gap(height: 14),
             PantrySection(state: state),
             gap(height: 14),

@@ -1,3 +1,4 @@
+import 'package:foodkitchen/core/common/domain/entities/pantries_entity.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';
 import 'package:foodkitchen/features/pantry/domain/entities/scan_receipt.dart';
 
@@ -30,4 +31,9 @@ class ScanReceiptLoaded extends PantryState {
   ScanReceiptLoaded copyWith({ScanReceiptEntity? scanReceipt}) {
     return ScanReceiptLoaded(scanReceipt ?? this.scanReceipt);
   }
+}
+
+class UserStorageAreaLoaded extends PantryState {
+  final List<PantriesCommonEntity> userStorageAreas;
+  UserStorageAreaLoaded(this.userStorageAreas);
 }

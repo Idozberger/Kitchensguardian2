@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
@@ -6,7 +8,9 @@ import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/services/date_picker/date_picker_service.dart';
+import 'package:foodkitchen/core/services/image_picker/image_picker_service.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
+import 'package:foodkitchen/core/utils/date_format_to_string.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_dropdown_widget.dart';
@@ -126,10 +130,14 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
             (e) => PantryItem(
               nameController: TextEditingController(text: e.name ?? ''),
               qtyController: TextEditingController(text: e.amount ?? ''),
-              expireDate: TextEditingController(),
+              expireDate: TextEditingController(
+                text: e.expireDate == "null"
+                    ? formatDate(DateTime.now())
+                    : e.expireDate,
+              ),
               manuFacturingDate: TextEditingController(),
-              unit: null,
-              pantry: null,
+              unit: e.unit,
+              fileBytes: e.thumbnail,
             ),
           )
           .toList();
@@ -213,14 +221,83 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
         children: [
           _formLabel(
             context,
-            "Item name",
-            action: CircularIconButton(
-              iconAsset: AppAssets.deleteSvg,
-              onTap: () {
-                setState(() => _items.removeAt(index));
+            "Item Image",
+            action: _items.first == item
+                ? null
+                : CircularIconButton(
+                    iconAsset: AppAssets.deleteSvg,
+                    onTap: () {
+                      _items.remove(item);
+                      setState(() {});
+                    },
+                  ),
+          ),
+          SizedBox(height: h(10)),
+          Material(
+            color: Colors.transparent,
+            shape: const CircleBorder(),
+            child: InkWell(
+              customBorder: const CircleBorder(),
+              onTap: () async {
+                item.file = await ImagePickerService.showImageSourceDialog(
+                  context,
+                );
+                setState(() {});
               },
+              child: Stack(
+                alignment: Alignment.center,
+                clipBehavior: Clip.none,
+                children: [
+                  CircleAvatar(
+                    radius: t(24),
+                    backgroundColor: Colors.grey.shade200,
+                    child: Icon(Icons.person, color: Colors.grey, size: t(24)),
+                  ),
+                  if (item.file != null)
+                    CircleAvatar(
+                      radius: t(24),
+                      backgroundImage: FileImage(item.file!),
+                      backgroundColor: Colors.transparent,
+                    )
+                  else if (item.fileBytes != null && item.fileBytes!.isNotEmpty)
+                    CircleAvatar(
+                      radius: t(24),
+                      backgroundImage: MemoryImage(item.fileBytes!),
+                      backgroundColor: Colors.transparent,
+                    )
+                  else
+                    const CircleAvatar(
+                      radius: 24,
+                      backgroundColor: Colors.grey,
+                      child: Icon(Icons.image, color: Colors.white),
+                    ),
+
+                  Positioned(
+                    bottom: h(-2),
+                    right: w(-4),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      padding: gapAll(4),
+                      child: CircleAvatar(
+                        radius: t(8),
+                        backgroundColor: Colors.blue,
+                        child: Icon(
+                          Icons.add,
+                          size: t(12),
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
+          SizedBox(height: h(10)),
+          _formLabel(context, "Item name"),
           SizedBox(height: h(10)),
           AppTextField(
             label: '',
@@ -262,15 +339,9 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
                   label: "Pantry",
                   hint: "Select Pantry",
                   value: item.pantry,
-                  items: const [
-                    "Fridge",
-                    "Freezer",
-                    "Shelves",
-                    "Cabinets",
-                    "Drawers",
-                    "Cold cellar",
-                    "Butler's Pantry",
-                  ],
+                  items: userCubit.state.userStorageAreas
+                      .map((storage) => storage.pantryName)
+                      .toList(),
                   onChanged: (val) => setState(() => item.pantry = val),
                 ),
               ),

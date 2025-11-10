@@ -39,4 +39,5 @@ class Routes {
   static const String referralPage = "/referral_page";
   static const String inviteMember = "/invite_member";
   static const String addPantryStorageType = "/add_pantry_storage_type";
+  static const String allStorageArea = "/all_storage_areas";
 }

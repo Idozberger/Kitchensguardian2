@@ -12,11 +12,4 @@ abstract interface class HomeRepository {
     required String kitchenId,
   });
   Future<Either<Failure, List<MealTypeEntity>>> getAllWeeklyPlans();
-  Future<Either<Failure, List<PantriesCommonEntity>>> getAllPantries({
-    required String kitchenId,
-  });
-  Future<Either<Failure, String>> createPantry({
-    required String kitchenId,
-    required List<String> pantries,
-  });
 }

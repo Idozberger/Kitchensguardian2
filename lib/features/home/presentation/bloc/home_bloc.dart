@@ -6,10 +6,9 @@ import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/domain/usecase/get_current_user.dart';
 import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/core/services/fcm/fcm_service.dart';
+import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/features/home/domain/entities/kitchen.dart';
 import 'package:foodkitchen/features/home/domain/usecases/create_kitchen_usecase.dart';
-import 'package:foodkitchen/features/home/domain/usecases/create_pantry_usecase.dart';
-import 'package:foodkitchen/features/home/domain/usecases/get_all_pantries_usecase.dart';
 import 'package:foodkitchen/features/home/domain/usecases/get_all_weekly_plans_usecase.dart';
 import 'package:foodkitchen/features/home/domain/usecases/get_pantries_usecase.dart';
 import 'package:foodkitchen/features/home/domain/usecases/join_kitchen_usecase.dart';
@@ -23,23 +22,19 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final JoinKitchen _joinKitchen;
   final GetPantriesForHome _getPantriesForHome;
   final GetAllWeeklyPlansForHome _getAllWeeklyPlansForHome;
-  final GetUserStorageArea _getUserStorageArea;
-  final CreatePantryUsecase _createPantry;
+
   HomeBloc({
     required UserCubit userCubit,
     required CreateKitchen createKitchen,
     required JoinKitchen joinKitchen,
     required GetPantriesForHome getPantriesForHome,
     required GetAllWeeklyPlansForHome getAllWeeklyPlansForHome,
-    required GetUserStorageArea getUserStorageArea,
-    required CreatePantryUsecase createPantryUsecase,
   }) : _userCubit = userCubit,
        _createKitchen = createKitchen,
        _joinKitchen = joinKitchen,
        _getAllWeeklyPlansForHome = getAllWeeklyPlansForHome,
        _getPantriesForHome = getPantriesForHome,
-       _getUserStorageArea = getUserStorageArea,
-       _createPantry = createPantryUsecase,
+
        super(const HomeState()) {
     on<CreateKitchenEventForHome>(_onCreateKitchenEvent);
     on<GetPantriesItemsEventForHome>(_onGetPantryItems);
@@ -47,7 +42,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<GetAllWeeklyPlansEventForHome>(_onGetAllWeeklyPlans);
     on<ResetHomeStateEvent>(_onResetHomeState);
     on<GetUserStorageAreaEvent>(_onGetUserStorageArea);
-    on<CreatePantryEvent>(_onCreatePantry);
   }
 
   Future<void> _onCreateKitchenEvent(
@@ -108,6 +102,18 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       final userId = kitchenData['user_id'];
       final kitchenName = kitchenData['kitchen_name'];
 
+      if (_userCubit.state.userId == userId) {
+        AppToast.show(
+          "You are the host of this kitchen: $kitchenName. You already have access.",
+          ToastType.error,
+        );
+        add(
+          GetPantriesItemsEventForHome(
+            kitchenId: _userCubit.state.activeKitchenId,
+          ),
+        );
+        return;
+      }
       final userDoc = await FirebaseFirestore.instance
           .collection('users')
           .doc(userId)
@@ -200,43 +206,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     GetUserStorageAreaEvent event,
     Emitter<HomeState> emit,
   ) async {
-    emit(state.copyWith(isLoading: true));
-    final res = await _getUserStorageArea(
-      GetUserStorageAreaParams(kitchenId: event.kitchenId),
-    );
-
-    res.fold(
-      (failure) {
-        emit(state.copyWith(errorMessage: failure.message, isLoading: false));
-      },
-      (userStorageAreas) {
-        emit(
-          state.copyWith(userStorageAreas: userStorageAreas, isLoading: false),
-        );
-      },
-    );
-  }
-
-  Future<void> _onCreatePantry(
-    CreatePantryEvent event,
-    Emitter<HomeState> emit,
-  ) async {
-    emit(state.copyWith(isLoading: true));
-    final res = await _createPantry(
-      CreatePantryUsecaseParams(
-        kitchenId: event.kitchenId,
-        pantries: event.pantries,
-      ),
-    );
-
-    res.fold(
-      (failure) {
-        emit(state.copyWith(errorMessage: failure.message, isLoading: false));
-      },
-      (successMessage) {
-        emit(state.copyWith(successMessage: successMessage, isLoading: false));
-      },
-    );
+    _userCubit.getUserStorageArea(kitchenId: event.kitchenId);
   }
 
   Future<void> _onGetAllWeeklyPlans(

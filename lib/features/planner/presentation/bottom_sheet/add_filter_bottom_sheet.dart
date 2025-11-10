@@ -88,7 +88,9 @@ class _AddFilterBottomSheetState extends State<AddFilterBottomSheet> {
                 gap(height: 12),
                 AppTextField(
                   hintText: "e.g, 450",
+                  keyboardType: TextInputType.number,
                   isLabled: false,
+                  textInputAction: TextInputAction.next,
                   fillColor: Colors.white,
                   isFilled: true,
                   controller: widget.controller,

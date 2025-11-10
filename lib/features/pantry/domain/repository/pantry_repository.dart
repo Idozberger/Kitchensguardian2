@@ -1,3 +1,4 @@
+import 'package:foodkitchen/core/common/domain/entities/pantries_entity.dart';
 import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';
@@ -18,5 +19,16 @@ abstract interface class PantryRepository {
     required String title,
     required String body,
     String? payload,
+  });
+  Future<Either<Failure, String>> createPantry({
+    required String kitchenId,
+    required List<String> pantries,
+  });
+  Future<Either<Failure, List<PantriesCommonEntity>>> getAllStorageArea({
+    required String kitchenId,
+  });
+  Future<Either<Failure, String>> deletePantry({
+    required String kitchenId,
+    required String pantryId,
   });
 }

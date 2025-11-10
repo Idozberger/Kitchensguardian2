@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
+import 'package:foodkitchen/core/common/cubits/user_state.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
+import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
@@ -32,32 +36,39 @@ class _PantrySectionState extends State<PantrySection> {
 
   @override
   Widget build(BuildContext context) {
-    return UpperTile(
-      widget: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _header(context),
-          gap(height: 14),
-          _actionButtons(context, hasItems),
-          gap(height: 14),
-          // SizedBox(
-          //   height: h(40),
-          //   child: ElevatedButton.icon(
-          //     onPressed: () => context.push(Routes.addPantryStorageType),
-          //     icon: SvgPicture.asset(AppAssets.addSvg),
-          //     label: Text(
-          //       "Add Pantry",
-          //       style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-          //         fontSize: t(12),
-          //         color: Colors.black,
-          //       ),
-          //     ),
-          //   ),
-          // ),
-          // gap(height: 14),
-          if (hasItems) _pantryList(context) else _noItemsText(context),
-        ],
-      ),
+    return BlocBuilder<UserCubit, UserState>(
+      builder: (_, userState) {
+        return UpperTile(
+          widget: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _header(context),
+              gap(height: 14),
+              _actionButtons(context, hasItems, userState),
+
+              if (userState.userStorageAreas.isEmpty)
+                Padding(
+                  padding: gapOnly(top: 14),
+                  child: SizedBox(
+                    height: h(40),
+                    child: ElevatedButton.icon(
+                      onPressed: () =>
+                          context.push(Routes.addPantryStorageType),
+                      icon: SvgPicture.asset(AppAssets.addSvg),
+                      label: Text(
+                        "Add Pantry",
+                        style: Theme.of(context).textTheme.headlineMedium!
+                            .copyWith(fontSize: t(12), color: Colors.black),
+                      ),
+                    ),
+                  ),
+                ),
+              gap(height: 14),
+              if (hasItems) _pantryList(context) else _noItemsText(context),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -69,33 +80,56 @@ class _PantrySectionState extends State<PantrySection> {
     ],
   );
 
-  Widget _actionButtons(BuildContext context, bool hasItems) => Row(
+  Widget _actionButtons(
+    BuildContext context,
+    bool hasItems,
+    UserState userState,
+  ) => Row(
     children: [
       if (!hasItems)
         Expanded(
           child: SizedBox(
             height: h(40),
-            child: OutlinedButton.icon(
-              onPressed: () {
-                context.push(Routes.scanMeal);
+            child: Builder(
+              builder: (context) {
+                final isDisabled = userState.userStorageAreas.isEmpty;
+
+                return OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(
+                      color: isDisabled ? Colors.grey : AppColors.primaryColor,
+                    ),
+                  ),
+                  onPressed: isDisabled
+                      ? null
+                      : () {
+                          context.push(Routes.scanMeal);
+                        },
+                  icon: SvgPicture.asset(
+                    AppAssets.scanSvg,
+                    color: isDisabled ? Colors.grey : AppColors.primaryColor,
+                  ),
+                  label: Text(
+                    "Scan",
+                    style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                      fontSize: t(12),
+                      color: isDisabled ? Colors.grey : AppColors.primaryColor,
+                    ),
+                  ),
+                );
               },
-              icon: SvgPicture.asset(AppAssets.scanSvg),
-              label: Text(
-                "Scan",
-                style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                  fontSize: t(12),
-                  color: AppColors.primaryColor,
-                ),
-              ),
             ),
           ),
         ),
+
       if (!hasItems) gap(width: 10),
       Expanded(
         child: SizedBox(
           height: h(40),
           child: ElevatedButton.icon(
-            onPressed: () => context.push(Routes.addItem),
+            onPressed: userState.userStorageAreas.isEmpty
+                ? null
+                : () => context.push(Routes.addItem),
             icon: SvgPicture.asset(AppAssets.addSvg),
             label: Text(
               "Add Item",

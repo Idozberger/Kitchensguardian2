@@ -1,13 +1,18 @@
+import 'dart:developer';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
+import 'package:foodkitchen/core/common/cubits/user_state.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/services/date_picker/date_picker_service.dart'
     show DatePickerService;
+import 'package:foodkitchen/core/services/image_picker/image_picker_service.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
@@ -23,6 +28,7 @@ import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_event.dart'
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_state.dart';
 import 'package:foodkitchen/features/pantry/presentation/models/pantry_items.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
 
 class AddItemPage extends StatefulWidget {
   const AddItemPage({super.key});
@@ -97,17 +103,25 @@ class _AddItemPageState extends State<AddItemPage> {
                   children: [
                     gap(height: 14),
                     Expanded(
-                      child: ListView.builder(
-                        padding: gapZero,
-                        shrinkWrap: true,
-                        itemCount: _items.length,
-                        itemBuilder: (context, index) {
-                          final item = _items[index];
-                          return Padding(
-                            padding: gapOnly(bottom: 10),
-                            child: UpperTile(
-                              widget: _buildPantryItemForm(context, item),
-                            ),
+                      child: BlocBuilder<UserCubit, UserState>(
+                        builder: (_, userState) {
+                          return ListView.builder(
+                            padding: gapZero,
+                            shrinkWrap: true,
+                            itemCount: _items.length,
+                            itemBuilder: (context, index) {
+                              final item = _items[index];
+                              return Padding(
+                                padding: gapOnly(bottom: 10),
+                                child: UpperTile(
+                                  widget: _buildPantryItemForm(
+                                    context,
+                                    item,
+                                    userState,
+                                  ),
+                                ),
+                              );
+                            },
                           );
                         },
                       ),
@@ -231,13 +245,17 @@ class _AddItemPageState extends State<AddItemPage> {
     );
   }
 
-  Widget _buildPantryItemForm(BuildContext context, PantryItem item) {
+  Widget _buildPantryItemForm(
+    BuildContext context,
+    PantryItem item,
+    UserState userState,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _formLabel(
           context,
-          "Item name",
+          "Item Image",
           action: _items.first == item
               ? null
               : CircularIconButton(
@@ -248,6 +266,56 @@ class _AddItemPageState extends State<AddItemPage> {
                   },
                 ),
         ),
+        SizedBox(height: h(10)),
+        Material(
+          color: Colors.transparent,
+          shape: const CircleBorder(),
+          child: InkWell(
+            customBorder: const CircleBorder(),
+            onTap: () async {
+              item.file = await ImagePickerService.showImageSourceDialog(
+                context,
+              );
+              setState(() {});
+            },
+            child: Stack(
+              alignment: Alignment.center,
+              clipBehavior: Clip.none,
+              children: [
+                CircleAvatar(
+                  radius: t(24),
+                  backgroundColor: Colors.grey.shade200,
+                  child: Icon(Icons.person, color: Colors.grey, size: t(24)),
+                ),
+                if (item.file != null)
+                  CircleAvatar(
+                    radius: t(24),
+                    backgroundImage: FileImage(item.file!),
+                    backgroundColor: Colors.transparent,
+                  ),
+
+                Positioned(
+                  bottom: h(-2),
+                  right: w(-4),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                    padding: gapAll(4),
+                    child: CircleAvatar(
+                      radius: t(8),
+                      backgroundColor: Colors.blue,
+                      child: Icon(Icons.add, size: t(12), color: Colors.white),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        SizedBox(height: h(10)),
+        _formLabel(context, "Item name"),
         SizedBox(height: h(10)),
         AppTextField(
           textInputAction: TextInputAction.next,
@@ -294,15 +362,9 @@ class _AddItemPageState extends State<AddItemPage> {
                 label: "Pantry",
                 hint: "Select Pantry",
                 value: item.pantry,
-                items: [
-                  "Fridge",
-                  "Freezer",
-                  "Shelves",
-                  "Cabinets",
-                  "Drawers",
-                  "Cold cellar",
-                  "Butler's Pantry",
-                ],
+                items: userState.userStorageAreas
+                    .map((area) => area.pantryName)
+                    .toList(),
                 onChanged: (val) => setState(() => item.pantry = val),
               ),
             ),
@@ -416,7 +478,6 @@ class _AddItemPageState extends State<AddItemPage> {
       final router = GoRouter.of(context);
       if (router.canPop()) {
         router.pop();
-        router.pop();
       } else {
         debugPrint('⚠️ No route to pop. Ignoring.');
       }
@@ -429,11 +490,12 @@ class _AddItemPageState extends State<AddItemPage> {
     if (hasItems) {
       final hasUserInput = _items.any(
         (item) =>
-            (item.nameController.text.trim().isNotEmpty ?? false) ||
-            (item.qtyController.text.trim().isNotEmpty ?? false) ||
+            item.file != null ||
+            item.nameController.text.trim().isNotEmpty ||
+            item.qtyController.text.trim().isNotEmpty ||
             (item.unit != null && item.unit!.isNotEmpty) ||
             (item.pantry != null && item.pantry!.isNotEmpty) ||
-            (item.expireDate.text.isNotEmpty),
+            item.expireDate.text.isNotEmpty,
       );
 
       if (hasUserInput) {
@@ -442,7 +504,10 @@ class _AddItemPageState extends State<AddItemPage> {
           title: "Go Back",
           subtitle:
               "If you go back, the items you just added will be removed. Continue?",
-          onConfirm: goBack,
+          onConfirm: () {
+            Navigator.of(context).pop();
+            goBack();
+          },
         );
       } else {
         goBack();

@@ -46,3 +46,20 @@ class ShowNotificationEvent extends PantryEvent {
     this.payload,
   });
 }
+
+final class CreatePantryEvent extends PantryEvent {
+  final String kitchenId;
+  final List<String> pantries;
+  CreatePantryEvent({required this.kitchenId, required this.pantries});
+}
+
+final class GetUserStorageAreaForPantryViewEvent extends PantryEvent {
+  final String kitchenId;
+  GetUserStorageAreaForPantryViewEvent(this.kitchenId);
+}
+
+final class DeletePantryEvent extends PantryEvent {
+  final String kitchenId;
+  final String pantryId;
+  DeletePantryEvent({required this.kitchenId, required this.pantryId});
+}

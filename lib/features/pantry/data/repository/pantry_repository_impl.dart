@@ -1,5 +1,9 @@
+import 'dart:developer';
+
+import 'package:foodkitchen/core/common/data/datasource/common_remote_datasource.dart';
+import 'package:foodkitchen/core/common/data/model/pantries_model.dart';
+import 'package:foodkitchen/core/common/domain/entities/pantries_entity.dart';
 import 'package:foodkitchen/core/error/failures.dart';
-import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/features/pantry/data/datasource/pantry_remote_datasource.dart';
 import 'package:foodkitchen/core/common/data/model/pantry_model.dart';
 import 'package:foodkitchen/features/pantry/data/model/scan_receipt_model.dart';
@@ -12,7 +16,12 @@ import 'package:fpdart/fpdart.dart';
 
 class PantryRepositoryImpl implements PantryRepository {
   final PantryRemoteDatasource pantryRemoteDatasource;
-  PantryRepositoryImpl(this.pantryRemoteDatasource);
+  final CommonRemoteDatasource commonRemoteDatasource;
+  PantryRepositoryImpl({
+    required this.pantryRemoteDatasource,
+    required this.commonRemoteDatasource,
+  });
+
   @override
   Future<Either<Failure, String>> addItem({required Pantry pantry}) async {
     try {
@@ -65,14 +74,20 @@ class PantryRepositoryImpl implements PantryRepository {
         final name = e['name'] as String? ?? '';
         final unit = e['unit'] as String? ?? 'Unit';
         final amount = e['amount'].toString();
+        final expireDate = e['expiry_date'].toString();
+        final thumbnail = e['thumbnail'];
 
-        print("Item parsed - name: $name, unit: $unit, amount: $amount");
+        print(
+          "Item parsed - name: $name, unit: $unit, amount: $amount, expireDate: $expireDate",
+        );
 
         items.add(
           ScanReceiptItemModel(
             name: name,
             unit: unit,
             amount: amount.isEmpty ? "1" : amount,
+            expireDate: expireDate,
+            thumbnail: thumbnail,
           ),
         );
       }
@@ -128,6 +143,65 @@ class PantryRepositoryImpl implements PantryRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, String>> createPantry({
+    required String kitchenId,
+    required List<String> pantries,
+  }) async {
+    try {
+      final response = await pantryRemoteDatasource.createPantry(
+        kitchenId: kitchenId,
+        pantries: pantries,
+      );
+
+      return Right(response);
+    } on Failure catch (f) {
+      return Left(f);
+    } catch (e, stack) {
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<PantriesCommonEntity>>> getAllStorageArea({
+    required String kitchenId,
+  }) async {
+    try {
+      final response = await commonRemoteDatasource.getAllStorageArea(
+        kitchenId: kitchenId,
+      );
+
+      final pantries = response
+          .map((json) => PantriesCommonModel.fromJson(json))
+          .toList();
+
+      return Right(pantries);
+    } on Failure catch (f) {
+      return Left(f);
+    } catch (e, stack) {
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, String>> deletePantry({
+    required String kitchenId,
+    required String pantryId,
+  }) async {
+    try {
+      final response = await pantryRemoteDatasource.deletePantry(
+        kitchenId: kitchenId,
+        pantryId: pantryId,
+      );
+
+      return Right(response);
+    } on Failure catch (f) {
+      return Left(f);
+    } catch (e, stack) {
       return Left(UnknownFailure(e.toString()));
     }
   }

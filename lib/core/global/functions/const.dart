@@ -47,4 +47,5 @@ class AppConstants {
   static const String inviteUser = "/api/kitchen/invite";
   static const String createPantry = "/api/kitchen/pantry/create";
   static const String getPantries = "/api/kitchen/pantry/list";
+  static const String deletePantry = "/api/kitchen/pantry/delete";
 }

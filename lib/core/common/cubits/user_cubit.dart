@@ -1,12 +1,18 @@
 import 'dart:convert';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:foodkitchen/core/common/data/datasource/common_remote_datasource.dart';
+import 'package:foodkitchen/core/common/data/model/pantries_model.dart';
 import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'user_state.dart';
 
 class UserCubit extends Cubit<UserState> {
-  UserCubit() : super(const UserState());
+  final CommonRemoteDatasource _commonRemoteDatasource;
+  UserCubit({required CommonRemoteDatasource commonRemoteDatasource})
+    : _commonRemoteDatasource = commonRemoteDatasource,
+      super(const UserState());
 
   void setUser({
     required String firstName,
@@ -74,5 +80,26 @@ class UserCubit extends Cubit<UserState> {
 
   void clearUser() {
     emit(const UserState());
+  }
+
+  Future<void> getUserStorageArea({required String kitchenId}) async {
+    try {
+      final response = await _commonRemoteDatasource.getAllStorageArea(
+        kitchenId: kitchenId,
+      );
+
+      final storageAreas = response
+          .map((json) => PantriesCommonModel.fromJson(json))
+          .toList();
+
+      emit(state.copyWith(userStorageAreas: storageAreas));
+    } catch (e, stackTrace) {
+      emit(state.copyWith(userStorageAreas: []));
+      print(stackTrace);
+    }
+  }
+
+  Future<void> updateStorageAreaToEmpty() async {
+    emit(state.copyWith(userStorageAreas: []));
   }
 }

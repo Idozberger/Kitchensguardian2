@@ -1,24 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/cubits/user_state.dart';
-import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
-import 'package:foodkitchen/core/config/app_assets.dart';
-import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
-import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
-import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_recipe_is_under_progress_widget.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_event.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_state.dart';
 import 'package:foodkitchen/features/home/presentation/pages/kitchen_home_view.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/floating_button.dart';
-import 'package:foodkitchen/features/kitchens/presentation/pages/invite_member_page.dart';
-import 'package:go_router/go_router.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -46,7 +38,8 @@ class _HomePageState extends State<HomePage> {
     if (kitchenId.isNotEmpty) {
       homeBloc
         ..add(GetAllWeeklyPlansEventForHome())
-        ..add(GetPantriesItemsEventForHome(kitchenId: kitchenId));
+        ..add(GetPantriesItemsEventForHome(kitchenId: kitchenId))
+        ..add(GetUserStorageAreaEvent(kitchenId));
     }
   }
 
@@ -118,8 +111,6 @@ class _HomePageState extends State<HomePage> {
           );
         },
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.miniStartFloat,
-      floatingActionButton: const FloatingButton(),
     );
   }
 }

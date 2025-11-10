@@ -86,44 +86,4 @@ class HomeRepositoryImpl implements HomeRepository {
       return Left(UnknownFailure(e.toString()));
     }
   }
-
-  @override
-  Future<Either<Failure, List<PantriesCommonEntity>>> getAllPantries({
-    required String kitchenId,
-  }) async {
-    try {
-      final response = await commonRemoteDatasource.getAllPantries(
-        kitchenId: kitchenId,
-      );
-
-      final pantries = response
-          .map((json) => PantriesCommonModel.fromJson(json))
-          .toList();
-
-      return Right(pantries);
-    } on Failure catch (f) {
-      return Left(f);
-    } catch (e, stack) {
-      return Left(UnknownFailure(e.toString()));
-    }
-  }
-
-  @override
-  Future<Either<Failure, String>> createPantry({
-    required String kitchenId,
-    required List<String> pantries,
-  }) async {
-    try {
-      final response = await commonRemoteDatasource.createPantry(
-        kitchenId: kitchenId,
-        pantries: pantries,
-      );
-
-      return Right(response);
-    } on Failure catch (f) {
-      return Left(f);
-    } catch (e, stack) {
-      return Left(UnknownFailure(e.toString()));
-    }
-  }
 }

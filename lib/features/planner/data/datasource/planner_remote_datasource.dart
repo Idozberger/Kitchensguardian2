@@ -44,6 +44,7 @@ class PlannerRemoteDatasourceImpl implements PlannerRemoteDatasource {
       );
 
       final data = response.data["recipes"];
+
       if (response.statusCode != 200 && response.statusCode != 201) {
         final data = response.data is String
             ? jsonDecode(response.data)
@@ -55,7 +56,7 @@ class PlannerRemoteDatasourceImpl implements PlannerRemoteDatasource {
       if (data is List) {
         return data.map<Map<String, dynamic>>((e) {
           final recipe = Map<String, dynamic>.from(e);
-
+          logError(recipe);
           final thumbnailBase64 = recipe["thumbnail"];
 
           if (thumbnailBase64 is String && thumbnailBase64.isNotEmpty) {
@@ -193,14 +194,10 @@ class PlannerRemoteDatasourceImpl implements PlannerRemoteDatasource {
   @override
   Future<String> requestItems({required PantryModel pantryModel}) async {
     try {
-      Map<String, dynamic> data = {
-        "kitchen_id": pantryModel.kitchenId,
-        "name": pantryModel.items[0].name,
-        "quantity": pantryModel.items[0].quantity.toString(),
-        "unit": pantryModel.items[0].unit,
-      };
-      logError(data);
-      final response = await dio.post(AppConstants.requestItems, data: data);
+      final response = await dio.post(
+        AppConstants.requestItems,
+        data: pantryModel.toJson(),
+      );
       if (response.statusCode != 200 && response.statusCode != 201) {
         final data = response.data is String
             ? jsonDecode(response.data)

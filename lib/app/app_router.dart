@@ -24,6 +24,7 @@ import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/features/onboarding/presentation/pages/splash_screen.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/add_item_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/add_pantry_storage_type_page.dart';
+import 'package:foodkitchen/features/pantry/presentation/pages/all_storage_areas_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/my_pantry_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/receipt_details/capture_details_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/request_now_page.dart';
@@ -217,6 +218,13 @@ final GoRouter router = GoRouter(
       pageBuilder: (context, state) => buildTransitionPage(
         key: state.pageKey,
         child: AddPantryStorageTypePage(),
+      ),
+    ),
+    GoRoute(
+      path: Routes.allStorageArea,
+      pageBuilder: (context, state) => buildTransitionPage(
+        key: state.pageKey,
+        child: AllPantryStoragePage(),
       ),
     ),
   ],

@@ -47,8 +47,7 @@ import 'package:foodkitchen/features/home/data/datasource/home_remote_datasource
 import 'package:foodkitchen/features/home/data/repository/home_repository_impl.dart';
 import 'package:foodkitchen/features/home/domain/repository/home_repository.dart';
 import 'package:foodkitchen/features/home/domain/usecases/create_kitchen_usecase.dart';
-import 'package:foodkitchen/features/home/domain/usecases/create_pantry_usecase.dart';
-import 'package:foodkitchen/features/home/domain/usecases/get_all_pantries_usecase.dart';
+import 'package:foodkitchen/features/pantry/domain/usecases/create_pantry_usecase.dart';
 import 'package:foodkitchen/features/home/domain/usecases/get_all_weekly_plans_usecase.dart';
 import 'package:foodkitchen/features/home/domain/usecases/get_pantries_usecase.dart';
 import 'package:foodkitchen/features/home/domain/usecases/join_kitchen_usecase.dart';
@@ -68,7 +67,9 @@ import 'package:foodkitchen/features/pantry/data/datasource/pantry_remote_dataso
 import 'package:foodkitchen/features/pantry/data/repository/pantry_repository_impl.dart';
 import 'package:foodkitchen/features/pantry/domain/repository/pantry_repository.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/add_pantry_item.dart';
+import 'package:foodkitchen/features/pantry/domain/usecases/delete_pantry.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/get_pantry_items.dart';
+import 'package:foodkitchen/features/pantry/domain/usecases/get_storage_area.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/request_items.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/scan_receipt.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/show_notification.dart';
@@ -106,6 +107,7 @@ Future<void> initDependencies() async {
   sl.registerFactory(() => dartJwtCoder);
   sl.registerFactory(() => InternetConnection());
   sl.registerFactory<ConnectionChecker>(() => ConnectionCheckerImpl(sl()));
+  _initCommonRemoteRepo();
   _dioInjection();
   _initOnboarding();
   _initHome();
@@ -117,7 +119,6 @@ Future<void> initDependencies() async {
   _initPlanner();
   _initHistory();
   _initProfile();
-  _initCommonRemoteRepo();
 }
 
 void _dioInjection() {
@@ -126,8 +127,8 @@ void _dioInjection() {
       BaseOptions(
         validateStatus: (status) => true,
         baseUrl: AppConstants.baseUrl,
-        connectTimeout: const Duration(seconds: 120),
-        receiveTimeout: const Duration(seconds: 120),
+        connectTimeout: const Duration(seconds: 180),
+        receiveTimeout: const Duration(seconds: 180),
       ),
     ),
   );
@@ -148,7 +149,11 @@ void _initOnboarding() async {
     // Usecases
     ..registerFactory(() => GetCurrentUserUseCase(sl()))
     // Cubit
-    ..registerLazySingleton(() => UserCubit())
+    ..registerLazySingleton(
+      () => UserCubit(
+        commonRemoteDatasource: CommonRemoteDatasourceImpl(dio: sl()),
+      ),
+    )
     // Bloc
     ..registerLazySingleton(
       () => UserBloc(
@@ -206,8 +211,6 @@ void _initHome() async {
     ..registerFactory(() => JoinKitchen(sl()))
     ..registerFactory(() => GetPantriesForHome(sl()))
     ..registerFactory(() => GetAllWeeklyPlansForHome(sl()))
-    ..registerFactory(() => GetUserStorageArea(sl()))
-    ..registerFactory(() => CreatePantryUsecase(sl()))
     // Bloc
     ..registerLazySingleton(
       () => HomeBloc(
@@ -216,8 +219,6 @@ void _initHome() async {
         userCubit: sl(),
         getPantriesForHome: GetPantriesForHome(sl()),
         getAllWeeklyPlansForHome: GetAllWeeklyPlansForHome(sl()),
-        getUserStorageArea: GetUserStorageArea(sl()),
-        createPantryUsecase: CreatePantryUsecase(sl()),
       ),
     );
 }
@@ -289,13 +290,21 @@ void _initPantry() async {
       () => PantryRemoteDatasourceImpl(dio: sl(), notificationService: sl()),
     )
     // Repository
-    ..registerFactory<PantryRepository>(() => PantryRepositoryImpl(sl()))
+    ..registerFactory<PantryRepository>(
+      () => PantryRepositoryImpl(
+        commonRemoteDatasource: sl(),
+        pantryRemoteDatasource: sl(),
+      ),
+    )
     // Usecases
     ..registerFactory(() => AddPantryItem(sl()))
     ..registerFactory(() => GetPantryItems(sl()))
     ..registerFactory(() => ScanReceiptUseCase(sl()))
     ..registerFactory(() => RequestItems(sl()))
     ..registerFactory(() => ShowNotification(sl()))
+    ..registerFactory(() => CreatePantryUsecase(sl()))
+    ..registerFactory(() => GetUserStorageAreaForPantryView(sl()))
+    ..registerFactory(() => DeletePantry(sl()))
     // Bloc
     ..registerLazySingleton(
       () => PantryBloc(
@@ -306,6 +315,9 @@ void _initPantry() async {
         requestItems: RequestItems(sl()),
         homeBloc: sl(),
         groceryBloc: sl(),
+        createPantryUsecase: CreatePantryUsecase(sl()),
+        userCubit: sl(),
+        deletePantry: DeletePantry(sl()),
       ),
     );
 }

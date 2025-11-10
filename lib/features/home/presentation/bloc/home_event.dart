@@ -23,9 +23,3 @@ final class GetUserStorageAreaEvent extends HomeEvent {
   final String kitchenId;
   GetUserStorageAreaEvent(this.kitchenId);
 }
-
-final class CreatePantryEvent extends HomeEvent {
-  final String kitchenId;
-  final List<String> pantries;
-  CreatePantryEvent({required this.kitchenId, required this.pantries});
-}

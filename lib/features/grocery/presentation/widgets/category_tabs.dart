@@ -37,8 +37,8 @@ class CategoryTabs extends StatelessWidget {
               borderColor: selectedIndex == index
                   ? AppColors.primaryColor
                   : const Color(0xffD4D2D2),
-              horizontalPad: 15,
-              verticalPad: 12,
+              horizontalPad: 14,
+              verticalPad: 0,
               text: categories[index],
               backgroundColor: selectedIndex == index
                   ? AppColors.primaryColor

@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
-import 'package:foodkitchen/core/common/domain/entities/pantry_storage_type_entity.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
@@ -15,9 +14,8 @@ import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_bloc.dart';
+import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_event.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_state.dart';
-import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
-import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dart';
 
 class AddPantryStorageTypePage extends StatefulWidget {
   const AddPantryStorageTypePage({super.key});
@@ -58,12 +56,6 @@ class _AddPantryStorageTypePageState extends State<AddPantryStorageTypePage> {
       _storageTypes.add(name);
       _nameController.clear();
     });
-
-    AppToast.show(
-      "Storage type added to list.",
-      ToastType.success,
-      gravity: ToastGravity.TOP,
-    );
   }
 
   void resetState() {
@@ -74,8 +66,15 @@ class _AddPantryStorageTypePageState extends State<AddPantryStorageTypePage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<PlannerBloc, PlannerState>(
-      listener: (_, state) {},
+    return BlocConsumer<PantryBloc, PantryState>(
+      listener: (_, state) {
+        if (state is PantrySuccess) {
+          AppToast.show(state.successMessage, ToastType.success);
+        }
+        if (state is PantryFailure) {
+          AppToast.show(state.errorMessage, ToastType.error);
+        }
+      },
       builder: (_, state) {
         return Scaffold(
           backgroundColor: const Color(0xffF9F9F9),
@@ -163,15 +162,13 @@ class _AddPantryStorageTypePageState extends State<AddPantryStorageTypePage> {
                             return;
                           }
 
-                          final pantryModel = PantryStorageTypeEntity(
-                            kitchenId: userCubit.state.activeKitchenId,
-                            storageTypes: _storageTypes,
+                          pantryBloc.add(
+                            CreatePantryEvent(
+                              kitchenId: userCubit.state.activeKitchenId,
+                              pantries: _storageTypes,
+                            ),
                           );
-                          AppToast.show(
-                            "Submitted ${pantryModel.storageTypes}",
-                            ToastType.success,
-                            gravity: ToastGravity.TOP,
-                          );
+
                           resetState();
                         },
                 ),
@@ -217,7 +214,7 @@ class _AddPantryStorageTypePageState extends State<AddPantryStorageTypePage> {
             height: h(18),
           ),
           label: Text(
-            "Tap to add more",
+            "Add Storage",
             style: Theme.of(context).textTheme.headlineMedium!.copyWith(
               fontSize: t(15),
               color: AppColors.primaryColor,

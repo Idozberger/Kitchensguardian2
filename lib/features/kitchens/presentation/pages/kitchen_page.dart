@@ -37,7 +37,7 @@ class _KitchenPageState extends State<KitchenPage> {
     super.initState();
   }
 
-  void fetchAllKitchens() {
+  void fetchAllKitchens() async {
     kitchenBloc.add(FetchKitchens());
   }
 
@@ -150,10 +150,11 @@ class _KitchenPageState extends State<KitchenPage> {
                             "Are you sure you want to leave this kitchen?",
                         primaryButtonText: "Yes",
                         secondaryButtonText: "Cancel",
-                        onPrimaryPressed: () {
+                        onPrimaryPressed: () async {
                           context.read<KitchenBloc>().add(
                             LeaveKitchenEvent(kitchen.kitchenId),
                           );
+                          await userCubit.updateStorageAreaToEmpty();
 
                           context.pop();
                         },
@@ -194,6 +195,9 @@ class _KitchenPageState extends State<KitchenPage> {
                             );
 
                             kitchenBloc.add(SwitchKitchenEvent(kitchen));
+                            await userCubit.getUserStorageArea(
+                              kitchenId: kitchen.kitchenId,
+                            );
                           },
                     imagePath: AppAssets.avatar,
                     title: kitchen.kitchenName,
@@ -301,10 +305,11 @@ class _KitchenPageState extends State<KitchenPage> {
                             "Are you sure you want to delete this kitchen?",
                         primaryButtonText: "Yes",
                         secondaryButtonText: "Cancel",
-                        onPrimaryPressed: () {
+                        onPrimaryPressed: () async {
                           context.read<KitchenBloc>().add(
                             RemoveKitchenEvent(kitchen.kitchenId),
                           );
+                          await userCubit.updateStorageAreaToEmpty();
                           context.pop();
                         },
                         onSecondaryPressed: () {
@@ -346,6 +351,9 @@ class _KitchenPageState extends State<KitchenPage> {
                             );
 
                             kitchenBloc.add(SwitchKitchenEvent(kitchen));
+                            await userCubit.getUserStorageArea(
+                              kitchenId: kitchen.kitchenId,
+                            );
                           },
                     imagePath: AppAssets.avatar,
                     title: kitchen.kitchenName,

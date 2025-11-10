@@ -10,7 +10,6 @@ class HomeState {
 
   final List<PantriesDataEntity> pantryItems;
   final List<MealTypeEntity> dateBasedPlan;
-  final List<PantriesCommonEntity> userStorageAreas;
 
   const HomeState({
     this.isLoading = false,
@@ -20,7 +19,6 @@ class HomeState {
 
     this.pantryItems = const [],
     this.dateBasedPlan = const [],
-    this.userStorageAreas = const [],
   });
 
   HomeState copyWith({
@@ -30,7 +28,6 @@ class HomeState {
     List<PantriesDataEntity>? pantryItems,
     List<MealTypeEntity>? dateBasedPlan,
     String? successMessage,
-    List<PantriesCommonEntity>? userStorageAreas,
   }) {
     return HomeState(
       isLoading: isLoading ?? this.isLoading,
@@ -39,7 +36,6 @@ class HomeState {
       successMessage: successMessage,
       pantryItems: pantryItems ?? this.pantryItems,
       dateBasedPlan: dateBasedPlan ?? this.dateBasedPlan,
-      userStorageAreas: userStorageAreas ?? this.userStorageAreas,
     );
   }
 }
