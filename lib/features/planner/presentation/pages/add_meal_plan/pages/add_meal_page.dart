@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
@@ -15,8 +17,6 @@ import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dar
 import 'package:foodkitchen/features/planner/presentation/pages/add_meal_plan/widgets/generated_recipe_section.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/add_meal_plan/widgets/meal_action_tile.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/add_meal_plan/widgets/meal_type_selector.dart';
-import 'package:foodkitchen/features/planner/presentation/pages/edit_meal_page.dart';
-
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_date_picker_widget.dart';
 import 'package:go_router/go_router.dart';
@@ -30,23 +30,31 @@ class AddMealPage extends StatefulWidget {
   State<AddMealPage> createState() => _AddMealPageState();
 }
 
-class _AddMealPageState extends State<AddMealPage> {
+class _AddMealPageState extends State<AddMealPage>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+  late PlannerBloc plannerBloc;
   bool isLoading = true;
-  int selectedIndex = 0;
-  late DateTime dateTime;
-
+  late DateTime startDate;
   final mealTypes = const ["Breakfast", "Lunch", "Dinner"];
 
   @override
   void initState() {
     super.initState();
+    plannerBloc = context.read<PlannerBloc>();
     _initializeDate();
   }
 
   Future<void> _initializeDate() async {
     final prefs = await SharedPreferences.getInstance();
-    final startDate = prefs.getString("start-date");
-    dateTime = startDate != null ? parseDate(startDate) : DateTime.now();
+    final getStartDate = prefs.getString("start-date");
+    startDate = getStartDate != null ? parseDate(getStartDate) : DateTime.now();
+    if (plannerBloc.state.selectedDate == null) {
+      plannerBloc.add(
+        UpdateTypeSelectedAndDateEvent(index: 0, date: startDate),
+      );
+    }
     setState(() => isLoading = false);
   }
 
@@ -91,9 +99,10 @@ class _AddMealPageState extends State<AddMealPage> {
                           _buildDateSelector(context),
                           gap(height: 20),
                           MealTypeSelector(
-                            selectedIndex: selectedIndex,
-                            onSelected: (index) =>
-                                setState(() => selectedIndex = index),
+                            selectedIndex: state.mealTypeSelectedIndex,
+                            onSelected: (index) => plannerBloc.add(
+                              UpdateTypeSelectedAndDateEvent(index: index),
+                            ),
                           ),
                           _buildGenerateRecipeButton(),
                           _buildMealPlanContent(state),
@@ -133,7 +142,8 @@ class _AddMealPageState extends State<AddMealPage> {
     return BlocBuilder<PlannerBloc, PlannerState>(
       builder: (_, state) {
         return SelectDateWidget(
-          startDate: dateTime,
+          selectedDate: state.selectedDate,
+          startDate: startDate,
           entitlementIsActive: false,
           onChanged: (selected) {
             final hasPlans =
@@ -147,14 +157,18 @@ class _AddMealPageState extends State<AddMealPage> {
                 subtitle:
                     "Changing the date will remove existing meal plans. Continue?",
                 onConfirm: () {
-                  dateTime = selected;
+                  plannerBloc.add(
+                    UpdateTypeSelectedAndDateEvent(date: selected, index: 0),
+                  );
                   context.read<PlannerBloc>().add(ResetMealPlanState());
                   AppToast.show("Previous plans removed", ToastType.success);
                   context.pop();
                 },
               );
             } else {
-              setState(() => dateTime = selected);
+              plannerBloc.add(
+                UpdateTypeSelectedAndDateEvent(date: selected, index: 0),
+              );
             }
           },
         );
@@ -166,7 +180,7 @@ class _AddMealPageState extends State<AddMealPage> {
     if (state.mealPlans.isEmpty) return const SizedBox();
 
     final plan = state.mealPlans.first;
-    final formattedDate = formatDate(dateTime);
+    final formattedDate = formatDate(state.selectedDate!);
 
     final isMatchingDate = plan.date == formattedDate;
 
@@ -177,10 +191,10 @@ class _AddMealPageState extends State<AddMealPage> {
         GeneratedRecipeSection(
           date: formattedDate,
           mealPlan: plan,
-          selectedIndex: selectedIndex,
+          selectedIndex: state.mealTypeSelectedIndex,
         ),
         gap(height: 18),
-        MealActionRow(selectedIndex: selectedIndex, plan: plan),
+        MealActionRow(selectedIndex: state.mealTypeSelectedIndex, plan: plan),
       ],
     );
   }
@@ -189,15 +203,15 @@ class _AddMealPageState extends State<AddMealPage> {
     return BlocBuilder<PlannerBloc, PlannerState>(
       builder: (_, state) {
         if (state.mealPlans.isEmpty) {
-          return _buildGenerateButton(context);
+          return _buildGenerateButton(context, state);
         } else {
           final plan = state.mealPlans.first;
-          if (selectedIndex == 0 && plan.breakfast == null) {
-            return _buildGenerateButton(context);
-          } else if (selectedIndex == 1 && plan.lunch == null) {
-            return _buildGenerateButton(context);
-          } else if (selectedIndex == 2 && plan.dinner == null) {
-            return _buildGenerateButton(context);
+          if (state.mealTypeSelectedIndex == 0 && plan.breakfast == null) {
+            return _buildGenerateButton(context, state);
+          } else if (state.mealTypeSelectedIndex == 1 && plan.lunch == null) {
+            return _buildGenerateButton(context, state);
+          } else if (state.mealTypeSelectedIndex == 2 && plan.dinner == null) {
+            return _buildGenerateButton(context, state);
           } else {
             return const SizedBox();
           }
@@ -206,8 +220,8 @@ class _AddMealPageState extends State<AddMealPage> {
     );
   }
 
-  Widget _buildGenerateButton(BuildContext context) {
-    final formatted = DateFormat('dd/MM/yyyy').format(dateTime);
+  Widget _buildGenerateButton(BuildContext context, PlannerState state) {
+    final formatted = DateFormat('dd/MM/yyyy').format(state.selectedDate!);
 
     return Padding(
       padding: gapOnly(top: 20),
@@ -218,7 +232,7 @@ class _AddMealPageState extends State<AddMealPage> {
             Routes.generateRecipes,
             extra: {
               "selected_date": formatted,
-              "selected_meal_type": mealTypes[selectedIndex],
+              "selected_meal_type": mealTypes[state.mealTypeSelectedIndex],
               "is_plan": true,
             },
           );

@@ -10,7 +10,6 @@ import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_event.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_state.dart';
 import 'package:foodkitchen/features/home/presentation/pages/kitchen_home_view.dart';
-import 'package:foodkitchen/features/home/presentation/widgets/floating_button.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -30,7 +29,9 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     userCubit = context.read<UserCubit>();
     homeBloc = context.read<HomeBloc>();
-    _fetchInitialData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchInitialData();
+    });
   }
 
   void _fetchInitialData() {

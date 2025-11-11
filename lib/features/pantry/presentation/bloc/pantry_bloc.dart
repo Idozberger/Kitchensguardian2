@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
@@ -9,12 +11,15 @@ import 'package:foodkitchen/features/pantry/data/model/scan_receipt_item_model.d
 import 'package:foodkitchen/features/pantry/domain/entities/scan_receipt.dart';
 import 'package:foodkitchen/features/pantry/domain/entities/scan_receipt_item.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/add_pantry_item.dart';
+import 'package:foodkitchen/features/pantry/domain/usecases/cart_items.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/create_pantry_usecase.dart';
+import 'package:foodkitchen/features/pantry/domain/usecases/delete_item.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/delete_pantry.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/get_pantry_items.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/request_items.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/scan_receipt.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/show_notification.dart';
+import 'package:foodkitchen/features/pantry/domain/usecases/update_item.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_event.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_state.dart';
 
@@ -29,6 +34,9 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
   final ShowNotification _showNotification;
   final CreatePantryUsecase _createPantry;
   final DeletePantry _deletePantry;
+  final CartItems _cartItems;
+  final DeleteItem _deleteItem;
+  final UpdateItem _updateItem;
 
   PantryBloc({
     required HomeBloc homeBloc,
@@ -40,8 +48,10 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
     required RequestItems requestItems,
     required ShowNotification showNotification,
     required CreatePantryUsecase createPantryUsecase,
-
+    required CartItems cartItems,
     required DeletePantry deletePantry,
+    required DeleteItem deleteItem,
+    required UpdateItem updateItem,
   }) : _addPantryItem = addPantryItem,
        _getPantryItems = getPantryItems,
        _scanReceiptUseCase = scanReceipt,
@@ -52,6 +62,9 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
        _createPantry = createPantryUsecase,
        _userCubit = userCubit,
        _deletePantry = deletePantry,
+       _cartItems = cartItems,
+       _deleteItem = deleteItem,
+       _updateItem = updateItem,
 
        super(PantryInitial()) {
     on<PantryAddItemEvent>(_onAddPantryItem);
@@ -66,6 +79,9 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
       _onGetUserStorageAreaForPantryView,
     );
     on<DeletePantryEvent>(_onDeletePantry);
+    on<CartItemsEvent>(_onCartItem);
+    on<DeleteItemEvent>(_onDeleteItem);
+    on<UpdateItemEvent>(_onUpdateItem);
   }
 
   Future<void> _onAddPantryItem(
@@ -94,7 +110,7 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
     );
 
     res.fold((failure) => emit(PantryFailure(failure.message)), (pantries) {
-      emit(PantryLoaded(pantries));
+      emit(PantryLoaded(pantryItems: pantries));
     });
   }
 
@@ -210,11 +226,12 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
       ),
     );
 
-    res.fold(
+    await res.fold(
       (failure) {
         AppToast.show(failure.message, ToastType.error);
       },
-      (successMessage) {
+      (successMessage) async {
+        await _userCubit.getUserStorageArea(kitchenId: event.kitchenId);
         emit(PantrySuccess(successMessage));
       },
     );
@@ -245,6 +262,103 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
       },
       (successMessage) {
         emit(PantrySuccess(successMessage));
+      },
+    );
+  }
+
+  Future<void> _onCartItem(
+    CartItemsEvent event,
+    Emitter<PantryState> emit,
+  ) async {
+    final currentState = state;
+
+    if (currentState is PantryLoaded) {
+      final index = event.index;
+
+      emit(currentState.copyWith(loadingIndex: index, isToCart: true));
+
+      final res = await _cartItems(CartItemsParams(pantry: event.pantry));
+
+      res.fold(
+        (failure) {
+          AppToast.show(failure.message, ToastType.error);
+          emit(
+            currentState.copyWith(
+              loadingIndex: null,
+              errorMessage: failure.message,
+              isToCart: false,
+            ),
+          );
+        },
+        (successMessage) {
+          AppToast.show(successMessage, ToastType.success);
+          emit(
+            currentState.copyWith(
+              loadingIndex: null,
+              successMessage: successMessage,
+              isToCart: false,
+            ),
+          );
+          _groceryBloc
+            ..add(
+              RequestedGroceryEvent(
+                kitchenId: _userCubit.state.activeKitchenId,
+              ),
+            )
+            ..add(
+              GetAiGeneratedItemsEvent(
+                kitchenId: _userCubit.state.activeKitchenId,
+              ),
+            );
+        },
+      );
+    }
+  }
+
+  Future<void> _onDeleteItem(
+    DeleteItemEvent event,
+    Emitter<PantryState> emit,
+  ) async {
+    emit(PantryLoading());
+
+    final res = await _deleteItem(DeleteItemParams(pantry: event.pantry));
+
+    res.fold(
+      (failure) {
+        AppToast.show(failure.message, ToastType.error);
+      },
+      (successMessage) {
+        emit(PantrySuccess(successMessage));
+        add(GetPantryItemsEvent(kitchenId: _userCubit.state.activeKitchenId));
+        _homeBloc.add(
+          GetPantriesItemsEventForHome(
+            kitchenId: _userCubit.state.activeKitchenId,
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _onUpdateItem(
+    UpdateItemEvent event,
+    Emitter<PantryState> emit,
+  ) async {
+    emit(PantryLoading());
+
+    final res = await _updateItem(UpdateItemParams(pantry: event.pantry));
+
+    res.fold(
+      (failure) {
+        AppToast.show(failure.message, ToastType.error);
+      },
+      (successMessage) {
+        emit(PantrySuccess(successMessage));
+        add(GetPantryItemsEvent(kitchenId: _userCubit.state.activeKitchenId));
+        _homeBloc.add(
+          GetPantriesItemsEventForHome(
+            kitchenId: _userCubit.state.activeKitchenId,
+          ),
+        );
       },
     );
   }

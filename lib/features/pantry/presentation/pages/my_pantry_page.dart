@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
+import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
@@ -59,6 +60,9 @@ class _MyPantryPageState extends State<MyPantryPage> {
           listener: (_, state) {
             if (state is PantryFailure) {
               AppToast.show(state.errorMessage, ToastType.error);
+            }
+            if (state is PantrySuccess) {
+              AppToast.show(state.successMessage, ToastType.success);
             }
           },
           builder: (_, state) {
@@ -126,10 +130,6 @@ class _MyPantryPageState extends State<MyPantryPage> {
             );
           },
         ),
-
-        bottomNavigationBar: userCubit.state.role != "member"
-            ? null
-            : _requestNow(context),
       ),
     );
   }
@@ -139,26 +139,39 @@ class _MyPantryPageState extends State<MyPantryPage> {
     bool requestButton = false,
     required PantryLoaded pantryLoaded,
   }) {
-    return ListView.separated(
-      itemCount: pantryLoaded.pantryItems.length,
-      shrinkWrap: true,
-      separatorBuilder: (context, index) =>
-          const Divider(color: Color(0xffF4F4F4)),
-      padding: gapSymmetric(horizontal: 20, vertical: 20),
-      itemBuilder: (_, index) {
-        var pantry = pantryLoaded.pantryItems[index];
-        return PantryItemCard(
-          title: pantry.name,
-          quantity: pantry.quantity.toString(),
-          unit: pantry.unit,
-          pantry: pantry.group,
-          expiry: "Expires in ${index + 1} days",
-          onListCheckedCallback: () async {
-            ////TODO: Request Notification Permission
-            await FCMService().sendNotification(
-              "cssg9rEJQtumlTZXIlYdNX:APA91bHXf54VEV2u5sGvVlQrmA9-aM_O4J6wMYDoHpgFLb6z7D4tr78HVVzsW_Av8XcA70a81vD3rk6G8ntrOTGqmzTlXwIY0s5mg3IrRVyGM9XpxsrJVFw",
-              "SS",
-              "sdfa",
+    return BlocBuilder<PantryBloc, PantryState>(
+      builder: (_, state) {
+        return ListView.separated(
+          itemCount: pantryLoaded.pantryItems.length,
+          shrinkWrap: true,
+          separatorBuilder: (context, index) =>
+              const Divider(color: Color(0xffF4F4F4)),
+          padding: gapSymmetric(horizontal: 20, vertical: 20),
+          itemBuilder: (_, index) {
+            var pantry = pantryLoaded.pantryItems[index];
+            return PantryItemCard(
+              title: pantry.name,
+              quantity: pantry.quantity.toString(),
+              unit: pantry.unit,
+              pantry: pantry.group,
+              expiry: pantry.expireDate.isEmpty
+                  ? "Expire in 2 days"
+                  : pantry.expireDate,
+              onListCheckedCallback: () async {},
+
+              onCartItem: () async {
+                pantryBloc.add(
+                  CartItemsEvent(
+                    pantry: Pantry(
+                      kitchenId: userCubit.state.activeKitchenId,
+                      items: [pantry],
+                    ),
+                    index: index,
+                  ),
+                );
+              },
+              pantryItemEntity: pantry,
+              kitchenId: userCubit.state.activeKitchenId,
             );
           },
         );

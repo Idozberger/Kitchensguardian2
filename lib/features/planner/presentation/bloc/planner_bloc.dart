@@ -88,6 +88,19 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     on<RequestMissingItemsEvent>(_onRequestMissingItems);
     on<ResetMealPlanState>(_onResetMealPlanState);
     on<DeleteMealPlanEvent>(_onDeleteMealPlan);
+    on<UpdateTypeSelectedAndDateEvent>(_onUpdateMealTypeSelectedAndDate);
+  }
+
+  Future<void> _onUpdateMealTypeSelectedAndDate(
+    UpdateTypeSelectedAndDateEvent event,
+    Emitter<PlannerState> emit,
+  ) async {
+    emit(
+      state.copyWith(
+        mealTypeSelectedIndex: event.index,
+        selectedDate: event.date,
+      ),
+    );
   }
 
   Future<void> _onGetFavouriteRecipes(

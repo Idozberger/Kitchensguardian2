@@ -208,7 +208,14 @@ class _PlannerPageState extends State<PlannerPage> {
         GenericButtonWidget(
           onPressed: () async {
             _plannerBloc.add(ResetMealPlanState());
-
+            final prefs = await SharedPreferences.getInstance();
+            final getStartDate = prefs.getString("start-date");
+            final startDate = getStartDate != null
+                ? parseDate(getStartDate)
+                : DateTime.now();
+            _plannerBloc.add(
+              UpdateTypeSelectedAndDateEvent(date: startDate, index: 0),
+            );
             setState(() {
               if (localDbPlanStartTime != null) {
                 _selectedDate = parseDate(localDbPlanStartTime!);

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 
 class DrawerListTile extends StatelessWidget {
@@ -20,6 +21,8 @@ class DrawerListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       dense: true,
+      contentPadding: gapZero,
+      visualDensity: VisualDensity(vertical: -1),
       onTap: onTap,
       leading: SvgPicture.asset(iconPath, color: color),
       title: Text(

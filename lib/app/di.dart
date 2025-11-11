@@ -47,6 +47,7 @@ import 'package:foodkitchen/features/home/data/datasource/home_remote_datasource
 import 'package:foodkitchen/features/home/data/repository/home_repository_impl.dart';
 import 'package:foodkitchen/features/home/domain/repository/home_repository.dart';
 import 'package:foodkitchen/features/home/domain/usecases/create_kitchen_usecase.dart';
+import 'package:foodkitchen/features/pantry/domain/usecases/cart_items.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/create_pantry_usecase.dart';
 import 'package:foodkitchen/features/home/domain/usecases/get_all_weekly_plans_usecase.dart';
 import 'package:foodkitchen/features/home/domain/usecases/get_pantries_usecase.dart';
@@ -67,12 +68,14 @@ import 'package:foodkitchen/features/pantry/data/datasource/pantry_remote_dataso
 import 'package:foodkitchen/features/pantry/data/repository/pantry_repository_impl.dart';
 import 'package:foodkitchen/features/pantry/domain/repository/pantry_repository.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/add_pantry_item.dart';
+import 'package:foodkitchen/features/pantry/domain/usecases/delete_item.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/delete_pantry.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/get_pantry_items.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/get_storage_area.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/request_items.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/scan_receipt.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/show_notification.dart';
+import 'package:foodkitchen/features/pantry/domain/usecases/update_item.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_bloc.dart';
 import 'package:foodkitchen/features/planner/data/datasource/planner_local_datasource.dart';
 import 'package:foodkitchen/features/planner/data/datasource/planner_remote_datasource.dart';
@@ -89,8 +92,11 @@ import 'package:foodkitchen/features/planner/domain/usecases/mark_recipe_finishe
 import 'package:foodkitchen/features/planner/domain/usecases/remove_from_favourite_recipe.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/request_missing_items.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
+import 'package:foodkitchen/features/profile/data/datasource/profile_remote_datasource.dart';
 import 'package:foodkitchen/features/profile/data/repository/profile_repository_impl.dart';
 import 'package:foodkitchen/features/profile/domain/repository/profile_repository.dart';
+import 'package:foodkitchen/features/profile/domain/usecases/change_password.dart';
+import 'package:foodkitchen/features/profile/domain/usecases/edit_profile.dart';
 import 'package:foodkitchen/features/profile/domain/usecases/get_profile_picture.dart';
 import 'package:foodkitchen/features/profile/domain/usecases/set_profile_picture.dart';
 import 'package:foodkitchen/features/profile/presentation/bloc/profile_bloc.dart';
@@ -305,6 +311,9 @@ void _initPantry() async {
     ..registerFactory(() => CreatePantryUsecase(sl()))
     ..registerFactory(() => GetUserStorageAreaForPantryView(sl()))
     ..registerFactory(() => DeletePantry(sl()))
+    ..registerFactory(() => CartItems(sl()))
+    ..registerFactory(() => DeleteItem(sl()))
+    ..registerFactory(() => UpdateItem(sl()))
     // Bloc
     ..registerLazySingleton(
       () => PantryBloc(
@@ -318,6 +327,9 @@ void _initPantry() async {
         createPantryUsecase: CreatePantryUsecase(sl()),
         userCubit: sl(),
         deletePantry: DeletePantry(sl()),
+        cartItems: CartItems(sl()),
+        deleteItem: DeleteItem(sl()),
+        updateItem: UpdateItem(sl()),
       ),
     );
 }
@@ -423,20 +435,32 @@ void _initProfile() async {
   // Datasource
 
   sl
+    ..registerFactory<ProfileRemoteDatasource>(
+      () => ProfileRemoteDatasourceImpl(dio: sl()),
+    )
     ..registerFactory<ProfileLocalDataSource>(
       () => ProfileLocalDatasourceImpl(sharedPreferences: sl()),
     )
     // Repository
-    ..registerFactory<ProfileRepository>(() => ProfileRepositoryImpl(sl()))
+    ..registerFactory<ProfileRepository>(
+      () => ProfileRepositoryImpl(
+        localDataSource: sl(),
+        profileRemoteDatasource: sl(),
+      ),
+    )
     // Usecases
     ..registerFactory(() => GetProfilePicture(sl()))
     ..registerFactory(() => SetProfilePicture(sl()))
+    ..registerFactory(() => EditProfile(sl()))
+    ..registerFactory(() => ChangePassword(sl()))
     // Bloc
     ..registerLazySingleton(
       () => ProfileBloc(
         getProfilePicture: GetProfilePicture(sl()),
         setProfilePicture: SetProfilePicture(sl()),
+        editProfile: EditProfile(sl()),
         userCubit: sl(),
+        changePassword: ChangePassword(sl()),
       ),
     );
 }

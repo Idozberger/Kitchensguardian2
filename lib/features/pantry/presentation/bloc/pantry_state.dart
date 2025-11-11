@@ -12,7 +12,34 @@ final class PantryLoading extends PantryState {}
 
 class PantryLoaded extends PantryState {
   final List<PantryItemEntity> pantryItems;
-  PantryLoaded(this.pantryItems);
+  final String? errorMessage;
+  final String? successMessage;
+  final bool isToCart;
+  final int? loadingIndex;
+
+  PantryLoaded({
+    required this.pantryItems,
+    this.errorMessage,
+    this.successMessage,
+    this.isToCart = false,
+    this.loadingIndex,
+  });
+
+  PantryLoaded copyWith({
+    List<PantryItemEntity>? pantryItems,
+    String? errorMessage,
+    String? successMessage,
+    bool? isToCart,
+    int? loadingIndex,
+  }) {
+    return PantryLoaded(
+      pantryItems: pantryItems ?? this.pantryItems,
+      errorMessage: errorMessage,
+      successMessage: successMessage,
+      isToCart: isToCart ?? this.isToCart,
+      loadingIndex: loadingIndex,
+    );
+  }
 }
 
 class PantrySuccess extends PantryState {

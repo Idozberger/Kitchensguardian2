@@ -95,3 +95,10 @@ final class DeleteMealPlanEvent extends PlannerEvent {
 
   DeleteMealPlanEvent({required this.mealType, required this.date});
 }
+
+final class UpdateTypeSelectedAndDateEvent extends PlannerEvent {
+  int? index;
+  DateTime? date;
+
+  UpdateTypeSelectedAndDateEvent({this.index, this.date});
+}

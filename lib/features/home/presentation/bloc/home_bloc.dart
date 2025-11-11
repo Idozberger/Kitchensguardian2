@@ -71,6 +71,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         );
 
         emit(state.copyWith(isLoading: false, successMessage: kitchen.message));
+        add(GetPantriesItemsEventForHome(kitchenId: kitchen.kitchenId));
       },
     );
   }

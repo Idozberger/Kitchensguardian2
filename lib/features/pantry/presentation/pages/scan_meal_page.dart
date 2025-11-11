@@ -89,6 +89,7 @@ class _ScanMealPageState extends State<ScanMealPage>
   Future<void> _showPermissionDialog() async {
     await showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) => AlertDialog(
         title: const Text("Camera Permission Required"),
         content: const Text(
@@ -96,7 +97,10 @@ class _ScanMealPageState extends State<ScanMealPage>
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pop(context);
+            },
             child: const Text("Cancel"),
           ),
           TextButton(

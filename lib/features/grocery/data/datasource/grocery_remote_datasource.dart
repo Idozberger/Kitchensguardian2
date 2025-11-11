@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -121,9 +122,38 @@ class GroceryRemoteDatasourceImpl implements GroceryRemoteDatasource {
     required String kitchenId,
   }) async {
     try {
-      return [];
+      final response = await dio.get(
+        "${AppConstants.getAiGeneratedList}?kitchen_id=$kitchenId",
+      );
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+
+        final message = data["error"];
+        throw message;
+      }
+      final data = response.data["missing_items"];
+      if (data is List) {
+        final parsedList = data.map<Map<String, dynamic>>((e) {
+          if (e is Map) {
+            return Map<String, dynamic>.from(e);
+          } else if (e is String) {
+            return {"name": e};
+          } else {
+            return {"name": e.toString()};
+          }
+        }).toList();
+
+        return parsedList;
+      } else {
+        throw Exception("Invalid data");
+      }
     } on DioException catch (e) {
       throw dio.handleError(e);
+    } catch (e, stackTrace) {
+      debugPrint("StackTrace: $stackTrace");
+      rethrow;
     }
   }
 

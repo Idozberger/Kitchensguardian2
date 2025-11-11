@@ -9,7 +9,7 @@ import 'package:intl/intl.dart';
 
 class SelectDateWidget extends StatefulWidget {
   final DateTime startDate;
-
+  final DateTime? selectedDate;
   final ValueChanged<DateTime> onChanged;
   final bool entitlementIsActive;
 
@@ -17,26 +17,37 @@ class SelectDateWidget extends StatefulWidget {
     super.key,
     required this.startDate,
     required this.onChanged,
-
     required this.entitlementIsActive,
+    this.selectedDate,
   });
 
   @override
   State<SelectDateWidget> createState() => _SelectDateWidgetState();
 }
 
-class _SelectDateWidgetState extends State<SelectDateWidget> {
+class _SelectDateWidgetState extends State<SelectDateWidget>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   late List<DateTime> _days;
 
   @override
   void initState() {
     super.initState();
+    _generateDays();
+  }
 
+  void _generateDays() {
     _days = List.generate(7, (i) => widget.startDate.add(Duration(days: i)));
   }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
+
+    final currentSelected = widget.selectedDate ?? widget.startDate;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -49,7 +60,7 @@ class _SelectDateWidgetState extends State<SelectDateWidget> {
             children: _days.asMap().entries.map((entry) {
               final index = entry.key;
               final date = entry.value;
-              final isSelected = _isSameDate(date, widget.startDate);
+              final isSelected = _isSameDate(date, currentSelected);
               final isLocked = !widget.entitlementIsActive && index > 2;
 
               return GestureDetector(
@@ -61,7 +72,6 @@ class _SelectDateWidgetState extends State<SelectDateWidget> {
                     );
                     return;
                   }
-
                   widget.onChanged(date);
                 },
                 child: Opacity(

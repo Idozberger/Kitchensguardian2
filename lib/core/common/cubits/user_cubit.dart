@@ -17,8 +17,8 @@ class UserCubit extends Cubit<UserState> {
   void setUser({
     required String firstName,
     required String lastName,
-    required String email,
-    required String userId,
+    String? email,
+    String? userId,
   }) {
     emit(
       state.copyWith(

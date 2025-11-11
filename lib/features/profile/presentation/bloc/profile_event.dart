@@ -17,3 +17,20 @@ class UpdateProfilePicture extends ProfileEvent {
   @override
   List<Object?> get props => [filePath];
 }
+
+class EditProfileEvent extends ProfileEvent {
+  final String firstName;
+  final String lastName;
+
+  const EditProfileEvent({required this.firstName, required this.lastName});
+}
+
+class ChangePasswordEvent extends ProfileEvent {
+  final String currentPassword;
+  final String newPassword;
+
+  const ChangePasswordEvent({
+    required this.currentPassword,
+    required this.newPassword,
+  });
+}

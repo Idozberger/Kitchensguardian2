@@ -63,3 +63,19 @@ final class DeletePantryEvent extends PantryEvent {
   final String pantryId;
   DeletePantryEvent({required this.kitchenId, required this.pantryId});
 }
+
+final class CartItemsEvent extends PantryEvent {
+  final Pantry pantry;
+  final int index;
+  CartItemsEvent({required this.pantry, required this.index});
+}
+
+final class DeleteItemEvent extends PantryEvent {
+  final Pantry pantry;
+  DeleteItemEvent({required this.pantry});
+}
+
+final class UpdateItemEvent extends PantryEvent {
+  final Pantry pantry;
+  UpdateItemEvent({required this.pantry});
+}

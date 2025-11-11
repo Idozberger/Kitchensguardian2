@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
@@ -25,13 +26,16 @@ class EditProfilePage extends StatefulWidget {
 
 class _EditProfilePageState extends State<EditProfilePage> {
   late ProfileBloc profileBloc;
+  late UserCubit userCubit;
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
 
   @override
   void initState() {
     profileBloc = context.read<ProfileBloc>();
-
+    userCubit = context.read<UserCubit>();
+    _firstNameController.text = userCubit.state.firstName;
+    _lastNameController.text = userCubit.state.lastName;
     super.initState();
   }
 
@@ -49,9 +53,52 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
   }
 
+  Future<void> _saveUser() async {
+    final firstName = _firstNameController.text.trim();
+    final lastName = _lastNameController.text.trim();
+
+    final firstNameError = _validateName(firstName, 'First name');
+    if (firstNameError != null) {
+      AppToast.show(firstNameError, ToastType.error);
+      return;
+    }
+
+    final lastNameError = _validateName(lastName, 'Last name');
+    if (lastNameError != null) {
+      AppToast.show(lastNameError, ToastType.error);
+      return;
+    }
+
+    profileBloc.add(EditProfileEvent(firstName: firstName, lastName: lastName));
+  }
+
+  String? _validateName(String name, String fieldName) {
+    if (name.isEmpty || name.length < 3) {
+      return '$fieldName must be at least 3 characters long';
+    }
+
+    if (name.length > 10) {
+      return '$fieldName must not exceed 10 characters';
+    }
+
+    if (name.split(RegExp(r'\s+')).length > 2) {
+      return '$fieldName can contain up to 2 words only';
+    }
+
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ProfileBloc, ProfileState>(
+    return BlocConsumer<ProfileBloc, ProfileState>(
+      listener: (context, state) {
+        if (state.successMessage != null) {
+          AppToast.show(state.successMessage!, ToastType.success);
+        }
+        if (state.errorMessage != null) {
+          AppToast.show(state.errorMessage!, ToastType.error);
+        }
+      },
       builder: (_, state) {
         return Scaffold(
           backgroundColor: const Color(0xffF9F9F9),
@@ -131,25 +178,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     gap(height: 20),
 
                     GenericButtonWidget(
-                      onPressed: () {
-                        if (_firstNameController.text.trim().isEmpty) {
-                          AppToast.show(
-                            "Please enter your first name",
-                            ToastType.error,
-                          );
-                        } else if (_lastNameController.text.trim().isEmpty) {
-                          AppToast.show(
-                            "Please enter your last name",
-                            ToastType.error,
-                          );
-                        } else {
-                          AppToast.show(
-                            "Successfully Changed!",
-                            ToastType.success,
-                          );
-                          Navigator.pop(context);
-                        }
-                      },
+                      isLoading: state.isLoading,
+                      onPressed: () => _saveUser(),
                       text: "Save",
                     ),
                   ],

@@ -31,4 +31,7 @@ abstract interface class PantryRepository {
     required String kitchenId,
     required String pantryId,
   });
+  Future<Either<Failure, String>> cartItems({required Pantry pantry});
+  Future<Either<Failure, String>> deleteItem({required Pantry pantry});
+  Future<Either<Failure, String>> updateItem({required Pantry pantry});
 }

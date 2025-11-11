@@ -229,6 +229,7 @@ final GoRouter router = GoRouter(
     ),
   ],
 );
+
 CustomTransitionPage buildTransitionPage({
   required Widget child,
   required LocalKey key,

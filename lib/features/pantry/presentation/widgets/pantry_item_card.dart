@@ -1,12 +1,25 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
+import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
+import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
+import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
+import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
+import 'package:foodkitchen/core/widgets/generic_dropdown_widget.dart';
+import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
+import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_bloc.dart';
+import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_event.dart';
+import 'package:go_router/go_router.dart';
 
 class PantryItemCard extends StatefulWidget {
   final String title;
@@ -14,7 +27,10 @@ class PantryItemCard extends StatefulWidget {
   final String unit;
   final String pantry;
   final VoidCallback onListCheckedCallback;
+  final VoidCallback onCartItem;
   final String expiry;
+  final PantryItemEntity pantryItemEntity;
+  final String kitchenId;
 
   const PantryItemCard({
     super.key,
@@ -24,6 +40,9 @@ class PantryItemCard extends StatefulWidget {
     required this.pantry,
     required this.expiry,
     required this.onListCheckedCallback,
+    required this.onCartItem,
+    required this.pantryItemEntity,
+    required this.kitchenId,
   });
 
   @override
@@ -83,7 +102,6 @@ class _PantryItemCardState extends State<PantryItemCard> {
               ],
             ),
 
-            /// Expanded Details
             if (_isExpanded) ...[
               SizedBox(height: h(15)),
               Row(
@@ -110,14 +128,24 @@ class _PantryItemCardState extends State<PantryItemCard> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  // _circleButton(AppAssets.editSvg, () {}),
-                  _circleButton(AppAssets.cartSvg, () {}),
+                  _circleButton(AppAssets.editSvg, () {
+                    _showEditItemDialog(
+                      context,
+                      widget.pantryItemEntity,
+                      widget.kitchenId,
+                    );
+                  }),
+                  _circleButton(AppAssets.cartSvg, widget.onCartItem),
                   _circleButton(
                     AppAssets.listCheckedSvg,
                     () => widget.onListCheckedCallback(),
                   ),
                   _circleButton(AppAssets.deleteSvg, () {
-                    _showDeleteDialog(context);
+                    _showDeleteDialog(
+                      context,
+                      widget.pantryItemEntity,
+                      widget.kitchenId,
+                    );
                   }),
                 ],
               ),
@@ -176,7 +204,152 @@ class _PantryItemCardState extends State<PantryItemCard> {
     );
   }
 
-  Future<dynamic> _showDeleteDialog(BuildContext context) {
+  Future<dynamic> _showEditItemDialog(
+    BuildContext context,
+    PantryItemEntity pantryItem,
+    String kitchenId,
+  ) {
+    final TextEditingController itemName = TextEditingController(
+      text: pantryItem.name,
+    );
+    final TextEditingController quantity = TextEditingController(
+      text: pantryItem.quantity.toString(),
+    );
+    String unit = pantryItem.unit;
+    String pantry = pantryItem.group;
+    final TextEditingController expireDate = TextEditingController(
+      text: pantryItem.expireDate,
+    );
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return GenericDialog(
+          borderRadius: h(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _formLabel(context, "Item name"),
+              SizedBox(height: h(10)),
+              AppTextField(
+                textInputAction: TextInputAction.next,
+                color: AppColors.apptextFieldStyleTextColor,
+                controller: itemName,
+                hintText: "Enter item name",
+                fillColor: const Color(0xffF9F9F9),
+                isFilled: true,
+                isLabled: false,
+                keyboardType: TextInputType.text,
+                label: "",
+              ),
+              SizedBox(height: h(10)),
+              _formLabel(context, "Quantity"),
+
+              SizedBox(height: h(14)),
+              AppTextField(
+                textInputAction: TextInputAction.next,
+                color: AppColors.apptextFieldStyleTextColor,
+                controller: quantity,
+                hintText: "Enter item quantity",
+                fillColor: const Color(0xffF9F9F9),
+                isFilled: true,
+                keyboardType: TextInputType.number,
+                isLabled: false,
+                label: "",
+              ),
+              SizedBox(height: h(15)),
+              Row(
+                spacing: w(12),
+                children: [
+                  Flexible(
+                    child: PopupDropdownField(
+                      label: "Units",
+                      hint: "Select Units",
+                      value: unit,
+                      items: ["Kg", "Gram", "Litre", "Piece"],
+                      onChanged: (val) => setState(() => unit = val!),
+                    ),
+                  ),
+                  Flexible(
+                    child: PopupDropdownField(
+                      label: "Pantry",
+                      hint: "Select Pantry",
+                      value: pantry,
+                      items: context
+                          .read<UserCubit>()
+                          .state
+                          .userStorageAreas
+                          .map((area) => area.pantryName)
+                          .toList(),
+                      onChanged: (val) => setState(() => pantry = val!),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: h(15)),
+              SizedBox(height: h(10)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(
+                    child: SizedBox(
+                      height: h(40),
+                      width: double.infinity,
+                      child: OutlinedButton(
+                        onPressed: () {
+                          AppToast.show("Coming soon...", ToastType.info);
+                          context.pop();
+                        },
+                        child: Text(
+                          "Edit",
+                          style: Theme.of(context).textTheme.headlineMedium!
+                              .copyWith(
+                                fontSize: t(12),
+                                color: AppColors.primaryColor,
+                              ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: h(10)),
+                  Flexible(
+                    child: GenericButtonWidget(
+                      onPressed: () {
+                        context.pop();
+                      },
+                      text: "Cancel",
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _formLabel(BuildContext context, String label, {Widget? action}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+            fontSize: t(15),
+            color: Colors.black,
+          ),
+        ),
+        if (action != null) action,
+      ],
+    );
+  }
+
+  Future<dynamic> _showDeleteDialog(
+    BuildContext context,
+    PantryItemEntity pantryItem,
+    String kitchenId,
+  ) {
     return showCustomGenericDialog(
       context: context,
       title: "Remove Item",
@@ -184,11 +357,15 @@ class _PantryItemCardState extends State<PantryItemCard> {
       primaryButtonText: "Yes",
       secondaryButtonText: "Cancel",
       onPrimaryPressed: () {
-        AppToast.show("Item removed", ToastType.success);
-        Navigator.pop(context);
+        context.read<PantryBloc>().add(
+          DeleteItemEvent(
+            pantry: Pantry(kitchenId: kitchenId, items: [pantryItem]),
+          ),
+        );
+        context.pop();
       },
       onSecondaryPressed: () {
-        Navigator.pop(context);
+        context.pop();
       },
     );
   }

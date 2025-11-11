@@ -1,9 +1,6 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:typed_data';
-
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
 import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
@@ -31,6 +28,8 @@ abstract interface class PantryRemoteDatasource {
     required String kitchenId,
     required String pantryId,
   });
+  Future<String> deleteItem({required PantryModel pantryModel});
+  Future<String> updateItem({required PantryModel pantryModel});
 }
 
 class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
@@ -146,14 +145,10 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
   @override
   Future<String> requestItems({required PantryModel pantryModel}) async {
     try {
-      Map<String, dynamic> data = {
-        "kitchen_id": pantryModel.kitchenId,
-        "name": pantryModel.items[0].name,
-        "quantity": pantryModel.items[0].quantity.toString(),
-        "unit": pantryModel.items[0].unit,
-      };
-      logError(data);
-      final response = await dio.post(AppConstants.requestItems, data: data);
+      final response = await dio.post(
+        AppConstants.requestItems,
+        data: pantryModel.toJson(),
+      );
       if (response.statusCode != 200 && response.statusCode != 201) {
         final data = response.data is String
             ? jsonDecode(response.data)
@@ -249,6 +244,62 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
       throw dio.handleError(e);
     } catch (e, stacktrace) {
       print('🧩 Stacktrace: $stacktrace');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<String> deleteItem({required PantryModel pantryModel}) async {
+    try {
+      final response = await dio.post(
+        AppConstants.removeItems,
+        data: pantryModel.toJson(),
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+
+        final message = data["error"];
+        throw message;
+      }
+
+      final successMessage = response.data["message"];
+      return successMessage;
+    } on DioException catch (e) {
+      final handledError = dio.handleError(e);
+
+      throw handledError;
+    } catch (e, stackTrace) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<String> updateItem({required PantryModel pantryModel}) async {
+    try {
+      final response = await dio.post(
+        AppConstants.updateKitchenItems,
+        data: pantryModel.toJson(),
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+
+        final message = data["error"];
+        throw message;
+      }
+
+      final successMessage = response.data["message"];
+      return successMessage;
+    } on DioException catch (e) {
+      final handledError = dio.handleError(e);
+
+      throw handledError;
+    } catch (e, stackTrace) {
       rethrow;
     }
   }

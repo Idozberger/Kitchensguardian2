@@ -15,6 +15,8 @@ final class PlannerState {
   final bool isFinishingRecipe;
   final String? errorMessage;
   final String successMessage;
+  final int mealTypeSelectedIndex;
+  final DateTime? selectedDate;
   const PlannerState({
     this.recipes,
     this.favouriteRecipes,
@@ -29,6 +31,8 @@ final class PlannerState {
     this.successMessage = "",
     this.dateBasedPlan = const [],
     this.doneSteps = const [],
+    this.mealTypeSelectedIndex = 0,
+    this.selectedDate,
   });
 
   PlannerState copyWith({
@@ -45,6 +49,8 @@ final class PlannerState {
     String? errorMessage,
     String? successMessage,
     List<Map<String, dynamic>>? doneSteps,
+    int? mealTypeSelectedIndex,
+    DateTime? selectedDate,
   }) {
     return PlannerState(
       recipes: recipes ?? this.recipes,
@@ -60,6 +66,9 @@ final class PlannerState {
       startedRecipe: startedRecipe ?? this.startedRecipe,
       doneSteps: doneSteps ?? this.doneSteps,
       mealPlans: mealPlans ?? this.mealPlans,
+      mealTypeSelectedIndex:
+          mealTypeSelectedIndex ?? this.mealTypeSelectedIndex,
+      selectedDate: selectedDate ?? this.selectedDate,
     );
   }
 }

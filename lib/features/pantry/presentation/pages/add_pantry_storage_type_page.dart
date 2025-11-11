@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
@@ -70,6 +69,7 @@ class _AddPantryStorageTypePageState extends State<AddPantryStorageTypePage> {
       listener: (_, state) {
         if (state is PantrySuccess) {
           AppToast.show(state.successMessage, ToastType.success);
+          resetState();
         }
         if (state is PantryFailure) {
           AppToast.show(state.errorMessage, ToastType.error);
@@ -168,8 +168,6 @@ class _AddPantryStorageTypePageState extends State<AddPantryStorageTypePage> {
                               pantries: _storageTypes,
                             ),
                           );
-
-                          resetState();
                         },
                 ),
               ),
