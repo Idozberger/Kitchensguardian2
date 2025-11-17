@@ -21,7 +21,6 @@ import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dart';
 import 'package:foodkitchen/features/planner/presentation/widgets/recipe_tile_item.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 class EditMealPage extends StatefulWidget {
   final MergedMealPlanEntity mergedMealPlanEntity;
@@ -34,7 +33,7 @@ class EditMealPage extends StatefulWidget {
 class _EditMealPageState extends State<EditMealPage> {
   late MergedMealPlanEntity _mealPlan;
   late DateTime _selectedDate;
-  late DateTime _previousSelectedDate;
+
   late int _selectedIndex;
 
   @override
@@ -43,8 +42,6 @@ class _EditMealPageState extends State<EditMealPage> {
     _mealPlan = widget.mergedMealPlanEntity;
 
     _selectedDate = parseDate(_mealPlan.date);
-
-    _previousSelectedDate = DateFormat('dd/MM/yyyy').parse(_mealPlan.date);
 
     _selectedIndex = _initialSelectedIndex();
   }
@@ -68,10 +65,6 @@ class _EditMealPageState extends State<EditMealPage> {
     //   //   date: DateFormat('dd/MM/yyyy').format(newDate),
     //   // );
     // });
-  }
-
-  void _onSavePressed() {
-    context.pop(_mealPlan);
   }
 
   @override

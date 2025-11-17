@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
@@ -7,6 +8,7 @@ import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/services/firebase_messenging/firebase_messenging_service.dart';
+import 'package:foodkitchen/core/services/notifications/flutter_local_notifications_service.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/drawer.dart';
 import 'package:foodkitchen/features/grocery/presentation/pages/grocery_page.dart';
@@ -31,8 +33,13 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   void initState() {
     userCubit = context.read<UserCubit>();
+    cancelNotificationsForItemExpiring();
     _initializeFirebaseMessaging();
     super.initState();
+  }
+
+  Future<void> cancelNotificationsForItemExpiring() async {
+    await NotificationService().cancelAllNotifications();
   }
 
   final List<Widget> _pages = const [
@@ -72,12 +79,36 @@ class _DashboardPageState extends State<DashboardPage> {
     });
   }
 
+  DateTime? _lastBackPressed;
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
-        if (_selectedIndex != 0) _onItemTapped(0);
+        if (_selectedIndex != 0) {
+          _onItemTapped(0);
+          return;
+        }
+
+        final now = DateTime.now();
+
+        if (_lastBackPressed == null ||
+            now.difference(_lastBackPressed!) > const Duration(seconds: 2)) {
+          _lastBackPressed = now;
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Press back again to exit"),
+              duration: Duration(seconds: 2),
+            ),
+          );
+
+          return;
+        }
+
+        _lastBackPressed = null;
+        SystemNavigator.pop();
       },
       child: Scaffold(
         drawer: const AppDrawer(),

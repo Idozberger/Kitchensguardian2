@@ -41,6 +41,7 @@ class _NotificationPageState extends State<NotificationPage> {
       builder: (_, state) {
         return PopScope(
           canPop: false,
+          // ignore: deprecated_member_use
           onPopInvoked: (didPop) async {
             if (!didPop) {
               await Future.delayed(Duration.zero);
@@ -96,7 +97,7 @@ class _NotificationPageState extends State<NotificationPage> {
                         shrinkWrap: true,
                         physics: NeverScrollableScrollPhysics(),
                         itemCount: notifications.length,
-                        separatorBuilder: (_, __) =>
+                        separatorBuilder: (_, _) =>
                             Divider(color: Color(0xffF4F4F4)),
                         padding: EdgeInsets.zero,
                         itemBuilder: (context, index) {

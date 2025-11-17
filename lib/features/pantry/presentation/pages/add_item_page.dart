@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
@@ -11,6 +13,8 @@ import 'package:foodkitchen/core/services/date_picker/date_picker_service.dart'
     show DatePickerService;
 import 'package:foodkitchen/core/services/image_picker/image_picker_service.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
+import 'package:foodkitchen/core/utils/date_format_to_string.dart';
+import 'package:foodkitchen/core/utils/format_date_for_backend.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
@@ -71,6 +75,7 @@ class _AddItemPageState extends State<AddItemPage> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
+      // ignore: deprecated_member_use
       onPopInvoked: (didPop) async {
         if (!didPop) {
           await Future.delayed(Duration.zero);
@@ -218,7 +223,12 @@ class _AddItemPageState extends State<AddItemPage> {
                                     0,
                                 unit: item.unit ?? '',
                                 group: item.pantry ?? '',
-                                expireDate: item.expireDate.text,
+                                expireDate: formatExpiry(item.expireDate.text),
+
+                                thumbnail: "",
+                                expiryStatus: "",
+                                stockStatus: "",
+                                itemId: "",
                               ),
                             );
                           }
@@ -453,6 +463,7 @@ class _AddItemPageState extends State<AddItemPage> {
           onPressed: _addNewItem,
           icon: SvgPicture.asset(
             AppAssets.addSvg,
+            // ignore: deprecated_member_use
             color: AppColors.primaryColor,
             width: w(18),
             height: h(18),

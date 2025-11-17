@@ -27,7 +27,6 @@ class AppToast {
 
         break;
       case ToastType.info:
-      default:
         bgColor = Colors.blue;
     }
 

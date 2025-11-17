@@ -223,6 +223,7 @@ class _PlannerPageState extends State<PlannerPage> {
                 _selectedDate = DateTime.now();
               }
             });
+            // ignore: use_build_context_synchronously
             context.push(Routes.addMeal);
           },
           text: "+ Add Meal",

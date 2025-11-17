@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:typed_data';
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
 import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
@@ -46,6 +48,7 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
         AppConstants.addPantryItem,
         data: pantryModel.toJson(),
       );
+
       if (response.statusCode != 200 && response.statusCode != 201) {
         final data = response.data is String
             ? jsonDecode(response.data)
@@ -68,6 +71,7 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
       final response = await dio.get(
         "${AppConstants.getPantryItems}?kitchen_id=$kitchenId",
       );
+
       if (response.statusCode != 200 && response.statusCode != 201) {
         final data = response.data is String
             ? jsonDecode(response.data)
@@ -137,7 +141,7 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
       return {"message": message, "items": parsedItems};
     } on DioException catch (e) {
       throw dio.handleError(e);
-    } catch (e, st) {
+    } catch (e) {
       rethrow;
     }
   }
@@ -204,7 +208,7 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
             : response.data;
 
         final message = data["error"];
-        print('⚠️ [createPantry] Error Message: $message');
+        debugPrint('⚠️ [createPantry] Error Message: $message');
         throw message;
       }
 
@@ -212,7 +216,7 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
     } on DioException catch (e) {
       throw dio.handleError(e);
     } catch (e, stacktrace) {
-      print('🧩 Stacktrace: $stacktrace');
+      debugPrint('🧩 Stacktrace: $stacktrace');
       rethrow;
     }
   }
@@ -243,7 +247,7 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
     } on DioException catch (e) {
       throw dio.handleError(e);
     } catch (e, stacktrace) {
-      print('🧩 Stacktrace: $stacktrace');
+      debugPrint('🧩 Stacktrace: $stacktrace');
       rethrow;
     }
   }
@@ -253,7 +257,10 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
     try {
       final response = await dio.post(
         AppConstants.removeItems,
-        data: pantryModel.toJson(),
+        data: {
+          "item_ids": [pantryModel.items[0].itemId],
+          "kitchen_id": pantryModel.kitchenId,
+        },
       );
 
       if (response.statusCode != 200 && response.statusCode != 201) {
@@ -271,7 +278,7 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
       final handledError = dio.handleError(e);
 
       throw handledError;
-    } catch (e, stackTrace) {
+    } catch (e) {
       rethrow;
     }
   }
@@ -283,7 +290,7 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
         AppConstants.updateKitchenItems,
         data: pantryModel.toJson(),
       );
-
+      print("dsfasdfdsfadsfads");
       if (response.statusCode != 200 && response.statusCode != 201) {
         final data = response.data is String
             ? jsonDecode(response.data)
@@ -299,7 +306,7 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
       final handledError = dio.handleError(e);
 
       throw handledError;
-    } catch (e, stackTrace) {
+    } catch (e) {
       rethrow;
     }
   }

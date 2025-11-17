@@ -1,5 +1,4 @@
 import 'package:foodkitchen/core/error/failures.dart';
-import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/features/history/data/datasource/scan_history_remote_datasource.dart';
 import 'package:foodkitchen/features/history/data/models/scan_history_model.dart';
 import 'package:foodkitchen/features/history/domain/entities/scan_history_entity.dart';

@@ -14,6 +14,7 @@ class RecipeStepTile extends StatelessWidget {
     required this.callback,
   });
 
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: callback,

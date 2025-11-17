@@ -39,17 +39,17 @@ class RemoveKitchenEvent extends KitchenEvent {
 
 class CreateKitchenEvent extends KitchenEvent {
   final String kitchenName;
-  CreateKitchenEvent(this.kitchenName);
+  const CreateKitchenEvent(this.kitchenName);
 }
 
 class JoinKitchenEvent extends KitchenEvent {
   final String invitationCode;
-  JoinKitchenEvent(this.invitationCode);
+  const JoinKitchenEvent(this.invitationCode);
 }
 
 class MemberApprovedEvent extends KitchenEvent {
   final String invitationCode;
-  MemberApprovedEvent(this.invitationCode);
+  const MemberApprovedEvent(this.invitationCode);
 }
 
 class SwitchKitchenEvent extends KitchenEvent {

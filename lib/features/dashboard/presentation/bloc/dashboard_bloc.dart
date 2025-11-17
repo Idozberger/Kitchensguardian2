@@ -15,6 +15,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   final GetKitchenMembers _getKitchenMembers;
   final MakeCohost _makeCohost;
   final KickMember _kickMember;
+  // ignore: unused_field
   final KitchenBloc _kitchenBloc;
   final UserCubit _userCubit;
   DashboardBloc({
@@ -131,6 +132,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       "status": true,
       'title': "You have been added to the kitchen",
       'body':
+          // ignore: unnecessary_brace_in_string_interps
           "Your request to join the kitchen \"${kitchenName}\" has been approved by the host. You are now added to the kitchen. You can access it anytime using this invitation code: $inviteCode",
       'host_user_id': userId,
       'sender_user_id': _userCubit.state.userId,
@@ -145,7 +147,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     await FCMService().sendNotification(
       userDeviceToken,
       "You have been added to the kitchen",
-      "Your request to join the kitchen \"${kitchenName}\" has been approved by the host. You are now added to the kitchen. You can access it anytime using this invitation code: $inviteCode",
+      "Your request to join the kitchen \"$kitchenName\" has been approved by the host. You are now added to the kitchen. You can access it anytime using this invitation code: $inviteCode",
     );
 
     // _kitchenBloc.add(MemberApprovedEvent(inviteCode));
@@ -201,7 +203,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       "status": false,
       'title': "Your request to join the kitchen was declined",
       'body':
-          "Your request to join the kitchen \"${kitchenName}\" has been declined by the host. You can try again later or contact the host for more details.",
+          "Your request to join the kitchen \"$kitchenName\" has been declined by the host. You can try again later or contact the host for more details.",
       'host_user_id': userId,
       'sender_user_id': _userCubit.state.userId,
       'sender_name':
@@ -215,7 +217,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     await FCMService().sendNotification(
       userDeviceToken,
       "Your request to join the kitchen was declined",
-      "Your request to join the kitchen \"${kitchenName}\" has been declined by the host. You can try again later or contact the host for more details.",
+      "Your request to join the kitchen \"$kitchenName\" has been declined by the host. You can try again later or contact the host for more details.",
     );
 
     // _kitchenBloc.add(MemberApprovedEvent(inviteCode));

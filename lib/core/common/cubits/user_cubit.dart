@@ -1,10 +1,10 @@
 import 'dart:convert';
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/data/datasource/common_remote_datasource.dart';
 import 'package:foodkitchen/core/common/data/model/pantries_model.dart';
 import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
-import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'user_state.dart';
 
@@ -95,7 +95,7 @@ class UserCubit extends Cubit<UserState> {
       emit(state.copyWith(userStorageAreas: storageAreas));
     } catch (e, stackTrace) {
       emit(state.copyWith(userStorageAreas: []));
-      print(stackTrace);
+      debugPrint(stackTrace.toString());
     }
   }
 

@@ -29,6 +29,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
   final UserCubit _userCubit;
+  // ignore: unused_field
   final HomeBloc _homeBloc;
   final GroceryBloc _groceryBloc;
   final GenerateRecipes _generateRecipes;

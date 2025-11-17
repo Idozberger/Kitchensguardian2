@@ -245,6 +245,7 @@ class AppDrawer extends StatelessWidget {
                       child: OutlinedButton(
                         onPressed: () async {
                           context.pop();
+                          // ignore: deprecated_member_use
                           await Share.share(
                             "Join Kitchen's Guardian using my referral code: $invitationCode",
                           );

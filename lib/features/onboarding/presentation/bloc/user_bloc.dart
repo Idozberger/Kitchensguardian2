@@ -72,10 +72,10 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     try {
       await _sharedPreferences.setBool("is_onboard", true);
 
-      bool? result = _sharedPreferences.getBool("is_onboard");
+      _sharedPreferences.getBool("is_onboard");
 
       emit(UserGetStarted());
-    } catch (e, stack) {
+    } catch (e) {
       emit(UserGetStarted());
     }
   }

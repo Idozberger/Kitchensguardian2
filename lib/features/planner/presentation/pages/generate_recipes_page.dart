@@ -158,6 +158,7 @@ class _GenerateRecipesPageState extends State<GenerateRecipesPage> {
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
               ),
+              // ignore: deprecated_member_use
               barrierColor: Colors.black.withOpacity(0.4),
               backgroundColor: Colors.transparent,
               isScrollControlled: true,

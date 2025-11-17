@@ -8,9 +8,9 @@ class ScanItemModel extends ScanItemEntity {
   });
   factory ScanItemModel.fromJson(Map<String, dynamic> json) {
     return ScanItemModel(
-      amount: json['amount'].toString() ?? '',
-      name: json['name'].toString() ?? '',
-      unit: json['unit'].toString() ?? '',
+      amount: json['amount'].toString(),
+      name: json['name'].toString(),
+      unit: json['unit'].toString(),
     );
   }
 

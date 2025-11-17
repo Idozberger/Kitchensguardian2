@@ -38,7 +38,7 @@ class GeneratedRecipesSection extends StatelessWidget {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: state.recipes!.length,
-            separatorBuilder: (_, __) => gap(height: 6),
+            separatorBuilder: (_, _) => gap(height: 6),
             itemBuilder: (_, index) {
               final recipe = state.recipes![index];
               return RecipeTileItem(

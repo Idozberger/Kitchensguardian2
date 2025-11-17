@@ -149,6 +149,7 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
             doneSteps: [],
           ),
         );
+        // ignore: avoid_function_literals_in_foreach_calls
         setState(() => steps.forEach((step) => step["completed"] = false));
       },
       onFinish: () {
@@ -225,6 +226,7 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
         ),
       );
       await Future.delayed(Duration(seconds: 1));
+      // ignore: use_build_context_synchronously
       context.push(Routes.addMeal);
     } else {
       AppToast.show(
@@ -264,6 +266,7 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
                 doneSteps: [],
               ),
             );
+            // ignore: avoid_function_literals_in_foreach_calls
             setState(() => steps.forEach((step) => step["completed"] = false));
             AppToast.show("You’ve finished the recipe!", ToastType.success);
           },

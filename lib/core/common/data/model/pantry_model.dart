@@ -45,6 +45,10 @@ class PantryItemModel extends PantryItemEntity {
     required super.unit,
     required super.group,
     required super.expireDate,
+    required super.thumbnail,
+    required super.expiryStatus,
+    required super.stockStatus,
+    required super.itemId,
   });
 
   factory PantryItemModel.fromJson(Map<String, dynamic> json) {
@@ -53,10 +57,13 @@ class PantryItemModel extends PantryItemEntity {
       quantity: (json['quantity'] is int || json['quantity'] is double)
           ? (json['quantity'] as num).toDouble()
           : 0.0,
-
       unit: json['unit']?.toString() ?? '',
       group: json['group']?.toString() ?? '',
-      expireDate: '',
+      expireDate: json['expiry_date']?.toString() ?? '',
+      thumbnail: json['thumbnail']?.toString() ?? '',
+      expiryStatus: json['expiry_status']?.toString() ?? '',
+      stockStatus: json['stock_status']?.toString() ?? '',
+      itemId: json['item_id']?.toString() ?? '',
     );
   }
 
@@ -66,7 +73,11 @@ class PantryItemModel extends PantryItemEntity {
       'quantity': quantity,
       'unit': unit,
       'group': group,
-      "expire_date": expireDate,
+      "expiry_date": expireDate,
+      "thumbnail": thumbnail,
+      "expiry_status": expiryStatus,
+      "stock_status": stockStatus,
+      "item_id": itemId,
     };
   }
 
@@ -76,7 +87,11 @@ class PantryItemModel extends PantryItemEntity {
       quantity: entity.quantity,
       unit: entity.unit,
       group: entity.group,
-      expireDate: '',
+      expireDate: entity.expireDate,
+      thumbnail: entity.thumbnail,
+      expiryStatus: entity.expiryStatus,
+      stockStatus: entity.stockStatus,
+      itemId: entity.itemId,
     );
   }
 }

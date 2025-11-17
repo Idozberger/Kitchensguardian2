@@ -23,7 +23,7 @@ class MealTypeModel extends MealTypeEntity {
 
   factory MealTypeModel.fromJson(Map<String, dynamic> json) {
     Uint8List? thumbnailBytes;
-    //TODO AFTER APIS to remove this code
+
     final thumbnail = json["thumbnail"];
     if (thumbnail != null) {
       if (thumbnail is String) {

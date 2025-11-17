@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
@@ -82,6 +79,7 @@ class ProfileHeader extends StatelessWidget {
                   ),
                   icon: SvgPicture.asset(
                     AppAssets.editSvg,
+                    // ignore: deprecated_member_use
                     color: AppColors.primaryColor,
                   ),
                   label: Text(

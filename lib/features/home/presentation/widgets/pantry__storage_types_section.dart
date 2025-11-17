@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
@@ -101,7 +99,7 @@ class _PantryStorageTypeSectionState extends State<PantryStorageTypeSection> {
         shrinkWrap: true,
         physics: NeverScrollableScrollPhysics(),
         itemCount: widget.state.pantryItems[0].items.length.clamp(0, 3),
-        separatorBuilder: (_, __) => const Divider(color: Color(0xffF4F4F4)),
+        separatorBuilder: (_, _) => const Divider(color: Color(0xffF4F4F4)),
         padding: EdgeInsets.zero,
         itemBuilder: (context, index) {
           final pantry = widget.state.pantryItems[0].items[index];
@@ -139,6 +137,7 @@ class _PantryStorageTypeSectionState extends State<PantryStorageTypeSection> {
             onPressed: () => context.push(Routes.myPantry),
             icon: SvgPicture.asset(
               AppAssets.eyeSvg,
+              // ignore: deprecated_member_use
               color: AppColors.primaryColor,
               width: w(10),
               height: h(10),

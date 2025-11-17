@@ -1,7 +1,8 @@
-import 'dart:developer';
-
+import 'package:android_intent_plus/android_intent.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
+import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';
+import 'package:foodkitchen/core/services/notifications/flutter_local_notifications_service.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_bloc.dart';
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_event.dart';
@@ -105,13 +106,120 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
     Emitter<PantryState> emit,
   ) async {
     emit(PantryLoading());
+
     final res = await _getPantryItems(
       GetPantryItemsParams(kitchenId: event.kitchenId),
     );
 
-    res.fold((failure) => emit(PantryFailure(failure.message)), (pantries) {
-      emit(PantryLoaded(pantryItems: pantries));
-    });
+    await res.fold<Future<void>>(
+      (failure) async {
+        emit(PantryFailure(failure.message));
+      },
+      (items) async {
+        final List<PantryItemEntity> pantryItems = [];
+        final List<PantryItemEntity> lowStockItems = [];
+        final List<PantryItemEntity> expiringItems = [];
+
+        for (final item in items) {
+          if (item.stockStatus == "low_stock") {
+            lowStockItems.add(item);
+            continue;
+          }
+
+          if (item.expiryStatus == "expiring_soon") {
+            expiringItems.add(item);
+            continue;
+          }
+
+          if (item.stockStatus == "in_stock" ||
+              item.expiryStatus == "" ||
+              item.expiryStatus == "null") {
+            pantryItems.add(item);
+            continue;
+          }
+
+          pantryItems.add(item);
+        }
+
+        // For real app (9am / 6pm)
+        await _schedulePantryNotifications(
+          lowStockItems: lowStockItems,
+          expiringItems: expiringItems,
+        );
+
+        emit(
+          PantryLoaded(
+            pantryItems: pantryItems,
+            lowStockItems: lowStockItems,
+            expiringItems: expiringItems,
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _schedulePantryNotifications({
+    required List<PantryItemEntity> lowStockItems,
+    required List<PantryItemEntity> expiringItems,
+  }) async {
+    final notificationService = NotificationService();
+
+    final DateTime now = DateTime.now();
+    final DateTime morningTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      9,
+      0,
+    ); // 9:00 AM
+    final DateTime eveningTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      18,
+      0,
+    ); // 6:00 PM
+
+    for (final item in lowStockItems) {
+      final int baseId = item.itemId.hashCode & 0x7fffffff;
+
+      await notificationService.scheduleDaily(
+        id: baseId,
+        title: 'Low stock: ${item.name}',
+        body:
+            'You are running low on ${item.name} (${item.quantity} ${item.unit}).',
+        dailyTime: morningTime,
+        payload: 'low_stock:${item.itemId}',
+      );
+
+      await notificationService.scheduleDaily(
+        id: baseId + 1, // evening
+        title: 'Low stock: ${item.name}',
+        body: 'Remember to restock ${item.name}.',
+        dailyTime: eveningTime,
+        payload: 'low_stock:${item.itemId}',
+      );
+    }
+
+    for (final item in expiringItems) {
+      final int baseId = (item.itemId.hashCode & 0x7fffffff) + 100000;
+
+      await notificationService.scheduleDaily(
+        id: baseId, // morning
+        title: 'Expiring soon: ${item.name}',
+        body: '${item.name} is expiring soon (${item.expireDate}).',
+        dailyTime: morningTime,
+        payload: 'expiring_soon:${item.itemId}',
+      );
+
+      await notificationService.scheduleDaily(
+        id: baseId + 1, // evening
+        title: 'Expiring soon: ${item.name}',
+        body: 'Use ${item.name} before it expires.',
+        dailyTime: eveningTime,
+        payload: 'expiring_soon:${item.itemId}',
+      );
+    }
   }
 
   Future<void> _onScanReceipt(

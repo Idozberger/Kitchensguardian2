@@ -1,10 +1,9 @@
-import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:foodkitchen/app/app_router.dart';
-import 'package:foodkitchen/core/common/data/model/meal_type_model.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:go_router/go_router.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -23,7 +22,6 @@ class NotificationService {
   }) async {
     await _requestPermissions();
     tz.initializeTimeZones();
-    final String localTimeZone = tz.local.name;
 
     final NotificationAppLaunchDetails? launchDetails =
         await _flutterLocalNotificationsPlugin
@@ -64,6 +62,14 @@ class NotificationService {
     }
   }
 
+  Future<void> requestPermission() async {
+    await _flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
+        ?.requestExactAlarmsPermission();
+  }
+
   Future<void> _requestPermissions() async {
     if (Platform.isIOS) {
       bool? permissionGranted = await _flutterLocalNotificationsPlugin
@@ -73,9 +79,9 @@ class NotificationService {
           ?.requestPermissions(alert: true, badge: true, sound: true);
 
       if (permissionGranted != null && permissionGranted) {
-        print("iOS Notification Permission Granted");
+        debugPrint("iOS Notification Permission Granted");
       } else {
-        print("iOS Notification Permission Denied");
+        debugPrint("iOS Notification Permission Denied");
       }
     } else if (Platform.isAndroid) {
       final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
@@ -92,12 +98,12 @@ class NotificationService {
             ?.requestNotificationsPermission();
 
         if (grantedNotificationPermission == true) {
-          print("Android Notification Permission Granted");
+          debugPrint("Android Notification Permission Granted");
         } else {
-          print("Android Notification Permission Denied");
+          debugPrint("Android Notification Permission Denied");
         }
       } else {
-        print("Android Notification Permission Already Granted");
+        debugPrint("Android Notification Permission Already Granted");
       }
     }
   }
@@ -169,9 +175,37 @@ class NotificationService {
       scheduledTZ,
       platformDetails,
       payload: payload,
-      matchDateTimeComponents: null,
-      androidScheduleMode: AndroidScheduleMode.exact,
+      matchDateTimeComponents: DateTimeComponents.time,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
     );
+  }
+
+  Future<void> scheduleEveryMinute({
+    required int id,
+    required String title,
+    required String body,
+    String? payload,
+  }) async {
+    final DateTime now = DateTime.now();
+
+    final DateTime nextSecond = now.add(const Duration(seconds: 1));
+
+    await scheduleDaily(
+      id: id,
+      title: title,
+      body: body,
+      dailyTime: nextSecond,
+      payload: payload,
+    );
+  }
+
+  Future<bool> isExactAlarmAllowed() async {
+    final androidPlugin = NotificationService._flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+
+    return await androidPlugin?.canScheduleExactNotifications() ?? false;
   }
 
   Future<void> scheduleDaily({

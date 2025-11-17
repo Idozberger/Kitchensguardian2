@@ -138,6 +138,7 @@ class _SignInPageState extends State<SignInPage> {
                                     ? AppAssets.eyeVisibilitySvg
                                     : AppAssets.eyeSvg,
                                 height: h(16),
+                                // ignore: deprecated_member_use
                                 color: AppColors.greyColor,
                               ),
                             ),

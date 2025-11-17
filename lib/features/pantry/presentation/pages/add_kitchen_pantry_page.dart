@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
@@ -235,6 +237,10 @@ class _AddKitchenPantryPageState extends State<AddKitchenPantryPage> {
                                 unit: item.unit ?? '',
                                 group: item.pantry ?? '',
                                 expireDate: item.expireDate.text,
+                                thumbnail: "",
+                                expiryStatus: '',
+                                stockStatus: '',
+                                itemId: '',
                               ),
                             );
                           }
@@ -419,6 +425,7 @@ class _AddKitchenPantryPageState extends State<AddKitchenPantryPage> {
           onPressed: _addNewItem,
           icon: SvgPicture.asset(
             AppAssets.addSvg,
+            // ignore: deprecated_member_use
             color: AppColors.primaryColor,
             width: w(18),
             height: h(18),

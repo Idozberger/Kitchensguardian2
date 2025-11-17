@@ -298,9 +298,9 @@ class KitchenBloc extends Bloc<KitchenEvent, KitchenState> {
 
   Future<void> _saveOrUpdateUserKitchen({required Kitchen kitchen}) async {
     try {
-      final _firestore = FirebaseFirestore.instance;
+      final firestore = FirebaseFirestore.instance;
 
-      final kitchenRef = _firestore
+      final kitchenRef = firestore
           .collection('kitchens')
           .doc(kitchen.kitchenId);
 

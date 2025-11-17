@@ -1,6 +1,5 @@
 import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
-import 'package:foodkitchen/features/planner/domain/entities/merged_meal_type_entity.dart';
 
 sealed class PlannerEvent {}
 

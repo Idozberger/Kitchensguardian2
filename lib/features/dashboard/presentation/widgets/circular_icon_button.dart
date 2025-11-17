@@ -37,6 +37,7 @@ class CircularIconButton extends StatelessWidget {
           border: Border.all(color: borderColor, width: borderWidth),
           shape: BoxShape.circle,
         ),
+        // ignore: deprecated_member_use
         child: SvgPicture.asset(iconAsset, color: iconColor),
       ),
     );

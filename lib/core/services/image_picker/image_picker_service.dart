@@ -71,6 +71,7 @@ class ImagePickerService {
                       icon: Icons.camera_alt_rounded,
                       label: 'Camera',
                       onTap: () async {
+                        // ignore: use_build_context_synchronously
                         Navigator.pop(context, await pickFromCamera(context));
                       },
                     ),
@@ -80,6 +81,7 @@ class ImagePickerService {
                       icon: Icons.photo_library_rounded,
                       label: 'Gallery',
                       onTap: () async {
+                        // ignore: use_build_context_synchronously
                         Navigator.pop(context, await pickFromGallery(context));
                       },
                     ),

@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
@@ -150,7 +152,7 @@ class _PantrySectionState extends State<PantrySection> {
         physics: NeverScrollableScrollPhysics(),
         shrinkWrap: true,
         itemCount: widget.state.pantryItems[0].items.length.clamp(0, 3),
-        separatorBuilder: (_, __) => const Divider(color: Color(0xffF4F4F4)),
+        separatorBuilder: (_, _) => const Divider(color: Color(0xffF4F4F4)),
         padding: EdgeInsets.zero,
         itemBuilder: (context, index) {
           final pantry = widget.state.pantryItems[0].items[index];

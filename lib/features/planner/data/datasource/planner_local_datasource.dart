@@ -1,9 +1,8 @@
 import 'dart:convert';
-import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/common/data/model/meal_type_model.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
-import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/core/utils/date_format_to_string.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -160,7 +159,7 @@ class PlannerLocalDatasourceImpl implements PlannerLocalDatasource {
 
       debugPrint("Filtered plans count: ${filteredPlans.length}");
       return filteredPlans;
-    } catch (e, stack) {
+    } catch (e) {
       debugPrint("Error in getWeeklyPlans(): $e");
 
       return [];

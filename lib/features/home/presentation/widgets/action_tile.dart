@@ -30,6 +30,7 @@ class ActionTile extends StatelessWidget {
             height: h(40),
             child: ElevatedButton.icon(
               onPressed: onTap,
+              // ignore: deprecated_member_use
               icon: SvgPicture.asset(svgPath, color: Colors.black),
               label: Text(
                 buttonText,

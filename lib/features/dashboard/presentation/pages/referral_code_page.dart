@@ -68,6 +68,7 @@ class ReferralCodePage extends StatelessWidget {
 
                       child: OutlinedButton(
                         onPressed: () {
+                          // ignore: deprecated_member_use
                           Share.share(
                             "Join Kitchen's Guardian using my referral code: ${state.invitationCode}",
                           );

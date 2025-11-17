@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/widgets.dart';
 import 'package:foodkitchen/core/services/connection/connection_checker.dart';
 import 'package:foodkitchen/features/auth/data/model/user_model.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
@@ -201,7 +201,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource {
 
       if (accessToken != null) {
         await sharedPreferences.setString("access-token", accessToken);
-        print("Access token saved ✅");
+        debugPrint("Access token saved ✅");
       }
 
       return message ?? "Logged In Successfully";

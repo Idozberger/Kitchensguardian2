@@ -24,6 +24,7 @@ class DrawerListTile extends StatelessWidget {
       contentPadding: gapZero,
       visualDensity: VisualDensity(vertical: -1),
       onTap: onTap,
+      // ignore: deprecated_member_use
       leading: SvgPicture.asset(iconPath, color: color),
       title: Text(
         title,

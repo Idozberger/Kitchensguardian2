@@ -26,9 +26,9 @@ class ShareButton extends StatelessWidget {
             .map((entry) {
               final index = entry.key + 1;
               final item = entry.value;
-              final name = item.name ?? 'Unnamed';
-              final quantity = item.quantity?.toString() ?? '-';
-              final unit = item.unit ?? '';
+              final name = item.name;
+              final quantity = item.quantity.toString();
+              final unit = item.unit;
               return "$index️⃣  $name\n     Quantity: $quantity $unit";
             })
             .join("\n\n");
@@ -42,6 +42,7 @@ $shareString
 🗓️ Shared via MyGroceryApp
 """;
 
+        // ignore: deprecated_member_use
         await Share.share(formattedList, subject: 'My Grocery List');
       },
     );

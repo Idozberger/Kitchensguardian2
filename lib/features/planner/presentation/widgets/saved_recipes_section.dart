@@ -53,7 +53,7 @@ class SavedRecipesSection extends StatelessWidget {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: state.favouriteRecipes!.length,
-            separatorBuilder: (_, __) => gap(height: 10),
+            separatorBuilder: (_, _) => gap(height: 10),
             itemBuilder: (_, index) {
               final recipe = state.favouriteRecipes![index];
               return RecipeTileItem(

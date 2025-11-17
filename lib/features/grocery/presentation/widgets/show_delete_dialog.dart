@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
-import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_bloc.dart';
-import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_event.dart';
 
 Future<dynamic> showDialogForItemDeletion(
   BuildContext context, {

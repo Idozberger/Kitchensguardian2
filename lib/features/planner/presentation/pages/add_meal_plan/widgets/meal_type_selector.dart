@@ -45,6 +45,7 @@ class MealTypeSelector extends StatelessWidget {
                     backgroundColor: Colors.white,
                     child: SvgPicture.asset(
                       meal["icon"]!,
+                      // ignore: deprecated_member_use
                       color: isSelected
                           ? const Color(0xffFFDD98)
                           : Colors.black,

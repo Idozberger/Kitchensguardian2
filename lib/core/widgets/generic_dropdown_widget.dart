@@ -189,6 +189,7 @@ class _PopupDropdownFieldState extends State<PopupDropdownField> {
                   ),
                   SvgPicture.asset(
                     _isOpen ? AppAssets.downArrow : AppAssets.downArrow,
+                    // ignore: deprecated_member_use
                     color: const Color(0xff787878),
                   ),
                 ],

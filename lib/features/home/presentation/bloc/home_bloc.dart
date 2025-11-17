@@ -19,6 +19,7 @@ import 'package:intl/intl.dart';
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final UserCubit _userCubit;
   final CreateKitchen _createKitchen;
+  // ignore: unused_field
   final JoinKitchen _joinKitchen;
   final GetPantriesForHome _getPantriesForHome;
   final GetAllWeeklyPlansForHome _getAllWeeklyPlansForHome;
@@ -159,7 +160,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
             "${_userCubit.state.firstName} ${_userCubit.state.lastName}",
         'read': false,
       };
-      print('📦 Sending notification data: $notificationData');
+      debugPrint('📦 Sending notification data: $notificationData');
 
       await FirebaseFirestore.instance
           .collection('notifications')
@@ -246,9 +247,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     String? kitchenName,
   }) async {
     try {
-      final _firestore = FirebaseFirestore.instance;
+      final firestore = FirebaseFirestore.instance;
 
-      final kitchenRef = _firestore
+      final kitchenRef = firestore
           .collection('kitchens')
           .doc(kitchen.kitchenId);
 

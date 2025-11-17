@@ -5,7 +5,7 @@ import 'package:foodkitchen/core/theme/app_colors.dart';
 
 // ignore: must_be_immutable
 class DiscoverText extends StatelessWidget {
-  DiscoverText({super.key});
+  const DiscoverText({super.key});
 
   @override
   Widget build(BuildContext context) {

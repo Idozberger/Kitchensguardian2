@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
+import 'package:foodkitchen/core/common/data/model/pantry_model.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
@@ -69,7 +70,6 @@ class _PantryItemCardState extends State<PantryItemCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// Top Row
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -124,7 +124,6 @@ class _PantryItemCardState extends State<PantryItemCard> {
               ),
               SizedBox(height: h(15)),
 
-              /// Action Buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -212,118 +211,150 @@ class _PantryItemCardState extends State<PantryItemCard> {
     final TextEditingController itemName = TextEditingController(
       text: pantryItem.name,
     );
+
     final TextEditingController quantity = TextEditingController(
       text: pantryItem.quantity.toString(),
     );
+
     String unit = pantryItem.unit;
     String pantry = pantryItem.group;
+
     final TextEditingController expireDate = TextEditingController(
       text: pantryItem.expireDate,
     );
+
     return showDialog(
       context: context,
       builder: (context) {
-        return GenericDialog(
-          borderRadius: h(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _formLabel(context, "Item name"),
-              SizedBox(height: h(10)),
-              AppTextField(
-                textInputAction: TextInputAction.next,
-                color: AppColors.apptextFieldStyleTextColor,
-                controller: itemName,
-                hintText: "Enter item name",
-                fillColor: const Color(0xffF9F9F9),
-                isFilled: true,
-                isLabled: false,
-                keyboardType: TextInputType.text,
-                label: "",
-              ),
-              SizedBox(height: h(10)),
-              _formLabel(context, "Quantity"),
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return GenericDialog(
+              borderRadius: h(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _formLabel(context, "Item name"),
+                  SizedBox(height: h(10)),
 
-              SizedBox(height: h(14)),
-              AppTextField(
-                textInputAction: TextInputAction.next,
-                color: AppColors.apptextFieldStyleTextColor,
-                controller: quantity,
-                hintText: "Enter item quantity",
-                fillColor: const Color(0xffF9F9F9),
-                isFilled: true,
-                keyboardType: TextInputType.number,
-                isLabled: false,
-                label: "",
-              ),
-              SizedBox(height: h(15)),
-              Row(
-                spacing: w(12),
-                children: [
-                  Flexible(
-                    child: PopupDropdownField(
-                      label: "Units",
-                      hint: "Select Units",
-                      value: unit,
-                      items: ["Kg", "Gram", "Litre", "Piece"],
-                      onChanged: (val) => setState(() => unit = val!),
-                    ),
+                  AppTextField(
+                    isLabled: false,
+                    controller: itemName,
+                    hintText: "Enter item name",
+                    textInputAction: TextInputAction.next,
+                    color: AppColors.apptextFieldStyleTextColor,
+                    fillColor: const Color(0xffF9F9F9),
+                    isFilled: true,
+                    label: '',
                   ),
-                  Flexible(
-                    child: PopupDropdownField(
-                      label: "Pantry",
-                      hint: "Select Pantry",
-                      value: pantry,
-                      items: context
-                          .read<UserCubit>()
-                          .state
-                          .userStorageAreas
-                          .map((area) => area.pantryName)
-                          .toList(),
-                      onChanged: (val) => setState(() => pantry = val!),
-                    ),
+
+                  SizedBox(height: h(15)),
+                  _formLabel(context, "Quantity"),
+                  SizedBox(height: h(10)),
+
+                  AppTextField(
+                    isLabled: false,
+                    controller: quantity,
+                    hintText: "Enter item quantity",
+                    textInputAction: TextInputAction.next,
+                    keyboardType: TextInputType.number,
+                    color: AppColors.apptextFieldStyleTextColor,
+                    fillColor: const Color(0xffF9F9F9),
+                    isFilled: true,
+                    label: '',
                   ),
-                ],
-              ),
-              SizedBox(height: h(15)),
-              SizedBox(height: h(10)),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Flexible(
-                    child: SizedBox(
-                      height: h(40),
-                      width: double.infinity,
-                      child: OutlinedButton(
-                        onPressed: () {
-                          AppToast.show("Coming soon...", ToastType.info);
-                          context.pop();
-                        },
-                        child: Text(
-                          "Edit",
-                          style: Theme.of(context).textTheme.headlineMedium!
-                              .copyWith(
-                                fontSize: t(12),
-                                color: AppColors.primaryColor,
-                              ),
+
+                  SizedBox(height: h(15)),
+                  Row(
+                    spacing: w(12),
+                    children: [
+                      Flexible(
+                        child: PopupDropdownField(
+                          label: "Units",
+                          hint: "Select Units",
+                          value: unit,
+                          items: ["Kg", "Gram", "Litre", "Piece"],
+                          onChanged: (val) => setState(() => unit = val!),
                         ),
                       ),
-                    ),
+                      Flexible(
+                        child: PopupDropdownField(
+                          label: "Pantry",
+                          hint: "Select Pantry",
+                          value: pantry,
+                          items: context
+                              .read<UserCubit>()
+                              .state
+                              .userStorageAreas
+                              .map((area) => area.pantryName)
+                              .toList(),
+                          onChanged: (val) => setState(() => pantry = val!),
+                        ),
+                      ),
+                    ],
                   ),
-                  SizedBox(width: h(10)),
-                  Flexible(
-                    child: GenericButtonWidget(
-                      onPressed: () {
-                        context.pop();
-                      },
-                      text: "Cancel",
-                    ),
+
+                  SizedBox(height: h(20)),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      /// SAVE BUTTON
+                      Flexible(
+                        child: SizedBox(
+                          height: h(40),
+                          width: double.infinity,
+                          child: OutlinedButton(
+                            onPressed: () {
+                              final updatedItem = PantryItemEntity(
+                                itemId: pantryItem.itemId,
+                                name: itemName.text.trim(),
+                                quantity: double.tryParse(quantity.text) ?? 0,
+                                unit: unit,
+                                group: pantry,
+                                expireDate: expireDate.text,
+                                thumbnail: pantryItem.thumbnail,
+                                expiryStatus: pantryItem.expiryStatus,
+                                stockStatus: pantryItem.stockStatus,
+                              );
+
+                              final pantryUpdate = Pantry(
+                                kitchenId: kitchenId,
+                                items: [updatedItem],
+                              );
+
+                              context.read<PantryBloc>().add(
+                                UpdateItemEvent(pantry: pantryUpdate),
+                              );
+
+                              context.pop();
+                            },
+                            child: Text(
+                              "Edit",
+                              style: Theme.of(context).textTheme.headlineMedium!
+                                  .copyWith(
+                                    fontSize: t(12),
+                                    color: AppColors.primaryColor,
+                                  ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      SizedBox(width: h(10)),
+
+                      /// CANCEL BUTTON
+                      Flexible(
+                        child: GenericButtonWidget(
+                          onPressed: () => context.pop(),
+                          text: "Cancel",
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
-          ),
+            );
+          },
         );
       },
     );

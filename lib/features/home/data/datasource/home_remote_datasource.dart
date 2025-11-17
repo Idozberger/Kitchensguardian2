@@ -83,6 +83,7 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
       final response = await dio.get(
         "${AppConstants.getPantryItems}?kitchen_id=$kitchenId",
       );
+      log('✅ Parsed Items: ${response.data}');
       if (response.statusCode != 200 && response.statusCode != 201) {
         final data = response.data is String
             ? jsonDecode(response.data)
@@ -92,7 +93,6 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
         throw message;
       }
       final items = response.data["items"];
-      final pantryTypes = response.data["pantry_types"];
 
       if (items is List) {
         final parsedItems = items
@@ -103,37 +103,14 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
 
         return {"items": parsedItems, "pantry_types": []};
       } else {
-        log('⚠️ Invalid data structure received from API');
         throw Exception("Invalid data format");
       }
     } on DioException catch (e) {
       throw dio.handleError(e);
-    } catch (e, st) {
-      log('🔥 Unexpected Error: $e');
-      log('🧾 StackTrace: $st');
+    } catch (e) {
       rethrow;
     }
   }
-
-  // @override
-  // Future<List<Map<String, dynamic>>> getPantriesItems({
-  //   required String kitchenId,
-  // }) async {
-  //   try {
-  //     final response = await dio.get(
-  //       "${AppConstants.getPantryItems}?kitchen_id=$kitchenId",
-  //     );
-  //     final data = response.data["items"];
-
-  //     if (data is List) {
-  //       return data.map((e) => Map<String, dynamic>.from(e)).toList();
-  //     } else {
-  //       throw Exception("Invalid data");
-  //     }
-  //   } on DioException catch (e) {
-  //     throw dio.handleError(e);
-  //   }
-  // }
 
   @override
   Future<List<MealTypeModel>> getWeeklyPlans() async {
@@ -180,7 +157,7 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
 
       debugPrint("Filtered plans count: ${filteredPlans.length}");
       return filteredPlans;
-    } catch (e, stack) {
+    } catch (e) {
       debugPrint("Error in getWeeklyPlans(): $e");
 
       return [];

@@ -86,7 +86,7 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
                                 physics: NeverScrollableScrollPhysics(),
                                 padding: EdgeInsets.only(bottom: h(20)),
                                 itemCount: _items.length,
-                                separatorBuilder: (_, __) => Padding(
+                                separatorBuilder: (_, _) => Padding(
                                   padding: gapOnly(bottom: 16),
                                   child: const Divider(
                                     color: Color(0xFFF4F4F4),
@@ -126,8 +126,8 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
       _items = scanReceipt.items
           .map(
             (e) => PantryItem(
-              nameController: TextEditingController(text: e.name ?? ''),
-              qtyController: TextEditingController(text: e.amount ?? ''),
+              nameController: TextEditingController(text: e.name),
+              qtyController: TextEditingController(text: e.amount),
               expireDate: TextEditingController(
                 text: e.expireDate == "null"
                     ? formatDate(DateTime.now())
@@ -197,6 +197,10 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
         unit: item.unit ?? "",
         group: item.pantry ?? 'Fridge',
         expireDate: item.expireDate.text.trim(),
+        thumbnail: "",
+        expiryStatus: '',
+        stockStatus: '',
+        itemId: '',
       );
     }).toList();
 

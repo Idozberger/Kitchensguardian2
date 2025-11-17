@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -23,7 +25,7 @@ class _ScanMealPageState extends State<ScanMealPage>
   CameraController? _controller;
   bool _isCameraInitialized = false;
   bool _isCapturing = false;
-  String? _capturedImagePath;
+  String? capturedImagePath;
 
   @override
   void initState() {
@@ -135,7 +137,7 @@ class _ScanMealPageState extends State<ScanMealPage>
 
     try {
       final image = await _controller!.takePicture();
-      setState(() => _capturedImagePath = image.path);
+      setState(() => capturedImagePath = image.path);
 
       context.pushNamed(
         Routes.capturedImageDetails,

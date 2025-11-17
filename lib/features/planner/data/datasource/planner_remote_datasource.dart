@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
@@ -120,7 +119,7 @@ class PlannerRemoteDatasourceImpl implements PlannerRemoteDatasource {
       final failure = await dio.handleError(e);
 
       throw failure;
-    } catch (e, s) {
+    } catch (e) {
       rethrow;
     }
   }

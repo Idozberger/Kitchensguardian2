@@ -45,6 +45,7 @@ class KitchenHomeView extends StatelessWidget {
           children: [
             gap(height: 14),
             UpperTile(
+              // ignore: deprecated_member_use
               color: AppColors.primaryColor.withOpacity(0.2),
               widget: Column(
                 children: [

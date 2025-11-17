@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
+// ignore: depend_on_referenced_packages
 import 'package:syncfusion_flutter_core/theme.dart';
 import 'package:syncfusion_flutter_sliders/sliders.dart'
-    show SfSlider, SfRectangularTooltipShape, SfSliderTheme, SfSliderThemeData;
+    show SfSlider, SfRectangularTooltipShape;
 
 class GenericSlider extends StatefulWidget {
   final double min;

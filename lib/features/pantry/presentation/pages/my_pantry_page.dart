@@ -1,15 +1,20 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'package:android_intent_plus/android_intent.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
-import 'package:foodkitchen/core/config/routes.dart';
+import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';
+import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
+
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
-import 'package:foodkitchen/core/services/fcm/fcm_service.dart';
+import 'package:foodkitchen/core/services/notifications/flutter_local_notifications_service.dart';
+
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
-import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
-import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
+
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_bloc.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_event.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_state.dart';
@@ -32,10 +37,34 @@ class _MyPantryPageState extends State<MyPantryPage> {
     userCubit = context.read<UserCubit>();
     pantryBloc = context.read<PantryBloc>();
     getPantryItems();
+
     super.initState();
   }
 
-  void getPantryItems() {
+  Future<void> requestExactAlarmPermission() async {
+    await NotificationService().requestPermission();
+  }
+
+  void getPantryItems() async {
+    bool hasPermission = await NotificationService().isExactAlarmAllowed();
+    if (!hasPermission) {
+      showCustomGenericDialog(
+        context: context,
+        title: "Exact Alarm Permission Needed",
+        subtitle:
+            "To schedule accurate notifications, please allow this permission.",
+        primaryButtonText: "Allow",
+        secondaryButtonText: "Cancel",
+        onPrimaryPressed: () async {
+          await requestExactAlarmPermission();
+          context.pop();
+        },
+        onSecondaryPressed: () {
+          context.pop();
+        },
+      );
+    }
+
     final kitchenId = userCubit.state.activeKitchenId.trim();
 
     if (kitchenId.isEmpty) {
@@ -104,18 +133,22 @@ class _MyPantryPageState extends State<MyPantryPage> {
                                 )
                               : TabBarView(
                                   children: [
+                                    /// All Items
                                     _buildItemList(
                                       context,
-                                      requestButton: true,
-                                      pantryLoaded: state,
+                                      items: state.pantryItems,
                                     ),
+
+                                    /// Expiring Soon
                                     _buildItemList(
                                       context,
-                                      pantryLoaded: state,
+                                      items: state.expiringItems,
                                     ),
+
+                                    /// Low Stock
                                     _buildItemList(
                                       context,
-                                      pantryLoaded: state,
+                                      items: state.lowStockItems,
                                     ),
                                   ],
                                 )
@@ -136,85 +169,49 @@ class _MyPantryPageState extends State<MyPantryPage> {
 
   Widget _buildItemList(
     BuildContext context, {
-    bool requestButton = false,
-    required PantryLoaded pantryLoaded,
+    required List<PantryItemEntity> items,
   }) {
-    return BlocBuilder<PantryBloc, PantryState>(
-      builder: (_, state) {
-        return ListView.separated(
-          itemCount: pantryLoaded.pantryItems.length,
-          shrinkWrap: true,
-          separatorBuilder: (context, index) =>
-              const Divider(color: Color(0xffF4F4F4)),
-          padding: gapSymmetric(horizontal: 20, vertical: 20),
-          itemBuilder: (_, index) {
-            var pantry = pantryLoaded.pantryItems[index];
-            return PantryItemCard(
-              title: pantry.name,
-              quantity: pantry.quantity.toString(),
-              unit: pantry.unit,
-              pantry: pantry.group,
-              expiry: pantry.expireDate.isEmpty
-                  ? "Expire in 2 days"
-                  : pantry.expireDate,
-              onListCheckedCallback: () async {},
+    if (items.isEmpty) {
+      return Center(
+        child: Text(
+          "No Items found",
+          style: Theme.of(context).textTheme.headlineMedium,
+        ),
+      );
+    }
 
-              onCartItem: () async {
-                pantryBloc.add(
-                  CartItemsEvent(
-                    pantry: Pantry(
-                      kitchenId: userCubit.state.activeKitchenId,
-                      items: [pantry],
-                    ),
-                    index: index,
-                  ),
-                );
-              },
-              pantryItemEntity: pantry,
-              kitchenId: userCubit.state.activeKitchenId,
+    return ListView.separated(
+      itemCount: items.length,
+      shrinkWrap: true,
+      separatorBuilder: (context, index) =>
+          const Divider(color: Color(0xffF4F4F4)),
+      padding: gapSymmetric(horizontal: 20, vertical: 20),
+      itemBuilder: (_, index) {
+        var pantry = items[index];
+        return PantryItemCard(
+          title: pantry.name,
+          quantity: pantry.quantity.toString(),
+          unit: pantry.unit,
+          pantry: pantry.group,
+          expiry: pantry.expireDate.isEmpty
+              ? "Expire in 2 days"
+              : pantry.expireDate,
+          onListCheckedCallback: () async {},
+          onCartItem: () async {
+            pantryBloc.add(
+              CartItemsEvent(
+                pantry: Pantry(
+                  kitchenId: userCubit.state.activeKitchenId,
+                  items: [pantry],
+                ),
+                index: index,
+              ),
             );
           },
+          pantryItemEntity: pantry,
+          kitchenId: userCubit.state.activeKitchenId,
         );
       },
-    );
-  }
-
-  SafeArea _requestNow(BuildContext context) {
-    return SafeArea(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: gapSymmetric(horizontal: 20, vertical: 10),
-            child: UpperTile(
-              widget: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Request List",
-                    style: Theme.of(context).textTheme.headlineLarge,
-                  ),
-                  SizedBox(height: h(10)),
-                  Text(
-                    "Request host to buy groceries or dinner",
-                    style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                      fontSize: t(15),
-                      color: Color(0xff787878),
-                    ),
-                  ),
-                  SizedBox(height: h(20)),
-                  GenericButtonWidget(
-                    onPressed: () {
-                      context.push(Routes.requestNow);
-                    },
-                    text: "Request Now",
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

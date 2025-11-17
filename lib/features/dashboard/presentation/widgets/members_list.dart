@@ -31,7 +31,7 @@ class MembersList extends StatelessWidget {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: members.length,
-              separatorBuilder: (_, __) => Divider(color: Colors.grey.shade300),
+              separatorBuilder: (_, _) => Divider(color: Colors.grey.shade300),
               itemBuilder: (context, index) {
                 final member = members[index];
                 return MemberTile(member: member, userState: userState);

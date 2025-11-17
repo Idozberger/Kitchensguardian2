@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
@@ -79,11 +77,12 @@ class _AddMealPageState extends State<AddMealPage>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return BlocBuilder<PlannerBloc, PlannerState>(
       builder: (_, state) {
         return PopScope(
           canPop: false,
-          onPopInvokedWithResult: (_, __) async =>
+          onPopInvokedWithResult: (_, _) async =>
               _handleBackNavigation(context),
           child: Scaffold(
             backgroundColor: const Color(0xffF9F9F9),

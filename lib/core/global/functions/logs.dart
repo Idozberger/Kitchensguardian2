@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 
-logError(Object message) {
+void logError(Object message) {
   _logWithColor(message, '❌', 31);
 }
 
-logSuccess(Object message) {
+void logSuccess(Object message) {
   _logWithColor(message, '✅', 32);
 }
 
-logWarning(Object message) {
+void logWarning(Object message) {
   _logWithColor(message, '📢', 33);
 }
 
-logInfo(Object message) {
+void logInfo(Object message) {
   _logWithColor(message, '📌', 34);
 }
 
-_logWithColor(Object message, String label, int colorCode) {
+void _logWithColor(Object message, String label, int colorCode) {
   final String separator =
       "\x1B[${colorCode}m==========================================================================================\x1B[0m";
   debugPrint(separator);

@@ -207,6 +207,7 @@ class _AddPantryStorageTypePageState extends State<AddPantryStorageTypePage> {
           onPressed: _addNewType,
           icon: SvgPicture.asset(
             AppAssets.addSvg,
+            // ignore: deprecated_member_use
             color: AppColors.primaryColor,
             width: w(18),
             height: h(18),

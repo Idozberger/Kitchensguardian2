@@ -1,5 +1,4 @@
-import 'dart:developer';
-
+import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/common/data/datasource/common_remote_datasource.dart';
 import 'package:foodkitchen/core/common/data/model/pantries_model.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantries_entity.dart';
@@ -45,14 +44,23 @@ class PantryRepositoryImpl implements PantryRepository {
       final response = await pantryRemoteDatasource.getPantryItems(
         kitchenId: kitchenId,
       );
-      final pantryItems = (response as List)
-          .map((e) => PantryItemModel.fromJson(e as Map<String, dynamic>))
-          .toList();
+
+      print("📥 Raw response: $response");
+
+      final pantryItems = (response as List).map((e) {
+        debugPrint("🔄 Mapping item: $e");
+        return PantryItemModel.fromJson(e as Map<String, dynamic>);
+      }).toList();
+
+      debugPrint("✅ Parsed ${pantryItems.length} pantry items");
 
       return Right(pantryItems);
     } on Failure catch (f) {
+      debugPrint("❗ Failure caught: ${f.message}");
       return Left(f);
     } catch (e) {
+      debugPrint("💥 Unknown error: $e");
+
       return Left(UnknownFailure(e.toString()));
     }
   }
@@ -77,7 +85,7 @@ class PantryRepositoryImpl implements PantryRepository {
         final expireDate = e['expiry_date'].toString();
         final thumbnail = e['thumbnail'];
 
-        print(
+        debugPrint(
           "Item parsed - name: $name, unit: $unit, amount: $amount, expireDate: $expireDate",
         );
 
@@ -97,14 +105,14 @@ class PantryRepositoryImpl implements PantryRepository {
         items: items,
       );
 
-      print("ScanReceiptModel created: ${receipt.toString()}");
+      debugPrint("ScanReceiptModel created: ${receipt.toString()}");
 
       return Right(receipt);
     } on Failure catch (f) {
-      print("Failure caught: ${f.message}");
+      debugPrint("Failure caught: ${f.message}");
       return Left(f);
     } catch (e) {
-      print("Unknown error: $e");
+      debugPrint("Unknown error: $e");
       return Left(UnknownFailure(e.toString()));
     }
   }
@@ -161,7 +169,7 @@ class PantryRepositoryImpl implements PantryRepository {
       return Right(response);
     } on Failure catch (f) {
       return Left(f);
-    } catch (e, stack) {
+    } catch (e) {
       return Left(UnknownFailure(e.toString()));
     }
   }
@@ -182,7 +190,7 @@ class PantryRepositoryImpl implements PantryRepository {
       return Right(pantries);
     } on Failure catch (f) {
       return Left(f);
-    } catch (e, stack) {
+    } catch (e) {
       return Left(UnknownFailure(e.toString()));
     }
   }
@@ -201,7 +209,7 @@ class PantryRepositoryImpl implements PantryRepository {
       return Right(response);
     } on Failure catch (f) {
       return Left(f);
-    } catch (e, stack) {
+    } catch (e) {
       return Left(UnknownFailure(e.toString()));
     }
   }

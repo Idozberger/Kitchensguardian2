@@ -12,6 +12,9 @@ final class PantryLoading extends PantryState {}
 
 class PantryLoaded extends PantryState {
   final List<PantryItemEntity> pantryItems;
+  final List<PantryItemEntity> lowStockItems;
+  final List<PantryItemEntity> expiringItems;
+
   final String? errorMessage;
   final String? successMessage;
   final bool isToCart;
@@ -19,6 +22,8 @@ class PantryLoaded extends PantryState {
 
   PantryLoaded({
     required this.pantryItems,
+    required this.lowStockItems,
+    required this.expiringItems,
     this.errorMessage,
     this.successMessage,
     this.isToCart = false,
@@ -27,6 +32,8 @@ class PantryLoaded extends PantryState {
 
   PantryLoaded copyWith({
     List<PantryItemEntity>? pantryItems,
+    List<PantryItemEntity>? lowStockItems,
+    List<PantryItemEntity>? expiringItems,
     String? errorMessage,
     String? successMessage,
     bool? isToCart,
@@ -34,6 +41,8 @@ class PantryLoaded extends PantryState {
   }) {
     return PantryLoaded(
       pantryItems: pantryItems ?? this.pantryItems,
+      lowStockItems: lowStockItems ?? this.lowStockItems,
+      expiringItems: expiringItems ?? this.expiringItems,
       errorMessage: errorMessage,
       successMessage: successMessage,
       isToCart: isToCart ?? this.isToCart,

@@ -1,11 +1,8 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';
-import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
@@ -17,7 +14,6 @@ import 'package:foodkitchen/features/planner/domain/entities/ingredient_entity.d
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dart';
-import 'package:go_router/go_router.dart';
 
 class MissingItemsListWidget extends StatefulWidget {
   final List<IngredientEntity> ingredients;
@@ -135,6 +131,10 @@ class _MissingItemsListWidgetState extends State<MissingItemsListWidget> {
           unit: selectedIngredients[i].unit,
           group: "group",
           expireDate: "",
+          thumbnail: "",
+          expiryStatus: '',
+          stockStatus: '',
+          itemId: '',
         ),
       );
     }

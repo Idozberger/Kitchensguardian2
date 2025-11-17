@@ -121,6 +121,7 @@ class DioHelper {
         await prefs.remove('invitation_code');
         await prefs.remove('role');
 
+        // ignore: use_build_context_synchronously
         context.go(Routes.signIn);
       }
     }

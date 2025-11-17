@@ -155,6 +155,7 @@ class _AllPantryStoragePageState extends State<AllPantryStoragePage> {
 
                   child: SvgPicture.asset(
                     AppAssets.addSvg,
+                    // ignore: deprecated_member_use
                     color: Colors.black,
                     height: h(16),
                   ),

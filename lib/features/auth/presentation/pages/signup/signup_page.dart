@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
-import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
@@ -138,6 +137,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                     ? AppAssets.eyeVisibilitySvg
                                     : AppAssets.eyeSvg,
                                 height: h(16),
+                                // ignore: deprecated_member_use
                                 color: AppColors.greyColor,
                               ),
                             ),
@@ -162,6 +162,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                     ? AppAssets.eyeVisibilitySvg
                                     : AppAssets.eyeSvg,
                                 height: h(16),
+                                // ignore: deprecated_member_use
                                 color: AppColors.greyColor,
                               ),
                             ),

@@ -27,7 +27,7 @@ class CategoryTabs extends StatelessWidget {
         itemCount: categories.length,
         shrinkWrap: true,
         padding: gapSymmetric(horizontal: 20),
-        separatorBuilder: (_, __) => gap(width: 8),
+        separatorBuilder: (_, _) => gap(width: 8),
         itemBuilder: (_, index) {
           return InkWell(
             borderRadius: BorderRadius.circular(h(50)),

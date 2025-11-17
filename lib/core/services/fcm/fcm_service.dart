@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/widgets.dart';
 import 'package:googleapis_auth/auth_io.dart';
 
 class FCMService {
@@ -35,7 +36,9 @@ class FCMService {
       authClient.close();
       return accessToken;
     } catch (e) {
-      print('❌ Error reading service account or generating access token: $e');
+      debugPrint(
+        '❌ Error reading service account or generating access token: $e',
+      );
       rethrow;
     }
   }
@@ -80,12 +83,12 @@ class FCMService {
       );
 
       if (response.statusCode == 200) {
-        print('✅ FCM notification sent successfully!');
+        debugPrint('✅ FCM notification sent successfully!');
       } else {
-        print('❌ Failed to send notification: ${response.data}');
+        debugPrint('❌ Failed to send notification: ${response.data}');
       }
     } catch (e) {
-      print('⚠️ Error sending notification: $e');
+      debugPrint('⚠️ Error sending notification: $e');
     }
   }
 }
