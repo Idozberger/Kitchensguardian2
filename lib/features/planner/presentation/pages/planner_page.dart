@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
@@ -33,12 +36,16 @@ class PlannerPage extends StatefulWidget {
 class _PlannerPageState extends State<PlannerPage> {
   bool isLoading = true;
   String? localDbPlanStartTime;
+
   late final PlannerBloc _plannerBloc;
+  late final UserCubit _userCubit;
   late DateTime _selectedDate;
+
   @override
   void initState() {
     super.initState();
     _plannerBloc = context.read<PlannerBloc>();
+    _userCubit = context.read<UserCubit>();
 
     _fetchInitialPlans();
   }
@@ -59,7 +66,7 @@ class _PlannerPageState extends State<PlannerPage> {
     final formattedDate = formatDate(_selectedDate);
 
     _plannerBloc
-      ..add(GetAllWeeklyPlansEvent())
+      ..add(GetAllWeeklyPlansEvent(_userCubit.state.activeKitchenId))
       ..add(GetDateBasedPlans(formattedDate));
     setState(() {
       isLoading = false;
@@ -71,71 +78,11 @@ class _PlannerPageState extends State<PlannerPage> {
     return DateFormat('EEEE dd, yyyy').format(date);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xffF9F9F9),
-      body: isLoading
-          ? Center(
-              child: CircularProgressIndicator(color: AppColors.primaryColor),
-            )
-          : SafeArea(
-              child: Padding(
-                padding: gapOnly(left: 20, right: 20, top: 14, bottom: 14),
-                child: BlocConsumer<PlannerBloc, PlannerState>(
-                  listener: (context, state) {},
-                  builder: (_, state) {
-                    final plan = state.dateBasedPlan;
-
-                    return SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildHeader(context),
-                          gap(height: 15),
-                          if (state.getAllWeeklyPlans.isEmpty)
-                            Padding(
-                              padding: gapOnly(top: 120),
-                              child: _buildEmptyState(),
-                            )
-                          else ...[
-                            SelectDateWidget(
-                              entitlementIsActive:
-                                  AppConstants.entitlementIsActive,
-                              startDate: _selectedDate,
-                              onChanged: (date) {
-                                setState(() => _selectedDate = date);
-                                _plannerBloc.add(
-                                  GetDateBasedPlans(formatDate(date)),
-                                );
-                              },
-                            ),
-                            gap(height: 15),
-                            if (plan.isNotEmpty &&
-                                plan[0].date == formatDate(_selectedDate))
-                              _buildPlanSection(plan[0])
-                            else
-                              Padding(
-                                padding: gapOnly(top: 64),
-                                child: _buildEmptyState(),
-                              ),
-                          ],
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-    );
-  }
-
   Widget _buildPlanSection(MergedMealPlanEntity plan) {
-    final readableDate = _formatReadableDate(plan.date);
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: DayPlanTile(
-        dayLabel: readableDate,
+        dayLabel: plan.date,
         meals: [
           if (plan.breakfast != null)
             MealTile(mealType: "Breakfast", mealName: plan.breakfast!.title),
@@ -168,7 +115,7 @@ class _PlannerPageState extends State<PlannerPage> {
 
   Future<dynamic> _showDeleteDialog(
     BuildContext context, {
-    required final plan,
+    required MergedMealPlanEntity plan,
   }) {
     return showCustomGenericDialog(
       context: context,
@@ -177,7 +124,11 @@ class _PlannerPageState extends State<PlannerPage> {
       primaryButtonText: "Yes",
       secondaryButtonText: "Cancel",
       onPrimaryPressed: () {
-        _plannerBloc.add(DeletePlanEvent(plan.date));
+        _plannerBloc.add(
+          DeletePlanFromRemoteDbEvent(
+            mealPlanId: plan.breakfast?.mealplanId ?? "",
+          ),
+        );
 
         Navigator.pop(context);
       },
@@ -231,4 +182,66 @@ class _PlannerPageState extends State<PlannerPage> {
       ],
     ),
   );
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xffF9F9F9),
+      body: isLoading
+          ? Center(
+              child: CircularProgressIndicator(color: AppColors.primaryColor),
+            )
+          : SafeArea(
+              child: Padding(
+                padding: gapOnly(left: 20, right: 20, top: 14, bottom: 14),
+                child: BlocConsumer<PlannerBloc, PlannerState>(
+                  listener: (context, state) {},
+                  builder: (_, state) {
+                    final plan = state.dateBasedPlan;
+
+                    return SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildHeader(context),
+                          gap(height: 15),
+                          if (state.getAllWeeklyPlans.isEmpty)
+                            Padding(
+                              padding: gapOnly(top: 120),
+                              child: _buildEmptyState(),
+                            )
+                          else ...[
+                            SelectDateWidget(
+                              entitlementIsActive:
+                                  AppConstants.entitlementIsActive,
+                              startDate: _selectedDate,
+                              onChanged: (date) {
+                                setState(() => _selectedDate = date);
+                                _plannerBloc.add(
+                                  GetDateBasedPlans(
+                                    formatDateToMeetBackendDate(date),
+                                  ),
+                                );
+                              },
+                            ),
+                            gap(height: 15),
+                            if (plan.isNotEmpty &&
+                                plan[0].date ==
+                                    formatDateToMeetBackendDate(_selectedDate))
+                              _buildPlanSection(plan[0])
+                            else
+                              Padding(
+                                padding: gapOnly(top: 64),
+                                child: _buildEmptyState(),
+                              ),
+                          ],
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+    );
+  }
 }

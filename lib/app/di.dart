@@ -83,14 +83,19 @@ import 'package:foodkitchen/features/planner/data/repository/planner_repository_
 import 'package:foodkitchen/features/planner/domain/repository/planner_repository.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/add_to_favourite_recipe.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/add_to_weekly_plan.dart';
+import 'package:foodkitchen/features/planner/domain/usecases/create_plan.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/delete_meal_type_from_weekly_plan.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/delete_plan.dart';
+import 'package:foodkitchen/features/planner/domain/usecases/delete_plan_remote_db.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/favourite_recipes.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/generate_recipes.dart';
+import 'package:foodkitchen/features/planner/domain/usecases/get_all_plans.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/get_all_weekly_plans.dart';
+import 'package:foodkitchen/features/planner/domain/usecases/get_meal_by_date.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/mark_recipe_finished.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/remove_from_favourite_recipe.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/request_missing_items.dart';
+import 'package:foodkitchen/features/planner/domain/usecases/update_meal_plan.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
 import 'package:foodkitchen/features/profile/data/datasource/profile_remote_datasource.dart';
 import 'package:foodkitchen/features/profile/data/repository/profile_repository_impl.dart';
@@ -391,10 +396,17 @@ void _initPlanner() async {
     ..registerFactory(() => DeleteMealTypeFromWeeklyPlan(sl()))
     ..registerFactory(() => MarkRecipeFinished(sl()))
     ..registerFactory(() => RequestMissingItems(sl()))
+    ..registerFactory(() => CreatePlan(sl()))
+    ..registerFactory(() => DeletePlanRemoteDb(sl()))
+    ..registerFactory(() => UpdateMealPlan(sl()))
+    ..registerFactory(() => GetMealByDate(sl()))
+    ..registerFactory(() => GetAllPlans(sl()))
     // Bloc
     ..registerLazySingleton(
       () => PlannerBloc(
         userCubit: sl(),
+        homeBloc: sl(),
+        groceryBloc: sl(),
         generateRecipes: GenerateRecipes(sl()),
         favouriteRecipes: FavouriteRecipes(sl()),
         addToFavouriteRecipe: AddToFavouriteRecipe(sl()),
@@ -402,11 +414,14 @@ void _initPlanner() async {
         addToWeeklyPlan: AddToWeeklyPlan(sl()),
         getAllWeeklyPlans: GetAllWeeklyPlans(sl()),
         deletePlan: DeletePlan(sl()),
-        homeBloc: sl(),
         deleteMealTypeFromWeeklyPlan: DeleteMealTypeFromWeeklyPlan(sl()),
         markRecipeFinished: MarkRecipeFinished(sl()),
         requestMissingItems: RequestMissingItems(sl()),
-        groceryBloc: sl(),
+        createPlan: CreatePlan(sl()),
+        deletePlanRemoteDb: DeletePlanRemoteDb(sl()),
+        updateMealPlan: UpdateMealPlan(sl()),
+        getMealByDate: GetMealByDate(sl()),
+        getAllPlans: GetAllPlans(sl()),
       ),
     );
 }

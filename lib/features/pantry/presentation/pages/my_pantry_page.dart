@@ -1,13 +1,12 @@
 // ignore_for_file: use_build_context_synchronously
-
-import 'package:android_intent_plus/android_intent.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';
 import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
-
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/services/notifications/flutter_local_notifications_service.dart';
@@ -189,6 +188,7 @@ class _MyPantryPageState extends State<MyPantryPage> {
       itemBuilder: (_, index) {
         var pantry = items[index];
         return PantryItemCard(
+          thumbnail: pantry.thumbnailBytes ?? Uint8List(0),
           title: pantry.name,
           quantity: pantry.quantity.toString(),
           unit: pantry.unit,

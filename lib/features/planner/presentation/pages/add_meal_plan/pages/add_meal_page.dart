@@ -78,7 +78,18 @@ class _AddMealPageState extends State<AddMealPage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return BlocBuilder<PlannerBloc, PlannerState>(
+    return BlocConsumer<PlannerBloc, PlannerState>(
+      listener: (context, state) {
+        if (state.successMessage.isNotEmpty) {
+          AppToast.show(state.successMessage, ToastType.success);
+          plannerBloc.add(UpdateTypeSelectedAndDateEvent(index: 0));
+          context.read<PlannerBloc>().add(ResetMealPlanState());
+          context.go(Routes.dashboard);
+        }
+        if (state.errorMessage != null && state.errorMessage!.isNotEmpty) {
+          AppToast.show(state.errorMessage!, ToastType.error);
+        }
+      },
       builder: (_, state) {
         return PopScope(
           canPop: false,

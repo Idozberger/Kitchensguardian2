@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';
 
@@ -49,10 +52,24 @@ class PantryItemModel extends PantryItemEntity {
     required super.expiryStatus,
     required super.stockStatus,
     required super.itemId,
+    required super.thumbnailBytes,
   });
 
   factory PantryItemModel.fromJson(Map<String, dynamic> json) {
+    String? thumbnailBase64 = json['thumbnail']?.toString();
+    Uint8List? thumbnailBytes;
+
+    if (thumbnailBase64 != null &&
+        thumbnailBase64.startsWith('data:image/jpeg;base64,')) {
+      String base64Image = thumbnailBase64.replaceFirst(
+        'data:image/jpeg;base64,',
+        '',
+      );
+      thumbnailBytes = base64Decode(base64Image);
+    }
+
     return PantryItemModel(
+      thumbnail: "",
       name: json['name']?.toString() ?? '',
       quantity: (json['quantity'] is int || json['quantity'] is double)
           ? (json['quantity'] as num).toDouble()
@@ -60,7 +77,7 @@ class PantryItemModel extends PantryItemEntity {
       unit: json['unit']?.toString() ?? '',
       group: json['group']?.toString() ?? '',
       expireDate: json['expiry_date']?.toString() ?? '',
-      thumbnail: json['thumbnail']?.toString() ?? '',
+      thumbnailBytes: thumbnailBytes ?? Uint8List(0),
       expiryStatus: json['expiry_status']?.toString() ?? '',
       stockStatus: json['stock_status']?.toString() ?? '',
       itemId: json['item_id']?.toString() ?? '',
@@ -84,6 +101,7 @@ class PantryItemModel extends PantryItemEntity {
   factory PantryItemModel.fromEntity(PantryItemEntity entity) {
     return PantryItemModel(
       name: entity.name,
+      thumbnailBytes: entity.thumbnailBytes,
       quantity: entity.quantity,
       unit: entity.unit,
       group: entity.group,

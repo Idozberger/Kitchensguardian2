@@ -7,3 +7,7 @@ String formatDate(DateTime date) => DateFormat('dd/MM/yyyy').format(date);
 DateTime parseDate(String formattedDateString) {
   return DateFormat("dd/MM/yyyy").parse(formattedDateString);
 }
+
+String formatDateToMeetBackendDate(DateTime date) {
+  return DateFormat('yyyy-MM-d').format(date);
+}

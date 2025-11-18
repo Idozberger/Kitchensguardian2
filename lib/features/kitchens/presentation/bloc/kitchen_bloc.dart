@@ -233,7 +233,7 @@ class KitchenBloc extends Bloc<KitchenEvent, KitchenState> {
       GetPantriesItemsEventForHome(kitchenId: event.kitchen.kitchenId),
     );
     _groceryBloc.add(RequestedGroceryEvent(kitchenId: event.kitchen.kitchenId));
-    _plannerBloc.add(GetAllWeeklyPlansEvent());
+    _plannerBloc.add(GetAllWeeklyPlansEvent(_userCubit.state.activeKitchenId));
     if (event.kitchen.invitationCode.isNotEmpty) {
       await _saveOrUpdateUserKitchen(kitchen: event.kitchen);
     }

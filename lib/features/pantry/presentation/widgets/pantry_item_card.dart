@@ -1,10 +1,9 @@
-import 'dart:developer';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
-import 'package:foodkitchen/core/common/data/model/pantry_model.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
@@ -13,9 +12,9 @@ import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
-import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_dropdown_widget.dart';
+import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_bloc.dart';
@@ -23,6 +22,7 @@ import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_event.dart'
 import 'package:go_router/go_router.dart';
 
 class PantryItemCard extends StatefulWidget {
+  final Uint8List thumbnail;
   final String title;
   final String quantity;
   final String unit;
@@ -37,6 +37,7 @@ class PantryItemCard extends StatefulWidget {
     super.key,
     required this.title,
     required this.quantity,
+    required this.thumbnail,
     required this.unit,
     required this.pantry,
     required this.expiry,
@@ -75,6 +76,16 @@ class _PantryItemCardState extends State<PantryItemCard> {
               children: [
                 Row(
                   children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(h(24)),
+                      child: Image.memory(
+                        widget.thumbnail,
+                        height: h(28),
+                        width: h(28),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    gap(width: 8),
                     SizedBox(
                       width: _isExpanded ? null : w(54),
                       child: Text(
@@ -85,12 +96,26 @@ class _PantryItemCardState extends State<PantryItemCard> {
                       ),
                     ),
                     if (!_isExpanded) ...[
-                      SizedBox(width: w(12)),
-                      _buildInlineInfo(widget.quantity),
-                      _dot(),
-                      _buildInlineInfo(widget.unit),
-                      _dot(),
-                      _buildInlineInfo(widget.pantry),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          SizedBox(
+                            width: w(38),
+                            child: _buildInlineInfo(widget.quantity),
+                          ),
+                          SizedBox(width: w(24), child: _dot()),
+
+                          SizedBox(
+                            width: w(18),
+                            child: _buildInlineInfo(widget.unit),
+                          ),
+                          SizedBox(width: w(24), child: _dot()),
+                          SizedBox(
+                            width: w(54),
+                            child: _buildInlineInfo(widget.pantry),
+                          ),
+                        ],
+                      ),
                     ],
                   ],
                 ),

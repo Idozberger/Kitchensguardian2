@@ -83,7 +83,7 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
       final response = await dio.get(
         "${AppConstants.getPantryItems}?kitchen_id=$kitchenId",
       );
-      log('✅ Parsed Items: ${response.data}');
+
       if (response.statusCode != 200 && response.statusCode != 201) {
         final data = response.data is String
             ? jsonDecode(response.data)
@@ -98,8 +98,6 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
         final parsedItems = items
             .map((e) => Map<String, dynamic>.from(e))
             .toList();
-
-        log('✅ Parsed Items: $parsedItems');
 
         return {"items": parsedItems, "pantry_types": []};
       } else {

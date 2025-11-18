@@ -45,22 +45,14 @@ class PantryRepositoryImpl implements PantryRepository {
         kitchenId: kitchenId,
       );
 
-      print("📥 Raw response: $response");
-
       final pantryItems = (response as List).map((e) {
-        debugPrint("🔄 Mapping item: $e");
         return PantryItemModel.fromJson(e as Map<String, dynamic>);
       }).toList();
 
-      debugPrint("✅ Parsed ${pantryItems.length} pantry items");
-
       return Right(pantryItems);
     } on Failure catch (f) {
-      debugPrint("❗ Failure caught: ${f.message}");
       return Left(f);
     } catch (e) {
-      debugPrint("💥 Unknown error: $e");
-
       return Left(UnknownFailure(e.toString()));
     }
   }

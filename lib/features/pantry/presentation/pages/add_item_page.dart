@@ -1,7 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/cubits/user_state.dart';
@@ -13,7 +16,6 @@ import 'package:foodkitchen/core/services/date_picker/date_picker_service.dart'
     show DatePickerService;
 import 'package:foodkitchen/core/services/image_picker/image_picker_service.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
-import 'package:foodkitchen/core/utils/date_format_to_string.dart';
 import 'package:foodkitchen/core/utils/format_date_for_backend.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
@@ -157,7 +159,7 @@ class _AddItemPageState extends State<AddItemPage> {
                   text: "Add Item",
                   onPressed: state is PantryLoading
                       ? () {}
-                      : () {
+                      : () async {
                           for (final item in _items) {
                             final name = item.nameController.text.trim();
                             final qty = item.qtyController.text.trim();
@@ -213,6 +215,7 @@ class _AddItemPageState extends State<AddItemPage> {
 
                           final List<PantryItemEntity> pantryItems = [];
                           for (final item in _items) {
+                            String bytes = await compressImage(item.file!);
                             pantryItems.add(
                               PantryItemEntity(
                                 name: item.nameController.text.trim(),
@@ -225,7 +228,7 @@ class _AddItemPageState extends State<AddItemPage> {
                                 group: item.pantry ?? '',
                                 expireDate: formatExpiry(item.expireDate.text),
 
-                                thumbnail: "",
+                                thumbnail: bytes,
                                 expiryStatus: "",
                                 stockStatus: "",
                                 itemId: "",
@@ -539,5 +542,24 @@ class _AddItemPageState extends State<AddItemPage> {
       onPrimaryPressed: onConfirm,
       onSecondaryPressed: () => context.pop(),
     );
+  }
+
+  Future<String> compressImage(File imageFile) async {
+    var result = await FlutterImageCompress.compressWithList(
+      imageFile.readAsBytesSync(),
+      minWidth: 800,
+      minHeight: 600,
+      quality: 15,
+      rotate: 0,
+      inSampleSize: 1,
+      autoCorrectionAngle: true,
+      format: CompressFormat.jpeg,
+      keepExif: false,
+    );
+    String base64Thumbnail = base64Encode(result);
+
+    String dataUri = "data:image/jpeg;base64,$base64Thumbnail";
+
+    return dataUri;
   }
 }

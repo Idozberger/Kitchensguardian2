@@ -50,4 +50,10 @@ class AppConstants {
   static const String deletePantry = "/api/kitchen/pantry/delete";
   static const String editUser = "/api/edit_user";
   static const String changePassword = "/api/change_password";
+  /////MEAL-PLANNER
+  static const String createMealPlan = "/api/meal_plan/create";
+  static const String deleteMealPlan = "/api/meal_plan/delete";
+  static const String updateMealPlan = "/api/meal_plan/update";
+  static const String getMealByDate = "/api/meal_plan/get_by_date";
+  static const String listAllMealPlans = "/api/meal_plan/list";
 }

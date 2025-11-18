@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
@@ -151,9 +149,8 @@ class _RequestNowPageState extends State<RequestNowPage> {
                                 unit: item.unit ?? '',
                                 group: item.pantry ?? '',
                                 expireDate: '',
-                                thumbnail: base64Encode(
-                                  item.file!.readAsBytesSync(),
-                                ),
+                                thumbnail: "",
+
                                 expiryStatus: '',
                                 stockStatus: '',
                                 itemId: '',

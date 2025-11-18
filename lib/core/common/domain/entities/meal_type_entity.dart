@@ -1,8 +1,10 @@
+import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:foodkitchen/features/planner/domain/entities/ingredient_entity.dart';
 
 class MealTypeEntity {
   final String id;
+  final String mealplanId;
   final String formatedDateString;
   final String mealType;
   final String title;
@@ -17,8 +19,19 @@ class MealTypeEntity {
   final bool missingItems;
   final bool available;
 
+  /// NEW
+  final String recipeId;
+  final String kitchenId;
+  final String date;
+  final String createdAt;
+  final String updatedAt;
+  final String createdBy;
+  final bool isCompleted;
+  final String notes;
+
   MealTypeEntity({
     required this.id,
+    required this.mealplanId,
     required this.title,
     required this.calories,
     required this.cookingTime,
@@ -32,5 +45,13 @@ class MealTypeEntity {
     required this.thumbnail,
     required this.missingIngredients,
     this.doneSteps = const [],
+    required this.recipeId,
+    required this.kitchenId,
+    required this.date,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.createdBy,
+    required this.isCompleted,
+    required this.notes,
   });
 }

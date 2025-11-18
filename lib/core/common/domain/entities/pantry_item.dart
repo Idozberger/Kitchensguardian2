@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 class PantryItemEntity {
   final String name;
   final double quantity;
@@ -5,6 +7,7 @@ class PantryItemEntity {
   final String group;
   final String expireDate;
   final String thumbnail;
+  final Uint8List? thumbnailBytes;
   final String expiryStatus;
   final String stockStatus;
   final String itemId;
@@ -18,6 +21,7 @@ class PantryItemEntity {
     required this.thumbnail,
     required this.expiryStatus,
     required this.stockStatus,
+    this.thumbnailBytes,
     required this.itemId,
   });
 }

@@ -1,6 +1,7 @@
 import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
 import 'package:foodkitchen/core/error/failures.dart';
+import 'package:foodkitchen/features/planner/domain/entities/meal_plan_entity.dart';
 import 'package:fpdart/fpdart.dart';
 
 abstract interface class PlannerRepository {
@@ -27,4 +28,23 @@ abstract interface class PlannerRepository {
     required String recipeId,
   });
   Future<Either<Failure, String>> requestItems({required Pantry pantry});
+  Future<Either<Failure, String>> createMealPlan({
+    required List<MealPlanEntity> mealPlans,
+  });
+  Future<Either<Failure, String>> deletePlanFromRemoteDb({
+    required String mealPlanId,
+  });
+  Future<Either<Failure, String>> updateMealPlan({
+    required String mealPlanId,
+    required String mealType,
+    required String notes,
+    required String recipeId,
+  });
+  Future<Either<Failure, String>> getMealByDate({
+    required String kitchenId,
+    required String date,
+  });
+  Future<Either<Failure, List<MealTypeEntity>>> listAllMealPlans({
+    required String kitchenId,
+  });
 }

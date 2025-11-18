@@ -1,8 +1,9 @@
 import 'dart:convert';
-import 'dart:developer';
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
 import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
@@ -61,6 +62,25 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
     } on DioException catch (e) {
       throw dio.handleError(e);
     }
+  }
+
+  Future<String> compressImage(File imageFile) async {
+    var result = await FlutterImageCompress.compressWithList(
+      imageFile.readAsBytesSync(),
+      minWidth: 800,
+      minHeight: 600,
+      quality: 15,
+      rotate: 0,
+      inSampleSize: 1,
+      autoCorrectionAngle: true,
+      format: CompressFormat.jpeg,
+      keepExif: false,
+    );
+    String base64Thumbnail = base64Encode(result);
+
+    String dataUri = "data:image/jpeg;base64,$base64Thumbnail";
+
+    return dataUri;
   }
 
   @override
