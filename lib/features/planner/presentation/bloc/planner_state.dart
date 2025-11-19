@@ -9,6 +9,7 @@ final class PlannerState {
   final List<MergedMealPlanEntity> dateBasedPlan;
   final List<Map<String, dynamic>> doneSteps;
   final List<MergedMealPlanEntity> mealPlans;
+  final List<MergedMealPlanEntity> editMealsPlans;
   final bool isLoading;
   final bool addingToWeeklyPlan;
   final bool startRecipe;
@@ -22,6 +23,7 @@ final class PlannerState {
     this.favouriteRecipes,
     this.getAllWeeklyPlans = const [],
     this.startedRecipe = const [],
+    this.editMealsPlans = const [],
     this.mealPlans = const [],
     this.isLoading = false,
     this.startRecipe = false,
@@ -42,6 +44,7 @@ final class PlannerState {
     List<MergedMealPlanEntity>? getAllWeeklyPlans,
     List<MergedMealPlanEntity>? dateBasedPlan,
     List<MealTypeEntity>? startedRecipe,
+    List<MergedMealPlanEntity>? editMealsPlans,
     bool? isLoading,
     bool? isFinishingRecipe,
     bool? startRecipe,
@@ -69,6 +72,7 @@ final class PlannerState {
       mealTypeSelectedIndex:
           mealTypeSelectedIndex ?? this.mealTypeSelectedIndex,
       selectedDate: selectedDate ?? this.selectedDate,
+      editMealsPlans: editMealsPlans ?? this.editMealsPlans,
     );
   }
 }

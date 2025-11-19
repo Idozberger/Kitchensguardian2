@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
@@ -63,18 +61,19 @@ class _PlannerPageState extends State<PlannerPage> {
     } else {
       _selectedDate = DateTime.now();
     }
-    final formattedDate = formatDate(_selectedDate);
+    final formattedDate = formatDateToMeetBackendDate(_selectedDate);
 
-    _plannerBloc
-      ..add(GetAllWeeklyPlansEvent(_userCubit.state.activeKitchenId))
-      ..add(GetDateBasedPlans(formattedDate));
+    _plannerBloc.add(
+      GetAllWeeklyPlansEvent(_userCubit.state.activeKitchenId, formattedDate),
+    );
     setState(() {
       isLoading = false;
     });
   }
 
-  String _formatReadableDate(String dateString) {
-    final date = DateFormat('dd/MM/yyyy').parse(dateString);
+  String formatDate(String inputDate) {
+    final DateTime date = DateTime.parse(inputDate);
+
     return DateFormat('EEEE dd, yyyy').format(date);
   }
 
@@ -82,7 +81,7 @@ class _PlannerPageState extends State<PlannerPage> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: DayPlanTile(
-        dayLabel: plan.date,
+        dayLabel: formatDate(plan.date),
         meals: [
           if (plan.breakfast != null)
             MealTile(mealType: "Breakfast", mealName: plan.breakfast!.title),
@@ -108,7 +107,24 @@ class _PlannerPageState extends State<PlannerPage> {
         deletePlan: () async {
           _showDeleteDialog(context, plan: plan);
         },
-        editPlan: () => context.pushNamed(Routes.editMeal, extra: plan),
+        editPlan: () {
+          _plannerBloc.add(ResetMealPlanState());
+          final meals = [plan.breakfast, plan.lunch, plan.dinner];
+
+          for (final meal in meals) {
+            if (meal != null) {
+              _plannerBloc.add(
+                AddMealPlanEvent(
+                  date: plan.date,
+                  kitchenId: context.read<UserCubit>().state.activeKitchenId,
+                  mealPlan: meal,
+                ),
+              );
+            }
+          }
+
+          context.push(Routes.editMeal);
+        },
       ),
     );
   }
@@ -127,6 +143,8 @@ class _PlannerPageState extends State<PlannerPage> {
         _plannerBloc.add(
           DeletePlanFromRemoteDbEvent(
             mealPlanId: plan.breakfast?.mealplanId ?? "",
+            date: plan.date,
+            kitchenId: context.read<UserCubit>().state.activeKitchenId,
           ),
         );
 
@@ -185,63 +203,79 @@ class _PlannerPageState extends State<PlannerPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xffF9F9F9),
-      body: isLoading
-          ? Center(
-              child: CircularProgressIndicator(color: AppColors.primaryColor),
-            )
-          : SafeArea(
-              child: Padding(
-                padding: gapOnly(left: 20, right: 20, top: 14, bottom: 14),
-                child: BlocConsumer<PlannerBloc, PlannerState>(
-                  listener: (context, state) {},
-                  builder: (_, state) {
-                    final plan = state.dateBasedPlan;
+    return BlocConsumer<PlannerBloc, PlannerState>(
+      listener: (context, state) {
+        if (state.successMessage.isNotEmpty) {
+          AppToast.show(state.successMessage, ToastType.success);
+        }
+        if (state.errorMessage != null && state.errorMessage!.isNotEmpty) {
+          AppToast.show(state.errorMessage!, ToastType.error);
+        }
+      },
+      builder: (context, state) {
+        return Scaffold(
+          backgroundColor: const Color(0xffF9F9F9),
+          body: state.isLoading
+              ? Center(
+                  child: CircularProgressIndicator(
+                    color: AppColors.primaryColor,
+                  ),
+                )
+              : SafeArea(
+                  child: Padding(
+                    padding: gapOnly(left: 20, right: 20, top: 14, bottom: 14),
+                    child: BlocConsumer<PlannerBloc, PlannerState>(
+                      listener: (context, state) {},
+                      builder: (_, state) {
+                        final plan = state.dateBasedPlan;
 
-                    return SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildHeader(context),
-                          gap(height: 15),
-                          if (state.getAllWeeklyPlans.isEmpty)
-                            Padding(
-                              padding: gapOnly(top: 120),
-                              child: _buildEmptyState(),
-                            )
-                          else ...[
-                            SelectDateWidget(
-                              entitlementIsActive:
-                                  AppConstants.entitlementIsActive,
-                              startDate: _selectedDate,
-                              onChanged: (date) {
-                                setState(() => _selectedDate = date);
-                                _plannerBloc.add(
-                                  GetDateBasedPlans(
-                                    formatDateToMeetBackendDate(date),
+                        return SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildHeader(context),
+                              gap(height: 15),
+                              if (state.getAllWeeklyPlans.isEmpty)
+                                Padding(
+                                  padding: gapOnly(top: 120),
+                                  child: _buildEmptyState(),
+                                )
+                              else ...[
+                                SelectDateWidget(
+                                  entitlementIsActive:
+                                      AppConstants.entitlementIsActive,
+                                  startDate: _selectedDate,
+                                  onChanged: (date) {
+                                    setState(() => _selectedDate = date);
+                                    _plannerBloc.add(
+                                      GetDateBasedPlans(
+                                        formatDateToMeetBackendDate(date),
+                                      ),
+                                    );
+                                  },
+                                ),
+                                gap(height: 15),
+                                if (plan.isNotEmpty &&
+                                    plan[0].date ==
+                                        formatDateToMeetBackendDate(
+                                          _selectedDate,
+                                        ))
+                                  _buildPlanSection(plan[0])
+                                else
+                                  Padding(
+                                    padding: gapOnly(top: 64),
+                                    child: _buildEmptyState(),
                                   ),
-                                );
-                              },
-                            ),
-                            gap(height: 15),
-                            if (plan.isNotEmpty &&
-                                plan[0].date ==
-                                    formatDateToMeetBackendDate(_selectedDate))
-                              _buildPlanSection(plan[0])
-                            else
-                              Padding(
-                                padding: gapOnly(top: 64),
-                                child: _buildEmptyState(),
-                              ),
-                          ],
-                        ],
-                      ),
-                    );
-                  },
+                              ],
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
                 ),
-              ),
-            ),
+        );
+      },
     );
   }
 }

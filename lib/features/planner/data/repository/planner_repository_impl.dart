@@ -1,6 +1,3 @@
-import 'dart:developer';
-
-import 'package:flutter/foundation.dart';
 import 'package:foodkitchen/core/common/data/model/meal_type_model.dart';
 import 'package:foodkitchen/core/common/data/model/pantry_model.dart';
 import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
@@ -213,10 +210,14 @@ class PlannerRepositoryImpl implements PlannerRepository {
   @override
   Future<Either<Failure, String>> deletePlanFromRemoteDb({
     required String mealPlanId,
+    required String kitchenId,
+    required String date,
   }) async {
     try {
       String response = await plannerRemoteDatasource.deletePlanFromRemoteDb(
         mealPlanId: mealPlanId,
+        kitchenId: kitchenId,
+        date: date,
       );
 
       return Right(response);
@@ -280,13 +281,13 @@ class PlannerRepositoryImpl implements PlannerRepository {
         kitchenId: kitchenId,
       );
 
-      logInfo("Raw response: $response");
-
       final generatedRecipes = (response as List).map((e) {
         return MealTypeModel.fromJson(e as Map<String, dynamic>);
       }).toList();
 
-      logInfo("Generated recipes: ${generatedRecipes[0].title}");
+      for (var element in generatedRecipes) {
+        logInfo("Generated recipesd: ${element.toJson()}");
+      }
 
       return Right(generatedRecipes);
     } on Failure catch (f) {

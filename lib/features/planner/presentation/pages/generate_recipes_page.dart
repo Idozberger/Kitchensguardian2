@@ -26,12 +26,14 @@ class GenerateRecipesPage extends StatefulWidget {
   final String selectedDate;
   final String selectedMealType;
   final bool isPlan;
+  final bool isEdit;
 
   const GenerateRecipesPage({
     super.key,
     required this.selectedDate,
     required this.selectedMealType,
     required this.isPlan,
+    required this.isEdit,
   });
 
   @override
@@ -114,6 +116,7 @@ class _GenerateRecipesPageState extends State<GenerateRecipesPage> {
                       selectedDate: widget.selectedDate,
                       selectedMealType: widget.selectedMealType,
                       isPlan: widget.isPlan,
+                      isEdit: widget.isEdit,
                     ),
                     gap(height: 14),
                     SavedRecipesSection(
@@ -121,6 +124,7 @@ class _GenerateRecipesPageState extends State<GenerateRecipesPage> {
                       selectedDate: widget.selectedDate,
                       selectedMealType: widget.selectedMealType,
                       isPlan: widget.isPlan,
+                      isEdit: widget.isEdit,
                     ),
                   ],
                 ],

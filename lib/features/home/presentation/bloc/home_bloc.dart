@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
+import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
 import 'package:foodkitchen/core/common/domain/usecase/get_current_user.dart';
 import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/core/services/fcm/fcm_service.dart';
@@ -14,6 +15,8 @@ import 'package:foodkitchen/features/home/domain/usecases/get_pantries_usecase.d
 import 'package:foodkitchen/features/home/domain/usecases/join_kitchen_usecase.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_event.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_state.dart';
+import 'package:foodkitchen/features/planner/data/models/merged_meal_plan_model.dart';
+import 'package:foodkitchen/features/planner/domain/entities/merged_meal_type_entity.dart';
 import 'package:intl/intl.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
@@ -216,23 +219,17 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     Emitter<HomeState> emit,
   ) async {
     emit(state.copyWith(loadingWeeklyPlans: true));
-    final res = await _getAllWeeklyPlansForHome(NoParams());
+    final res = await _getAllWeeklyPlansForHome(
+      GetAllWeeklyPlansForHomeParams(_userCubit.state.activeKitchenId),
+    );
 
     res.fold(
       (failure) {
-        emit(
-          state.copyWith(
-            errorMessage: failure.message,
-            loadingWeeklyPlans: false,
-          ),
-        );
+        emit(state.copyWith(errorMessage: failure.message, isLoading: false));
       },
       (getAllWeeklyPlans) {
         emit(
-          state.copyWith(
-            dateBasedPlan: getAllWeeklyPlans,
-            loadingWeeklyPlans: false,
-          ),
+          state.copyWith(dateBasedPlan: getAllWeeklyPlans, isLoading: false),
         );
       },
     );

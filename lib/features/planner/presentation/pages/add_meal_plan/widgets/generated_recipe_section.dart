@@ -15,12 +15,14 @@ class GeneratedRecipeSection extends StatelessWidget {
   final MergedMealPlanEntity mealPlan;
   final int selectedIndex;
   final String date;
+  final bool isEdit;
 
   const GeneratedRecipeSection({
     super.key,
     required this.mealPlan,
     required this.selectedIndex,
     required this.date,
+    required this.isEdit,
   });
 
   @override
@@ -69,6 +71,7 @@ class GeneratedRecipeSection extends StatelessWidget {
 
     if (meal != null && isSameDate) {
       return RecipeTileItem(
+        isEdit: isEdit,
         isDeletedIcon: true,
         svgAsset: AppAssets.deleteSvg,
         deleteCallback: () => _showDeleteDialog(context, meal),
@@ -82,21 +85,34 @@ class GeneratedRecipeSection extends StatelessWidget {
     return _EmptyMealState(label: label);
   }
 
-  Future<void> _showDeleteDialog(BuildContext context, MealTypeEntity meal) {
-    return showCustomGenericDialog(
+  Future<void> _showDeleteDialog(
+    BuildContext context,
+    MealTypeEntity meal,
+  ) async {
+    await showCustomGenericDialog(
       context: context,
       title: "Delete Plan",
       subtitle: "Are you sure you want to delete this plan?",
       primaryButtonText: "Yes",
       secondaryButtonText: "Cancel",
-      onPrimaryPressed: () {
-        context.read<PlannerBloc>().add(
-          DeleteMealPlanEvent(
-            mealType: meal.mealType,
-            date: meal.formatedDateString,
-          ),
-        );
-        AppToast.show("Item removed", ToastType.success);
+      isloading: false,
+      onPrimaryPressed: () async {
+        if (meal.mealplanId.isEmpty) {
+          context.read<PlannerBloc>().add(
+            DeleteMealPlanEvent(
+              mealType: meal.mealType,
+              date: meal.formatedDateString,
+            ),
+          );
+          AppToast.show("Item removed", ToastType.success);
+        } else {
+          context.read<PlannerBloc>().add(
+            DeletePlanFromRemoteDbEvent(mealPlanId: meal.mealplanId),
+          );
+          await Future.delayed(Duration(seconds: 2));
+          AppToast.show("Item removed", ToastType.success);
+        }
+
         Navigator.pop(context);
       },
       onSecondaryPressed: () => Navigator.pop(context),

@@ -11,5 +11,7 @@ abstract interface class HomeRepository {
   Future<Either<Failure, PantriesDataEntity>> getItems({
     required String kitchenId,
   });
-  Future<Either<Failure, List<MealTypeEntity>>> getAllWeeklyPlans();
+  Future<Either<Failure, List<MealTypeEntity>>> getAllWeeklyPlans({
+    required String kicthenId,
+  });
 }

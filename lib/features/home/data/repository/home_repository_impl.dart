@@ -1,6 +1,8 @@
 import 'package:foodkitchen/core/common/data/datasource/common_remote_datasource.dart';
+import 'package:foodkitchen/core/common/data/model/meal_type_model.dart';
 import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
 import 'package:foodkitchen/core/error/failures.dart';
+import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/features/home/data/datasource/home_remote_datasource.dart';
 import 'package:foodkitchen/features/home/data/models/kitchen_model.dart';
 import 'package:foodkitchen/features/home/data/models/pantry_data_model.dart';
@@ -73,14 +75,30 @@ class HomeRepositoryImpl implements HomeRepository {
   }
 
   @override
-  Future<Either<Failure, List<MealTypeEntity>>> getAllWeeklyPlans() async {
+  Future<Either<Failure, List<MealTypeEntity>>> getAllWeeklyPlans({
+    required String kicthenId,
+  }) async {
     try {
-      final response = await homeRemoteDataSource.getWeeklyPlans();
+      logInfo("Fetching meal plans for kitchenId: $kicthenId");
 
-      return Right(response);
+      final response = await homeRemoteDataSource.getWeeklyPlans(
+        kitchenId: kicthenId,
+      );
+
+      final generatedRecipes = (response as List).map((e) {
+        return MealTypeModel.fromJson(e as Map<String, dynamic>);
+      }).toList();
+
+      for (var element in generatedRecipes) {
+        logInfo("Generated recipesd: ${element.toJson()}");
+      }
+
+      return Right(generatedRecipes);
     } on Failure catch (f) {
+      logInfo("Failure: ${f.message}");
       return Left(f);
     } catch (e) {
+      logInfo("Error: ${e.toString()}");
       return Left(UnknownFailure(e.toString()));
     }
   }

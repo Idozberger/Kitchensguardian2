@@ -11,3 +11,7 @@ DateTime parseDate(String formattedDateString) {
 String formatDateToMeetBackendDate(DateTime date) {
   return DateFormat('yyyy-MM-d').format(date);
 }
+
+DateTime formatStringDateToMeetBackendDate(String formattedDateString) {
+  return DateFormat('yyyy-MM-d').parse(formattedDateString);
+}

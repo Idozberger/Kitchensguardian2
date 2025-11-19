@@ -24,7 +24,11 @@ abstract interface class PlannerRemoteDatasource {
   });
   Future<String> requestItems({required PantryModel pantryModel});
   Future<String> createPlan({required List<MealPlanEntity> mealPlans});
-  Future<String> deletePlanFromRemoteDb({required String mealPlanId});
+  Future<String> deletePlanFromRemoteDb({
+    required String mealPlanId,
+    required String kitchenId,
+    required String date,
+  });
   Future<String> updateMealPlan({
     required String mealPlanId,
     required String mealType,
@@ -231,36 +235,51 @@ class PlannerRemoteDatasourceImpl implements PlannerRemoteDatasource {
   @override
   Future<String> createPlan({required List<MealPlanEntity> mealPlans}) async {
     try {
-      final response = await dio.post(
-        AppConstants.createMealPlan,
-        data: {
-          "date": mealPlans[0].date,
-          "kitchen_id": mealPlans[0].kitchenId,
-          "meal_type": mealPlans[0].mealType,
-          "notes": mealPlans[0].notes,
-          "recipe_id": mealPlans[0].recipeId,
-        },
-      );
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
+      List<String> responses = [];
 
-        final message = data["error"];
-        throw message;
+      for (final meal in mealPlans) {
+        final response = await dio.post(
+          AppConstants.createMealPlan,
+          data: {
+            "date": meal.date,
+            "kitchen_id": meal.kitchenId,
+            "meal_type": meal.mealType,
+            "notes": meal.notes,
+            "recipe_id": meal.recipeId,
+          },
+        );
+
+        if (response.statusCode != 200 && response.statusCode != 201) {
+          final data = response.data is String
+              ? jsonDecode(response.data)
+              : response.data;
+
+          throw data["error"];
+        }
+
+        responses.add(response.data["message"]);
       }
-      return response.data["message"];
+
+      return responses.join(", ");
     } on DioException catch (e) {
       throw dio.handleError(e);
     }
   }
 
   @override
-  Future<String> deletePlanFromRemoteDb({required String mealPlanId}) async {
+  Future<String> deletePlanFromRemoteDb({
+    required String mealPlanId,
+    required String kitchenId,
+    required String date,
+  }) async {
     try {
       final response = await dio.post(
         AppConstants.deleteMealPlan,
-        data: {"meal_plan_id": mealPlanId},
+        data: {
+          "meal_plan_id": mealPlanId,
+          "kitchen_id": kitchenId,
+          "date": date,
+        },
       );
       if (response.statusCode != 200 && response.statusCode != 201) {
         final data = response.data is String
@@ -339,7 +358,14 @@ class PlannerRemoteDatasourceImpl implements PlannerRemoteDatasource {
         "${AppConstants.listAllMealPlans}?kitchen_id=$kitchenId",
       );
 
-      final data = response.data["meal_plans"];
+      final raw = response.data;
+
+      if (raw is String && raw.trim().startsWith("<!doctype html")) {
+        log("⚠ HTML returned instead of JSON. Returning empty list.");
+        return [];
+      }
+
+      final data = raw["meal_plans"];
 
       if (response.statusCode != 200 && response.statusCode != 201) {
         final data = response.data is String
@@ -352,7 +378,7 @@ class PlannerRemoteDatasourceImpl implements PlannerRemoteDatasource {
       if (data is List) {
         return data.map<Map<String, dynamic>>((e) {
           final recipe = Map<String, dynamic>.from(e);
-          logError(recipe);
+
           final thumbnailBase64 = recipe["thumbnail"];
 
           if (thumbnailBase64 is String && thumbnailBase64.isNotEmpty) {

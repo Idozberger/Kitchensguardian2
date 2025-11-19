@@ -11,11 +11,19 @@ class DeletePlanRemoteDb implements UseCase<String, DeletePlanRemoteDbParams> {
   Future<Either<Failure, String>> call(DeletePlanRemoteDbParams params) async {
     return await plannerRepository.deletePlanFromRemoteDb(
       mealPlanId: params.mealPlanId,
+      kitchenId: params.kitchenId,
+      date: params.date,
     );
   }
 }
 
 class DeletePlanRemoteDbParams {
   final String mealPlanId;
-  DeletePlanRemoteDbParams(this.mealPlanId);
+  final String kitchenId;
+  final String date;
+  DeletePlanRemoteDbParams({
+    required this.mealPlanId,
+    required this.date,
+    required this.kitchenId,
+  });
 }

@@ -3,7 +3,6 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:foodkitchen/core/common/data/model/meal_type_model.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
 import 'package:intl/intl.dart';
@@ -15,7 +14,9 @@ abstract interface class HomeRemoteDataSource {
   Future<Map<String, List<Map<String, dynamic>>>> getPantriesItems({
     required String kitchenId,
   });
-  Future<List<MealTypeModel>> getWeeklyPlans();
+  Future<List<Map<String, dynamic>>> getWeeklyPlans({
+    required String kitchenId,
+  });
 }
 
 class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
@@ -111,54 +112,55 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
   }
 
   @override
-  Future<List<MealTypeModel>> getWeeklyPlans() async {
+  Future<List<Map<String, dynamic>>> getWeeklyPlans({
+    required String kitchenId,
+  }) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final response = await dio.get(
+        "${AppConstants.listAllMealPlans}?kitchen_id=$kitchenId",
+      );
 
-      final List<String> jsonList = prefs.getStringList('weekly_plan') ?? [];
+      final raw = response.data;
 
-      List<MealTypeModel> allPlans = jsonList
-          .map((jsonString) => MealTypeModel.fromJson(jsonDecode(jsonString)))
-          .toList();
-
-      List<MealTypeModel> filteredPlans = [];
-
-      String? startDate = sharedPreferences.getString("start-date");
-      debugPrint("Start date from SharedPreferences: $startDate");
-
-      for (var i = 0; i < allPlans.length; i++) {
-        final plan = allPlans[i];
-        final parsedDate = parseDate(plan.formatedDateString);
-        final planDate = DateTime(
-          parsedDate.year,
-          parsedDate.month,
-          parsedDate.day,
-        );
-
-        if (startDate != null) {
-          DateTime startDateTime = parseDate(startDate);
-          final startDateTimePlanString = DateTime(
-            startDateTime.year,
-            startDateTime.month,
-            startDateTime.day,
-          ).subtract(Duration(days: 1));
-
-          if (planDate.isAfter(startDateTimePlanString)) {
-            filteredPlans.add(plan);
-          } else {
-            debugPrint("Skipped plan #$i — older than start date");
-          }
-        } else {
-          debugPrint("No start-date found, skipping filtering logic");
-        }
+      if (raw is String && raw.trim().startsWith("<!doctype html")) {
+        log("⚠ HTML returned instead of JSON. Returning empty list.");
+        return [];
       }
 
-      debugPrint("Filtered plans count: ${filteredPlans.length}");
-      return filteredPlans;
-    } catch (e) {
-      debugPrint("Error in getWeeklyPlans(): $e");
+      final data = raw["meal_plans"];
 
-      return [];
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+
+        final message = data["error"];
+        throw message;
+      }
+      if (data is List) {
+        return data.map<Map<String, dynamic>>((e) {
+          final recipe = Map<String, dynamic>.from(e);
+
+          final thumbnailBase64 = recipe["thumbnail"];
+
+          if (thumbnailBase64 is String && thumbnailBase64.isNotEmpty) {
+            try {
+              recipe["thumbnail"] = base64Decode(
+                thumbnailBase64.contains(",")
+                    ? thumbnailBase64.split(",").last.trim()
+                    : thumbnailBase64.trim(),
+              );
+            } catch (e) {
+              recipe["thumbnail"] = Uint8List(0);
+            }
+          }
+          return recipe;
+        }).toList();
+      } else {
+        throw Exception("Invalid data format for favourite_recipes");
+      }
+    } on DioException catch (e) {
+      throw dio.handleError(e);
     }
   }
 

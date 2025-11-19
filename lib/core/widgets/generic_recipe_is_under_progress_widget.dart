@@ -75,6 +75,7 @@ class RecipeInProgressNotification extends StatelessWidget {
                       extra: {
                         "meal_type_entity": mealTypeEntity,
                         "is_plan": false,
+                        "is_edit": false,
                       },
                     );
                   },

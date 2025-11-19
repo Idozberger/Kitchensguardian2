@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
@@ -16,11 +18,13 @@ import 'package:go_router/go_router.dart';
 class MealActionRow extends StatelessWidget {
   final int selectedIndex;
   final MergedMealPlanEntity plan;
+  final String buttonText;
 
   const MealActionRow({
     super.key,
     required this.selectedIndex,
     required this.plan,
+    this.buttonText = "Add Meal",
   });
 
   bool get _hasMeal {
@@ -52,7 +56,7 @@ class MealActionRow extends StatelessWidget {
             gap(width: 12),
             Expanded(
               child: GenericButtonWidget(
-                text: "Add Meal",
+                text: buttonText,
                 isLoading: state.isLoading,
                 onPressed: state.isLoading
                     ? () {}
@@ -62,45 +66,54 @@ class MealActionRow extends StatelessWidget {
                             .read<UserCubit>()
                             .state
                             .activeKitchenId;
-
-                        final formattedDate = formatDateForBackend(plan.date);
+                        log("DATE: ${plan.date}");
+                        String formattedDate = plan.date;
+                        if (!formattedDate.contains("-")) {
+                          formattedDate = formatDateForBackend(plan.date);
+                        }
 
                         final List<MealPlanEntity> mealPlans = [];
 
                         if (plan.breakfast != null) {
-                          mealPlans.add(
-                            MealPlanEntity(
-                              date: formattedDate,
-                              kitchenId: kitchenId,
-                              mealType: "breakfast",
-                              notes: "notes",
-                              recipeId: plan.breakfast!.id,
-                            ),
-                          );
+                          if (plan.breakfast!.mealplanId.isEmpty) {
+                            mealPlans.add(
+                              MealPlanEntity(
+                                date: formattedDate,
+                                kitchenId: kitchenId,
+                                mealType: "breakfast",
+                                notes: "notes",
+                                recipeId: plan.breakfast!.id,
+                              ),
+                            );
+                          }
                         }
 
                         if (plan.lunch != null) {
-                          mealPlans.add(
-                            MealPlanEntity(
-                              date: formattedDate,
-                              kitchenId: kitchenId,
-                              mealType: "lunch",
-                              notes: "notes",
-                              recipeId: plan.lunch!.id,
-                            ),
-                          );
+                          if (plan.lunch!.mealplanId.isEmpty) {
+                            mealPlans.add(
+                              MealPlanEntity(
+                                date: formattedDate,
+                                kitchenId: kitchenId,
+                                mealType: "lunch",
+                                notes: "notes",
+                                recipeId: plan.lunch!.id,
+                              ),
+                            );
+                          }
                         }
 
                         if (plan.dinner != null) {
-                          mealPlans.add(
-                            MealPlanEntity(
-                              date: formattedDate,
-                              kitchenId: kitchenId,
-                              mealType: "dinner",
-                              notes: "notes",
-                              recipeId: plan.dinner!.id,
-                            ),
-                          );
+                          if (plan.dinner!.mealplanId.isEmpty) {
+                            mealPlans.add(
+                              MealPlanEntity(
+                                date: formattedDate,
+                                kitchenId: kitchenId,
+                                mealType: "dinner",
+                                notes: "notes",
+                                recipeId: plan.dinner!.id,
+                              ),
+                            );
+                          }
                         }
 
                         if (mealPlans.isNotEmpty) {
@@ -118,7 +131,6 @@ class MealActionRow extends StatelessWidget {
   }
 
   String formatDateForBackend(String inputDate) {
-    // inputDate = "17/11/2025"
     final parts = inputDate.split("/");
     final day = parts[0].padLeft(2, '0');
     final month = parts[1].padLeft(2, '0');

@@ -1,428 +1,290 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:foodkitchen/core/common/data/model/meal_type_model.dart';
-import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
-import 'package:foodkitchen/core/global/functions/const.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/date_format_to_string.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
-import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
-import 'package:foodkitchen/core/widgets/generic_date_picker_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:foodkitchen/features/planner/domain/entities/merged_meal_type_entity.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dart';
-import 'package:foodkitchen/features/planner/presentation/widgets/recipe_tile_item.dart';
+import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dart';
+import 'package:foodkitchen/features/planner/presentation/pages/add_meal_plan/widgets/generated_recipe_section.dart';
+import 'package:foodkitchen/features/planner/presentation/pages/add_meal_plan/widgets/meal_action_tile.dart';
+import 'package:foodkitchen/features/planner/presentation/pages/add_meal_plan/widgets/meal_type_selector.dart';
+import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
+import 'package:foodkitchen/core/widgets/generic_date_picker_widget.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 class EditMealPage extends StatefulWidget {
-  final MergedMealPlanEntity mergedMealPlanEntity;
-  const EditMealPage({super.key, required this.mergedMealPlanEntity});
+  const EditMealPage({super.key});
 
   @override
   State<EditMealPage> createState() => _EditMealPageState();
 }
 
-class _EditMealPageState extends State<EditMealPage> {
-  late MergedMealPlanEntity _mealPlan;
-  late DateTime _selectedDate;
-
-  late int _selectedIndex;
+class _EditMealPageState extends State<EditMealPage>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+  late PlannerBloc plannerBloc;
+  bool isLoading = true;
+  late DateTime startDate;
+  final mealTypes = const ["Breakfast", "Lunch", "Dinner"];
 
   @override
   void initState() {
     super.initState();
-    _mealPlan = widget.mergedMealPlanEntity;
-
-    _selectedDate = parseDate(_mealPlan.date);
-
-    _selectedIndex = _initialSelectedIndex();
+    plannerBloc = context.read<PlannerBloc>();
+    _initializeDate();
   }
 
-  int _initialSelectedIndex() {
-    if (_mealPlan.breakfast != null) return 0;
-    if (_mealPlan.lunch != null) return 1;
-    if (_mealPlan.dinner != null) return 2;
-    return 0; // fallback
+  Future<void> _initializeDate() async {
+    final hasPlans = plannerBloc.state.mealPlans.isNotEmpty;
+
+    if (hasPlans) {
+      final dateString = context.read<PlannerBloc>().state.mealPlans[0].date;
+      DateTime date = DateTime.parse(dateString);
+      startDate = date;
+
+      plannerBloc.add(
+        UpdateTypeSelectedAndDateEvent(index: 0, date: startDate),
+      );
+    }
+
+    setState(() => isLoading = false);
   }
 
-  void _updateSelectedIndex(int index) {
-    if (_selectedIndex == index) return;
-    setState(() => _selectedIndex = index);
-  }
-
-  void _onDateChanged(DateTime newDate) {
-    // setState(() {
-    //   // _selectedDate = newDate;
-    //   // _mealPlan = _mealPlan.copyWith(
-    //   //   date: DateFormat('dd/MM/yyyy').format(newDate),
-    //   // );
-    // });
+  void _handleBackNavigation(BuildContext context) {
+    final hasPlans = context.read<PlannerBloc>().state.mealPlans.isNotEmpty;
+    if (hasPlans) {
+      _showConfirmDialog(
+        context,
+        title: "Go Back",
+        subtitle:
+            "If you go back, the meal data you just added will be removed. Continue?",
+        onConfirm: () => WidgetsBinding.instance.addPostFrameCallback((_) {
+          context.go(Routes.dashboard);
+        }),
+      );
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.go(Routes.dashboard);
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Scaffold(
-      backgroundColor: const Color(0xffF9F9F9),
-      appBar: _buildAppBar(theme),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: gapSymmetric(horizontal: 20, vertical: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                DatePickerSection(
-                  startDate: _selectedDate,
-                  onChanged: _onDateChanged,
-                ),
-                gap(height: 20),
-                MealTypeSection(
-                  selectedIndex: _selectedIndex,
-                  onSelected: _updateSelectedIndex,
-                ),
-                gap(height: 20),
-                GeneratedRecipeSectionEdit(
-                  date: _mealPlan.date,
-                  mealPlan: _mealPlan,
-                  selectedIndex: _selectedIndex,
-                ),
-                // gap(height: 18),
-                // ActionButtons(
-                //   onCancel: () => context.pop(),
-                //   onSave: _onSavePressed,
-                // ),
-              ],
-            ),
+    super.build(context);
+    return BlocConsumer<PlannerBloc, PlannerState>(
+      listener: (context, state) {
+        if (state.successMessage.isNotEmpty) {
+          AppToast.show(state.successMessage, ToastType.success);
+          plannerBloc.add(UpdateTypeSelectedAndDateEvent(index: 0));
+          context.read<PlannerBloc>().add(ResetMealPlanState());
+          context.go(Routes.dashboard);
+        }
+        if (state.errorMessage != null && state.errorMessage!.isNotEmpty) {
+          AppToast.show(state.errorMessage!, ToastType.error);
+        }
+      },
+      builder: (_, state) {
+        return PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (_, _) async =>
+              _handleBackNavigation(context),
+          child: Scaffold(
+            backgroundColor: const Color(0xffF9F9F9),
+            appBar: _buildAppBar(context),
+            body: state.isLoading
+                ? Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.primaryColor,
+                    ),
+                  )
+                : isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : SafeArea(
+                    child: SingleChildScrollView(
+                      padding: gapSymmetric(horizontal: 20, vertical: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // _buildDateSelector(context),
+                          // gap(height: 20),
+                          MealTypeSelector(
+                            selectedIndex: state.mealTypeSelectedIndex,
+                            onSelected: (index) => plannerBloc.add(
+                              UpdateTypeSelectedAndDateEvent(index: index),
+                            ),
+                          ),
+                          _buildGenerateRecipeButton(),
+                          _buildMealPlanContent(state),
+                        ],
+                      ),
+                    ),
+                  ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
-  AppBar _buildAppBar(ThemeData theme) {
+  AppBar _buildAppBar(BuildContext context) {
     return AppBar(
-      automaticallyImplyLeading: false,
       leadingWidth: w(55),
-      centerTitle: true,
       leading: Row(
         children: [
           SizedBox(width: w(16)),
           CircularIconButton(
             iconAsset: AppAssets.backArrowiOS,
-            onTap: () => Navigator.pop(context),
+            onTap: () {
+              _handleBackNavigation(context);
+            },
           ),
         ],
       ),
-      title: Text('Edit Day Plan', style: theme.textTheme.headlineLarge),
-    );
-  }
-}
-
-class DatePickerSection extends StatelessWidget {
-  final DateTime startDate;
-  final ValueChanged<DateTime> onChanged;
-  const DatePickerSection({
-    super.key,
-    required this.startDate,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SelectDateWidget(
-      entitlementIsActive: AppConstants.entitlementIsActive,
-      startDate: startDate,
-      onChanged: onChanged,
-    );
-  }
-}
-
-class MealTypeSection extends StatelessWidget {
-  final int selectedIndex;
-  final ValueChanged<int> onSelected;
-  const MealTypeSection({
-    super.key,
-    required this.selectedIndex,
-    required this.onSelected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Meal Type', style: theme.textTheme.headlineLarge),
-        gap(height: 20),
-        MealTypeTile(
-          index: 0,
-          text: 'Breakfast',
-          iconPath: AppAssets.breakfastSvg,
-          isSelected: selectedIndex == 0,
-          onTap: () => onSelected(0),
-        ),
-        gap(height: 10),
-        MealTypeTile(
-          index: 1,
-          text: 'Lunch',
-          iconPath: AppAssets.lunchSvg,
-          isSelected: selectedIndex == 1,
-          onTap: () => onSelected(1),
-        ),
-        gap(height: 10),
-        MealTypeTile(
-          index: 2,
-          text: 'Dinner',
-          iconPath: AppAssets.dinnerSvg,
-          isSelected: selectedIndex == 2,
-          onTap: () => onSelected(2),
-        ),
-      ],
-    );
-  }
-}
-
-class MealTypeTile extends StatelessWidget {
-  final int index;
-  final String text;
-  final String iconPath;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const MealTypeTile({
-    super.key,
-    required this.index,
-    required this.text,
-    required this.iconPath,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return UpperTile(
-      callback: onTap,
-      height: h(51),
-      borderColor: isSelected ? const Color(0xffFFDD98) : null,
-      color: isSelected ? const Color(0xffFFFBEB) : null,
-      widget: Row(
-        children: [
-          CircleAvatar(
-            backgroundColor: Colors.white,
-            child: SvgPicture.asset(iconPath),
-          ),
-          SizedBox(width: w(15)),
-          Text(
-            text,
-            style: Theme.of(
-              context,
-            ).textTheme.headlineMedium!.copyWith(color: Colors.black),
-          ),
-        ],
+      centerTitle: true,
+      title: Text(
+        "Edit Meal",
+        style: Theme.of(context).textTheme.headlineLarge,
       ),
     );
   }
-}
 
-class GeneratedRecipeSectionEdit extends StatelessWidget {
-  final MergedMealPlanEntity mealPlan;
-  final int selectedIndex;
-  final String date;
-  const GeneratedRecipeSectionEdit({
-    super.key,
-    required this.mealPlan,
-    required this.selectedIndex,
-    required this.date,
-  });
+  Widget _buildDateSelector(BuildContext context) {
+    return BlocBuilder<PlannerBloc, PlannerState>(
+      builder: (_, state) {
+        return SelectDateWidget(
+          selectedDate: state.selectedDate,
+          startDate: startDate,
+          entitlementIsActive: false,
+          onChanged: (selected) {},
+        );
+      },
+    );
+  }
 
-  Widget _emptyState(BuildContext context, String mealLabel) {
+  Widget _buildMealPlanContent(PlannerState state) {
+    if (state.mealPlans.isEmpty) return const SizedBox();
+
+    final plan = state.mealPlans.first;
+    final formattedDate = formatDateToMeetBackendDate(startDate);
+
+    final isMatchingDate = plan.date == formattedDate;
+
+    if (!isMatchingDate) return const SizedBox();
+
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        gap(height: 8),
-        Text(
-          'No recipe planned for $mealLabel today',
-          style: Theme.of(context).textTheme.headlineMedium,
+        GeneratedRecipeSection(
+          isEdit: true,
+          date: formattedDate,
+          mealPlan: plan,
+          selectedIndex: state.mealTypeSelectedIndex,
         ),
-        TextButton(
-          onPressed: () {
-            context.pushNamed(
-              Routes.generateRecipes,
-              extra: {
-                "selected_date": date,
-                "selected_meal_type": mealLabel,
-                "is_plan": true,
-              },
-            );
-          },
-          child: const Text('Find Recipe'),
-        ),
+        gap(height: 18),
+        _buildEditMealRow(state, plan),
       ],
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    Widget child;
-
-    switch (selectedIndex) {
-      case 0:
-        child = (mealPlan.breakfast != null)
-            ? RecipeTileItem(
-                isDeletedIcon: true,
-                svgAsset: AppAssets.deleteSvg,
-                deleteCallback: () {
-                  _showDeleteDialog(context, mealPlan.breakfast!);
-                },
-                recipe: mealPlan.breakfast! as MealTypeModel,
-                selectedDate: mealPlan.date,
-                selectedMealType: 'Breakfast',
-                isPlan: false,
-              )
-            : _emptyState(context, 'breakfast');
-        break;
-      case 1:
-        child = (mealPlan.lunch != null)
-            ? RecipeTileItem(
-                isDeletedIcon: true,
-                svgAsset: AppAssets.deleteSvg,
-                deleteCallback: () {
-                  _showDeleteDialog(context, mealPlan.lunch!);
-                },
-                recipe: mealPlan.lunch! as MealTypeModel,
-                selectedDate: mealPlan.date,
-                selectedMealType: 'Lunch',
-                isPlan: false,
-              )
-            : _emptyState(context, 'lunch');
-        break;
-      case 2:
-      default:
-        child = (mealPlan.dinner != null)
-            ? RecipeTileItem(
-                isDeletedIcon: true,
-                svgAsset: AppAssets.deleteSvg,
-                deleteCallback: () {
-                  _showDeleteDialog(context, mealPlan.dinner!);
-                },
-                recipe: mealPlan.dinner! as MealTypeModel,
-                selectedDate: mealPlan.date,
-                selectedMealType: 'Dinner',
-                isPlan: false,
-              )
-            : _emptyState(context, 'dinner');
-        break;
+  Widget _buildEditMealRow(PlannerState state, MergedMealPlanEntity plan) {
+    if (state.mealTypeSelectedIndex == 0) {
+      if (plan.breakfast == null || plan.breakfast!.mealplanId.isEmpty) {
+        return MealActionRow(
+          selectedIndex: state.mealTypeSelectedIndex,
+          plan: plan,
+          buttonText: "Edit Meal",
+        );
+      }
+    } else if (state.mealTypeSelectedIndex == 1) {
+      if (plan.lunch == null || plan.lunch!.mealplanId.isEmpty) {
+        return MealActionRow(
+          selectedIndex: state.mealTypeSelectedIndex,
+          plan: plan,
+          buttonText: "Edit Meal",
+        );
+      }
+    } else if (state.mealTypeSelectedIndex == 2) {
+      if (plan.dinner == null || plan.dinner!.mealplanId.isEmpty) {
+        return MealActionRow(
+          selectedIndex: state.mealTypeSelectedIndex,
+          plan: plan,
+          buttonText: "Edit Meal",
+        );
+      }
     }
 
+    return const SizedBox();
+  }
+
+  Widget _buildGenerateRecipeButton() {
+    return BlocBuilder<PlannerBloc, PlannerState>(
+      builder: (_, state) {
+        if (state.mealPlans.isEmpty) {
+          return _buildGenerateButton(context, state);
+        } else {
+          final plan = state.mealPlans.first;
+          if (state.mealTypeSelectedIndex == 0 && plan.breakfast == null) {
+            return _buildGenerateButton(context, state);
+          } else if (state.mealTypeSelectedIndex == 1 && plan.lunch == null) {
+            return _buildGenerateButton(context, state);
+          } else if (state.mealTypeSelectedIndex == 2 && plan.dinner == null) {
+            return _buildGenerateButton(context, state);
+          } else {
+            return const SizedBox();
+          }
+        }
+      },
+    );
+  }
+
+  Widget _buildGenerateButton(BuildContext context, PlannerState state) {
+    final formatted = DateFormat('dd/MM/yyyy').format(state.selectedDate!);
+
     return Padding(
-      padding: gapSymmetric(horizontal: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Generated Recipe', style: theme.textTheme.headlineLarge),
-          gap(height: 12),
-          UpperTile(
-            horizontalPadding: 8,
-            verticalPadding: 8,
-            widget: child,
-            color: Color(0xffFFFBEB),
-            borderColor: const Color(0xffFFDD98),
-          ),
-        ],
+      padding: gapOnly(top: 20),
+      child: GenericButtonWidget(
+        text: "Generate Recipe",
+        onPressed: () {
+          context.pushNamed(
+            Routes.generateRecipes,
+            extra: {
+              "selected_date": formatted,
+              "selected_meal_type": mealTypes[state.mealTypeSelectedIndex],
+              "is_plan": true,
+              "is_edit": true,
+            },
+          );
+        },
       ),
     );
   }
 
-  Future<dynamic> _showDeleteDialog(BuildContext context, MealTypeEntity plan) {
+  Future<void> _showConfirmDialog(
+    BuildContext context, {
+    required String title,
+    required String subtitle,
+    required VoidCallback onConfirm,
+  }) {
     return showCustomGenericDialog(
       context: context,
-      title: "Delete Plan",
-      subtitle: "Are you sure you want to delete this plan?",
+      title: title,
+      subtitle: subtitle,
       primaryButtonText: "Yes",
       secondaryButtonText: "Cancel",
-      onPrimaryPressed: () {
-        context.read<PlannerBloc>().add(
-          DeleteMealTypeFromWeeklyPlanEvent(
-            selectedDate: plan.formatedDateString,
-            mealType: plan.mealType,
-          ),
-        );
-        AppToast.show("Item removed", ToastType.success);
-        context.pop();
-        context.pop();
-      },
-      onSecondaryPressed: () {
-        Navigator.pop(context);
-      },
-    );
-  }
-}
-
-class ActionButtons extends StatelessWidget {
-  final VoidCallback onCancel;
-  final VoidCallback onSave;
-
-  const ActionButtons({
-    super.key,
-    required this.onCancel,
-    required this.onSave,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: gapSymmetric(horizontal: 12),
-      child: Row(
-        children: [
-          Flexible(
-            child: SizedBox(
-              width: double.infinity,
-              height: h(40),
-              child: OutlinedButton(
-                onPressed: onCancel,
-                child: Text(
-                  'Cancel',
-                  style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                    fontSize: t(14),
-                    color: AppColors.primaryColor,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          SizedBox(width: h(10)),
-          Flexible(
-            child: SizedBox(
-              width: double.infinity,
-              height: h(40),
-              child: ElevatedButton(
-                onPressed: onSave,
-                child: Text(
-                  'Save Edit',
-                  style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                    fontSize: t(14),
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+      onPrimaryPressed: onConfirm,
+      onSecondaryPressed: () => context.pop(),
     );
   }
 }

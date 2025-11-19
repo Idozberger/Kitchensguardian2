@@ -1,6 +1,7 @@
 import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
 import 'package:foodkitchen/features/planner/domain/entities/meal_plan_entity.dart';
+import 'package:foodkitchen/features/planner/domain/entities/merged_meal_type_entity.dart';
 
 sealed class PlannerEvent {}
 
@@ -32,7 +33,8 @@ final class AddToWeeklyPlanEvent extends PlannerEvent {
 
 final class GetAllWeeklyPlansEvent extends PlannerEvent {
   final String kitchenId;
-  GetAllWeeklyPlansEvent(this.kitchenId);
+  final String? date;
+  GetAllWeeklyPlansEvent(this.kitchenId, this.date);
 }
 
 final class DeletePlanEvent extends PlannerEvent {
@@ -113,7 +115,13 @@ final class CreatePlanEvent extends PlannerEvent {
 
 final class DeletePlanFromRemoteDbEvent extends PlannerEvent {
   final String mealPlanId;
-  DeletePlanFromRemoteDbEvent({required this.mealPlanId});
+  final String? date;
+  final String? kitchenId;
+  DeletePlanFromRemoteDbEvent({
+    required this.mealPlanId,
+    this.date,
+    this.kitchenId,
+  });
 }
 
 final class UpdateMealPlanEvent extends PlannerEvent {
@@ -134,4 +142,10 @@ final class GetMealByDateEvent extends PlannerEvent {
   final String kitchenId;
 
   GetMealByDateEvent({required this.kitchenId, required this.date});
+}
+
+final class EditMealEvent extends PlannerEvent {
+  final MergedMealPlanEntity mergedPlans;
+
+  EditMealEvent({required this.mergedPlans});
 }

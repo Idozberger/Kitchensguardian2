@@ -33,6 +33,8 @@ abstract interface class PlannerRepository {
   });
   Future<Either<Failure, String>> deletePlanFromRemoteDb({
     required String mealPlanId,
+    required String kitchenId,
+    required String date,
   });
   Future<Either<Failure, String>> updateMealPlan({
     required String mealPlanId,

@@ -1,11 +1,12 @@
 // ignore_for_file: use_build_context_synchronously
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';
 import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
-import 'dart:convert';
 import 'dart:typed_data';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
@@ -46,7 +47,7 @@ class _MyPantryPageState extends State<MyPantryPage> {
 
   void getPantryItems() async {
     bool hasPermission = await NotificationService().isExactAlarmAllowed();
-    if (!hasPermission) {
+    if (!hasPermission && Platform.isAndroid) {
       showCustomGenericDialog(
         context: context,
         title: "Exact Alarm Permission Needed",

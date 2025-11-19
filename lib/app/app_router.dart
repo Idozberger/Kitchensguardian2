@@ -123,12 +123,9 @@ final GoRouter router = GoRouter(
     ),
     GoRoute(path: Routes.addMeal, builder: (context, state) => AddMealPage()),
     GoRoute(
-      name: Routes.editMeal,
       path: Routes.editMeal,
       builder: (context, state) {
-        final MergedMealPlanEntity mergedMealPlanEntity =
-            state.extra as MergedMealPlanEntity;
-        return EditMealPage(mergedMealPlanEntity: mergedMealPlanEntity);
+        return EditMealPage();
       },
     ),
     GoRoute(
@@ -142,6 +139,7 @@ final GoRouter router = GoRouter(
             selectedDate: data["selected_date"],
             selectedMealType: data["selected_meal_type"],
             isPlan: data["is_plan"],
+            isEdit: data["is_edit"],
           ),
         );
       },
@@ -154,10 +152,12 @@ final GoRouter router = GoRouter(
         final Map<String, dynamic> data = state.extra as Map<String, dynamic>;
         MealTypeEntity mealTypeEntity = data["meal_type_entity"];
         bool isPlan = data["is_plan"];
+        bool isEdit = data["is_edit"];
 
         return RecipesDetailsPage(
           mealTypeEntity: mealTypeEntity,
           isPlan: isPlan,
+          isEdit: isEdit,
         );
       },
     ),

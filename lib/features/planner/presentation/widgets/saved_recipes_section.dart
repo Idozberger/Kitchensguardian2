@@ -10,6 +10,7 @@ class SavedRecipesSection extends StatelessWidget {
   final String selectedDate;
   final String selectedMealType;
   final bool isPlan;
+  final bool isEdit;
 
   const SavedRecipesSection({
     super.key,
@@ -17,6 +18,7 @@ class SavedRecipesSection extends StatelessWidget {
     required this.selectedDate,
     required this.selectedMealType,
     required this.isPlan,
+    required this.isEdit,
   });
 
   @override
@@ -57,6 +59,7 @@ class SavedRecipesSection extends StatelessWidget {
             itemBuilder: (_, index) {
               final recipe = state.favouriteRecipes![index];
               return RecipeTileItem(
+                isEdit: isEdit,
                 recipe: recipe as MealTypeModel,
                 selectedDate: selectedDate,
                 selectedMealType: selectedMealType,

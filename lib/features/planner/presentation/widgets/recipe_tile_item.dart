@@ -14,6 +14,7 @@ class RecipeTileItem extends StatelessWidget {
   final String selectedDate;
   final String? selectedMealType;
   final bool isPlan;
+  final bool isEdit;
   final bool isDeletedIcon;
   final String svgAsset;
 
@@ -26,6 +27,7 @@ class RecipeTileItem extends StatelessWidget {
     required this.isPlan,
     this.svgAsset = "",
     this.isDeletedIcon = false,
+    required this.isEdit,
 
     this.deleteCallback,
   });
@@ -39,7 +41,11 @@ class RecipeTileItem extends StatelessWidget {
 
       context.pushNamed(
         Routes.generateRecipesDetails,
-        extra: {"meal_type_entity": updatedRecipe, "is_plan": isPlan},
+        extra: {
+          "meal_type_entity": updatedRecipe,
+          "is_plan": isPlan,
+          "is_edit": isEdit,
+        },
       );
     } else {
       AppToast.show(

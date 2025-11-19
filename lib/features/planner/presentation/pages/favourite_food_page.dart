@@ -86,6 +86,7 @@ class _FavouriteFoodPageState extends State<FavouriteFoodPage> {
                                         extra: {
                                           "meal_type_entity": recipe,
                                           "is_plan": false,
+                                          "is_edit": false,
                                         },
                                       );
                                     },
@@ -104,6 +105,7 @@ class _FavouriteFoodPageState extends State<FavouriteFoodPage> {
                                         extra: {
                                           "meal_type_entity": recipe,
                                           "is_plan": false,
+                                          "is_edit": false,
                                         },
                                       );
                                     },
@@ -133,6 +135,7 @@ class _FavouriteFoodPageState extends State<FavouriteFoodPage> {
                     "selected_date": formatedDateString,
                     "selected_meal_type": "",
                     "is_plan": false,
+                    "is_edit": false,
                   },
                 );
               },

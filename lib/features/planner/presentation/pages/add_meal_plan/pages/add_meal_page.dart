@@ -199,6 +199,7 @@ class _AddMealPageState extends State<AddMealPage>
     return Column(
       children: [
         GeneratedRecipeSection(
+          isEdit: false,
           date: formattedDate,
           mealPlan: plan,
           selectedIndex: state.mealTypeSelectedIndex,
@@ -244,6 +245,7 @@ class _AddMealPageState extends State<AddMealPage>
               "selected_date": formatted,
               "selected_meal_type": mealTypes[state.mealTypeSelectedIndex],
               "is_plan": true,
+              "is_edit": false,
             },
           );
         },

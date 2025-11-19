@@ -9,6 +9,7 @@ import 'package:foodkitchen/features/dashboard/domain/usecases/make_cohost.dart'
 import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_event.dart';
 import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_state.dart';
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_bloc.dart';
+import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_event.dart';
 import 'package:intl/intl.dart';
 
 class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
@@ -150,7 +151,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       "Your request to join the kitchen \"$kitchenName\" has been approved by the host. You are now added to the kitchen. You can access it anytime using this invitation code: $inviteCode",
     );
 
-    // _kitchenBloc.add(MemberApprovedEvent(inviteCode));
+    _kitchenBloc.add(MemberApprovedEvent(inviteCode));
     await FirebaseFirestore.instance
         .collection('notifications')
         .add(notificationData);
@@ -220,7 +221,6 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       "Your request to join the kitchen \"$kitchenName\" has been declined by the host. You can try again later or contact the host for more details.",
     );
 
-    // _kitchenBloc.add(MemberApprovedEvent(inviteCode));
     await FirebaseFirestore.instance
         .collection('notifications')
         .add(notificationData);

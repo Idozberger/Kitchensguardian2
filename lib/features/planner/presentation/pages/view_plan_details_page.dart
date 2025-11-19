@@ -46,6 +46,7 @@ class ViewPlanDetailsPage extends StatelessWidget {
                           gap(height: 12),
                           UpperTile(
                             widget: RecipeTileItem(
+                              isEdit: false,
                               recipe:
                                   mergedMealPlanEntity.breakfast
                                       as MealTypeModel,
@@ -64,6 +65,7 @@ class ViewPlanDetailsPage extends StatelessWidget {
                           gap(height: 12),
                           UpperTile(
                             widget: RecipeTileItem(
+                              isEdit: false,
                               recipe:
                                   mergedMealPlanEntity.lunch as MealTypeModel,
                               selectedDate: mergedMealPlanEntity.date,
@@ -81,6 +83,7 @@ class ViewPlanDetailsPage extends StatelessWidget {
                           gap(height: 12),
                           UpperTile(
                             widget: RecipeTileItem(
+                              isEdit: false,
                               recipe:
                                   mergedMealPlanEntity.dinner as MealTypeModel,
                               selectedDate: mergedMealPlanEntity.date,

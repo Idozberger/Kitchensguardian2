@@ -27,11 +27,13 @@ import 'widgets/bottom_nav_recipe_details.dart';
 class RecipesDetailsPage extends StatefulWidget {
   final MealTypeEntity mealTypeEntity;
   final bool isPlan;
+  final bool isEdit;
 
   const RecipesDetailsPage({
     super.key,
     required this.mealTypeEntity,
     required this.isPlan,
+    required this.isEdit,
   });
 
   @override
@@ -154,6 +156,13 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
       },
       onFinish: () {
         plannerBloc.add(
+          UpdateStartRecipeEvent(
+            startRecipe: false,
+            mealTypeEntity: [],
+            doneSteps: [],
+          ),
+        );
+        plannerBloc.add(
           MarkRecipeFinishedEvent(
             kitchenId: context.read<UserCubit>().state.activeKitchenId,
             recipeId: recipe.id,
@@ -214,26 +223,22 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
       (plan) => plan.date == recipe.formatedDateString,
     );
 
-    if (alreadyPlanned || existingPlans.length < 3) {
-      setState(() {
-        addPlanDummyLoading = true;
-      });
-      plannerBloc.add(
-        AddMealPlanEvent(
-          date: widget.mealTypeEntity.formatedDateString,
-          kitchenId: context.read<UserCubit>().state.activeKitchenId,
-          mealPlan: recipe,
-        ),
-      );
-      await Future.delayed(Duration(seconds: 1));
-      // ignore: use_build_context_synchronously
-      context.push(Routes.addMeal);
+    setState(() {
+      addPlanDummyLoading = true;
+    });
+    plannerBloc.add(
+      AddMealPlanEvent(
+        date: widget.mealTypeEntity.formatedDateString,
+        kitchenId: context.read<UserCubit>().state.activeKitchenId,
+        mealPlan: recipe,
+      ),
+    );
+    await Future.delayed(Duration(seconds: 1));
+
+    if (widget.isEdit) {
+      context.push(Routes.editMeal);
     } else {
-      AppToast.show(
-        "You can only create plans for 3 days in advance.",
-        ToastType.error,
-      );
-      context.push(Routes.subscription);
+      context.push(Routes.addMeal);
     }
   }
 

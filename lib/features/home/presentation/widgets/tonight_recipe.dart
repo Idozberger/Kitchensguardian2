@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -40,12 +42,15 @@ class _TonightRecipeWidgetState extends State<TonightRecipeWidget> {
   Widget build(BuildContext context) {
     return BlocBuilder<HomeBloc, HomeState>(
       builder: (_, state) {
-        final todayFormatted = formatDate(DateTime.now());
-        final todayRecipes = state.dateBasedPlan
-            .where((recipe) => recipe.formatedDateString == todayFormatted)
-            .toList();
+        final todayFormatted = formatDateToMeetBackendDate(DateTime.now());
+        log("TODAY DATE HOME VIEW: $todayFormatted");
+        log("TODAY DATE HOME VIEW: $todayFormatted");
 
-        // Define meal order
+        final todayRecipes = state.dateBasedPlan.where((recipe) {
+          log("TODAY DATE HOME VIEW: ${recipe.date} == $todayFormatted");
+          return recipe.date == todayFormatted;
+        }).toList();
+        log("TODAY DATE HOME VIEW: $todayRecipes");
         const mealOrder = ["Breakfast", "Lunch", "Dinner"];
 
         todayRecipes.sort((a, b) {
@@ -122,6 +127,7 @@ class _TonightRecipeWidgetState extends State<TonightRecipeWidget> {
                                 extra: {
                                   "meal_type_entity": recipe,
                                   "is_plan": false,
+                                  "is_edit": false,
                                 },
                               );
                             },

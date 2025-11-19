@@ -94,6 +94,7 @@ class KitchenHomeView extends StatelessWidget {
                     "selected_date": date,
                     "selected_meal_type": "Breakfast",
                     "is_plan": false,
+                    "is_edit": false,
                   },
                 );
               },

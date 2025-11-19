@@ -7,6 +7,7 @@ import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 Future<dynamic> showCustomGenericDialog({
   required BuildContext context,
   required String title,
+  bool isloading = false,
   required String subtitle,
   required String primaryButtonText,
   required String secondaryButtonText,
@@ -64,6 +65,7 @@ Future<dynamic> showCustomGenericDialog({
                 SizedBox(width: h(10)),
                 Flexible(
                   child: GenericButtonWidget(
+                    isLoading: isloading,
                     onPressed: onSecondaryPressed,
                     text: secondaryButtonText,
                   ),
