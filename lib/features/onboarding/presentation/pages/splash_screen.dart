@@ -11,6 +11,8 @@ import 'package:foodkitchen/core/global/functions/const.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/utils/date_format_to_string.dart';
 import 'package:foodkitchen/features/onboarding/presentation/bloc/user_bloc.dart';
+import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
+import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -35,6 +37,7 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
     userBloc = context.read<UserBloc>();
     userCubit = context.read<UserCubit>();
+
     getCurrentUser();
     visibleLetters = List.filled(fullText.length, false);
     _startTextAnimation();
@@ -179,34 +182,14 @@ class _SplashScreenState extends State<SplashScreen> {
     );
 
     final sharedPreferences = await SharedPreferences.getInstance();
+    final getEndDate = sharedPreferences.getString("end-date");
+    if (getEndDate != null) {
+      DateTime endDate = parseDate(getEndDate);
 
-    String? endTime = sharedPreferences.getString("end-date");
-    debugPrint("Fetched end-time from prefs: $endTime");
-
-    if (endTime != null) {
-      DateTime endDateTime = parseDate(endTime);
-
-      final endDateInDaysMonthYear = DateTime(
-        endDateTime.year,
-        endDateTime.month,
-        endDateTime.day,
-      );
-
-      if (endDateInDaysMonthYear.isBefore(today)) {
-        debugPrint("End date reached! Resetting start and end dates...");
-
+      if (today.isAfter(endDate)) {
         sharedPreferences.setString("start-date", formatDate(today));
-        debugPrint("Start date updated to today: ${formatDate(today)}");
-
-        if (AppConstants.entitlementIsActive == false) {
-          final newEndDate = formatDate(DateTime.now().add(Duration(days: 2)));
-          sharedPreferences.setString("end-date", newEndDate);
-          debugPrint("Free user — new end-date set to: $newEndDate");
-        } else {
-          final newEndDate = formatDate(DateTime.now().add(Duration(days: 6)));
-          sharedPreferences.setString("end-date", newEndDate);
-          debugPrint("Premium user — new end-date set to: $newEndDate");
-        }
+        final endDate = today.add(Duration(days: 3));
+        sharedPreferences.setString("end-date", formatDate(endDate));
       }
     }
   }

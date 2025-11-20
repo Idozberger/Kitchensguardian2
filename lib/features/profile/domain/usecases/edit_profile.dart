@@ -12,6 +12,7 @@ class EditProfile implements UseCase<String, EditProfileParams> {
     return await profileRepository.editProfile(
       firstName: params.firstName,
       lastName: params.lastName,
+      thumbnail: params.thumbnail,
     );
   }
 }
@@ -19,5 +20,10 @@ class EditProfile implements UseCase<String, EditProfileParams> {
 class EditProfileParams {
   final String firstName;
   final String lastName;
-  EditProfileParams({required this.firstName, required this.lastName});
+  final String thumbnail;
+  EditProfileParams({
+    required this.firstName,
+    required this.lastName,
+    required this.thumbnail,
+  });
 }

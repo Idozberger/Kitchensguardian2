@@ -81,7 +81,11 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     emit(state.copyWith(isLoading: true, errorMessage: null));
 
     final result = await _editProfile(
-      EditProfileParams(firstName: event.firstName, lastName: event.lastName),
+      EditProfileParams(
+        firstName: event.firstName,
+        lastName: event.lastName,
+        thumbnail: event.thumbnail,
+      ),
     );
     result.fold(
       (failure) =>

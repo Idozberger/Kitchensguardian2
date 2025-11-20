@@ -42,11 +42,13 @@ class ProfileRepositoryImpl implements ProfileRepository {
   Future<Either<Failure, String>> editProfile({
     required String firstName,
     required String lastName,
+    required String thumbnail,
   }) async {
     try {
       String? result = await profileRemoteDatasource.editProfile(
         firstName: firstName,
         lastName: lastName,
+        thumbnail: thumbnail,
       );
 
       return Right(result);

@@ -1,7 +1,7 @@
 import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/features/grocery/data/datasource/grocery_remote_datasource.dart';
-import 'package:foodkitchen/features/grocery/data/models/requested_items_model.dart';
-import 'package:foodkitchen/features/grocery/domain/entities/requested_item.dart';
+import 'package:foodkitchen/core/common/data/model/requested_items_model.dart';
+import 'package:foodkitchen/core/common/domain/entities/requested_item.dart';
 import 'package:foodkitchen/features/grocery/domain/repository/grocery_repository.dart';
 import 'package:fpdart/fpdart.dart';
 

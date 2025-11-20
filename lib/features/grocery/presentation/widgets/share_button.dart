@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
-import 'package:foodkitchen/features/grocery/domain/entities/requested_item.dart';
+import 'package:foodkitchen/core/common/domain/entities/requested_item.dart';
 import 'package:share_plus/share_plus.dart';
 
 class ShareButton extends StatelessWidget {

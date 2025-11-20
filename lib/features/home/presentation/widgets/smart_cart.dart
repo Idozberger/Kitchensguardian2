@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
+import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
@@ -10,6 +11,7 @@ import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/rounded_text_container.dart';
+import 'package:go_router/go_router.dart';
 
 class SmartCartTile extends StatelessWidget {
   final bool isGenerated;
@@ -33,8 +35,8 @@ class SmartCartTile extends StatelessWidget {
         children: [
           _header(context),
           gap(height: 8),
-          Visibility(visible: isGenerated, child: _preview(context)),
 
+          Visibility(visible: isGenerated, child: _preview(context)),
           Visibility(visible: isGenerated == false, child: _noItems(context)),
           gap(height: 12),
           GenericButtonWidget(
@@ -70,21 +72,30 @@ class SmartCartTile extends StatelessWidget {
         ),
       ),
       gap(height: 12),
-      Row(
+      Wrap(
+        spacing: 6,
+        runSpacing: 6,
         children: [
           for (final item in previewItems)
-            Padding(
-              padding: gapOnly(right: 6),
-              child: RoundedTextContainer(
-                text: item,
-                fontWeight: FontWeight.w500,
+            IntrinsicWidth(
+              child: Padding(
+                padding: gapOnly(right: 6),
+                child: RoundedTextContainer(
+                  text: item,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
         ],
       ),
       gap(height: 12),
       if (infoText != null)
-        IntrinsicWidth(child: RoundedTextContainer(text: infoText!)),
+        IntrinsicWidth(
+          child: InkWell(
+            onTap: () => context.push(Routes.smartCart),
+            child: RoundedTextContainer(text: infoText!),
+          ),
+        ),
     ],
   );
 

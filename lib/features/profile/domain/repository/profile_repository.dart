@@ -7,6 +7,7 @@ abstract interface class ProfileRepository {
   Future<Either<Failure, String>> editProfile({
     required String firstName,
     required String lastName,
+    required String thumbnail,
   });
   Future<Either<Failure, String>> chnagePassword({
     required String currentPassword,

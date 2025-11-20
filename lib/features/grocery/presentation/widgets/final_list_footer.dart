@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
-import 'package:foodkitchen/features/grocery/domain/entities/requested_item.dart';
+import 'package:foodkitchen/core/common/domain/entities/requested_item.dart';
 import 'package:foodkitchen/features/grocery/presentation/widgets/remove_all_button.dart';
 import 'package:foodkitchen/features/grocery/presentation/widgets/share_button.dart';
 

@@ -132,12 +132,11 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
       GetAllPlansParams(kitchenId: event.kitchenId),
     );
 
-    res.fold(
+    await res.fold(
       (failure) {
         emit(state.copyWith(errorMessage: failure.message, isLoading: false));
       },
-      (getAllWeeklyPlans) {
-        log("DATE ${event.date}");
+      (getAllWeeklyPlans) async {
         List<MergedMealPlanEntity> mergedMealPlanEntities =
             mergeMealPlansByDate(getAllWeeklyPlans);
 
@@ -147,7 +146,12 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
             isLoading: false,
           ),
         );
-
+        String? startDate = await getStartDate(getAllWeeklyPlans);
+        emit(
+          state.copyWith(
+            startDate: startDate ?? formatDateToMeetBackendDate(DateTime.now()),
+          ),
+        );
         if (event.date == null) {
           add(GetDateBasedPlans(getAllWeeklyPlans[0].date));
         } else {
@@ -155,6 +159,27 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
         }
       },
     );
+  }
+
+  Future<String?> getStartDate(final plans) async {
+    final allPlans = plans;
+
+    if (allPlans.isNotEmpty) {
+      log(allPlans.toString());
+      List<DateTime> dateList = [];
+
+      for (var i = 0; i < allPlans.length; i++) {
+        DateTime planDate = DateTime.parse(allPlans[i].date);
+        dateList.add(planDate);
+        log(planDate.toString());
+      }
+
+      DateTime smallestDate = dateList.reduce((a, b) => a.isBefore(b) ? a : b);
+
+      return smallestDate.toIso8601String();
+    }
+
+    return null;
   }
 
   Future<void> _onGetMealByDate(
@@ -392,15 +417,8 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
         }
         emit(state.copyWith(successMessage: successMessage));
         add(GetAllWeeklyPlansEvent(_userCubit.state.activeKitchenId, null));
-        final startDate = await getStartDate();
-        add(GetDateBasedPlans(startDate ?? formatDate(DateTime.now())));
       },
     );
-  }
-
-  Future<String?> getStartDate() async {
-    final sharedPreferences = await SharedPreferences.getInstance();
-    return sharedPreferences.getString("start-date");
   }
 
   List<MergedMealPlanEntity> mergeMealPlansByDate(List<MealTypeEntity> meals) {

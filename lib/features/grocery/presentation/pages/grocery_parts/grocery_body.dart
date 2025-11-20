@@ -8,7 +8,7 @@ import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
-import 'package:foodkitchen/features/grocery/domain/entities/requested_item.dart';
+import 'package:foodkitchen/core/common/domain/entities/requested_item.dart';
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_event.dart';
 import 'package:foodkitchen/features/grocery/presentation/pages/grocery_parts/grocery_list_item.dart';
 import 'package:foodkitchen/features/grocery/presentation/widgets/category_tabs.dart';

@@ -17,6 +17,7 @@ import 'package:foodkitchen/features/dashboard/presentation/pages/notification_p
 import 'package:foodkitchen/features/dashboard/presentation/pages/referral_code_page.dart';
 import 'package:foodkitchen/features/grocery/presentation/pages/add_custom_items_page.dart';
 import 'package:foodkitchen/features/history/presentation/pages/scan_history_page.dart';
+import 'package:foodkitchen/features/home/presentation/pages/grocery_list_page.dart';
 import 'package:foodkitchen/features/kitchens/presentation/pages/invite_member_page.dart';
 import 'package:foodkitchen/features/kitchens/presentation/pages/kitchen_page.dart';
 import 'package:foodkitchen/features/onboarding/presentation/pages/intro_page.dart';
@@ -226,6 +227,10 @@ final GoRouter router = GoRouter(
         key: state.pageKey,
         child: AllPantryStoragePage(),
       ),
+    ),
+    GoRoute(
+      path: Routes.smartCart,
+      builder: (context, state) => SmartCartPage(),
     ),
   ],
 );

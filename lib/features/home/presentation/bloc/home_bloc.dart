@@ -3,11 +3,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
-import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
-import 'package:foodkitchen/core/common/domain/usecase/get_current_user.dart';
 import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/core/services/fcm/fcm_service.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
+import 'package:foodkitchen/features/grocery/domain/usecases/get_requested_items.dart';
 import 'package:foodkitchen/features/home/domain/entities/kitchen.dart';
 import 'package:foodkitchen/features/home/domain/usecases/create_kitchen_usecase.dart';
 import 'package:foodkitchen/features/home/domain/usecases/get_all_weekly_plans_usecase.dart';
@@ -15,8 +14,6 @@ import 'package:foodkitchen/features/home/domain/usecases/get_pantries_usecase.d
 import 'package:foodkitchen/features/home/domain/usecases/join_kitchen_usecase.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_event.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_state.dart';
-import 'package:foodkitchen/features/planner/data/models/merged_meal_plan_model.dart';
-import 'package:foodkitchen/features/planner/domain/entities/merged_meal_type_entity.dart';
 import 'package:intl/intl.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
@@ -46,6 +43,29 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<GetAllWeeklyPlansEventForHome>(_onGetAllWeeklyPlans);
     on<ResetHomeStateEvent>(_onResetHomeState);
     on<GetUserStorageAreaEvent>(_onGetUserStorageArea);
+    on<GenerateGroceryList>(_onGetGenerateGroceryList);
+  }
+  Future<void> _onGetGenerateGroceryList(
+    GenerateGroceryList event,
+    Emitter<HomeState> emit,
+  ) async {
+    final getAllWeeklyPlans = state.dateBasedPlan;
+
+    List<String> missingIngredientNames = [];
+    for (var meal = 0; meal < getAllWeeklyPlans.length; meal++) {
+      for (
+        var ingredient = 0;
+        ingredient < getAllWeeklyPlans[meal].ingredients.length;
+        ingredient++
+      ) {
+        missingIngredientNames.add(
+          getAllWeeklyPlans[meal].ingredients[ingredient].name,
+        );
+        logError(getAllWeeklyPlans[meal].ingredients[ingredient].name);
+      }
+    }
+
+    emit(state.copyWith(groceryList: missingIngredientNames));
   }
 
   Future<void> _onCreateKitchenEvent(

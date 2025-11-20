@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
@@ -37,38 +39,20 @@ class _PlannerPageState extends State<PlannerPage> {
 
   late final PlannerBloc _plannerBloc;
   late final UserCubit _userCubit;
-  late DateTime _selectedDate;
+  DateTime? _selectedDate;
 
   @override
   void initState() {
     super.initState();
     _plannerBloc = context.read<PlannerBloc>();
     _userCubit = context.read<UserCubit>();
-
     _fetchInitialPlans();
   }
 
-  Future<String?> getStartDate() async {
-    final sharedPreferences = await SharedPreferences.getInstance();
-    return sharedPreferences.getString("start-date");
-  }
-
   void _fetchInitialPlans() async {
-    var startDate = await getStartDate();
-    localDbPlanStartTime = startDate;
-    if (startDate != null) {
-      _selectedDate = parseDate(startDate);
-    } else {
-      _selectedDate = DateTime.now();
-    }
-    final formattedDate = formatDateToMeetBackendDate(_selectedDate);
-
     _plannerBloc.add(
-      GetAllWeeklyPlansEvent(_userCubit.state.activeKitchenId, formattedDate),
+      GetAllWeeklyPlansEvent(_userCubit.state.activeKitchenId, null),
     );
-    setState(() {
-      isLoading = false;
-    });
   }
 
   String formatDate(String inputDate) {
@@ -229,6 +213,10 @@ class _PlannerPageState extends State<PlannerPage> {
                       builder: (_, state) {
                         final plan = state.dateBasedPlan;
 
+                        _selectedDate ??= formatStringDateToMeetBackendDate(
+                          state.startDate!,
+                        );
+
                         return SingleChildScrollView(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -244,7 +232,11 @@ class _PlannerPageState extends State<PlannerPage> {
                                 SelectDateWidget(
                                   entitlementIsActive:
                                       AppConstants.entitlementIsActive,
-                                  startDate: _selectedDate,
+                                  startDate:
+                                      _selectedDate ??
+                                      formatStringDateToMeetBackendDate(
+                                        state.startDate!,
+                                      ),
                                   onChanged: (date) {
                                     setState(() => _selectedDate = date);
                                     _plannerBloc.add(
@@ -258,7 +250,7 @@ class _PlannerPageState extends State<PlannerPage> {
                                 if (plan.isNotEmpty &&
                                     plan[0].date ==
                                         formatDateToMeetBackendDate(
-                                          _selectedDate,
+                                          _selectedDate!,
                                         ))
                                   _buildPlanSection(plan[0])
                                 else

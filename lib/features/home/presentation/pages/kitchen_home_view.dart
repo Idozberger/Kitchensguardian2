@@ -4,8 +4,6 @@ import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
-import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
-import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_state.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/action_tile.dart';
@@ -29,13 +27,6 @@ class KitchenHomeView extends StatelessWidget {
     required this.isGeneratedRecipes,
     required this.onGeneratePressed,
   });
-  static const List<String> demoIngredients = [
-    "Tomatoes",
-    "Olive Oil",
-    "Garlic",
-    "Onions",
-    "Cheese",
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -101,11 +92,11 @@ class KitchenHomeView extends StatelessWidget {
             ),
             gap(height: 14),
             SmartCartTile(
-              infoText: demoIngredients.length > 3
-                  ? "+${demoIngredients.length - 3} more"
+              infoText: state.groceryList.length > 3
+                  ? "+${state.groceryList.length - 3} tap to see more"
                   : null,
               isGenerated: isGeneratedRecipes,
-              previewItems: demoIngredients.take(3).toList(),
+              previewItems: state.groceryList.take(3).toList(),
               onGenerate: onGeneratePressed,
             ),
             gap(height: 14),

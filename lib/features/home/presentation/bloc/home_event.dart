@@ -23,3 +23,5 @@ final class GetUserStorageAreaEvent extends HomeEvent {
   final String kitchenId;
   GetUserStorageAreaEvent(this.kitchenId);
 }
+
+final class GenerateGroceryList extends HomeEvent {}

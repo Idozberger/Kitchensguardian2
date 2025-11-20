@@ -8,6 +8,7 @@ abstract class ProfileRemoteDatasource {
   Future<String> editProfile({
     required String firstName,
     required String lastName,
+    required String thumbnail,
   });
   Future<String> changePassword({
     required String currentPassword,
@@ -22,11 +23,16 @@ class ProfileRemoteDatasourceImpl implements ProfileRemoteDatasource {
   Future<String> editProfile({
     required String firstName,
     required String lastName,
+    required String thumbnail,
   }) async {
     try {
       final response = await dio.post(
         AppConstants.editUser,
-        data: {"first_name": firstName, "last_name": lastName},
+        data: {
+          "first_name": firstName,
+          "last_name": lastName,
+          "avatar": thumbnail,
+        },
       );
       if (response.statusCode != 200 && response.statusCode != 201) {
         final data = response.data is String

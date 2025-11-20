@@ -1,4 +1,4 @@
-import 'package:foodkitchen/features/grocery/domain/entities/requested_item.dart';
+import 'package:foodkitchen/core/common/domain/entities/requested_item.dart';
 
 class RequestedItemModel extends RequestedItemEntity {
   RequestedItemModel({

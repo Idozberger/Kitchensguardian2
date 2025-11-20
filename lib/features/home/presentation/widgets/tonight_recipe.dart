@@ -43,15 +43,11 @@ class _TonightRecipeWidgetState extends State<TonightRecipeWidget> {
     return BlocBuilder<HomeBloc, HomeState>(
       builder: (_, state) {
         final todayFormatted = formatDateToMeetBackendDate(DateTime.now());
-        log("TODAY DATE HOME VIEW: $todayFormatted");
-        log("TODAY DATE HOME VIEW: $todayFormatted");
 
         final todayRecipes = state.dateBasedPlan.where((recipe) {
-          log("TODAY DATE HOME VIEW: ${recipe.date} == $todayFormatted");
           return recipe.date == todayFormatted;
         }).toList();
-        log("TODAY DATE HOME VIEW: $todayRecipes");
-        const mealOrder = ["Breakfast", "Lunch", "Dinner"];
+        const mealOrder = ["breakfast", "lunch", "dinner"];
 
         todayRecipes.sort((a, b) {
           final aIndex = mealOrder.indexOf(a.mealType);
@@ -120,7 +116,7 @@ class _TonightRecipeWidgetState extends State<TonightRecipeWidget> {
                             mealType: recipe.mealType,
                             title: recipe.title,
                             description: recipe.recipeShortSummary,
-                            imagePath: AppAssets.onBoardingSliderBg01,
+                            imageBytes: recipe.thumbnail,
                             onTap: () {
                               context.pushNamed(
                                 Routes.generateRecipesDetails,

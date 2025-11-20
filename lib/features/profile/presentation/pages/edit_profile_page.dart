@@ -1,7 +1,12 @@
 // ignore_for_file: deprecated_member_use
 
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
@@ -31,7 +36,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   late UserCubit userCubit;
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
-
+  Uint8List? imageBytes;
   @override
   void initState() {
     profileBloc = context.read<ProfileBloc>();
@@ -51,7 +56,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Future<void> _pickImage() async {
     final image = await ImagePickerService.pickFromGallery(context);
     if (image != null) {
-      profileBloc.add(UpdateProfilePicture(image.path));
+      imageBytes = image.readAsBytesSync();
+      setState(() {});
+      // profileBloc.add(UpdateProfilePicture(image.path));
     }
   }
 
@@ -71,7 +78,38 @@ class _EditProfilePageState extends State<EditProfilePage> {
       return;
     }
 
-    profileBloc.add(EditProfileEvent(firstName: firstName, lastName: lastName));
+    String? base64Thumbnail;
+
+    if (imageBytes != null) {
+      base64Thumbnail = await compressImage(imageBytes!);
+    } else {
+      AppToast.show("Please select a profile picture", ToastType.error);
+      return;
+    }
+
+    profileBloc.add(
+      EditProfileEvent(
+        firstName: firstName,
+        lastName: lastName,
+        thumbnail: base64Thumbnail,
+      ),
+    );
+  }
+
+  Future<String> compressImage(Uint8List bytes) async {
+    final result = await FlutterImageCompress.compressWithList(
+      bytes,
+      minWidth: 800,
+      minHeight: 600,
+      quality: 15,
+      rotate: 0,
+      autoCorrectionAngle: true,
+      format: CompressFormat.jpeg,
+      keepExif: false,
+    );
+
+    String base64Thumbnail = base64Encode(result);
+    return "data:image/jpeg;base64,$base64Thumbnail";
   }
 
   String? _validateName(String name, String fieldName) {

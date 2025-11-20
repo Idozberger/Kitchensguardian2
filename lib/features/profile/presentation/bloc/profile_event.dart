@@ -20,9 +20,14 @@ class UpdateProfilePicture extends ProfileEvent {
 
 class EditProfileEvent extends ProfileEvent {
   final String firstName;
+  final String thumbnail;
   final String lastName;
 
-  const EditProfileEvent({required this.firstName, required this.lastName});
+  const EditProfileEvent({
+    required this.firstName,
+    required this.lastName,
+    required this.thumbnail,
+  });
 }
 
 class ChangePasswordEvent extends ProfileEvent {

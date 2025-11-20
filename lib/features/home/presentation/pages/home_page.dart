@@ -101,8 +101,10 @@ class _HomePageState extends State<HomePage> {
                       KitchenHomeView(
                         state: state,
                         isGeneratedRecipes: isGeneratedRecipes,
-                        onGeneratePressed: () =>
-                            setState(() => isGeneratedRecipes = true),
+                        onGeneratePressed: () {
+                          homeBloc.add(GenerateGroceryList());
+                          setState(() => isGeneratedRecipes = true);
+                        },
                       ),
                     ],
                   );

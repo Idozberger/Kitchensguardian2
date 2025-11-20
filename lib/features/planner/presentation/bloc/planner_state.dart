@@ -10,6 +10,7 @@ final class PlannerState {
   final List<Map<String, dynamic>> doneSteps;
   final List<MergedMealPlanEntity> mealPlans;
   final List<MergedMealPlanEntity> editMealsPlans;
+  final String? startDate;
   final bool isLoading;
   final bool addingToWeeklyPlan;
   final bool startRecipe;
@@ -35,6 +36,7 @@ final class PlannerState {
     this.doneSteps = const [],
     this.mealTypeSelectedIndex = 0,
     this.selectedDate,
+    this.startDate,
   });
 
   PlannerState copyWith({
@@ -54,6 +56,7 @@ final class PlannerState {
     List<Map<String, dynamic>>? doneSteps,
     int? mealTypeSelectedIndex,
     DateTime? selectedDate,
+    String? startDate,
   }) {
     return PlannerState(
       recipes: recipes ?? this.recipes,
@@ -73,6 +76,7 @@ final class PlannerState {
           mealTypeSelectedIndex ?? this.mealTypeSelectedIndex,
       selectedDate: selectedDate ?? this.selectedDate,
       editMealsPlans: editMealsPlans ?? this.editMealsPlans,
+      startDate: startDate ?? this.startDate,
     );
   }
 }

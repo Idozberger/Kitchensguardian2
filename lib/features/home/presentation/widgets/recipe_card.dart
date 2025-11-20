@@ -1,5 +1,7 @@
 // ignore_for_file: deprecated_member_use
 
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
@@ -12,7 +14,7 @@ class RecipeCard extends StatelessWidget {
   final double height;
   final String title;
   final String description;
-  final String imagePath;
+  final Uint8List? imageBytes;
   final VoidCallback onTap;
   final bool isTodayPlan;
   final String? mealType;
@@ -20,7 +22,7 @@ class RecipeCard extends StatelessWidget {
     super.key,
     required this.title,
     required this.description,
-    required this.imagePath,
+    required this.imageBytes,
     this.width = 258,
     this.height = 144,
     required this.onTap,
@@ -43,7 +45,10 @@ class RecipeCard extends StatelessWidget {
               color: Colors.white,
               borderRadius: BorderRadius.circular(h(10)),
               image: DecorationImage(
-                image: AssetImage(imagePath),
+                image: imageBytes != null
+                    ? MemoryImage(imageBytes!)
+                    : AssetImage(AppAssets.onBoardingSliderBg02)
+                          as ImageProvider,
                 fit: BoxFit.cover,
               ),
             ),
@@ -57,15 +62,15 @@ class RecipeCard extends StatelessWidget {
                     ),
                     padding: gapAll(6),
                     child: switch (mealType) {
-                      "Breakfast" => SvgPicture.asset(
+                      "breakfast" => SvgPicture.asset(
                         AppAssets.breakfastSvg,
                         color: Colors.black,
                       ),
-                      "Lunch" => SvgPicture.asset(
+                      "lunch" => SvgPicture.asset(
                         AppAssets.lunchSvg,
                         color: Colors.black,
                       ),
-                      "Dinner" => SvgPicture.asset(
+                      "dinner" => SvgPicture.asset(
                         AppAssets.dinnerSvg,
                         color: Colors.black,
                       ),

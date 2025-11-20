@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:intl/intl.dart';
 
 String formatDate(DateTime date) => DateFormat('dd/MM/yyyy').format(date);
@@ -13,5 +15,6 @@ String formatDateToMeetBackendDate(DateTime date) {
 }
 
 DateTime formatStringDateToMeetBackendDate(String formattedDateString) {
+  log("Formatting date: $formattedDateString");
   return DateFormat('yyyy-MM-d').parse(formattedDateString);
 }

@@ -8,6 +8,8 @@ import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
+import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_bloc.dart';
+import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
 import 'package:foodkitchen/features/profile/presentation/bloc/profile_state.dart';
 import 'package:foodkitchen/features/profile/presentation/widgets/star_tile.dart';
 import 'package:go_router/go_router.dart';
@@ -61,9 +63,29 @@ class ProfileHeader extends StatelessWidget {
               SizedBox(height: h(5)),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: const [
-                  ProfileStatTile(title: "Meals Planned", value: "12"),
-                  ProfileStatTile(title: "Shopping Lists", value: "10"),
+                children: [
+                  ProfileStatTile(
+                    title: "Meals Planned",
+                    value: context
+                        .read<PlannerBloc>()
+                        .state
+                        .getAllWeeklyPlans
+                        .length
+                        .toString(),
+                  ),
+                  ProfileStatTile(
+                    title: "Shopping Lists",
+                    value:
+                        (context.read<GroceryBloc>().state.finalListItemsList !=
+                            null)
+                        ? context
+                              .read<GroceryBloc>()
+                              .state
+                              .finalListItemsList!
+                              .length
+                              .toString()
+                        : "NO",
+                  ),
                 ],
               ),
               SizedBox(height: h(15)),

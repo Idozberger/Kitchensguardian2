@@ -1,4 +1,5 @@
 import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/common/domain/entities/requested_item.dart';
 import 'package:foodkitchen/features/home/domain/entities/pantry_data.dart';
 
 class HomeState {
@@ -6,7 +7,7 @@ class HomeState {
   final bool loadingWeeklyPlans;
   final String? errorMessage;
   final String? successMessage;
-
+  final List<String> groceryList;
   final List<PantriesDataEntity> pantryItems;
   final List<MealTypeEntity> dateBasedPlan;
 
@@ -18,6 +19,7 @@ class HomeState {
 
     this.pantryItems = const [],
     this.dateBasedPlan = const [],
+    this.groceryList = const [],
   });
 
   HomeState copyWith({
@@ -27,6 +29,7 @@ class HomeState {
     List<PantriesDataEntity>? pantryItems,
     List<MealTypeEntity>? dateBasedPlan,
     String? successMessage,
+    List<String>? groceryList,
   }) {
     return HomeState(
       isLoading: isLoading ?? this.isLoading,
@@ -35,6 +38,7 @@ class HomeState {
       successMessage: successMessage,
       pantryItems: pantryItems ?? this.pantryItems,
       dateBasedPlan: dateBasedPlan ?? this.dateBasedPlan,
+      groceryList: groceryList ?? this.groceryList,
     );
   }
 }

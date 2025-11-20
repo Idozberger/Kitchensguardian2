@@ -6,6 +6,7 @@ import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
+import 'package:foodkitchen/core/utils/date_format_to_string.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/planner/domain/entities/meal_plan_entity.dart';
@@ -14,6 +15,8 @@ import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MealActionRow extends StatelessWidget {
   final int selectedIndex;
@@ -60,7 +63,7 @@ class MealActionRow extends StatelessWidget {
                 isLoading: state.isLoading,
                 onPressed: state.isLoading
                     ? () {}
-                    : () {
+                    : () async {
                         final plannerBloc = context.read<PlannerBloc>();
                         final kitchenId = context
                             .read<UserCubit>()

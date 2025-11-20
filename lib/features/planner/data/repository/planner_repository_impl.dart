@@ -285,10 +285,6 @@ class PlannerRepositoryImpl implements PlannerRepository {
         return MealTypeModel.fromJson(e as Map<String, dynamic>);
       }).toList();
 
-      for (var element in generatedRecipes) {
-        logInfo("Generated recipesd: ${element.toJson()}");
-      }
-
       return Right(generatedRecipes);
     } on Failure catch (f) {
       logInfo("Failure: ${f.message}");
