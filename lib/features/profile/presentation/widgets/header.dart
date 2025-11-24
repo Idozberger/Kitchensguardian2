@@ -9,7 +9,9 @@ import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_bloc.dart';
+import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_state.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
+import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dart';
 import 'package:foodkitchen/features/profile/presentation/bloc/profile_state.dart';
 import 'package:foodkitchen/features/profile/presentation/widgets/star_tile.dart';
 import 'package:go_router/go_router.dart';
@@ -28,11 +30,13 @@ class ProfileHeader extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  profileState.imagePath != null
+                  state.profilePictureFilePath != null
                       ? CircleAvatar(
                           radius: w(36),
                           backgroundColor: Colors.grey.shade200,
-                          backgroundImage: MemoryImage(profileState.imagePath!),
+                          backgroundImage: MemoryImage(
+                            state.profilePictureFilePath!,
+                          ),
                         )
                       : Image.asset(
                           AppAssets.avatar,
@@ -64,27 +68,23 @@ class ProfileHeader extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  ProfileStatTile(
-                    title: "Meals Planned",
-                    value: context
-                        .read<PlannerBloc>()
-                        .state
-                        .getAllWeeklyPlans
-                        .length
-                        .toString(),
+                  BlocBuilder<PlannerBloc, PlannerState>(
+                    builder: (_, state) {
+                      return ProfileStatTile(
+                        title: "Meals Planned",
+                        value: state.getAllWeeklyPlans.length.toString(),
+                      );
+                    },
                   ),
-                  ProfileStatTile(
-                    title: "Shopping Lists",
-                    value:
-                        (context.read<GroceryBloc>().state.finalListItemsList !=
-                            null)
-                        ? context
-                              .read<GroceryBloc>()
-                              .state
-                              .finalListItemsList!
-                              .length
-                              .toString()
-                        : "NO",
+                  BlocBuilder<GroceryBloc, GroceryState>(
+                    builder: (_, state) {
+                      return ProfileStatTile(
+                        title: "Shopping Lists",
+                        value: (state.finalListItemsList != null)
+                            ? state.finalListItemsList!.length.toString()
+                            : "0",
+                      );
+                    },
                   ),
                 ],
               ),

@@ -122,36 +122,21 @@ class _MyPantryPageState extends State<MyPantryPage> {
 
                   Expanded(
                     child: state is PantryLoaded
-                        ? state.pantryItems.isEmpty
-                              ? Center(
-                                  child: Text(
-                                    "No Items found",
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.headlineMedium,
-                                  ),
-                                )
-                              : TabBarView(
-                                  children: [
-                                    /// All Items
-                                    _buildItemList(
-                                      context,
-                                      items: state.pantryItems,
-                                    ),
+                        ? TabBarView(
+                            children: [
+                              _buildItemList(context, items: state.pantryItems),
 
-                                    /// Expiring Soon
-                                    _buildItemList(
-                                      context,
-                                      items: state.expiringItems,
-                                    ),
+                              _buildItemList(
+                                context,
+                                items: state.expiringItems,
+                              ),
 
-                                    /// Low Stock
-                                    _buildItemList(
-                                      context,
-                                      items: state.lowStockItems,
-                                    ),
-                                  ],
-                                )
+                              _buildItemList(
+                                context,
+                                items: state.lowStockItems,
+                              ),
+                            ],
+                          )
                         : Center(
                             child: CircularProgressIndicator(
                               color: AppColors.primaryColor,
@@ -188,6 +173,7 @@ class _MyPantryPageState extends State<MyPantryPage> {
       padding: gapSymmetric(horizontal: 20, vertical: 20),
       itemBuilder: (_, index) {
         var pantry = items[index];
+
         return PantryItemCard(
           thumbnail: pantry.thumbnailBytes ?? Uint8List(0),
           title: pantry.name,

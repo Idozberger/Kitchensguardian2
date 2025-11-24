@@ -87,157 +87,158 @@ class _SignInPageState extends State<SignInPage> {
       builder: (BuildContext context, AuthState state) {
         return Scaffold(
           resizeToAvoidBottomInset: false,
-          body: Align(
-            alignment: Alignment.bottomCenter,
-            child: SingleChildScrollView(
-              padding: gapSymmetric(horizontal: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    "Welcome back",
-                    style: Theme.of(context).textTheme.headlineLarge,
-                  ),
-                  SizedBox(height: h(5)),
-                  Text(
-                    "Login to your account.",
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                  SizedBox(height: h(39)),
-                  Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        AppTextField(
-                          textInputAction: TextInputAction.next,
-                          controller: _emailController,
-                          label: "Email address",
+          body: SafeArea(
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: SingleChildScrollView(
+                padding: gapSymmetric(horizontal: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      "Welcome back",
+                      style: Theme.of(context).textTheme.headlineLarge,
+                    ),
+                    SizedBox(height: h(5)),
+                    Text(
+                      "Login to your account.",
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                    SizedBox(height: h(39)),
+                    Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          AppTextField(
+                            textInputAction: TextInputAction.next,
+                            controller: _emailController,
+                            label: "Email address",
 
-                          keyboardType: TextInputType.emailAddress,
-                          hintText: "Enter your email address",
-                        ),
+                            keyboardType: TextInputType.emailAddress,
+                            hintText: "Enter your email address",
+                          ),
 
-                        SizedBox(height: h(20)),
-                        AppTextField(
-                          controller: _passwordController,
-                          label: "Password",
-                          textInputAction: TextInputAction.done,
+                          SizedBox(height: h(20)),
+                          AppTextField(
+                            controller: _passwordController,
+                            label: "Password",
+                            textInputAction: TextInputAction.done,
 
-                          hintText: "Enter your password",
-                          obscureText: _isObscure,
-                          suffixIcon: GestureDetector(
-                            onTap: () => updateObsecure(),
-                            child: Padding(
-                              padding: gapSymmetric(
-                                vertical: 13,
-                                horizontal: 15,
-                              ),
-                              child: SvgPicture.asset(
-                                _isObscure == false
-                                    ? AppAssets.eyeVisibilitySvg
-                                    : AppAssets.eyeSvg,
-                                height: h(16),
-                                // ignore: deprecated_member_use
-                                color: AppColors.greyColor,
+                            hintText: "Enter your password",
+                            obscureText: _isObscure,
+                            suffixIcon: GestureDetector(
+                              onTap: () => updateObsecure(),
+                              child: Padding(
+                                padding: gapSymmetric(
+                                  vertical: 13,
+                                  horizontal: 15,
+                                ),
+                                child: SvgPicture.asset(
+                                  _isObscure == false
+                                      ? AppAssets.eyeVisibilitySvg
+                                      : AppAssets.eyeSvg,
+                                  height: h(16),
+                                  // ignore: deprecated_member_use
+                                  color: AppColors.greyColor,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  SizedBox(height: h(6)),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () => context.push(Routes.forgotPassword),
-                      child: Text(
-                        "Forgot Password?",
-                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                          color: AppColors.primaryColor,
+                    SizedBox(height: h(6)),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () => context.push(Routes.forgotPassword),
+                        child: Text(
+                          "Forgot Password?",
+                          style: Theme.of(context).textTheme.bodyMedium!
+                              .copyWith(color: AppColors.primaryColor),
                         ),
                       ),
                     ),
-                  ),
 
-                  Padding(
-                    padding: gapOnly(top: 16, bottom: 25),
-                    child: GenericButtonWidget(
-                      onPressed: () => onLogin(),
-                      text: "Login",
-                      isLoading: state is AuthLoading,
+                    Padding(
+                      padding: gapOnly(top: 16, bottom: 25),
+                      child: GenericButtonWidget(
+                        onPressed: () => onLogin(),
+                        text: "Login",
+                        isLoading: state is AuthLoading,
+                      ),
                     ),
-                  ),
 
-                  Center(
-                    child: TextspanWidget(
-                      buttonColor: AppColors.primaryColor,
-                      callback: () {
-                        context.push(Routes.signUp);
-                      },
-                      text: "Don’t have an account? ",
-                      buttonText: "Sign Up",
+                    Center(
+                      child: TextspanWidget(
+                        buttonColor: AppColors.primaryColor,
+                        callback: () {
+                          context.push(Routes.signUp);
+                        },
+                        text: "Don’t have an account? ",
+                        buttonText: "Sign Up",
+                      ),
                     ),
-                  ),
-                  SizedBox(height: h(20)),
-                  Center(
-                    child: Text(
-                      "Or with",
-                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                        color: AppColors.greyColor,
+                    SizedBox(height: h(20)),
+                    Center(
+                      child: Text(
+                        "Or with",
+                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                          color: AppColors.greyColor,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: h(20)),
+                    Center(
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(h(10)),
+                        onTap: () {
+                          onLogin();
+                        },
+                        child: Ink(
+                          width: w(209),
+                          padding: gapAll(10),
+                          decoration: BoxDecoration(
+                            color: Color(0xffF9F8F8),
+                            borderRadius: BorderRadius.circular(h(10)),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                AppAssets.googlePng,
+                                height: h(22),
+                                width: w(22),
+                              ),
+                              SizedBox(width: w(6)),
+                              Text(
+                                "Sign In with Google",
+                                style: Theme.of(context).textTheme.bodyMedium!
+                                    .copyWith(
+                                      fontSize: t(12),
+                                      color: Color(0xff757575),
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: h(110)),
+                    Text(
+                      "By logging in, you agree to the terms and conditions of this application.",
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                        fontSize: t(14),
+                        color: Color(0xff8F8F8F),
                         fontWeight: FontWeight.w400,
                       ),
                     ),
-                  ),
-                  SizedBox(height: h(20)),
-                  Center(
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(h(10)),
-                      onTap: () {
-                        onLogin();
-                      },
-                      child: Ink(
-                        width: w(209),
-                        padding: gapAll(10),
-                        decoration: BoxDecoration(
-                          color: Color(0xffF9F8F8),
-                          borderRadius: BorderRadius.circular(h(10)),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Image.asset(
-                              AppAssets.googlePng,
-                              height: h(22),
-                              width: w(22),
-                            ),
-                            SizedBox(width: w(6)),
-                            Text(
-                              "Sign In with Google",
-                              style: Theme.of(context).textTheme.bodyMedium!
-                                  .copyWith(
-                                    fontSize: t(12),
-                                    color: Color(0xff757575),
-                                  ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: h(110)),
-                  Text(
-                    "By logging in, you agree to the terms and conditions of this application.",
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                      fontSize: t(14),
-                      color: Color(0xff8F8F8F),
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                  SizedBox(height: h(37)),
-                ],
+                    SizedBox(height: h(37)),
+                  ],
+                ),
               ),
             ),
           ),

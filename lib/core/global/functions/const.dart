@@ -56,4 +56,7 @@ class AppConstants {
   static const String updateMealPlan = "/api/meal_plan/update";
   static const String getMealByDate = "/api/meal_plan/get_by_date";
   static const String listAllMealPlans = "/api/meal_plan/list";
+  static const String getDateRange = "/api/kitchen/get_date_range";
+  static const String setDateRange = "/api/kitchen/set_date_range";
+  static const String getUserProfile = "/api/get_user_profile";
 }

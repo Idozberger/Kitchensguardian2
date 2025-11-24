@@ -69,7 +69,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         emit(
           state.copyWith(isLoading: false, imagePath: base64Decode(imagePath)),
         );
-        _userCubit.updateUserProfilePicture();
+        _userCubit.updateUserProfilePicture(base64Decode(imagePath));
       },
     );
   }
@@ -95,6 +95,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         _userCubit.setUser(
           firstName: event.firstName,
           lastName: event.lastName,
+          profilePicture: base64Decode(event.thumbnail),
         );
       },
     );

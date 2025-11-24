@@ -1,31 +1,40 @@
-import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/data/datasource/common_remote_datasource.dart';
 import 'package:foodkitchen/core/common/data/model/pantries_model.dart';
 import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
 import 'user_state.dart';
 
 class UserCubit extends Cubit<UserState> {
   final CommonRemoteDatasource _commonRemoteDatasource;
+
   UserCubit({required CommonRemoteDatasource commonRemoteDatasource})
     : _commonRemoteDatasource = commonRemoteDatasource,
       super(const UserState());
+  Future<Uint8List?> fetchUserAvatar() async {
+    final bytes = await _commonRemoteDatasource.getUserAvatar();
+    emit(state.copyWith(profilePictureFilePath: bytes));
+    return bytes;
+  }
 
   void setUser({
     required String firstName,
     required String lastName,
     String? email,
     String? userId,
-  }) {
+    Uint8List? profilePicture,
+  }) async {
+    Uint8List? imageBytes = await fetchUserAvatar();
     emit(
       state.copyWith(
         firstName: firstName,
         lastName: lastName,
         email: email,
         userId: userId,
+        profilePictureFilePath: imageBytes,
       ),
     );
   }
@@ -34,28 +43,20 @@ class UserCubit extends Cubit<UserState> {
     required String activeKitchenId,
     required String invitationCode,
     required String role,
-  }) async {
-    String? filePath = await getUserPicture();
+    Uint8List? avatarBytes,
+  }) {
     emit(
       state.copyWith(
         activeKitchenId: activeKitchenId,
         invitationCode: invitationCode,
         role: role,
-        profilePictureFilePath: filePath == null
-            ? null
-            : base64Decode(filePath),
+        profilePictureFilePath: avatarBytes,
       ),
     );
   }
 
-  Future<String?> getUserPicture() async {
-    final pref = await SharedPreferences.getInstance();
-    return pref.getString("profile_image_path");
-  }
-
-  Future<void> updateUserProfilePicture() async {
-    String? filePath = await getUserPicture();
-    emit(state.copyWith(profilePictureFilePath: base64Decode(filePath!)));
+  Future<void> updateUserProfilePicture(Uint8List avatarBytes) async {
+    emit(state.copyWith(profilePictureFilePath: avatarBytes));
   }
 
   Future<void> updateKitchenIdAndRefferalCode(

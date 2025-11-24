@@ -34,13 +34,14 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  void _fetchInitialData() {
+  void _fetchInitialData() async {
     final kitchenId = userCubit.state.activeKitchenId;
+
     if (kitchenId.isNotEmpty) {
       homeBloc
         ..add(GetAllWeeklyPlansEventForHome())
-        ..add(GetPantriesItemsEventForHome(kitchenId: kitchenId))
-        ..add(GetUserStorageAreaEvent(kitchenId));
+        ..add(GetUserStorageAreaEvent(kitchenId))
+        ..add(GetPantriesItemsEventForHome(kitchenId: kitchenId));
     }
   }
 
@@ -103,6 +104,7 @@ class _HomePageState extends State<HomePage> {
                         isGeneratedRecipes: isGeneratedRecipes,
                         onGeneratePressed: () {
                           homeBloc.add(GenerateGroceryList());
+
                           setState(() => isGeneratedRecipes = true);
                         },
                       ),

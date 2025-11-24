@@ -73,15 +73,13 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
     return Scaffold(
       backgroundColor: const Color(0xffF9F9F9),
       appBar: AppBarWidget(),
-      body: SafeArea(
-        child: BlocConsumer<PlannerBloc, PlannerState>(
-          listener: (_, state) {
-            if (state.successMessage.isNotEmpty) {
-              AppToast.show(state.successMessage, ToastType.success);
-            }
-          },
-          builder: (_, state) => _buildContent(context, state),
-        ),
+      body: BlocConsumer<PlannerBloc, PlannerState>(
+        listener: (_, state) {
+          if (state.successMessage.isNotEmpty) {
+            AppToast.show(state.successMessage, ToastType.success);
+          }
+        },
+        builder: (_, state) => _buildContent(context, state),
       ),
       bottomNavigationBar: BlocBuilder<PlannerBloc, PlannerState>(
         builder: (_, state) {
@@ -94,17 +92,19 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
   }
 
   Widget _buildContent(BuildContext context, PlannerState state) {
-    return SingleChildScrollView(
-      child: Column(
-        spacing: h(14),
-        children: [
-          _buildHeader(),
-          RecipeInfoWidget(recipe: recipe),
-          _buildPrimaryActions(context, state),
-          _buildTabs(),
-          _buildTabContent(state),
-          gap(height: 18),
-        ],
+    return SafeArea(
+      child: SingleChildScrollView(
+        child: Column(
+          spacing: h(14),
+          children: [
+            _buildHeader(),
+            RecipeInfoWidget(recipe: recipe),
+            _buildPrimaryActions(context, state),
+            _buildTabs(),
+            _buildTabContent(state),
+            gap(height: 18),
+          ],
+        ),
       ),
     );
   }

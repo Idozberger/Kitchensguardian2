@@ -125,15 +125,18 @@ class _NotificationPageState extends State<NotificationPage> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text(
-                                        senderName,
-                                        maxLines: 1,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .headlineLarge!
-                                            .copyWith(
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
+                                      SizedBox(
+                                        width: w(144),
+                                        child: Text(
+                                          senderName,
+                                          maxLines: 1,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .headlineLarge!
+                                              .copyWith(
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                        ),
                                       ),
                                       Text(
                                         date,

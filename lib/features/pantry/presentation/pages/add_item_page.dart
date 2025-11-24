@@ -166,6 +166,13 @@ class _AddItemPageState extends State<AddItemPage> {
                             final unit = item.unit?.trim() ?? '';
                             final pantry = item.pantry?.trim() ?? '';
                             final expireDate = item.expireDate.text.trim();
+                            if (item.file == null) {
+                              AppToast.show(
+                                "Please add an image.",
+                                ToastType.error,
+                              );
+                              return;
+                            }
 
                             if (name.isEmpty) {
                               AppToast.show(

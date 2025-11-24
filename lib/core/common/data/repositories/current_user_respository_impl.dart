@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:foodkitchen/core/common/domain/entities/user.dart';
 import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/core/services/connection/connection_checker.dart';

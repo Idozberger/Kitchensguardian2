@@ -12,6 +12,7 @@ import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
+import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_state.dart';
 import 'package:foodkitchen/features/pantry/presentation/widgets/list_tile.dart';
 import 'package:go_router/go_router.dart';
@@ -26,49 +27,46 @@ class PantrySection extends StatefulWidget {
 }
 
 class _PantrySectionState extends State<PantrySection> {
-  bool hasItems = false;
-  @override
-  void initState() {
-    if (widget.state.pantryItems.isNotEmpty) {
-      hasItems = widget.state.pantryItems[0].items.isNotEmpty;
-    }
-
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<UserCubit, UserState>(
-      builder: (_, userState) {
-        return UpperTile(
-          widget: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _header(context),
-              gap(height: 14),
-              _actionButtons(context, hasItems, userState),
+    return BlocBuilder<HomeBloc, HomeState>(
+      builder: (_, homeState) {
+        final bool hasItems =
+            homeState.pantryItems.isNotEmpty &&
+            homeState.pantryItems[0].items.isNotEmpty;
+        return BlocBuilder<UserCubit, UserState>(
+          builder: (_, userState) {
+            return UpperTile(
+              widget: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _header(context),
+                  gap(height: 14),
+                  _actionButtons(context, hasItems, userState),
 
-              if (userState.userStorageAreas.isEmpty)
-                Padding(
-                  padding: gapOnly(top: 14),
-                  child: SizedBox(
-                    height: h(40),
-                    child: ElevatedButton.icon(
-                      onPressed: () =>
-                          context.push(Routes.addPantryStorageType),
-                      icon: SvgPicture.asset(AppAssets.addSvg),
-                      label: Text(
-                        "Add Pantry",
-                        style: Theme.of(context).textTheme.headlineMedium!
-                            .copyWith(fontSize: t(12), color: Colors.black),
+                  if (userState.userStorageAreas.isEmpty)
+                    Padding(
+                      padding: gapOnly(top: 14),
+                      child: SizedBox(
+                        height: h(40),
+                        child: ElevatedButton.icon(
+                          onPressed: () =>
+                              context.push(Routes.addPantryStorageType),
+                          icon: SvgPicture.asset(AppAssets.addSvg),
+                          label: Text(
+                            "Add Pantry",
+                            style: Theme.of(context).textTheme.headlineMedium!
+                                .copyWith(fontSize: t(12), color: Colors.black),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-              gap(height: 14),
-              if (hasItems) _pantryList(context) else _noItemsText(context),
-            ],
-          ),
+                  gap(height: 14),
+                  if (hasItems) _pantryList(context) else _noItemsText(context),
+                ],
+              ),
+            );
+          },
         );
       },
     );

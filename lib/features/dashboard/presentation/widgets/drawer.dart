@@ -115,7 +115,7 @@ class AppDrawer extends StatelessWidget {
             ),
             Divider(color: Color(0xffF4F4F4)),
             DrawerListTile(
-              title: "Get Referral Code",
+              title: "Get Kitchen Code",
               iconPath: AppAssets.referralSvg,
               onTap: () async {
                 if (state.activeKitchenId.isNotEmpty) {

@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
@@ -22,18 +23,18 @@ import 'package:foodkitchen/features/planner/domain/usecases/favourite_recipes.d
 import 'package:foodkitchen/features/planner/domain/usecases/generate_recipes.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/get_all_plans.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/get_all_weekly_plans.dart';
+import 'package:foodkitchen/features/planner/domain/usecases/get_date_range.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/get_meal_by_date.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/mark_recipe_finished.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/remove_from_favourite_recipe.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/request_missing_items.dart';
+import 'package:foodkitchen/features/planner/domain/usecases/set_date_range.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/update_meal_plan.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
   final UserCubit _userCubit;
-  // ignore: unused_field
   final HomeBloc _homeBloc;
   final GroceryBloc _groceryBloc;
   final GenerateRecipes _generateRecipes;
@@ -51,6 +52,8 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
   final UpdateMealPlan _updateMealPlan;
   final GetMealByDate _getMealByDate;
   final GetAllPlans _getAllPlans;
+  final GetDateRange _getDateRange;
+  final SetDateRange _setDateRange;
 
   PlannerBloc({
     required UserCubit userCubit,
@@ -71,6 +74,8 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     required UpdateMealPlan updateMealPlan,
     required GetMealByDate getMealByDate,
     required GetAllPlans getAllPlans,
+    required GetDateRange getDateRange,
+    required SetDateRange setDateRange,
   }) : _generateRecipes = generateRecipes,
        _favouriteRecipes = favouriteRecipes,
        _addToFavouriteRecipe = addToFavouriteRecipe,
@@ -89,6 +94,8 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
        _updateMealPlan = updateMealPlan,
        _getMealByDate = getMealByDate,
        _getAllPlans = getAllPlans,
+       _getDateRange = getDateRange,
+       _setDateRange = setDateRange,
 
        super(PlannerState()) {
     on<GetFavouriteRecipesEvent>(_onGetFavouriteRecipes);
@@ -114,7 +121,93 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     on<UpdateMealPlanEvent>(_onUpdateMealPlan);
     on<GetMealByDateEvent>(_onGetMealByDate);
     on<EditMealEvent>(_onEditMeal);
+    on<GetDateRangeEvent>(_onGetDateRangeEvent);
+    on<SetDateRangeEvent>(_onSetDateRange);
   }
+  Future<void> _onSetDateRange(
+    SetDateRangeEvent event,
+    Emitter<PlannerState> emit,
+  ) async {
+    if (_userCubit.state.activeKitchenId.isEmpty) return;
+    final res = await _setDateRange(
+      SetDateRangeParams(
+        kitchenId: _userCubit.state.activeKitchenId,
+        startDate: event.startDate,
+        endDate: event.endDate,
+      ),
+    );
+
+    res.fold(
+      (failure) {
+        emit(state.copyWith(errorMessage: failure.message, isLoading: false));
+      },
+      (dateRange) {
+        log(
+          "Date Ranges: ${dateRange.startDate} -- End Date ${dateRange.endDate}",
+        );
+        emit(
+          state.copyWith(
+            endDate: dateRange.endDate,
+            startDate: dateRange.startDate,
+          ),
+        );
+      },
+    );
+    emit(state.copyWith(isLoading: true));
+  }
+
+  Future<void> _onGetDateRangeEvent(
+    GetDateRangeEvent event,
+    Emitter<PlannerState> emit,
+  ) async {
+    if (event.kitchenId.isEmpty) return;
+    emit(state.copyWith(isLoading: true));
+
+    final res = await _getDateRange(GetDateRangeParams(event.kitchenId));
+
+    res.fold(
+      (failure) {
+        emit(state.copyWith(errorMessage: failure.message, isLoading: false));
+      },
+      (dateRange) {
+        log(
+          "Date Ranges: ${dateRange.startDate} -- End Date ${dateRange.endDate}",
+        );
+        if (dateRange.endDate.isNotEmpty) {
+          final existingEndDate = DateTime.parse(dateRange.endDate);
+
+          if (existingEndDate.isBefore(DateTime.now())) {
+            updateStartEndDate();
+          }
+        }
+        emit(
+          state.copyWith(
+            endDate: dateRange.endDate,
+            startDate: dateRange.startDate,
+            isLoading: false,
+          ),
+        );
+      },
+    );
+  }
+
+  void updateStartEndDate() {
+    final today = DateTime.now();
+    final next3Dates = List.generate(3, (i) => today.add(Duration(days: i)));
+
+    final formattedStartDate = formatDateToMeetBackendDate(next3Dates.first);
+    final formattedEndDate = formatDateToMeetBackendDate(next3Dates.last);
+    log(formattedStartDate);
+    log(formattedEndDate);
+    add(
+      SetDateRangeEvent(
+        kitchenId: _userCubit.state.activeKitchenId,
+        startDate: formattedStartDate,
+        endDate: formattedEndDate,
+      ),
+    );
+  }
+
   Future<void> _onEditMeal(
     EditMealEvent event,
     Emitter<PlannerState> emit,
@@ -126,6 +219,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     GetAllWeeklyPlansEvent event,
     Emitter<PlannerState> emit,
   ) async {
+    if (event.kitchenId.isEmpty) return;
     emit(state.copyWith(isLoading: true));
 
     final res = await _getAllPlans(
@@ -146,40 +240,16 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
             isLoading: false,
           ),
         );
-        String? startDate = await getStartDate(getAllWeeklyPlans);
+
         emit(
           state.copyWith(
-            startDate: startDate ?? formatDateToMeetBackendDate(DateTime.now()),
+            startDate:
+                state.startDate ?? formatDateToMeetBackendDate(DateTime.now()),
           ),
         );
-        if (event.date == null) {
-          add(GetDateBasedPlans(getAllWeeklyPlans[0].date));
-        } else {
-          add(GetDateBasedPlans(event.date!));
-        }
+        add(GetDateBasedPlans(state.startDate ?? formatDate(DateTime.now())));
       },
     );
-  }
-
-  Future<String?> getStartDate(final plans) async {
-    final allPlans = plans;
-
-    if (allPlans.isNotEmpty) {
-      log(allPlans.toString());
-      List<DateTime> dateList = [];
-
-      for (var i = 0; i < allPlans.length; i++) {
-        DateTime planDate = DateTime.parse(allPlans[i].date);
-        dateList.add(planDate);
-        log(planDate.toString());
-      }
-
-      DateTime smallestDate = dateList.reduce((a, b) => a.isBefore(b) ? a : b);
-
-      return smallestDate.toIso8601String();
-    }
-
-    return null;
   }
 
   Future<void> _onGetMealByDate(

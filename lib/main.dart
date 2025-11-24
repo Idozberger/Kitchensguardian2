@@ -33,11 +33,11 @@ Future<void> main() async {
   ]);
   cameras = await availableCameras();
   SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
+    SystemUiOverlayStyle(
       statusBarColor: Colors.white,
       statusBarIconBrightness: Brightness.dark,
-      systemNavigationBarColor: Colors.white,
-      systemNavigationBarIconBrightness: Brightness.light,
+      systemNavigationBarColor: Colors.grey.shade300,
+      systemNavigationBarIconBrightness: Brightness.dark,
     ),
   );
   runApp(

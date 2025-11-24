@@ -15,8 +15,6 @@ import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class MealActionRow extends StatelessWidget {
   final int selectedIndex;
@@ -41,7 +39,7 @@ class MealActionRow extends StatelessWidget {
     if (!_hasMeal) return const SizedBox();
 
     return BlocBuilder<PlannerBloc, PlannerState>(
-      builder: (_, state) {
+      builder: (context, state) {
         return Row(
           children: [
             Expanded(
@@ -120,6 +118,21 @@ class MealActionRow extends StatelessWidget {
                         }
 
                         if (mealPlans.isNotEmpty) {
+                          log("Date Ranges: -- Setting: ${state.startDate}");
+                          if (state.startDate == null) {
+                            updateStartEndDate(plannerBloc);
+                          }
+                          if (state.endDate != null &&
+                              state.endDate!.isNotEmpty) {
+                            final existingEndDate = DateTime.parse(
+                              state.endDate!,
+                            );
+
+                            if (existingEndDate.isBefore(DateTime.now())) {
+                              updateStartEndDate(plannerBloc);
+                            }
+                          }
+
                           plannerBloc.add(
                             CreatePlanEvent(mealPlans: mealPlans),
                           );
@@ -130,6 +143,22 @@ class MealActionRow extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+
+  void updateStartEndDate(PlannerBloc plannerBloc) {
+    final today = DateTime.now();
+    final next3Dates = List.generate(3, (i) => today.add(Duration(days: i)));
+
+    final formattedStartDate = formatDateToMeetBackendDate(next3Dates.first);
+    final formattedEndDate = formatDateToMeetBackendDate(next3Dates.last);
+    log(formattedStartDate);
+    log(formattedEndDate);
+    plannerBloc.add(
+      SetDateRangeEvent(
+        startDate: formattedStartDate,
+        endDate: formattedEndDate,
+      ),
     );
   }
 

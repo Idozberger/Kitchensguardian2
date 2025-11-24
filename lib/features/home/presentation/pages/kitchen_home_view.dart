@@ -60,7 +60,9 @@ class KitchenHomeView extends StatelessWidget {
                   backgroundColor: Color(0xffDE7600),
                   disabledBackgroundColor: AppColors.disabledPrimaryColor,
                 ),
-                onPressed: () => context.push(Routes.scanMeal),
+                onPressed: () {
+                  context.push(Routes.scanMeal);
+                },
                 child: Text(
                   "Scan Receipt",
                   style: Theme.of(context).textTheme.headlineMedium!.copyWith(

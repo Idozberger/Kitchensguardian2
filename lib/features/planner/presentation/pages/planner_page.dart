@@ -17,6 +17,7 @@ import 'package:foodkitchen/core/widgets/generic_date_picker_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/no_kitchen_found.dart';
 import 'package:foodkitchen/features/planner/domain/entities/merged_meal_type_entity.dart';
+import 'package:foodkitchen/features/planner/domain/usecases/get_date_range.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dart';
@@ -50,6 +51,10 @@ class _PlannerPageState extends State<PlannerPage> {
   }
 
   void _fetchInitialPlans() async {
+    if (_userCubit.state.activeKitchenId.isEmpty) return;
+    _plannerBloc.add(
+      GetDateRangeEvent(kitchenId: _userCubit.state.activeKitchenId),
+    );
     _plannerBloc.add(
       GetAllWeeklyPlansEvent(_userCubit.state.activeKitchenId, null),
     );
@@ -211,11 +216,17 @@ class _PlannerPageState extends State<PlannerPage> {
                     child: BlocConsumer<PlannerBloc, PlannerState>(
                       listener: (context, state) {},
                       builder: (_, state) {
-                        final plan = state.dateBasedPlan;
+                        final plan = state.dateBasedPlan ?? [];
 
-                        _selectedDate ??= formatStringDateToMeetBackendDate(
-                          state.startDate!,
-                        );
+                        final startDate = state.startDate;
+                        log("start date $startDate");
+                        if (startDate != null && startDate.isNotEmpty) {
+                          try {
+                            _selectedDate ??= formatStringDateToMeetBackendDate(
+                              startDate,
+                            );
+                          } catch (_) {}
+                        }
 
                         return SingleChildScrollView(
                           child: Column(
@@ -239,6 +250,7 @@ class _PlannerPageState extends State<PlannerPage> {
                                       ),
                                   onChanged: (date) {
                                     setState(() => _selectedDate = date);
+
                                     _plannerBloc.add(
                                       GetDateBasedPlans(
                                         formatDateToMeetBackendDate(date),

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/common/data/datasource/common_remote_datasource.dart';
 import 'package:foodkitchen/core/common/data/model/pantries_model.dart';
@@ -44,7 +46,7 @@ class PantryRepositoryImpl implements PantryRepository {
       final response = await pantryRemoteDatasource.getPantryItems(
         kitchenId: kitchenId,
       );
-
+      log("[Pantry] ${response.first}");
       final pantryItems = (response as List).map((e) {
         return PantryItemModel.fromJson(e as Map<String, dynamic>);
       }).toList();

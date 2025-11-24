@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
+import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
@@ -82,7 +83,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       AppToast.show("Passwords do not match", ToastType.error);
       return;
     }
-    changePassword(currentPassword: confirmPassword, newPassword: newPassword);
+
+    changePassword(currentPassword: currentPassword, newPassword: newPassword);
   }
 
   void changePassword({

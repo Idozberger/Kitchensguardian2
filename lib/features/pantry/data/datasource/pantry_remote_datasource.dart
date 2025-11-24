@@ -88,27 +88,37 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
     required String kitchenId,
   }) async {
     try {
-      final response = await dio.get(
-        "${AppConstants.getPantryItems}?kitchen_id=$kitchenId",
-      );
+      final url = "${AppConstants.getPantryItems}?kitchen_id=$kitchenId";
+
+      final response = await dio.get(url);
 
       if (response.statusCode != 200 && response.statusCode != 201) {
         final data = response.data is String
             ? jsonDecode(response.data)
             : response.data;
 
-        final message = data["error"];
+        final message = data?["error"] ?? "Unknown error";
+
         throw message;
       }
-      final data = response.data["items"];
+
+      final data = response.data?["items"];
 
       if (data is List) {
-        return data.map((e) => Map<String, dynamic>.from(e)).toList();
+        final parsedList = data.map((e) {
+          return Map<String, dynamic>.from(e);
+        }).toList();
+
+        return parsedList;
       } else {
         throw Exception("Invalid data");
       }
     } on DioException catch (e) {
-      throw dio.handleError(e);
+      final error = dio.handleError(e);
+
+      throw error;
+    } catch (e) {
+      rethrow;
     }
   }
 

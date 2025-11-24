@@ -91,10 +91,12 @@ import 'package:foodkitchen/features/planner/domain/usecases/favourite_recipes.d
 import 'package:foodkitchen/features/planner/domain/usecases/generate_recipes.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/get_all_plans.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/get_all_weekly_plans.dart';
+import 'package:foodkitchen/features/planner/domain/usecases/get_date_range.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/get_meal_by_date.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/mark_recipe_finished.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/remove_from_favourite_recipe.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/request_missing_items.dart';
+import 'package:foodkitchen/features/planner/domain/usecases/set_date_range.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/update_meal_plan.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
 import 'package:foodkitchen/features/profile/data/datasource/profile_remote_datasource.dart';
@@ -151,7 +153,7 @@ void _initOnboarding() async {
   // Datasource
   sl
     ..registerFactory<CurrentUserRemoteDatasource>(
-      () => CurrentUserRemoteDataSourceImpl(sl(), sl()),
+      () => CurrentUserRemoteDataSourceImpl(sl(), sl(), sl()),
     )
     // Repository
     ..registerFactory<CurrentUserRepository>(
@@ -401,6 +403,8 @@ void _initPlanner() async {
     ..registerFactory(() => UpdateMealPlan(sl()))
     ..registerFactory(() => GetMealByDate(sl()))
     ..registerFactory(() => GetAllPlans(sl()))
+    ..registerFactory(() => GetDateRange(sl()))
+    ..registerFactory(() => SetDateRange(sl()))
     // Bloc
     ..registerLazySingleton(
       () => PlannerBloc(
@@ -422,6 +426,8 @@ void _initPlanner() async {
         updateMealPlan: UpdateMealPlan(sl()),
         getMealByDate: GetMealByDate(sl()),
         getAllPlans: GetAllPlans(sl()),
+        getDateRange: GetDateRange(sl()),
+        setDateRange: SetDateRange(sl()),
       ),
     );
 }

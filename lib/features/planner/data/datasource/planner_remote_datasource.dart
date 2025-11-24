@@ -42,6 +42,12 @@ abstract interface class PlannerRemoteDatasource {
   Future<List<Map<String, dynamic>>> listAllMealPlans({
     required String kitchenId,
   });
+  Future<Map<String, dynamic>> getDateRange({required String kitchenId});
+  Future<Map<String, dynamic>> setDateRange({
+    required String kitchenId,
+    required String startDate,
+    required String endDate,
+  });
 }
 
 class PlannerRemoteDatasourceImpl implements PlannerRemoteDatasource {
@@ -397,6 +403,58 @@ class PlannerRemoteDatasourceImpl implements PlannerRemoteDatasource {
       } else {
         throw Exception("Invalid data format for favourite_recipes");
       }
+    } on DioException catch (e) {
+      throw dio.handleError(e);
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> getDateRange({required String kitchenId}) async {
+    try {
+      final response = await dio.get(
+        "${AppConstants.getDateRange}?kitchen_id=$kitchenId",
+      );
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+
+        final message = data["error"];
+        throw message;
+      }
+      log("date ranges: ${response.data}");
+      return response.data;
+    } on DioException catch (e) {
+      throw dio.handleError(e);
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> setDateRange({
+    required String kitchenId,
+    required String startDate,
+    required String endDate,
+  }) async {
+    try {
+      final response = await dio.post(
+        AppConstants.setDateRange,
+        data: {
+          "kitchen_id": kitchenId,
+          "start_date": startDate,
+          "end_date": endDate,
+        },
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+
+        final message = data["error"];
+        throw message;
+      }
+
+      return response.data;
     } on DioException catch (e) {
       throw dio.handleError(e);
     }

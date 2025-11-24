@@ -23,8 +23,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     return Scaffold(
       backgroundColor: Color(0xffF9F9F9),
       appBar: _buildAppBar(context),
-      body: SafeArea(
-        child: SingleChildScrollView(
+      body: SingleChildScrollView(
+        child: SafeArea(
           child: Padding(
             padding: gapSymmetric(horizontal: 20, vertical: 15),
             child: Column(

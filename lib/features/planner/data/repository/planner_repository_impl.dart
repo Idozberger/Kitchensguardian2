@@ -6,6 +6,8 @@ import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/features/planner/data/datasource/planner_local_datasource.dart';
 import 'package:foodkitchen/features/planner/data/datasource/planner_remote_datasource.dart';
+import 'package:foodkitchen/features/planner/data/models/kitchen_date_range_model.dart';
+import 'package:foodkitchen/features/planner/domain/entities/kitchen_date_range_entity.dart';
 import 'package:foodkitchen/features/planner/domain/entities/meal_plan_entity.dart';
 
 import 'package:foodkitchen/features/planner/domain/repository/planner_repository.dart';
@@ -291,6 +293,48 @@ class PlannerRepositoryImpl implements PlannerRepository {
       return Left(f);
     } catch (e) {
       logInfo("Error: ${e.toString()}");
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, KitchenDateRangeEntity>> getDateRange({
+    required String kitchenId,
+  }) async {
+    try {
+      final response = await plannerRemoteDatasource.getDateRange(
+        kitchenId: kitchenId,
+      );
+
+      final model = KitchenDateRangeModel.fromJson(response);
+
+      return Right(model);
+    } on Failure catch (f) {
+      return Left(f);
+    } catch (e) {
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, KitchenDateRangeEntity>> setDateRange({
+    required String kitchenId,
+    required String startDate,
+    required String endDate,
+  }) async {
+    try {
+      final response = await plannerRemoteDatasource.setDateRange(
+        kitchenId: kitchenId,
+        startDate: startDate,
+        endDate: endDate,
+      );
+
+      final model = KitchenDateRangeModel.fromJson(response);
+
+      return Right(model);
+    } on Failure catch (f) {
+      return Left(f);
+    } catch (e) {
       return Left(UnknownFailure(e.toString()));
     }
   }

@@ -105,6 +105,7 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
     GetPantryItemsEvent event,
     Emitter<PantryState> emit,
   ) async {
+    print("PantryBloc: ${event.kitchenId}");
     emit(PantryLoading());
 
     final res = await _getPantryItems(
@@ -128,6 +129,7 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
 
           if (item.expiryStatus == "expiring_soon") {
             expiringItems.add(item);
+
             continue;
           }
 
@@ -141,18 +143,17 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
           pantryItems.add(item);
         }
 
-        // For real app (9am / 6pm)
-        await _schedulePantryNotifications(
-          lowStockItems: lowStockItems,
-          expiringItems: expiringItems,
-        );
-
         emit(
           PantryLoaded(
             pantryItems: pantryItems,
             lowStockItems: lowStockItems,
             expiringItems: expiringItems,
           ),
+        );
+
+        await _schedulePantryNotifications(
+          lowStockItems: lowStockItems,
+          expiringItems: expiringItems,
         );
       },
     );

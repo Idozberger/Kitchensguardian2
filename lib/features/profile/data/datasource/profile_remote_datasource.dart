@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
+import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
 
 abstract class ProfileRemoteDatasource {
@@ -54,6 +55,8 @@ class ProfileRemoteDatasourceImpl implements ProfileRemoteDatasource {
     required String newPassword,
   }) async {
     try {
+      logError("Current password: ${currentPassword}");
+      logError("Current password: ${newPassword}");
       final response = await dio.post(
         AppConstants.changePassword,
         data: {

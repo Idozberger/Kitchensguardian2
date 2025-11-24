@@ -208,7 +208,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                     },
 
                     child: Text(
-                      "oK",
+                      "ok",
                       style: Theme.of(context).textTheme.headlineMedium!
                           .copyWith(fontSize: t(15), color: Colors.black),
                     ),

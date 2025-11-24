@@ -6,7 +6,6 @@ import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/core/services/fcm/fcm_service.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
-import 'package:foodkitchen/features/grocery/domain/usecases/get_requested_items.dart';
 import 'package:foodkitchen/features/home/domain/entities/kitchen.dart';
 import 'package:foodkitchen/features/home/domain/usecases/create_kitchen_usecase.dart';
 import 'package:foodkitchen/features/home/domain/usecases/get_all_weekly_plans_usecase.dart';
@@ -201,12 +200,10 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           successMessage: "Join request sent to the host.",
         ),
       );
-    } catch (e, st) {
+    } catch (e) {
       emit(
         state.copyWith(isLoading: false, errorMessage: 'An error occurred.'),
       );
-      debugPrint('❌ Error: $e');
-      debugPrint('🧾 Stack Trace: $st');
     }
   }
 
@@ -238,6 +235,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     GetAllWeeklyPlansEventForHome event,
     Emitter<HomeState> emit,
   ) async {
+    if (_userCubit.state.activeKitchenId.isEmpty) return;
     emit(state.copyWith(loadingWeeklyPlans: true));
     final res = await _getAllWeeklyPlansForHome(
       GetAllWeeklyPlansForHomeParams(_userCubit.state.activeKitchenId),
@@ -245,12 +243,10 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
     res.fold(
       (failure) {
-        emit(state.copyWith(errorMessage: failure.message, isLoading: false));
+        emit(state.copyWith(errorMessage: failure.message));
       },
       (getAllWeeklyPlans) {
-        emit(
-          state.copyWith(dateBasedPlan: getAllWeeklyPlans, isLoading: false),
-        );
+        emit(state.copyWith(dateBasedPlan: getAllWeeklyPlans));
       },
     );
   }

@@ -11,6 +11,7 @@ final class PlannerState {
   final List<MergedMealPlanEntity> mealPlans;
   final List<MergedMealPlanEntity> editMealsPlans;
   final String? startDate;
+  final String? endDate;
   final bool isLoading;
   final bool addingToWeeklyPlan;
   final bool startRecipe;
@@ -37,6 +38,7 @@ final class PlannerState {
     this.mealTypeSelectedIndex = 0,
     this.selectedDate,
     this.startDate,
+    this.endDate,
   });
 
   PlannerState copyWith({
@@ -57,6 +59,7 @@ final class PlannerState {
     int? mealTypeSelectedIndex,
     DateTime? selectedDate,
     String? startDate,
+    String? endDate,
   }) {
     return PlannerState(
       recipes: recipes ?? this.recipes,
@@ -77,6 +80,7 @@ final class PlannerState {
       selectedDate: selectedDate ?? this.selectedDate,
       editMealsPlans: editMealsPlans ?? this.editMealsPlans,
       startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
     );
   }
 }

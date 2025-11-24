@@ -149,3 +149,21 @@ final class EditMealEvent extends PlannerEvent {
 
   EditMealEvent({required this.mergedPlans});
 }
+
+final class GetDateRangeEvent extends PlannerEvent {
+  final String kitchenId;
+
+  GetDateRangeEvent({required this.kitchenId});
+}
+
+final class SetDateRangeEvent extends PlannerEvent {
+  final String? kitchenId;
+  final String startDate;
+  final String endDate;
+
+  SetDateRangeEvent({
+    this.kitchenId,
+    required this.endDate,
+    required this.startDate,
+  });
+}

@@ -1,6 +1,7 @@
 import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
 import 'package:foodkitchen/core/error/failures.dart';
+import 'package:foodkitchen/features/planner/domain/entities/kitchen_date_range_entity.dart';
 import 'package:foodkitchen/features/planner/domain/entities/meal_plan_entity.dart';
 import 'package:fpdart/fpdart.dart';
 
@@ -48,5 +49,13 @@ abstract interface class PlannerRepository {
   });
   Future<Either<Failure, List<MealTypeEntity>>> listAllMealPlans({
     required String kitchenId,
+  });
+  Future<Either<Failure, KitchenDateRangeEntity>> getDateRange({
+    required String kitchenId,
+  });
+  Future<Either<Failure, KitchenDateRangeEntity>> setDateRange({
+    required String kitchenId,
+    required String startDate,
+    required String endDate,
   });
 }

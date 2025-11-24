@@ -44,6 +44,7 @@ class GroceryBloc extends Bloc<GroceryEvent, GroceryState> {
     RequestedGroceryEvent event,
     Emitter<GroceryState> emit,
   ) async {
+    if (event.kitchenId.isEmpty) return;
     final res = await _getRequestedItems(
       GetRequestedItemsParams(kitchenId: event.kitchenId),
     );
@@ -143,6 +144,7 @@ class GroceryBloc extends Bloc<GroceryEvent, GroceryState> {
     GetAiGeneratedItemsEvent event,
     Emitter<GroceryState> emit,
   ) async {
+    if (event.kitchenId.isEmpty) return;
     final res = await _getAiGeneratedItems(
       GetAiGeneratedItemsParams(kitchenId: event.kitchenId),
     );
