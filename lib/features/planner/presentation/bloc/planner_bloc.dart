@@ -220,6 +220,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     Emitter<PlannerState> emit,
   ) async {
     if (event.kitchenId.isEmpty) return;
+
     emit(state.copyWith(isLoading: true));
 
     final res = await _getAllPlans(
@@ -240,13 +241,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
             isLoading: false,
           ),
         );
-
-        emit(
-          state.copyWith(
-            startDate:
-                state.startDate ?? formatDateToMeetBackendDate(DateTime.now()),
-          ),
-        );
+        log("start date : ${state.startDate}");
         add(GetDateBasedPlans(state.startDate ?? formatDate(DateTime.now())));
       },
     );
@@ -612,6 +607,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
       switch (event.mealPlan.mealType.toLowerCase()) {
         case "breakfast":
           plans = plans.copyWith(
+            date: event.date,
             breakfast: event.mealPlan,
             lunch: null,
             dinner: null,
@@ -620,6 +616,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
 
         case "lunch":
           plans = plans.copyWith(
+            date: event.date,
             breakfast: null,
             lunch: event.mealPlan,
             dinner: null,
@@ -628,6 +625,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
 
         case "dinner":
           plans = plans.copyWith(
+            date: event.date,
             breakfast: null,
             lunch: null,
             dinner: event.mealPlan,
@@ -706,6 +704,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
 
     emit(
       state.copyWith(
+        startDate: state.startDate,
         dateBasedPlan: dateBasedPlan.isNotEmpty ? [dateBasedPlan[0]] : [],
         isLoading: false,
         addingToWeeklyPlan: false,

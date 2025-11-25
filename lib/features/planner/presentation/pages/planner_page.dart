@@ -17,7 +17,6 @@ import 'package:foodkitchen/core/widgets/generic_date_picker_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/no_kitchen_found.dart';
 import 'package:foodkitchen/features/planner/domain/entities/merged_meal_type_entity.dart';
-import 'package:foodkitchen/features/planner/domain/usecases/get_date_range.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dart';
@@ -25,7 +24,6 @@ import 'package:foodkitchen/features/planner/presentation/widgets/day_plan_tile.
 import 'package:foodkitchen/features/planner/presentation/widgets/meal_tile.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class PlannerPage extends StatefulWidget {
   const PlannerPage({super.key});
@@ -139,6 +137,7 @@ class _PlannerPageState extends State<PlannerPage> {
 
         Navigator.pop(context);
       },
+
       onSecondaryPressed: () {
         Navigator.pop(context);
       },
@@ -154,41 +153,47 @@ class _PlannerPageState extends State<PlannerPage> {
   );
 
   Widget _buildHeader(BuildContext context) => UpperTile(
-    widget: Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text(
-          "Plan your meals for the week ahead",
-          style: Theme.of(context).textTheme.headlineLarge,
-          textAlign: TextAlign.center,
-        ),
-        gap(height: 15),
-        GenericButtonWidget(
-          onPressed: () async {
-            _plannerBloc.add(ResetMealPlanState());
-            final prefs = await SharedPreferences.getInstance();
-            final getStartDate = prefs.getString("start-date");
-            final startDate = getStartDate != null
-                ? parseDate(getStartDate)
-                : DateTime.now();
-            _plannerBloc.add(
-              UpdateTypeSelectedAndDateEvent(date: startDate, index: 0),
-            );
-            setState(() {
-              if (localDbPlanStartTime != null) {
-                _selectedDate = parseDate(localDbPlanStartTime!);
-              } else {
-                _selectedDate = DateTime.now();
-              }
-            });
-            // ignore: use_build_context_synchronously
-            context.push(Routes.addMeal);
-          },
-          text: "+ Add Meal",
-        ),
-      ],
+    widget: BlocBuilder<PlannerBloc, PlannerState>(
+      builder: (context, state) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              "Plan your meals for the week ahead",
+              style: Theme.of(context).textTheme.headlineLarge,
+              textAlign: TextAlign.center,
+            ),
+            gap(height: 15),
+            GenericButtonWidget(
+              onPressed: () async {
+                _plannerBloc.add(ResetMealPlanState());
+
+                _plannerBloc.add(
+                  UpdateTypeSelectedAndDateEvent(
+                    date: _getCurrentDateForBackend(state),
+                    index: 0,
+                  ),
+                );
+
+                // ignore: use_build_context_synchronously
+                context.push(Routes.addMeal);
+              },
+              text: "+ Add Meal",
+            ),
+          ],
+        );
+      },
     ),
   );
+  DateTime _getCurrentDateForBackend(PlannerState state) {
+    if (state.startDate != null && state.startDate!.isNotEmpty) {
+      return formatStringDateToMeetBackendDate(state.startDate!);
+    }
+
+    final DateTime today = DateTime.now();
+    final String todayString = formatDateToMeetBackendDate(today);
+    return formatStringDateToMeetBackendDate(todayString);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -218,9 +223,11 @@ class _PlannerPageState extends State<PlannerPage> {
                       builder: (_, state) {
                         final plan = state.dateBasedPlan ?? [];
 
-                        final startDate = state.startDate;
-                        log("start date $startDate");
-                        if (startDate != null && startDate.isNotEmpty) {
+                        String startDate =
+                            state.startDate ??
+                            formatDateToMeetBackendDate(DateTime.now());
+
+                        if (startDate.isNotEmpty) {
                           try {
                             _selectedDate ??= formatStringDateToMeetBackendDate(
                               startDate,
@@ -240,21 +247,48 @@ class _PlannerPageState extends State<PlannerPage> {
                                   child: _buildEmptyState(),
                                 )
                               else ...[
-                                SelectDateWidget(
-                                  entitlementIsActive:
-                                      AppConstants.entitlementIsActive,
-                                  startDate:
-                                      _selectedDate ??
-                                      formatStringDateToMeetBackendDate(
-                                        state.startDate!,
-                                      ),
-                                  onChanged: (date) {
-                                    setState(() => _selectedDate = date);
+                                BlocBuilder<PlannerBloc, PlannerState>(
+                                  builder: (context, state) {
+                                    if (state.startDate != null &&
+                                        state.startDate!.isNotEmpty &&
+                                        _selectedDate == null) {
+                                      try {
+                                        _selectedDate = DateTime.parse(
+                                          state.startDate!,
+                                        );
+                                      } catch (e) {
+                                        _selectedDate = DateTime.now();
+                                      }
+                                    }
 
-                                    _plannerBloc.add(
-                                      GetDateBasedPlans(
-                                        formatDateToMeetBackendDate(date),
-                                      ),
+                                    if (state.isLoading &&
+                                        state.mealPlans.isEmpty &&
+                                        state.startDate == null) {
+                                      return const Center(
+                                        child: CircularProgressIndicator(),
+                                      );
+                                    }
+
+                                    return SelectDateWidget(
+                                      entitlementIsActive:
+                                          AppConstants.entitlementIsActive,
+                                      startDate:
+                                          formatStringDateToMeetBackendDate(
+                                            state.startDate ??
+                                                formatDateToMeetBackendDate(
+                                                  DateTime.now(),
+                                                ),
+                                          ),
+                                      selectedDate: _selectedDate,
+                                      onChanged: (date) {
+                                        setState(() => _selectedDate = date);
+
+                                        _plannerBloc.add(
+                                          GetDateBasedPlans(
+                                            formatDateToMeetBackendDate(date),
+                                          ),
+                                        );
+                                      },
                                     );
                                   },
                                 ),

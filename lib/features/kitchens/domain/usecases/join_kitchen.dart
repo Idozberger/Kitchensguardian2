@@ -11,12 +11,17 @@ class JoinKitchenUseCase implements UseCase<String, JoinKitchenUsecaseParams> {
   Future<Either<Failure, String>> call(JoinKitchenUsecaseParams params) async {
     return await kitchenRepository.joinKitchen(
       invitationCode: params.invitationCode,
+      userId: params.userId,
     );
   }
 }
 
 class JoinKitchenUsecaseParams {
   final String invitationCode;
+  final String userId;
 
-  JoinKitchenUsecaseParams({required this.invitationCode});
+  JoinKitchenUsecaseParams({
+    required this.invitationCode,
+    required this.userId,
+  });
 }

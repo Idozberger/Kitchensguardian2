@@ -66,3 +66,5 @@ final class ResendEmailVerficationCodeEvent extends AuthEvent {
 
   ResendEmailVerficationCodeEvent({required this.email});
 }
+
+final class GoogleSignInEvent extends AuthEvent {}

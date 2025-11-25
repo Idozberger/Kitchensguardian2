@@ -118,8 +118,9 @@ class MealActionRow extends StatelessWidget {
                         }
 
                         if (mealPlans.isNotEmpty) {
-                          log("Date Ranges: -- Setting: ${state.startDate}");
-                          if (state.startDate == null) {
+                          if (state.startDate == null ||
+                              state.startDate!.isEmpty) {
+                            log("Date Ranges: -- Setting: ${state.startDate}");
                             updateStartEndDate(plannerBloc);
                           }
                           if (state.endDate != null &&

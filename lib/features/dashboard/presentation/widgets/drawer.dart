@@ -60,7 +60,9 @@ class AppDrawer extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: h(35),
-              backgroundImage: state.profilePictureFilePath != null
+              backgroundImage:
+                  state.profilePictureFilePath != null &&
+                      state.profilePictureFilePath!.isNotEmpty
                   ? MemoryImage(state.profilePictureFilePath!)
                   : AssetImage(AppAssets.avatar),
             ),

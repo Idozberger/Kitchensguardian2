@@ -8,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
+import 'package:foodkitchen/core/common/cubits/user_state.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
@@ -149,46 +150,63 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Center(
-                      child: Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          state.imagePath != null
-                              ? CircleAvatar(
-                                  radius: w(36),
-                                  backgroundColor: Colors.grey.shade200,
+                    GestureDetector(
+                      onTap: _pickImage,
+                      child: Center(
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            BlocBuilder<UserCubit, UserState>(
+                              builder: (_, userstate) {
+                                if (imageBytes != null) {
+                                  return CircleAvatar(
+                                    radius: w(36),
+                                    backgroundColor: Colors.grey.shade200,
+                                    backgroundImage: MemoryImage(imageBytes!),
+                                  );
+                                }
+                                return userstate.profilePictureFilePath !=
+                                            null &&
+                                        userstate
+                                            .profilePictureFilePath!
+                                            .isNotEmpty
+                                    ? CircleAvatar(
+                                        radius: w(36),
+                                        backgroundColor: Colors.grey.shade200,
+                                        backgroundImage: MemoryImage(
+                                          userstate.profilePictureFilePath!,
+                                        ),
+                                      )
+                                    : Image.asset(
+                                        AppAssets.avatar,
+                                        width: w(72),
+                                        height: h(72),
+                                      );
+                              },
+                            ),
 
-                                  backgroundImage: MemoryImage(
-                                    state.imagePath!,
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: GestureDetector(
+                                onTap: _pickImage,
+                                child: Container(
+                                  padding: EdgeInsets.all(w(4)),
+                                  decoration: const BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.white,
                                   ),
-                                )
-                              : Image.asset(
-                                  AppAssets.avatar,
-                                  width: w(72),
-                                  height: h(72),
-                                ),
-
-                          Positioned(
-                            bottom: 0,
-                            right: 0,
-                            child: GestureDetector(
-                              onTap: _pickImage,
-                              child: Container(
-                                padding: EdgeInsets.all(w(4)),
-                                decoration: const BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.white,
-                                ),
-                                child: SvgPicture.asset(
-                                  AppAssets.editSvg,
-                                  width: w(16),
-                                  height: h(16),
-                                  color: AppColors.primaryColor,
+                                  child: SvgPicture.asset(
+                                    AppAssets.editSvg,
+                                    width: w(16),
+                                    height: h(16),
+                                    color: AppColors.primaryColor,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                     gap(height: 20),

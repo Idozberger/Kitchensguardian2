@@ -151,7 +151,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       "Your request to join the kitchen \"$kitchenName\" has been approved by the host. You are now added to the kitchen. You can access it anytime using this invitation code: $inviteCode",
     );
 
-    _kitchenBloc.add(MemberApprovedEvent(inviteCode));
+    _kitchenBloc.add(MemberApprovedEvent(inviteCode, userId));
     await FirebaseFirestore.instance
         .collection('notifications')
         .add(notificationData);
@@ -201,7 +201,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     }
 
     final notificationData = {
-      "status": false,
+      "status": true,
       'title': "Your request to join the kitchen was declined",
       'body':
           "Your request to join the kitchen \"$kitchenName\" has been declined by the host. You can try again later or contact the host for more details.",

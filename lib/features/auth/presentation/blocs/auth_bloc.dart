@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/domain/usecase/get_current_user.dart';
+import 'package:foodkitchen/features/auth/domain/usecase/google_sign_in_usecase.dart';
 import 'package:foodkitchen/features/auth/domain/usecase/send_password_reset_email_usecase.dart';
 import 'package:foodkitchen/features/auth/domain/usecase/send_user_email_verification_code_usecase.dart';
 import 'package:foodkitchen/features/auth/domain/usecase/set_user_new_password_usecase.dart';
@@ -19,6 +20,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final SendPasswordResetEmail _sendPasswordResetEmail;
   final SetUserNewPassword _setUserNewPassword;
   final VerifyUserEmail _verifyUserEmail;
+  final GoogleSignInUsecase _googleSignInUsecase;
 
   AuthBloc({
     required UserCubit userCubit,
@@ -29,6 +31,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required SetUserNewPassword setUserNewPassword,
     required VerifyUserEmail verifyUserEmail,
     required GetCurrentUserUseCase getCurrentUser,
+    required GoogleSignInUsecase googleSignIn,
   }) : _userCubit = userCubit,
        _userSignUp = userSignUp,
        _sendUserEmailVerificationCode = sendUserEmailVerificationCode,
@@ -37,6 +40,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
        _setUserNewPassword = setUserNewPassword,
        _verifyUserEmail = verifyUserEmail,
        _getCurrentUser = getCurrentUser,
+       _googleSignInUsecase = googleSignIn,
 
        super(AuthInitial()) {
     on<AuthSignUp>(_onAuthSignUp);
@@ -47,7 +51,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthVerifyEmail>(_onVerifyUserEmail);
     on<AuthGetCurrentUser>(_onGetCurrentUser);
     on<ResendEmailVerficationCodeEvent>(_onResendEmailVerficationCode);
+    on<GoogleSignInEvent>(_onGoogleSignIn);
   }
+  Future<void> _onGoogleSignIn(
+    GoogleSignInEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(GoogleAuthLoading());
+    final res = await _googleSignInUsecase(NoParams());
+
+    res.fold((failure) => emit(AuthFailure(failure.message)), (message) {
+      emit(AuthSuccess(message));
+      _onGetCurrentUser(AuthGetCurrentUser(), emit);
+    });
+  }
+
   Future<void> _onAuthSignUp(AuthSignUp event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     final res = await _userSignUp(
@@ -89,8 +107,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       UserSignInParams(email: event.email, password: event.password),
     );
 
-    res.fold((failure) => emit(AuthFailure(failure.message)), (user) {
-      emit(AuthSuccess(user));
+    res.fold((failure) => emit(AuthFailure(failure.message)), (message) {
+      emit(AuthSuccess(message));
       _onGetCurrentUser(AuthGetCurrentUser(), emit);
     });
   }

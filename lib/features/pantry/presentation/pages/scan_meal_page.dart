@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
+import 'package:foodkitchen/core/dialogs/camera_permission_denied.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
@@ -42,7 +43,7 @@ class _ScanMealPageState extends State<ScanMealPage>
       if (result.isGranted) {
         _initializeCameraController();
       } else if (result.isPermanentlyDenied) {
-        _showPermissionDialog();
+        showPermissionDialog(context);
       } else {
         _showDeniedSnackBar();
       }
@@ -50,7 +51,7 @@ class _ScanMealPageState extends State<ScanMealPage>
     }
 
     if (status.isPermanentlyDenied) {
-      _showPermissionDialog();
+      showPermissionDialog(context);
       return;
     }
 
@@ -84,35 +85,6 @@ class _ScanMealPageState extends State<ScanMealPage>
         content: Text(
           'Camera permission denied. Please enable it to use scanning.',
         ),
-      ),
-    );
-  }
-
-  Future<void> _showPermissionDialog() async {
-    await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text("Camera Permission Required"),
-        content: const Text(
-          "Camera access is permanently denied. Please enable it in app settings to use this feature.",
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pop(context);
-            },
-            child: const Text("Cancel"),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              await openAppSettings();
-            },
-            child: const Text("Open Settings"),
-          ),
-        ],
       ),
     );
   }

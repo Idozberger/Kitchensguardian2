@@ -43,10 +43,12 @@ class KitchenRepositoryImpl implements KitchenRepository {
   @override
   Future<Either<Failure, String>> joinKitchen({
     required String invitationCode,
+    required String userId,
   }) async {
     try {
       final response = await kitchenRemoteDataSource.joinKitchen(
         invitationCode: invitationCode,
+        userId: userId,
       );
       return right(response);
     } on Failure catch (f) {

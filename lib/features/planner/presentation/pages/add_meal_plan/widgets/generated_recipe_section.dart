@@ -3,12 +3,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/data/model/meal_type_model.dart';
 import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
-import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
+import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
+import 'package:foodkitchen/core/global/functions/resize.dart';
+import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
+import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/features/planner/domain/entities/merged_meal_type_entity.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dart';
+import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dart';
 import 'package:foodkitchen/features/planner/presentation/widgets/recipe_tile_item.dart';
 
 class GeneratedRecipeSection extends StatelessWidget {
@@ -89,13 +93,13 @@ class GeneratedRecipeSection extends StatelessWidget {
     BuildContext context,
     MealTypeEntity meal,
   ) async {
-    await showCustomGenericDialog(
+    await showPlannerDeleteDialog(
       context: context,
       title: "Delete Plan",
       subtitle: "Are you sure you want to delete this plan?",
       primaryButtonText: "Yes",
       secondaryButtonText: "Cancel",
-      isloading: false,
+
       onPrimaryPressed: () async {
         if (meal.mealplanId.isEmpty) {
           context.read<PlannerBloc>().add(
@@ -116,6 +120,96 @@ class GeneratedRecipeSection extends StatelessWidget {
         Navigator.pop(context);
       },
       onSecondaryPressed: () => Navigator.pop(context),
+    );
+  }
+
+  Future<dynamic> showPlannerDeleteDialog({
+    required BuildContext context,
+    required String title,
+    bool isloading = false,
+    required String subtitle,
+    required String primaryButtonText,
+    required String secondaryButtonText,
+    required VoidCallback onPrimaryPressed,
+    required VoidCallback onSecondaryPressed,
+  }) {
+    return showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) {
+        return GenericDialog(
+          borderRadius: h(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                title,
+                style: Theme.of(context).textTheme.headlineLarge!.copyWith(
+                  fontWeight: FontWeight.w600,
+                  fontSize: t(14),
+                ),
+              ),
+              SizedBox(height: h(10)),
+              Text(
+                subtitle,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.headlineLarge!.copyWith(
+                  fontWeight: FontWeight.w600,
+                  fontSize: t(12),
+                  color: const Color(0xff7B7B7B),
+                ),
+              ),
+              SizedBox(height: h(10)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  BlocBuilder<PlannerBloc, PlannerState>(
+                    builder: (context, state) {
+                      return Flexible(
+                        child: SizedBox(
+                          height: h(40),
+                          width: double.infinity,
+                          child: OutlinedButton(
+                            onPressed: onPrimaryPressed,
+                            child: state.isLoading
+                                ? Transform.scale(
+                                    scale: 0.7,
+                                    child: Center(
+                                      child: CircularProgressIndicator(
+                                        color: AppColors.primaryColor,
+                                      ),
+                                    ),
+                                  )
+                                : Text(
+                                    primaryButtonText,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineMedium!
+                                        .copyWith(
+                                          fontSize: t(12),
+                                          color: AppColors.primaryColor,
+                                        ),
+                                  ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  SizedBox(width: h(10)),
+                  Flexible(
+                    child: GenericButtonWidget(
+                      isLoading: false,
+                      onPressed: onSecondaryPressed,
+                      text: secondaryButtonText,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

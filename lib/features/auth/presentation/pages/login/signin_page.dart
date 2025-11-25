@@ -53,6 +53,10 @@ class _SignInPageState extends State<SignInPage> {
     }
   }
 
+  Future<void> onGoogleSignIn() async {
+    context.read<AuthBloc>().add(GoogleSignInEvent());
+  }
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -194,9 +198,11 @@ class _SignInPageState extends State<SignInPage> {
                     Center(
                       child: InkWell(
                         borderRadius: BorderRadius.circular(h(10)),
-                        onTap: () {
-                          onLogin();
-                        },
+                        onTap: state is GoogleAuthLoading
+                            ? null
+                            : () {
+                                onGoogleSignIn();
+                              },
                         child: Ink(
                           width: w(209),
                           padding: gapAll(10),
@@ -204,25 +210,33 @@ class _SignInPageState extends State<SignInPage> {
                             color: Color(0xffF9F8F8),
                             borderRadius: BorderRadius.circular(h(10)),
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Image.asset(
-                                AppAssets.googlePng,
-                                height: h(22),
-                                width: w(22),
-                              ),
-                              SizedBox(width: w(6)),
-                              Text(
-                                "Sign In with Google",
-                                style: Theme.of(context).textTheme.bodyMedium!
-                                    .copyWith(
-                                      fontSize: t(12),
-                                      color: Color(0xff757575),
+                          child: (state is GoogleAuthLoading)
+                              ? Center(
+                                  child: CircularProgressIndicator(
+                                    color: Colors.pink,
+                                  ),
+                                )
+                              : Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Image.asset(
+                                      AppAssets.googlePng,
+                                      height: h(22),
+                                      width: w(22),
                                     ),
-                              ),
-                            ],
-                          ),
+                                    SizedBox(width: w(6)),
+                                    Text(
+                                      "Sign In with Google",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium!
+                                          .copyWith(
+                                            fontSize: t(12),
+                                            color: Color(0xff757575),
+                                          ),
+                                    ),
+                                  ],
+                                ),
                         ),
                       ),
                     ),

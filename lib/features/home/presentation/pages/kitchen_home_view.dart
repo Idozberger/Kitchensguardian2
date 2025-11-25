@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
+import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
@@ -14,6 +15,7 @@ import 'package:foodkitchen/features/home/presentation/widgets/smart_cart.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/tonight_recipe.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class KitchenHomeView extends StatelessWidget {
   final HomeState state;
@@ -60,8 +62,35 @@ class KitchenHomeView extends StatelessWidget {
                   backgroundColor: Color(0xffDE7600),
                   disabledBackgroundColor: AppColors.disabledPrimaryColor,
                 ),
-                onPressed: () {
-                  context.push(Routes.scanMeal);
+
+                onPressed: () async {
+                  PermissionStatus status = await Permission.camera.status;
+
+                  if (status.isGranted) {
+                    context.push(Routes.scanMeal);
+                  } else {
+                    showCustomGenericDialog(
+                      context: context,
+                      title: "Request Camera Permission",
+                      subtitle: "We need camera access to continue.",
+                      primaryButtonText: "Yes",
+                      secondaryButtonText: "Cancel",
+                      onPrimaryPressed: () async {
+                        Navigator.pop(context);
+                        PermissionStatus result = await Permission.camera
+                            .request();
+
+                        if (result.isGranted) {
+                          context.push(Routes.scanMeal);
+                        } else if (result.isPermanentlyDenied) {
+                          openAppSettings();
+                        }
+                      },
+                      onSecondaryPressed: () {
+                        Navigator.pop(context);
+                      },
+                    );
+                  }
                 },
                 child: Text(
                   "Scan Receipt",

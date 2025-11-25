@@ -75,7 +75,10 @@ class KitchenBloc extends Bloc<KitchenEvent, KitchenState> {
   ) async {
     emit(KitchensLoading());
     final res = await _joinKitchen(
-      JoinKitchenUsecaseParams(invitationCode: event.invitationCode),
+      JoinKitchenUsecaseParams(
+        invitationCode: event.invitationCode,
+        userId: event.userId,
+      ),
     );
 
     res.fold(

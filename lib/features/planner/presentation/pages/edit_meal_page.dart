@@ -1,10 +1,9 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
+import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
@@ -48,17 +47,58 @@ class _EditMealPageState extends State<EditMealPage>
   }
 
   Future<void> _initializeDate() async {
-    final hasPlans = plannerBloc.state.mealPlans.isNotEmpty;
+    setState(() => isLoading = true);
 
-    if (hasPlans) {
-      final dateString = context.read<PlannerBloc>().state.mealPlans[0].date;
-      DateTime date = DateTime.parse(dateString);
-      startDate = date;
+    final state = plannerBloc.state;
 
-      plannerBloc.add(
-        UpdateTypeSelectedAndDateEvent(index: 0, date: startDate),
-      );
+    if (state.mealPlans.isEmpty) {
+      startDate = DateTime.now();
+    } else {
+      final List<DateTime> planDates = state.mealPlans
+          .map((plan) {
+            try {
+              return DateTime.parse(plan.date);
+            } catch (e) {
+              return null;
+            }
+          })
+          .whereType<DateTime>()
+          .toList();
+
+      if (planDates.isEmpty) {
+        startDate = DateTime.now();
+      } else {
+        planDates.sort((a, b) => b.compareTo(a));
+
+        final today = DateTime(
+          DateTime.now().year,
+          DateTime.now().month,
+          DateTime.now().day,
+        );
+
+        final todayPlanDate = planDates.cast<DateTime?>().firstWhere(
+          (date) =>
+              date != null &&
+              date.year == today.year &&
+              date.month == today.month &&
+              date.day == today.day,
+          orElse: () => null,
+        );
+
+        if (todayPlanDate != null) {
+          startDate = todayPlanDate;
+        } else {
+          startDate = planDates.first;
+        }
+      }
     }
+
+    plannerBloc.add(
+      UpdateTypeSelectedAndDateEvent(
+        index: 0, // breakfast
+        date: startDate,
+      ),
+    );
 
     setState(() => isLoading = false);
   }
@@ -119,8 +159,6 @@ class _EditMealPageState extends State<EditMealPage>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // _buildDateSelector(context),
-                          // gap(height: 20),
                           MealTypeSelector(
                             selectedIndex: state.mealTypeSelectedIndex,
                             onSelected: (index) => plannerBloc.add(
@@ -158,19 +196,6 @@ class _EditMealPageState extends State<EditMealPage>
         "Edit Meal",
         style: Theme.of(context).textTheme.headlineLarge,
       ),
-    );
-  }
-
-  Widget _buildDateSelector(BuildContext context) {
-    return BlocBuilder<PlannerBloc, PlannerState>(
-      builder: (_, state) {
-        return SelectDateWidget(
-          selectedDate: state.selectedDate,
-          startDate: startDate,
-          entitlementIsActive: false,
-          onChanged: (selected) {},
-        );
-      },
     );
   }
 
@@ -250,7 +275,9 @@ class _EditMealPageState extends State<EditMealPage>
   }
 
   Widget _buildGenerateButton(BuildContext context, PlannerState state) {
-    final formatted = DateFormat('dd/MM/yyyy').format(state.selectedDate!);
+    final formatted = DateFormat(
+      'dd/MM/yyyy',
+    ).format(state.selectedDate ?? DateTime.now());
 
     return Padding(
       padding: gapOnly(top: 20),
@@ -279,6 +306,7 @@ class _EditMealPageState extends State<EditMealPage>
   }) {
     return showCustomGenericDialog(
       context: context,
+
       title: title,
       subtitle: subtitle,
       primaryButtonText: "Yes",

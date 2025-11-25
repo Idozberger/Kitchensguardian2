@@ -12,7 +12,12 @@
           "package_name": "com.example.foodkitchen"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "428640146273-a3i750lldh1etatql54i10b2sqebcqus.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBAT1_CcBAyn3eZ3ZUBIO7W1E5WmjJ6Eyc"
@@ -20,7 +25,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "428640146273-a3i750lldh1etatql54i10b2sqebcqus.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "428640146273-6ad3ontpf8vdr3vmbf7u4drbet46h6o0.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.foodkitchen"
+              }
+            }
+          ]
         }
       }
     },
@@ -31,7 +48,12 @@
           "package_name": "com.quickfixtechnology.image2text"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "428640146273-a3i750lldh1etatql54i10b2sqebcqus.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBAT1_CcBAyn3eZ3ZUBIO7W1E5WmjJ6Eyc"
@@ -39,7 +61,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "428640146273-a3i750lldh1etatql54i10b2sqebcqus.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "428640146273-6ad3ontpf8vdr3vmbf7u4drbet46h6o0.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.foodkitchen"
+              }
+            }
+          ]
         }
       }
     }

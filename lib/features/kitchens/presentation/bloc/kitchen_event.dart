@@ -49,7 +49,8 @@ class JoinKitchenEvent extends KitchenEvent {
 
 class MemberApprovedEvent extends KitchenEvent {
   final String invitationCode;
-  const MemberApprovedEvent(this.invitationCode);
+  final String userId;
+  const MemberApprovedEvent(this.invitationCode, this.userId);
 }
 
 class SwitchKitchenEvent extends KitchenEvent {

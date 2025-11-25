@@ -30,7 +30,8 @@ class ProfileHeader extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  state.profilePictureFilePath != null
+                  state.profilePictureFilePath != null &&
+                          state.profilePictureFilePath!.isNotEmpty
                       ? CircleAvatar(
                           radius: w(36),
                           backgroundColor: Colors.grey.shade200,

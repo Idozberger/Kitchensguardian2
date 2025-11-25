@@ -54,3 +54,5 @@ final class ResendEmailVerficationCode extends AuthState {
   final String message;
   const ResendEmailVerficationCode(this.message);
 }
+
+final class GoogleAuthLoading extends AuthState {}

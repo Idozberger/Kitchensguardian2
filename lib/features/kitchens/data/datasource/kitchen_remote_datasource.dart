@@ -10,7 +10,10 @@ abstract interface class KitchenRemoteDatasource {
   Future<List<Map<String, dynamic>>> getKitchens();
   Future<String> leaveKitchen({required String kitchenId});
   Future<String> createKitchen({required String kitchenName});
-  Future<String> joinKitchen({required String invitationCode});
+  Future<String> joinKitchen({
+    required String invitationCode,
+    required String userId,
+  });
   Future<String> removeKitchen({required String kitchenId});
   Future<String> inviteUser({required String email, required String kitchenId});
 }
@@ -74,12 +77,18 @@ class KitchenRemoteDataSourceImpl implements KitchenRemoteDatasource {
   }
 
   @override
-  Future<String> joinKitchen({required String invitationCode}) async {
+  Future<String> joinKitchen({
+    required String invitationCode,
+    required String userId,
+  }) async {
     try {
+      log("userId: ${userId}");
+
       final response = await dio.post(
         AppConstants.joinKitchen,
-        data: {"invitation_code": invitationCode},
+        data: {"invitation_code": invitationCode, "user_id": userId},
       );
+
       if (response.statusCode != 200 && response.statusCode != 201) {
         final data = response.data is String
             ? jsonDecode(response.data)
@@ -88,10 +97,6 @@ class KitchenRemoteDataSourceImpl implements KitchenRemoteDatasource {
         final message = data["error"];
         throw message;
       }
-      final data = response.data;
-      final kitchenId = data["kitchen_id"];
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('kitchen_id', kitchenId.toString());
 
       return response.data["message"];
     } on DioException catch (e) {
