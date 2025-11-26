@@ -153,8 +153,7 @@ class MealActionRow extends StatelessWidget {
 
     final formattedStartDate = formatDateToMeetBackendDate(next3Dates.first);
     final formattedEndDate = formatDateToMeetBackendDate(next3Dates.last);
-    log(formattedStartDate);
-    log(formattedEndDate);
+
     plannerBloc.add(
       SetDateRangeEvent(
         startDate: formattedStartDate,

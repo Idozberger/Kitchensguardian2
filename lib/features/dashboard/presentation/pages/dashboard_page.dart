@@ -16,6 +16,8 @@ import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_event.dart';
 
 import 'package:foodkitchen/features/home/presentation/pages/home_page.dart';
+import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
+import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dart';
 
 import 'package:foodkitchen/features/planner/presentation/pages/planner_page.dart';
 import 'package:foodkitchen/features/profile/presentation/pages/profile_page.dart';
@@ -36,6 +38,7 @@ class _DashboardPageState extends State<DashboardPage> {
     userCubit = context.read<UserCubit>();
     cancelNotificationsForItemExpiring();
     _initializeFirebaseMessaging();
+
     super.initState();
   }
 

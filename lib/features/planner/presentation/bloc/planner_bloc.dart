@@ -175,8 +175,12 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
         );
         if (dateRange.endDate.isNotEmpty) {
           final existingEndDate = DateTime.parse(dateRange.endDate);
-
-          if (existingEndDate.isBefore(DateTime.now())) {
+          final todayOnly = DateTime(
+            DateTime.now().year,
+            DateTime.now().month,
+            DateTime.now().day,
+          );
+          if (existingEndDate.isBefore(todayOnly)) {
             updateStartEndDate();
           }
         }
