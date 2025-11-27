@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';
+import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
 import 'dart:typed_data';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
@@ -21,6 +22,7 @@ import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_state.dart'
 import 'package:foodkitchen/features/pantry/presentation/widgets/custom_appbar.dart';
 import 'package:foodkitchen/features/pantry/presentation/widgets/pantry_item_card.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 
 class MyPantryPage extends StatefulWidget {
   const MyPantryPage({super.key});
@@ -137,11 +139,7 @@ class _MyPantryPageState extends State<MyPantryPage> {
                               ),
                             ],
                           )
-                        : Center(
-                            child: CircularProgressIndicator(
-                              color: AppColors.primaryColor,
-                            ),
-                          ),
+                        : Center(child: Lottie.asset(AppAssets.loader)),
                   ),
                 ],
               ),

@@ -19,6 +19,7 @@ import 'package:foodkitchen/features/kitchens/presentation/dialogs/create_kitche
 import 'package:foodkitchen/features/kitchens/presentation/dialogs/join_kitchen.dart';
 import 'package:foodkitchen/features/kitchens/presentation/widgets/kitchen_tile.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class KitchenPage extends StatefulWidget {
@@ -61,9 +62,7 @@ class _KitchenPageState extends State<KitchenPage> {
         },
         builder: (_, kitchenState) {
           if (kitchenState is KitchensLoading) {
-            return Center(
-              child: CircularProgressIndicator(color: AppColors.primaryColor),
-            );
+            return Center(child: Lottie.asset(AppAssets.loader));
           } else if (kitchenState is KitchensLoaded) {
             return SafeArea(
               child: SingleChildScrollView(
@@ -197,6 +196,7 @@ class _KitchenPageState extends State<KitchenPage> {
                             );
 
                             kitchenBloc.add(SwitchKitchenEvent(kitchen));
+
                             await userCubit.getUserStorageArea(
                               kitchenId: kitchen.kitchenId,
                             );

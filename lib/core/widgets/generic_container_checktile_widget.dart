@@ -64,19 +64,17 @@ class GenericCircleCheckboxTile extends StatelessWidget {
                 SizedBox(width: w(14)),
 
                 Expanded(
-                  child: GestureDetector(
+                  child: InkWell(
                     onTap: () => onChanged(!isChecked),
                     child: Text(
                       title,
                       style:
                           textStyle ??
                           Theme.of(context).textTheme.headlineMedium!.copyWith(
-                            decoration: isChecked && isFinalList
+                            decoration: isFinalList
                                 ? TextDecoration.lineThrough
                                 : null,
-                            fontWeight: isChecked && isFinalList
-                                ? null
-                                : FontWeight.bold,
+                            fontWeight: isFinalList ? null : FontWeight.bold,
                           ),
                     ),
                   ),

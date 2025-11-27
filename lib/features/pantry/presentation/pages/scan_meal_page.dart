@@ -12,6 +12,7 @@ import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:foodkitchen/main.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class ScanMealPage extends StatefulWidget {
@@ -172,7 +173,7 @@ class _ScanMealPageState extends State<ScanMealPage>
         borderRadius: BorderRadius.circular(h(20)),
       ),
       child: !_isCameraInitialized
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: Lottie.asset(AppAssets.loader))
           : ClipRRect(
               borderRadius: BorderRadius.circular(h(20)),
               child: CameraPreview(_controller!),

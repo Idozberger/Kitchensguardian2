@@ -24,6 +24,7 @@ import 'package:foodkitchen/features/planner/presentation/widgets/day_plan_tile.
 import 'package:foodkitchen/features/planner/presentation/widgets/meal_tile.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:lottie/lottie.dart';
 
 class PlannerPage extends StatefulWidget {
   const PlannerPage({super.key});
@@ -53,6 +54,7 @@ class _PlannerPageState extends State<PlannerPage> {
     _plannerBloc.add(
       GetDateRangeEvent(kitchenId: _userCubit.state.activeKitchenId),
     );
+    await Future.delayed(Duration(seconds: 4));
     _plannerBloc.add(
       GetAllWeeklyPlansEvent(_userCubit.state.activeKitchenId, null),
     );
@@ -167,12 +169,10 @@ class _PlannerPageState extends State<PlannerPage> {
             GenericButtonWidget(
               onPressed: () async {
                 _plannerBloc.add(ResetMealPlanState());
-
+                DateTime date = _getCurrentDateForBackend(state);
+                log("start-date button: ${date}");
                 _plannerBloc.add(
-                  UpdateTypeSelectedAndDateEvent(
-                    date: _getCurrentDateForBackend(state),
-                    index: 0,
-                  ),
+                  UpdateTypeSelectedAndDateEvent(date: date, index: 0),
                 );
 
                 // ignore: use_build_context_synchronously
@@ -187,12 +187,14 @@ class _PlannerPageState extends State<PlannerPage> {
   );
   DateTime _getCurrentDateForBackend(PlannerState state) {
     if (state.startDate != null && state.startDate!.isNotEmpty) {
+      log("start-date: ${state.startDate}");
       return formatStringDateToMeetBackendDate(state.startDate!);
     }
 
-    final DateTime today = DateTime.now();
-    final String todayString = formatDateToMeetBackendDate(today);
-    return formatStringDateToMeetBackendDate(todayString);
+    final String selectedDateString = formatDateToMeetBackendDate(
+      _selectedDate!,
+    );
+    return formatStringDateToMeetBackendDate(selectedDateString);
   }
 
   @override
@@ -210,11 +212,7 @@ class _PlannerPageState extends State<PlannerPage> {
         return Scaffold(
           backgroundColor: const Color(0xffF9F9F9),
           body: state.isLoading
-              ? Center(
-                  child: CircularProgressIndicator(
-                    color: AppColors.primaryColor,
-                  ),
-                )
+              ? Center(child: Lottie.asset(AppAssets.loader))
               : SafeArea(
                   child: Padding(
                     padding: gapOnly(left: 20, right: 20, top: 14, bottom: 14),
@@ -222,10 +220,15 @@ class _PlannerPageState extends State<PlannerPage> {
                       listener: (context, state) {},
                       builder: (_, state) {
                         final plan = state.dateBasedPlan ?? [];
-
+                        final todayOnly = DateTime(
+                          DateTime.now().year,
+                          DateTime.now().month,
+                          DateTime.now().day,
+                        );
                         String startDate =
-                            state.startDate ??
-                            formatDateToMeetBackendDate(DateTime.now());
+                            state.startDate == null || state.startDate!.isEmpty
+                            ? formatDateToMeetBackendDate(todayOnly)
+                            : state.startDate!;
 
                         if (startDate.isNotEmpty) {
                           try {
@@ -233,6 +236,8 @@ class _PlannerPageState extends State<PlannerPage> {
                               startDate,
                             );
                           } catch (_) {}
+                        } else {
+                          _selectedDate = todayOnly;
                         }
 
                         return SingleChildScrollView(
@@ -264,8 +269,8 @@ class _PlannerPageState extends State<PlannerPage> {
                                     if (state.isLoading &&
                                         state.mealPlans.isEmpty &&
                                         state.startDate == null) {
-                                      return const Center(
-                                        child: CircularProgressIndicator(),
+                                      return Center(
+                                        child: Lottie.asset(AppAssets.loader),
                                       );
                                     }
 
@@ -274,10 +279,15 @@ class _PlannerPageState extends State<PlannerPage> {
                                           AppConstants.entitlementIsActive,
                                       startDate:
                                           formatStringDateToMeetBackendDate(
-                                            state.startDate ??
-                                                formatDateToMeetBackendDate(
-                                                  DateTime.now(),
-                                                ),
+                                            state.startDate == null
+                                                ? formatDateToMeetBackendDate(
+                                                    DateTime.now(),
+                                                  )
+                                                : state.startDate!.isEmpty
+                                                ? formatDateToMeetBackendDate(
+                                                    DateTime.now(),
+                                                  )
+                                                : state.startDate!,
                                           ),
                                       selectedDate: _selectedDate,
                                       onChanged: (date) {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/recipes_details/app_bar_widget.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/recipes_details/complete_dialog_widget.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/recipes_details/header_image_widget.dart';
@@ -155,19 +156,7 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
         setState(() => steps.forEach((step) => step["completed"] = false));
       },
       onFinish: () {
-        plannerBloc.add(
-          UpdateStartRecipeEvent(
-            startRecipe: false,
-            mealTypeEntity: [],
-            doneSteps: [],
-          ),
-        );
-        plannerBloc.add(
-          MarkRecipeFinishedEvent(
-            kitchenId: context.read<UserCubit>().state.activeKitchenId,
-            recipeId: recipe.id,
-          ),
-        );
+        _showFinishConfirmationDialog(context);
       },
     );
   }
@@ -318,6 +307,37 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
           ],
         ),
       ),
+    );
+  }
+
+  Future<dynamic> _showFinishConfirmationDialog(BuildContext context) {
+    return showCustomGenericDialog(
+      context: context,
+      title: "Finish Recipe?",
+      subtitle:
+          "This will mark the recipe as completed and automatically remove all used ingredients from your kitchen inventory.",
+      primaryButtonText: "Yes",
+      secondaryButtonText: "Cancel",
+      onPrimaryPressed: () {
+        plannerBloc.add(
+          UpdateStartRecipeEvent(
+            startRecipe: false,
+            mealTypeEntity: [],
+            doneSteps: [],
+          ),
+        );
+        plannerBloc.add(
+          MarkRecipeFinishedEvent(
+            kitchenId: context.read<UserCubit>().state.activeKitchenId,
+            recipeId: recipe.id,
+          ),
+        );
+        setState(() => steps.forEach((step) => step["completed"] = false));
+        context.pop();
+      },
+      onSecondaryPressed: () {
+        context.pop();
+      },
     );
   }
 }

@@ -18,6 +18,7 @@ import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_bloc.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_event.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_state.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 
 class AllPantryStoragePage extends StatefulWidget {
   const AllPantryStoragePage({super.key});
@@ -64,11 +65,7 @@ class _AllPantryStoragePageState extends State<AllPantryStoragePage> {
               },
               builder: (_, state) {
                 if (state is PantryLoading) {
-                  return Center(
-                    child: CircularProgressIndicator(
-                      color: AppColors.primaryColor,
-                    ),
-                  );
+                  return Center(child: Lottie.asset(AppAssets.loader));
                 }
 
                 if (state is UserStorageAreaLoaded) {

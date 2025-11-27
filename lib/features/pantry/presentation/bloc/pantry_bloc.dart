@@ -150,7 +150,6 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
             expiringItems: expiringItems,
           ),
         );
-
         await _schedulePantryNotifications(
           lowStockItems: lowStockItems,
           expiringItems: expiringItems,

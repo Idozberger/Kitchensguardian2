@@ -165,11 +165,11 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
 
     final res = await _getDateRange(GetDateRangeParams(event.kitchenId));
 
-    res.fold(
+    await res.fold(
       (failure) {
         emit(state.copyWith(errorMessage: failure.message, isLoading: false));
       },
-      (dateRange) {
+      (dateRange) async {
         log(
           "Date Ranges: ${dateRange.startDate} -- End Date ${dateRange.endDate}",
         );
@@ -180,8 +180,10 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
             DateTime.now().month,
             DateTime.now().day,
           );
+
           if (existingEndDate.isBefore(todayOnly)) {
             updateStartEndDate();
+            add(GetDateRangeEvent(kitchenId: _userCubit.state.activeKitchenId));
           }
         }
         emit(

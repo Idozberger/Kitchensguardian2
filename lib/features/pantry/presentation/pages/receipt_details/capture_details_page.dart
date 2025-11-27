@@ -1,6 +1,10 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
@@ -25,6 +29,7 @@ import 'package:foodkitchen/features/pantry/presentation/models/pantry_items.dar
 import 'package:foodkitchen/features/pantry/presentation/pages/receipt_details/confirm_button.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/receipt_details/image_preview.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 
 class CaptureDetailsPage extends StatefulWidget {
   final String imagePath;
@@ -69,9 +74,7 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
           appBar: _buildAppBar(),
           body: SafeArea(
             child: switch (state) {
-              PantryLoading() => Center(
-                child: CircularProgressIndicator(color: AppColors.primaryColor),
-              ),
+              PantryLoading() => Center(child: Lottie.asset(AppAssets.loader)),
               ScanReceiptLoaded() =>
                 _items.isEmpty
                     ? const Center(child: Text("No items found"))
@@ -190,20 +193,62 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
     _confirmItems();
   }
 
-  void _confirmItems() {
-    final pantryItems = _items.map((item) {
-      return PantryItemEntity(
-        name: item.nameController.text.trim(),
-        quantity: double.tryParse(item.qtyController.text.trim()) ?? 0.0,
-        unit: item.unit ?? "",
-        group: item.pantry ?? 'Fridge',
-        expireDate: item.expireDate.text.trim(),
-        thumbnail: "",
-        expiryStatus: '',
-        stockStatus: '',
-        itemId: '',
+  Future<String> compressImage(File imageFile) async {
+    var result = await FlutterImageCompress.compressWithList(
+      imageFile.readAsBytesSync(),
+      minWidth: 800,
+      minHeight: 600,
+      quality: 15,
+      rotate: 0,
+      inSampleSize: 1,
+      autoCorrectionAngle: true,
+      format: CompressFormat.jpeg,
+      keepExif: false,
+    );
+    String base64Thumbnail = base64Encode(result);
+
+    String dataUri = "data:image/jpeg;base64,$base64Thumbnail";
+
+    return dataUri;
+  }
+
+  void _confirmItems() async {
+    final pantryItems = <PantryItemEntity>[];
+
+    for (final item in _items) {
+      String? thumbnailBase64;
+
+      if (item.file != null) {
+        try {
+          thumbnailBase64 = await compressImage(item.file!);
+        } catch (e) {
+          debugPrint("Image compression failed: $e");
+          try {
+            final bytes = await item.file!.readAsBytes();
+            thumbnailBase64 = "data:image/jpeg;base64,${base64Encode(bytes)}";
+          } catch (_) {
+            thumbnailBase64 = null;
+          }
+        }
+      } else if (item.fileBytes != null && item.fileBytes!.isNotEmpty) {
+        final base64Str = base64Encode(item.fileBytes!);
+        thumbnailBase64 = "data:image/jpeg;base64,$base64Str";
+      }
+
+      pantryItems.add(
+        PantryItemEntity(
+          name: item.nameController.text.trim(),
+          quantity: double.tryParse(item.qtyController.text.trim()) ?? 0.0,
+          unit: item.unit ?? "",
+          group: item.pantry ?? 'Fridge',
+          expireDate: item.expireDate.text.trim(),
+          thumbnail: thumbnailBase64 ?? "",
+          expiryStatus: '',
+          stockStatus: '',
+          itemId: '',
+        ),
       );
-    }).toList();
+    }
 
     final pantryModel = Pantry(
       kitchenId: userCubit.state.activeKitchenId,

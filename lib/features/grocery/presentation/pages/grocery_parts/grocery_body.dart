@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
@@ -19,6 +21,7 @@ import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_state.dar
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/features/grocery/presentation/widgets/show_delete_dialog.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 
 class GroceryBody extends StatefulWidget {
   final GroceryState state;
@@ -55,9 +58,7 @@ class _GroceryBodyState extends State<GroceryBody> {
     return BlocBuilder<GroceryBloc, GroceryState>(
       builder: (_, state) {
         if (widget.state.isLoading) {
-          return Center(
-            child: CircularProgressIndicator(color: AppColors.primaryColor),
-          );
+          return Center(child: Lottie.asset(AppAssets.loader));
         }
         return Scaffold(
           backgroundColor: const Color(0xffF9F9F9),
@@ -153,6 +154,7 @@ class _GroceryBodyState extends State<GroceryBody> {
                   widget: Column(
                     children: List.generate(filteredList.length, (index) {
                       final item = filteredList[index];
+                      log("Grocery: ${item.unit}");
                       return GroceryListItem(
                         grocery: item,
                         isChecked: _isChecked(item.itemId),
@@ -164,7 +166,6 @@ class _GroceryBodyState extends State<GroceryBody> {
                     }),
                   ),
                 ),
-
                 gap(height: 16),
                 if (selectedIndex == 2)
                   FinalListFooter(

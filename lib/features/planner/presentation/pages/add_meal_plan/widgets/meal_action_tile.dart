@@ -20,11 +20,13 @@ class MealActionRow extends StatelessWidget {
   final int selectedIndex;
   final MergedMealPlanEntity plan;
   final String buttonText;
+  final VoidCallback? callback;
 
   const MealActionRow({
     super.key,
     required this.selectedIndex,
     required this.plan,
+    this.callback,
     this.buttonText = "Add Meal",
   });
 
@@ -44,7 +46,7 @@ class MealActionRow extends StatelessWidget {
           children: [
             Expanded(
               child: OutlinedButton(
-                onPressed: () => context.go(Routes.dashboard),
+                onPressed: callback ?? () => context.go(Routes.dashboard),
                 child: Text(
                   "Cancel",
                   style: Theme.of(context).textTheme.headlineMedium!.copyWith(

@@ -11,6 +11,7 @@ import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_state
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/empty_members_view.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/members_list.dart';
+import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MyKitchenMembersPage extends StatefulWidget {
@@ -56,9 +57,7 @@ class _MyKitchenMembersPageState extends State<MyKitchenMembersPage> {
         },
         builder: (context, state) {
           if (state is DashboardLoading) {
-            return Center(
-              child: CircularProgressIndicator(color: AppColors.primaryColor),
-            );
+            return Center(child: Lottie.asset(AppAssets.loader));
           } else if (state is DashboardLoaded) {
             return SingleChildScrollView(
               child: MembersList(members: state.kitchenMembers),

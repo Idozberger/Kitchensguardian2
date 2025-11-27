@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/cubits/user_state.dart';
+import 'package:foodkitchen/core/config/app_assets.dart';
+import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
@@ -10,6 +12,8 @@ import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_event.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_state.dart';
 import 'package:foodkitchen/features/home/presentation/pages/kitchen_home_view.dart';
+import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -77,13 +81,9 @@ class _HomePageState extends State<HomePage> {
                   if (state.isLoading) {
                     return Padding(
                       padding: gapOnly(
-                        top: MediaQuery.of(context).size.height * 0.35,
+                        top: MediaQuery.of(context).size.height * 0.14,
                       ),
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.primaryColor,
-                        ),
-                      ),
+                      child: Lottie.asset(AppAssets.loader),
                     );
                   }
 
@@ -103,6 +103,9 @@ class _HomePageState extends State<HomePage> {
                         state: state,
                         isGeneratedRecipes: isGeneratedRecipes,
                         onGeneratePressed: () {
+                          if (isGeneratedRecipes) {
+                            context.push(Routes.smartCart);
+                          }
                           homeBloc.add(GenerateGroceryList());
 
                           setState(() => isGeneratedRecipes = true);

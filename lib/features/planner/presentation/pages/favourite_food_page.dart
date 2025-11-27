@@ -14,6 +14,7 @@ import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dar
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dart';
 import 'package:foodkitchen/features/planner/presentation/widgets/recipes_tile.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 
 class FavouriteFoodPage extends StatefulWidget {
   const FavouriteFoodPage({super.key});
@@ -43,11 +44,7 @@ class _FavouriteFoodPageState extends State<FavouriteFoodPage> {
       body: BlocBuilder<PlannerBloc, PlannerState>(
         builder: (_, state) {
           return state.isLoading
-              ? Center(
-                  child: CircularProgressIndicator(
-                    color: AppColors.primaryColor,
-                  ),
-                )
+              ? Center(child: Lottie.asset(AppAssets.loader))
               : state.favouriteRecipes == null ||
                     state.favouriteRecipes!.isEmpty
               ? Center(

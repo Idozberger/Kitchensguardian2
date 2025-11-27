@@ -19,7 +19,6 @@ import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_date_picker_widget.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class AddMealPage extends StatefulWidget {
   const AddMealPage({super.key});
@@ -45,14 +44,18 @@ class _AddMealPageState extends State<AddMealPage>
   }
 
   Future<void> _initializeDate() async {
-    final prefs = await SharedPreferences.getInstance();
-    final getStartDate = prefs.getString("start-date");
-    startDate = getStartDate != null ? parseDate(getStartDate) : DateTime.now();
-    if (plannerBloc.state.selectedDate == null) {
-      plannerBloc.add(
-        UpdateTypeSelectedAndDateEvent(index: 0, date: startDate),
-      );
+    final raw = context.read<PlannerBloc>().state.startDate;
+
+    if (raw?.isNotEmpty == true) {
+      try {
+        startDate = DateTime.parse(raw!);
+      } catch (e) {
+        startDate = DateTime.now();
+      }
+    } else {
+      startDate = DateTime.now();
     }
+
     setState(() => isLoading = false);
   }
 
@@ -205,7 +208,11 @@ class _AddMealPageState extends State<AddMealPage>
           selectedIndex: state.mealTypeSelectedIndex,
         ),
         gap(height: 18),
-        MealActionRow(selectedIndex: state.mealTypeSelectedIndex, plan: plan),
+        MealActionRow(
+          selectedIndex: state.mealTypeSelectedIndex,
+          plan: plan,
+          callback: () => _handleBackNavigation(context),
+        ),
       ],
     );
   }
