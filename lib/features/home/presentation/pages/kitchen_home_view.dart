@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
@@ -5,7 +7,6 @@ import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
-import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_state.dart';
@@ -14,6 +15,7 @@ import 'package:foodkitchen/features/home/presentation/widgets/create_or_join_ti
 import 'package:foodkitchen/features/home/presentation/widgets/no_kitchen_found.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/pantry_section.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/smart_cart.dart';
+import 'package:foodkitchen/features/home/presentation/widgets/suggestion_recipes.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/tonight_recipe.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -119,6 +121,11 @@ class KitchenHomeView extends StatelessWidget {
               onGenerate: onGeneratePressed,
             ),
             gap(height: 14),
+            if (state.pantryItems.isNotEmpty)
+              Padding(
+                padding: gapOnly(bottom: 14),
+                child: const SuggestionRecipes(),
+              ),
             if (state.dateBasedPlan.isNotEmpty) const TonightRecipeWidget(),
             gap(height: 14),
           ],

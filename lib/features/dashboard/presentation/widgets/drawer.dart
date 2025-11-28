@@ -172,10 +172,7 @@ class AppDrawer extends StatelessWidget {
               title: "Terms & Conditions",
               iconPath: AppAssets.termsAndConditionSvg,
               onTap: () {
-                AppToast.show(
-                  "We will navigate user to our privacypolicy and termsAndCondition page",
-                  ToastType.success,
-                );
+                AppToast.show("Coming Soon!", ToastType.success);
               },
             ),
           ],

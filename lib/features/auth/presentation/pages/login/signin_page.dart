@@ -213,7 +213,7 @@ class _SignInPageState extends State<SignInPage> {
                           child: (state is GoogleAuthLoading)
                               ? Center(
                                   child: CircularProgressIndicator(
-                                    color: Colors.pink,
+                                    color: AppColors.primaryColor,
                                   ),
                                 )
                               : Row(

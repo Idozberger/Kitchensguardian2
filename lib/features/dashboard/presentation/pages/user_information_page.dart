@@ -7,6 +7,7 @@ import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
+import 'package:lottie/lottie.dart';
 
 class UserPage extends StatefulWidget {
   final String senderUserId;
@@ -76,9 +77,7 @@ class _UserPageState extends State<UserPage> {
       body: Padding(
         padding: gapSymmetric(horizontal: 20, vertical: 20),
         child: _isLoading
-            ? Center(
-                child: CircularProgressIndicator(color: AppColors.primaryColor),
-              )
+            ? Center(child: Lottie.asset(AppAssets.loader))
             : Column(
                 spacing: h(16),
                 crossAxisAlignment: CrossAxisAlignment.start,

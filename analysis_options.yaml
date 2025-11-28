@@ -3,3 +3,4 @@ analyzer:
   errors:
     deprecated_member_use: ignore
     unused_field: ignore
+    use_build_context_synchronously: ignore ignore ignore

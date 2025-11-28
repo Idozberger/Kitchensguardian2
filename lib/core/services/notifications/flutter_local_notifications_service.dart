@@ -5,6 +5,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:foodkitchen/app/app_router.dart';
 import 'package:foodkitchen/core/config/routes.dart';
+import 'package:foodkitchen/core/utils/date_format_to_string.dart';
+import 'package:foodkitchen/features/planner/domain/entities/merged_meal_type_entity.dart';
 import 'package:go_router/go_router.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -236,6 +238,127 @@ class NotificationService {
       scheduledDateTime: scheduledDate,
       payload: payload,
     );
+  }
+
+  Future<void> scheduleMealPlanReminders(
+    List<MergedMealPlanEntity> plans,
+  ) async {
+    await cancelAllNotifications();
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final tomorrow = today.add(const Duration(days: 1));
+
+    int notificationId = 1000;
+
+    // Helper: Get missing ingredients as bullet list
+
+    // Check if plan has ANY missing ingredients
+
+    for (var plan in plans) {
+      final planDate = DateTime.parse(plan.date);
+      final dateOnly = DateTime(planDate.year, planDate.month, planDate.day);
+
+      // Skip past dates
+      if (dateOnly.isBefore(today)) continue;
+
+      final isToday = dateOnly.isAtSameMomentAs(today);
+      final isTomorrow = dateOnly.isAtSameMomentAs(tomorrow);
+
+      // ────────────── Morning Reminder (Always show if plan exists) ──────────────
+      var morningTime = DateTime(
+        dateOnly.year,
+        dateOnly.month,
+        dateOnly.day,
+        8,
+        0,
+      );
+
+      if (isToday && morningTime.isBefore(now)) {
+        morningTime = morningTime.add(const Duration(days: 1));
+      }
+
+      String morningTitle = isToday
+          ? "Good Morning! Your Meals Are Today"
+          : "Tomorrow: You Have Meals Planned!";
+      String morningBody = isToday
+          ? "Time to shine in the kitchen! Tap to see your plan."
+          : "Get ready! Delicious food awaits you tomorrow.";
+
+      await scheduleNotification(
+        id: notificationId++,
+        title: morningTitle,
+        body: morningBody,
+        scheduledDateTime: morningTime,
+        payload: "meal_plan_reminder",
+      );
+
+      // ────────────── Shopping Reminder (Only if missing ingredients exist) ──────────────
+      if ((isToday || isTomorrow) && _hasMissingIngredients(plan)) {
+        final shoppingReminderDate = isTomorrow
+            ? today
+            : today.subtract(const Duration(days: 1));
+        final shoppingTime = DateTime(
+          shoppingReminderDate.year,
+          shoppingReminderDate.month,
+          shoppingReminderDate.day,
+          18, // 6:00 PM
+          0,
+        );
+
+        // Only schedule if time is in the future
+        if (!shoppingTime.isBefore(now)) {
+          await scheduleNotification(
+            id: notificationId++,
+            title: isTomorrow
+                ? "Buy These Today for Tomorrow's Meals!"
+                : "Don't Forget! You Need These for Today's Meals",
+            body: _missingItemsText(plan),
+            scheduledDateTime: shoppingTime,
+            payload: "shopping_reminder",
+          );
+
+          log(
+            "Shopping reminder scheduled → ${formatDate(shoppingTime)} 6:00 PM",
+          );
+        }
+      }
+    }
+    log("All smart reminders scheduled!");
+  }
+
+  String _missingItemsText(MergedMealPlanEntity plan) {
+    final List<String> allMissing = [];
+
+    if (plan.breakfast != null &&
+        plan.breakfast!.missingIngredients.isNotEmpty) {
+      final items = plan.breakfast!.missingIngredients
+          .map((i) => i.name)
+          .toList();
+      allMissing.add("Breakfast:\n${items.map((e) => "• $e").join("\n")}");
+    }
+
+    if (plan.lunch != null && plan.lunch!.missingIngredients.isNotEmpty) {
+      final items = plan.lunch!.missingIngredients.map((i) => i.name).toList();
+      allMissing.add("Lunch:\n${items.map((e) => "• $e").join("\n")}");
+    }
+
+    if (plan.dinner != null && plan.dinner!.missingIngredients.isNotEmpty) {
+      final items = plan.dinner!.missingIngredients.map((i) => i.name).toList();
+      allMissing.add("Dinner:\n${items.map((e) => "• $e").join("\n")}");
+    }
+
+    if (allMissing.isEmpty) {
+      return "All ingredients are ready! You're all set";
+    }
+
+    return allMissing.join("\n\n");
+  }
+
+  bool _hasMissingIngredients(MergedMealPlanEntity plan) {
+    return (plan.breakfast?.missingIngredients.isNotEmpty == true) ||
+        (plan.lunch?.missingIngredients.isNotEmpty == true) ||
+        (plan.dinner?.missingIngredients.isNotEmpty == true);
   }
 
   Future<void> cancelNotification(int id) async {

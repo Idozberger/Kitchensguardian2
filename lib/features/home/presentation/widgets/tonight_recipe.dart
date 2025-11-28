@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -13,6 +11,8 @@ import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_state.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/recipe_card.dart';
+import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
+import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dart';
 import 'package:go_router/go_router.dart';
 
 class TonightRecipeWidget extends StatefulWidget {
@@ -85,6 +85,15 @@ class _TonightRecipeWidgetState extends State<TonightRecipeWidget> {
                       gap(height: 4),
                       TextButton(
                         onPressed: () {
+                          context.read<PlannerBloc>()
+                            ..add(ResetMealPlanState())
+                            ..add(
+                              UpdateTypeSelectedAndDateEvent(
+                                date: DateTime.now(),
+                                index: 0,
+                              ),
+                            );
+
                           context.push(Routes.addMeal);
                         },
                         child: Text("Find Recipes"),

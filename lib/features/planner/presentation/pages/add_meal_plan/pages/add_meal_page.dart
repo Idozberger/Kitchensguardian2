@@ -239,7 +239,9 @@ class _AddMealPageState extends State<AddMealPage>
   }
 
   Widget _buildGenerateButton(BuildContext context, PlannerState state) {
-    final formatted = DateFormat('dd/MM/yyyy').format(state.selectedDate!);
+    final formatted = DateFormat(
+      'dd/MM/yyyy',
+    ).format(state.selectedDate ?? DateTime.now());
 
     return Padding(
       padding: gapOnly(top: 20),

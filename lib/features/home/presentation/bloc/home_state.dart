@@ -1,5 +1,4 @@
 import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
-import 'package:foodkitchen/core/common/domain/entities/requested_item.dart';
 import 'package:foodkitchen/features/home/domain/entities/pantry_data.dart';
 
 class HomeState {

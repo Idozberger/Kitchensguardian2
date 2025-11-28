@@ -41,9 +41,14 @@ class _PantrySectionState extends State<PantrySection> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _header(context),
-                  gap(height: 14),
-                  _actionButtons(context, hasItems, userState),
+                  if (hasItems || userState.userStorageAreas.isNotEmpty)
+                    Column(
+                      children: [
+                        gap(height: 14),
 
+                        _actionButtons(context, hasItems, userState),
+                      ],
+                    ),
                   if (userState.userStorageAreas.isEmpty)
                     Padding(
                       padding: gapOnly(top: 14),
@@ -86,43 +91,6 @@ class _PantrySectionState extends State<PantrySection> {
     UserState userState,
   ) => Row(
     children: [
-      if (!hasItems)
-        Expanded(
-          child: SizedBox(
-            height: h(40),
-            child: Builder(
-              builder: (context) {
-                final isDisabled = userState.userStorageAreas.isEmpty;
-
-                return OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(
-                      color: isDisabled ? Colors.grey : AppColors.primaryColor,
-                    ),
-                  ),
-                  onPressed: isDisabled
-                      ? null
-                      : () {
-                          context.push(Routes.scanMeal);
-                        },
-                  icon: SvgPicture.asset(
-                    AppAssets.scanSvg,
-                    color: isDisabled ? Colors.grey : AppColors.primaryColor,
-                  ),
-                  label: Text(
-                    "Scan",
-                    style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                      fontSize: t(12),
-                      color: isDisabled ? Colors.grey : AppColors.primaryColor,
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ),
-
-      if (!hasItems) gap(width: 10),
       Expanded(
         child: SizedBox(
           height: h(40),

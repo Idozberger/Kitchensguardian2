@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
@@ -123,36 +124,59 @@ class GroceryRemoteDatasourceImpl implements GroceryRemoteDatasource {
       final response = await dio.get(
         "${AppConstants.getAiGeneratedList}?kitchen_id=$kitchenId",
       );
+
       if (response.statusCode != 200 && response.statusCode != 201) {
         final data = response.data is String
             ? jsonDecode(response.data)
             : response.data;
-
-        final message = data["error"];
+        final message = data["error"] ?? "Failed to fetch AI items";
         throw message;
       }
-      final data = response.data["missing_items"];
-      if (data is List) {
-        final parsedList = data.map<Map<String, dynamic>>((e) {
-          if (e is Map) {
-            return Map<String, dynamic>.from(e);
-          } else if (e is String) {
-            return {"name": e};
-          } else {
-            return {"name": e.toString()};
-          }
-        }).toList();
 
-        return parsedList;
-      } else {
-        throw Exception("Invalid data");
+      final data = response.data["missing_items"];
+
+      if (data is! List) {
+        throw Exception("Expected list of items, got: ${data.runtimeType}");
       }
+
+      log("Raw AI generated items: $data");
+
+      final List<Map<String, dynamic>> parsedList = data.map((item) {
+        if (item is Map<String, dynamic>) {
+          final map = Map<String, dynamic>.from(item);
+
+          if (!map.containsKey("item_id") || map["item_id"] == null) {
+            map["item_id"] = _generateUniqueId();
+          }
+          return map;
+        } else if (item is String) {
+          return {
+            "item_id": _generateUniqueId(),
+            "name": item.trim(),
+            "is_custom": true,
+          };
+        } else {
+          return {
+            "item_id": _generateUniqueId(),
+            "name": item.toString(),
+            "is_custom": true,
+          };
+        }
+      }).toList();
+
+      log("Parsed AI items with item_id: $parsedList");
+      return parsedList;
     } on DioException catch (e) {
       throw dio.handleError(e);
     } catch (e, stackTrace) {
+      debugPrint("Error in getAiGeneratedItems: $e");
       debugPrint("StackTrace: $stackTrace");
       rethrow;
     }
+  }
+
+  String _generateUniqueId() {
+    return "ai_${DateTime.now().millisecondsSinceEpoch}_${DateTime.now().microsecondsSinceEpoch}";
   }
 
   @override

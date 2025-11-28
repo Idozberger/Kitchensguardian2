@@ -61,43 +61,45 @@ class SmartCartTile extends StatelessWidget {
     ],
   );
 
-  Widget _preview(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        "Preview items:",
-        style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-          fontSize: t(12),
-          color: const Color(0xff787878),
-        ),
-      ),
-      gap(height: 12),
-      Wrap(
-        spacing: 6,
-        runSpacing: 6,
-        children: [
-          for (final item in previewItems)
-            IntrinsicWidth(
-              child: Padding(
-                padding: gapOnly(right: 6),
-                child: RoundedTextContainer(
-                  text: item,
-                  fontWeight: FontWeight.w500,
-                ),
+  Widget _preview(BuildContext context) => previewItems.isEmpty
+      ? _noItems(context)
+      : Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Preview items:",
+              style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                fontSize: t(12),
+                color: const Color(0xff787878),
               ),
             ),
-        ],
-      ),
-      gap(height: 12),
-      if (infoText != null)
-        IntrinsicWidth(
-          child: InkWell(
-            onTap: () => context.push(Routes.smartCart),
-            child: RoundedTextContainer(text: infoText!),
-          ),
-        ),
-    ],
-  );
+            gap(height: 12),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                for (final item in previewItems)
+                  IntrinsicWidth(
+                    child: Padding(
+                      padding: gapOnly(right: 6),
+                      child: RoundedTextContainer(
+                        text: item,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            gap(height: 12),
+            if (infoText != null)
+              IntrinsicWidth(
+                child: InkWell(
+                  onTap: () => context.push(Routes.smartCart),
+                  child: RoundedTextContainer(text: infoText!),
+                ),
+              ),
+          ],
+        );
 
   Widget _noItems(BuildContext context) => Text(
     "No items available in Pantry",

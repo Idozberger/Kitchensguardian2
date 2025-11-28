@@ -44,25 +44,47 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<GetUserStorageAreaEvent>(_onGetUserStorageArea);
     on<GenerateGroceryList>(_onGetGenerateGroceryList);
   }
+
   Future<void> _onGetGenerateGroceryList(
     GenerateGroceryList event,
     Emitter<HomeState> emit,
   ) async {
-    final getAllWeeklyPlans = state.dateBasedPlan;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
 
-    List<String> missingIngredientNames = [];
-    for (var meal = 0; meal < getAllWeeklyPlans.length; meal++) {
-      for (
-        var ingredient = 0;
-        ingredient < getAllWeeklyPlans[meal].ingredients.length;
-        ingredient++
-      ) {
-        missingIngredientNames.add(
-          getAllWeeklyPlans[meal].ingredients[ingredient].name,
-        );
-        logError(getAllWeeklyPlans[meal].ingredients[ingredient].name);
+    final allWeeklyPlans = state.dateBasedPlan;
+
+    final List<String> missingIngredientNames = [];
+
+    final dateFormatter = DateFormat('yyyy-MM-dd');
+
+    for (var plan in allWeeklyPlans) {
+      try {
+        final planDate = dateFormatter.parse(plan.date);
+
+        if (planDate.isBefore(today)) {
+          continue;
+        }
+
+        for (var ingredient in plan.ingredients) {
+          final ingredientName = ingredient.name.trim();
+
+          if (!missingIngredientNames.contains(ingredientName)) {
+            missingIngredientNames.add(ingredientName);
+          }
+
+          logError(
+            'Grocery: $ingredientName → ${DateFormat('EEE, MMM d').format(planDate)}',
+          );
+        }
+      } on FormatException catch (e) {
+        logError('Invalid date format in plan: ${plan.date}, error: $e');
       }
     }
+
+    missingIngredientNames.sort(
+      (a, b) => a.toLowerCase().compareTo(b.toLowerCase()),
+    );
 
     emit(state.copyWith(groceryList: missingIngredientNames));
   }

@@ -5,13 +5,13 @@ import 'package:foodkitchen/core/common/cubits/user_state.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
-import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_recipe_is_under_progress_widget.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_event.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_state.dart';
 import 'package:foodkitchen/features/home/presentation/pages/kitchen_home_view.dart';
+import 'package:foodkitchen/features/home/presentation/widgets/Low_stock_and_expiry_banner.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
 
@@ -89,6 +89,7 @@ class _HomePageState extends State<HomePage> {
 
                   return Column(
                     children: [
+                      LowStockAndExpiryBanner(),
                       if (userState.mealTypeEntity.isNotEmpty)
                         RecipeInProgressNotification(
                           padding: gapOnly(
@@ -103,8 +104,14 @@ class _HomePageState extends State<HomePage> {
                         state: state,
                         isGeneratedRecipes: isGeneratedRecipes,
                         onGeneratePressed: () {
-                          if (isGeneratedRecipes) {
+                          if (isGeneratedRecipes &&
+                              state.groceryList.isNotEmpty) {
                             context.push(Routes.smartCart);
+                          } else {
+                            AppToast.show(
+                              "No groceries needed right now!",
+                              ToastType.info,
+                            );
                           }
                           homeBloc.add(GenerateGroceryList());
 

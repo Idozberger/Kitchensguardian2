@@ -1,4 +1,5 @@
-import 'package:android_intent_plus/android_intent.dart';
+// ignore_for_file: avoid_print
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';

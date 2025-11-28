@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_brace_in_string_interps
+
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
@@ -8,7 +10,6 @@ import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
-import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/date_format_to_string.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
@@ -219,7 +220,7 @@ class _PlannerPageState extends State<PlannerPage> {
                     child: BlocConsumer<PlannerBloc, PlannerState>(
                       listener: (context, state) {},
                       builder: (_, state) {
-                        final plan = state.dateBasedPlan ?? [];
+                        final plan = state.dateBasedPlan;
                         final todayOnly = DateTime(
                           DateTime.now().year,
                           DateTime.now().month,

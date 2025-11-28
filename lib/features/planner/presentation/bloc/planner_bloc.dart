@@ -1,11 +1,11 @@
 import 'dart:developer';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/data/model/meal_type_model.dart';
 import 'package:foodkitchen/core/common/domain/usecase/get_current_user.dart';
 import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/services/notifications/flutter_local_notifications_service.dart';
 import 'package:foodkitchen/core/utils/date_format_to_string.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_bloc.dart';
@@ -248,6 +248,9 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
           ),
         );
         log("start date : ${state.startDate}");
+        await NotificationService().scheduleMealPlanReminders(
+          mergedMealPlanEntities,
+        );
         add(GetDateBasedPlans(state.startDate ?? formatDate(DateTime.now())));
       },
     );

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
 import 'package:foodkitchen/core/dialogs/logout.dart';
 import 'package:foodkitchen/core/dialogs/not_found_404.dart';
 import 'package:foodkitchen/features/auth/data/model/user_model.dart';
@@ -51,92 +50,124 @@ final GoRouter router = GoRouter(
   routes: [
     GoRoute(
       path: Routes.splash,
-      builder: (context, state) => const SplashScreen(),
+      pageBuilder: (context, state) =>
+          buildPage(state.pageKey, const SplashScreen()),
     ),
-    GoRoute(path: Routes.onBoarding, builder: (context, state) => IntroPage()),
-    // GoRoute(
-    //   path: Routes.languageSelection,
-    //   builder: (context, state) => LanguageSelectionPage(),
-    // ),
-    GoRoute(path: Routes.signIn, builder: (context, state) => SignInPage()),
-    GoRoute(path: Routes.signUp, builder: (context, state) => SignUpPage()),
+    GoRoute(
+      path: Routes.onBoarding,
+      pageBuilder: (context, state) => buildPage(state.pageKey, IntroPage()),
+    ),
+    GoRoute(
+      path: Routes.signIn,
+      pageBuilder: (context, state) => buildPage(state.pageKey, SignInPage()),
+    ),
+    GoRoute(
+      path: Routes.signUp,
+      pageBuilder: (context, state) => buildPage(state.pageKey, SignUpPage()),
+    ),
     GoRoute(
       path: Routes.forgotPassword,
-      builder: (context, state) => ForgotPasswordPage(),
+      pageBuilder: (context, state) =>
+          buildPage(state.pageKey, ForgotPasswordPage()),
     ),
     GoRoute(
       name: "reset_password_verification",
       path: Routes.resetPasswordVerification,
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final String email = state.extra as String;
-        return ResetPasswordVerificationPage(email: email);
+        return buildPage(
+          state.pageKey,
+          ResetPasswordVerificationPage(email: email),
+        );
       },
     ),
-
     GoRoute(
       name: "create_new_password",
       path: Routes.createNewPassword,
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final String email = state.extra as String;
-        return CreateNewPasswordPage(email: email);
+        return buildPage(state.pageKey, CreateNewPasswordPage(email: email));
       },
     ),
     GoRoute(
       path: Routes.passwordChangedSuccess,
-      builder: (context, state) => PasswordChangedSuccessPage(),
+      pageBuilder: (context, state) =>
+          buildPage(state.pageKey, PasswordChangedSuccessPage()),
     ),
     GoRoute(
       name: "verify_email",
       path: Routes.verifyEmail,
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final UserModel userModel = state.extra as UserModel;
-        return VerifyEmailPage(userModel: userModel);
+        return buildPage(state.pageKey, VerifyEmailPage(userModel: userModel));
       },
     ),
     GoRoute(
       path: Routes.emailVerifiedSuccess,
-      builder: (context, state) => EmailVerfiedSuccesPage(),
+      pageBuilder: (context, state) =>
+          buildPage(state.pageKey, EmailVerfiedSuccesPage()),
     ),
     GoRoute(
       path: Routes.dashboard,
-      builder: (context, state) => DashboardPage(),
+      pageBuilder: (context, state) =>
+          buildPage(state.pageKey, DashboardPage()),
     ),
     GoRoute(
       path: Routes.notification,
-      builder: (context, state) => NotificationPage(),
+      pageBuilder: (context, state) =>
+          buildPage(state.pageKey, NotificationPage()),
     ),
     GoRoute(
       path: Routes.scanHistory,
-      builder: (context, state) => ScanHistoryPage(),
+      pageBuilder: (context, state) =>
+          buildPage(state.pageKey, ScanHistoryPage()),
     ),
-    GoRoute(path: Routes.addItem, builder: (context, state) => AddItemPage()),
-    GoRoute(path: Routes.myPantry, builder: (context, state) => MyPantryPage()),
-    GoRoute(path: Routes.scanMeal, builder: (context, state) => ScanMealPage()),
-    GoRoute(path: Routes.kitchen, builder: (context, state) => KitchenPage()),
-    GoRoute(path: Routes.profile, builder: (context, state) => ProfilePage()),
+    GoRoute(
+      path: Routes.addItem,
+      pageBuilder: (context, state) => buildPage(state.pageKey, AddItemPage()),
+    ),
+    GoRoute(
+      path: Routes.myPantry,
+      pageBuilder: (context, state) => buildPage(state.pageKey, MyPantryPage()),
+    ),
+    GoRoute(
+      path: Routes.scanMeal,
+      pageBuilder: (context, state) => buildPage(state.pageKey, ScanMealPage()),
+    ),
+    GoRoute(
+      path: Routes.kitchen,
+      pageBuilder: (context, state) => buildPage(state.pageKey, KitchenPage()),
+    ),
+    GoRoute(
+      path: Routes.profile,
+      pageBuilder: (context, state) => buildPage(state.pageKey, ProfilePage()),
+    ),
     GoRoute(
       path: Routes.editProfile,
-      builder: (context, state) => EditProfilePage(),
+      pageBuilder: (context, state) =>
+          buildPage(state.pageKey, EditProfilePage()),
     ),
     GoRoute(
       path: Routes.changePassword,
-      builder: (context, state) => ChangePasswordPage(),
+      pageBuilder: (context, state) =>
+          buildPage(state.pageKey, ChangePasswordPage()),
     ),
-    GoRoute(path: Routes.addMeal, builder: (context, state) => AddMealPage()),
+    GoRoute(
+      path: Routes.addMeal,
+      pageBuilder: (context, state) => buildPage(state.pageKey, AddMealPage()),
+    ),
     GoRoute(
       path: Routes.editMeal,
-      builder: (context, state) {
-        return EditMealPage();
-      },
+      pageBuilder: (context, state) => buildPage(state.pageKey, EditMealPage()),
     ),
     GoRoute(
       name: Routes.generateRecipes,
       path: Routes.generateRecipes,
       pageBuilder: (context, state) {
         final Map<String, dynamic> data = state.extra as Map<String, dynamic>;
-        return buildTransitionPage(
-          key: state.pageKey,
-          child: GenerateRecipesPage(
+        return buildPage(
+          state.pageKey,
+          GenerateRecipesPage(
             selectedDate: data["selected_date"],
             selectedMealType: data["selected_meal_type"],
             isPlan: data["is_plan"],
@@ -145,118 +176,120 @@ final GoRouter router = GoRouter(
         );
       },
     ),
-
     GoRoute(
       name: Routes.generateRecipesDetails,
       path: Routes.generateRecipesDetails,
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final Map<String, dynamic> data = state.extra as Map<String, dynamic>;
-        MealTypeEntity mealTypeEntity = data["meal_type_entity"];
-        bool isPlan = data["is_plan"];
-        bool isEdit = data["is_edit"];
-
-        return RecipesDetailsPage(
-          mealTypeEntity: mealTypeEntity,
-          isPlan: isPlan,
-          isEdit: isEdit,
+        return buildPage(
+          state.pageKey,
+          RecipesDetailsPage(
+            mealTypeEntity: data["meal_type_entity"],
+            isPlan: data["is_plan"],
+            isEdit: data["is_edit"],
+          ),
         );
       },
     ),
     GoRoute(
       path: Routes.favouriteFood,
-      builder: (context, state) => FavouriteFoodPage(),
+      pageBuilder: (context, state) =>
+          buildPage(state.pageKey, FavouriteFoodPage()),
     ),
     GoRoute(
       path: Routes.myKitchenMembers,
-      builder: (context, state) => MyKitchenMembersPage(),
+      pageBuilder: (context, state) =>
+          buildPage(state.pageKey, MyKitchenMembersPage()),
     ),
     GoRoute(
       path: Routes.subscription,
-      builder: (context, state) => SubscriptionPage(),
+      pageBuilder: (context, state) =>
+          buildPage(state.pageKey, SubscriptionPage()),
     ),
-    GoRoute(path: Routes.logout, builder: (context, state) => LogoutDialog()),
+    GoRoute(
+      path: Routes.logout,
+      pageBuilder: (context, state) => buildPage(state.pageKey, LogoutDialog()),
+    ),
     GoRoute(
       path: Routes.notFound404,
-      builder: (context, state) => NotFound404Dialog(),
+      pageBuilder: (context, state) =>
+          buildPage(state.pageKey, NotFound404Dialog()),
     ),
     GoRoute(
       path: Routes.requestNow,
-      builder: (context, state) => RequestNowPage(),
+      pageBuilder: (context, state) =>
+          buildPage(state.pageKey, RequestNowPage()),
     ),
     GoRoute(
       name: Routes.capturedImageDetails,
       path: Routes.capturedImageDetails,
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final Map<String, dynamic> data = state.extra as Map<String, dynamic>;
-        final String imagePath = data["image_path"];
-        return CaptureDetailsPage(imagePath: imagePath);
+        return buildPage(
+          state.pageKey,
+          CaptureDetailsPage(imagePath: data["image_path"]),
+        );
       },
     ),
     GoRoute(
       path: Routes.addCustomItem,
-      builder: (context, state) => AddCustomItemsPage(),
+      pageBuilder: (context, state) =>
+          buildPage(state.pageKey, AddCustomItemsPage()),
     ),
     GoRoute(
       name: Routes.viewPlanDetails,
       path: Routes.viewPlanDetails,
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final MergedMealPlanEntity mergedMealPlanEntity =
             state.extra as MergedMealPlanEntity;
-        return ViewPlanDetailsPage(mergedMealPlanEntity: mergedMealPlanEntity);
+        return buildPage(
+          state.pageKey,
+          ViewPlanDetailsPage(mergedMealPlanEntity: mergedMealPlanEntity),
+        );
       },
     ),
-
     GoRoute(
       path: Routes.referralPage,
-      builder: (context, state) => ReferralCodePage(),
+      pageBuilder: (context, state) =>
+          buildPage(state.pageKey, ReferralCodePage()),
     ),
     GoRoute(
       path: Routes.inviteMember,
-      builder: (context, state) => InviteMemberPage(),
+      pageBuilder: (context, state) =>
+          buildPage(state.pageKey, InviteMemberPage()),
     ),
     GoRoute(
       path: Routes.addPantryStorageType,
-      pageBuilder: (context, state) => buildTransitionPage(
-        key: state.pageKey,
-        child: AddPantryStorageTypePage(),
-      ),
+      pageBuilder: (context, state) =>
+          buildPage(state.pageKey, AddPantryStorageTypePage()),
     ),
     GoRoute(
       path: Routes.allStorageArea,
-      pageBuilder: (context, state) => buildTransitionPage(
-        key: state.pageKey,
-        child: AllPantryStoragePage(),
-      ),
+      pageBuilder: (context, state) =>
+          buildPage(state.pageKey, AllPantryStoragePage()),
     ),
     GoRoute(
       path: Routes.smartCart,
-      builder: (context, state) => SmartCartPage(),
+      pageBuilder: (context, state) =>
+          buildPage(state.pageKey, SmartCartPage()),
     ),
   ],
 );
 
-CustomTransitionPage buildTransitionPage({
-  required Widget child,
-  required LocalKey key,
-}) {
+CustomTransitionPage buildPage(LocalKey key, Widget child) {
   return CustomTransitionPage(
     key: key,
     child: child,
     transitionDuration: const Duration(milliseconds: 300),
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      final offsetAnimation = Tween<Offset>(
+      final slide = Tween<Offset>(
         begin: const Offset(1.0, 0.0),
         end: Offset.zero,
       ).animate(animation);
-
-      final fadeAnimation = Tween<double>(
-        begin: 0.0,
-        end: 1.0,
-      ).animate(animation);
-
+      final fade = Tween<double>(begin: 0.0, end: 1.0).animate(animation);
       return FadeTransition(
-        opacity: fadeAnimation,
-        child: SlideTransition(position: offsetAnimation, child: child),
+        opacity: fade,
+        child: SlideTransition(position: slide, child: child),
       );
     },
   );

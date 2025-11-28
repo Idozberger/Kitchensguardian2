@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously, unused_local_variable, avoid_function_literals_in_foreach_calls, duplicate_ignore
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
