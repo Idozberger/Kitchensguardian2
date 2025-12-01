@@ -1,4 +1,4 @@
-import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
 import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/features/planner/domain/entities/kitchen_date_range_entity.dart';
@@ -6,20 +6,20 @@ import 'package:foodkitchen/features/planner/domain/entities/meal_plan_entity.da
 import 'package:fpdart/fpdart.dart';
 
 abstract interface class PlannerRepository {
-  Future<Either<Failure, List<MealTypeEntity>>> generateRecipes({
+  Future<Either<Failure, List<RecipeEntity>>> generateRecipes({
     required String instructions,
     required String kitchenId,
   });
-  Future<Either<Failure, List<MealTypeEntity>>> favouriteRecipes();
+  Future<Either<Failure, List<RecipeEntity>>> favouriteRecipes();
   Future<Either<Failure, String>> addToFavourite({required String recipeId});
   Future<Either<Failure, String>> removeFromFavourite({
     required String recipeId,
   });
   Future<Either<Failure, String>> addToWeeklyPlan({
-    required MealTypeEntity mealTypeEntity,
+    required RecipeEntity RecipeEntity,
   });
-  Future<Either<Failure, List<MealTypeEntity>>> getAllWeeklyPlans();
-  Future<Either<Failure, List<MealTypeEntity>>> deleteMealTypeFromWeeklyPlan({
+  Future<Either<Failure, List<RecipeEntity>>> getAllWeeklyPlans();
+  Future<Either<Failure, List<RecipeEntity>>> deleteMealTypeFromWeeklyPlan({
     required String selectedDate,
     required String mealType,
   });
@@ -47,7 +47,7 @@ abstract interface class PlannerRepository {
     required String kitchenId,
     required String date,
   });
-  Future<Either<Failure, List<MealTypeEntity>>> listAllMealPlans({
+  Future<Either<Failure, List<RecipeEntity>>> listAllMealPlans({
     required String kitchenId,
   });
   Future<Either<Failure, KitchenDateRangeEntity>> getDateRange({

@@ -14,6 +14,7 @@ import 'package:foodkitchen/core/services/image_picker/image_picker_service.dart
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/date_format_to_string.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
+import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_dropdown_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
@@ -73,10 +74,98 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
           appBar: _buildAppBar(),
           body: SafeArea(
             child: switch (state) {
-              PantryLoading() => Center(child: Lottie.asset(AppAssets.loader)),
+              PantryLoading() => Center(
+                child: Padding(
+                  padding: gapAll(32),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          SizedBox(
+                            width: w(140),
+                            height: h(140),
+                            child: CircularProgressIndicator(
+                              strokeWidth: 6,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                AppColors.primaryColor.withOpacity(0.3),
+                              ),
+                              backgroundColor: Colors.transparent,
+                            ),
+                          ),
+                          TweenAnimationBuilder<double>(
+                            tween: Tween(begin: 0.7, end: 1.0),
+                            duration: const Duration(milliseconds: 1500),
+                            curve: Curves.easeInOut,
+                            builder: (_, scale, child) {
+                              return Transform.scale(
+                                scale: scale,
+                                child: Container(
+                                  width: w(100),
+                                  height: h(100),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        AppColors.primaryColor.withOpacity(0.6),
+                                        AppColors.primaryColor.withOpacity(0.2),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+
+                          Lottie.asset(
+                            AppAssets.loader,
+                            width: w(120),
+                            height: h(120),
+                            fit: BoxFit.contain,
+                          ),
+                        ],
+                      ),
+
+                      SizedBox(height: h(40)),
+
+                      Text(
+                        "Scanning your receipt...",
+                        style: Theme.of(context).textTheme.headlineMedium
+                            ?.copyWith(
+                              fontSize: t(22),
+                              fontWeight: FontWeight.w700,
+                              color: Colors.black87,
+                            ),
+                      ),
+
+                      SizedBox(height: h(16)),
+
+                      AnimatedDotsText(
+                        text: "Analyzing items with AI",
+                        style: TextStyle(
+                          fontSize: t(15),
+                          color: Colors.grey.shade600,
+                          height: 1.5,
+                        ),
+                      ),
+
+                      SizedBox(height: h(20)),
+
+                      Text(
+                        "This usually takes a few seconds",
+                        style: TextStyle(
+                          fontSize: t(13),
+                          color: Colors.grey.shade500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               ScanReceiptLoaded() =>
                 _items.isEmpty
-                    ? const Center(child: Text("No items found"))
+                    ? _buildEmptyState()
                     : SingleChildScrollView(
                         child: Padding(
                           padding: gapAll(20),
@@ -120,6 +209,76 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
               : null,
         );
       },
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Padding(
+        padding: gapSymmetric(horizontal: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              AppAssets.groceryEmpty,
+              width: w(220),
+              height: h(220),
+              fit: BoxFit.contain,
+            ),
+
+            SizedBox(height: h(32)),
+
+            Text(
+              "No items detected",
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontSize: t(24),
+                fontWeight: FontWeight.w700,
+                color: Colors.black87,
+              ),
+            ),
+
+            SizedBox(height: h(16)),
+
+            Text(
+              "We couldn't recognize any items from this receipt.\nTry taking a clearer photo or add items manually.",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: t(15),
+                color: Colors.grey.shade600,
+                height: 1.6,
+              ),
+            ),
+
+            SizedBox(height: h(48)),
+
+            GenericButtonWidget(
+              onPressed: () {
+                context.pop();
+              },
+              text: "Retake",
+            ),
+
+            SizedBox(height: h(16)),
+
+            TextButton(
+              onPressed: () {
+                context.push(Routes.addItem);
+              },
+              child: Text(
+                "Add Items Manually",
+                style: TextStyle(
+                  color: AppColors.primaryColor,
+                  fontSize: t(15),
+                  fontWeight: FontWeight.w600,
+                  decoration: TextDecoration.underline,
+                  decorationColor: AppColors.primaryColor,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -455,7 +614,7 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
         ],
       ),
       title: Text(
-        "Meal Scan",
+        "Receipt Scan",
         style: Theme.of(context).textTheme.headlineLarge,
       ),
       actions: [
@@ -467,6 +626,52 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class AnimatedDotsText extends StatefulWidget {
+  final String text;
+  final TextStyle? style;
+
+  const AnimatedDotsText({super.key, required this.text, this.style});
+
+  @override
+  State<AnimatedDotsText> createState() => _AnimatedDotsTextState();
+}
+
+class _AnimatedDotsTextState extends State<AnimatedDotsText>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  int _dotCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    )..repeat();
+    _controller.addListener(() {
+      final count = (_controller.value * 4).floor();
+      if (count != _dotCount) {
+        setState(() => _dotCount = count);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      "${widget.text}${'.' * _dotCount}",
+      style: widget.style,
+      textAlign: TextAlign.center,
     );
   }
 }

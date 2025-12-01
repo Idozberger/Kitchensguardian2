@@ -48,6 +48,7 @@ import 'package:foodkitchen/features/home/data/datasource/home_remote_datasource
 import 'package:foodkitchen/features/home/data/repository/home_repository_impl.dart';
 import 'package:foodkitchen/features/home/domain/repository/home_repository.dart';
 import 'package:foodkitchen/features/home/domain/usecases/create_kitchen_usecase.dart';
+import 'package:foodkitchen/features/home/domain/usecases/get_recipe_suggestion_usecase.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/cart_items.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/create_pantry_usecase.dart';
 import 'package:foodkitchen/features/home/domain/usecases/get_all_weekly_plans_usecase.dart';
@@ -226,6 +227,7 @@ void _initHome() async {
     ..registerFactory(() => JoinKitchen(sl()))
     ..registerFactory(() => GetPantriesForHome(sl()))
     ..registerFactory(() => GetAllWeeklyPlansForHome(sl()))
+    ..registerFactory(() => GetRecipeSuggestionUsecase(sl()))
     // Bloc
     ..registerLazySingleton(
       () => HomeBloc(
@@ -234,6 +236,7 @@ void _initHome() async {
         userCubit: sl(),
         getPantriesForHome: GetPantriesForHome(sl()),
         getAllWeeklyPlansForHome: GetAllWeeklyPlansForHome(sl()),
+        getRecipeSuggestionUsecase: GetRecipeSuggestionUsecase(sl()),
       ),
     );
 }

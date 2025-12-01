@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/cubits/user_state.dart';
-import 'package:foodkitchen/core/common/data/model/meal_type_model.dart';
+import 'package:foodkitchen/core/common/data/model/recipe_model.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
@@ -14,8 +14,8 @@ import 'package:foodkitchen/features/planner/domain/entities/merged_meal_type_en
 import 'package:foodkitchen/features/planner/presentation/widgets/recipe_tile_item.dart';
 
 class ViewPlanDetailsPage extends StatelessWidget {
-  final MergedMealPlanEntity mergedMealPlanEntity;
-  const ViewPlanDetailsPage({super.key, required this.mergedMealPlanEntity});
+  final MergedRecipePlanEntity mergedRecipePlanEntity;
+  const ViewPlanDetailsPage({super.key, required this.mergedRecipePlanEntity});
 
   @override
   Widget build(BuildContext context) {
@@ -28,17 +28,17 @@ class ViewPlanDetailsPage extends StatelessWidget {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  if (state.mealTypeEntity.isNotEmpty)
+                  if (state.recipeEntity.isNotEmpty)
                     RecipeInProgressNotification(
                       padding: gapOnly(left: 20, right: 20, bottom: 0, top: 14),
-                      mealTypeEntity: state.mealTypeEntity[0],
+                      recipeEntity: state.recipeEntity[0],
                     ),
                   Padding(
                     padding: gapSymmetric(horizontal: 20, vertical: 20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (mergedMealPlanEntity.breakfast != null) ...[
+                        if (mergedRecipePlanEntity.breakfast != null) ...[
                           Text(
                             "Breakfast Recipe",
                             style: Theme.of(context).textTheme.headlineLarge,
@@ -48,16 +48,16 @@ class ViewPlanDetailsPage extends StatelessWidget {
                             widget: RecipeTileItem(
                               isEdit: false,
                               recipe:
-                                  mergedMealPlanEntity.breakfast
-                                      as MealTypeModel,
-                              selectedDate: mergedMealPlanEntity.date,
+                                  mergedRecipePlanEntity.breakfast
+                                      as RecipeModel,
+                              selectedDate: mergedRecipePlanEntity.date,
                               selectedMealType: "Breakfast",
                               isPlan: false,
                             ),
                           ),
                           gap(height: 16),
                         ],
-                        if (mergedMealPlanEntity.lunch != null) ...[
+                        if (mergedRecipePlanEntity.lunch != null) ...[
                           Text(
                             "Lunch Recipe",
                             style: Theme.of(context).textTheme.headlineLarge,
@@ -67,15 +67,15 @@ class ViewPlanDetailsPage extends StatelessWidget {
                             widget: RecipeTileItem(
                               isEdit: false,
                               recipe:
-                                  mergedMealPlanEntity.lunch as MealTypeModel,
-                              selectedDate: mergedMealPlanEntity.date,
+                                  mergedRecipePlanEntity.lunch as RecipeModel,
+                              selectedDate: mergedRecipePlanEntity.date,
                               selectedMealType: "Lunch",
                               isPlan: false,
                             ),
                           ),
                           gap(height: 16),
                         ],
-                        if (mergedMealPlanEntity.dinner != null) ...[
+                        if (mergedRecipePlanEntity.dinner != null) ...[
                           Text(
                             "Dinner Recipe",
                             style: Theme.of(context).textTheme.headlineLarge,
@@ -85,8 +85,8 @@ class ViewPlanDetailsPage extends StatelessWidget {
                             widget: RecipeTileItem(
                               isEdit: false,
                               recipe:
-                                  mergedMealPlanEntity.dinner as MealTypeModel,
-                              selectedDate: mergedMealPlanEntity.date,
+                                  mergedRecipePlanEntity.dinner as RecipeModel,
+                              selectedDate: mergedRecipePlanEntity.date,
                               selectedMealType: "Dinner",
                               isPlan: false,
                             ),

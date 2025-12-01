@@ -41,6 +41,7 @@ dependencies:
   pinput: ^5.0.2
   share_plus: ^12.0.0
   shared_preferences: ^2.5.3
+  shimmer: ^3.0.0
   syncfusion_flutter_sliders: ^31.1.19
   timezone: ^0.10.1
 

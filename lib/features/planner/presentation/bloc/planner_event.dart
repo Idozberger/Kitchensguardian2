@@ -1,4 +1,5 @@
-import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/common/data/model/recipe_model.dart';
+import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
 import 'package:foodkitchen/features/planner/domain/entities/meal_plan_entity.dart';
 import 'package:foodkitchen/features/planner/domain/entities/merged_meal_type_entity.dart';
@@ -27,8 +28,8 @@ final class RemoveFromFavouriteRecipeEvent extends PlannerEvent {
 final class ClearAiGeneratedRecipes extends PlannerEvent {}
 
 final class AddToWeeklyPlanEvent extends PlannerEvent {
-  final MealTypeEntity mealTypeEntity;
-  AddToWeeklyPlanEvent(this.mealTypeEntity);
+  final RecipeModel RecipeEntity;
+  AddToWeeklyPlanEvent(this.RecipeEntity);
 }
 
 final class GetAllWeeklyPlansEvent extends PlannerEvent {
@@ -65,11 +66,11 @@ class MarkRecipeFinishedEvent extends PlannerEvent {
 
 class UpdateStartRecipeEvent extends PlannerEvent {
   final bool startRecipe;
-  final List<MealTypeEntity> mealTypeEntity;
+  final List<RecipeModel> RecipeEntity;
   final List<Map<String, dynamic>> doneSteps;
   UpdateStartRecipeEvent({
     required this.startRecipe,
-    required this.mealTypeEntity,
+    required this.RecipeEntity,
     required this.doneSteps,
   });
 }
@@ -77,7 +78,7 @@ class UpdateStartRecipeEvent extends PlannerEvent {
 final class ResetPlannerStateEvent extends PlannerEvent {}
 
 final class AddMealPlanEvent extends PlannerEvent {
-  final MealTypeEntity mealPlan;
+  final RecipeModel mealPlan;
   final String date;
   final String kitchenId;
   AddMealPlanEvent({
@@ -145,7 +146,7 @@ final class GetMealByDateEvent extends PlannerEvent {
 }
 
 final class EditMealEvent extends PlannerEvent {
-  final MergedMealPlanEntity mergedPlans;
+  final MergedRecipePlanEntity mergedPlans;
 
   EditMealEvent({required this.mergedPlans});
 }

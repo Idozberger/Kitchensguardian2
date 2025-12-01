@@ -1,12 +1,12 @@
-import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 
-class MergedMealPlanEntity {
+class MergedRecipePlanEntity {
   final String date;
-  final MealTypeEntity? breakfast;
-  final MealTypeEntity? lunch;
-  final MealTypeEntity? dinner;
+  final RecipeEntity? breakfast;
+  final RecipeEntity? lunch;
+  final RecipeEntity? dinner;
 
-  MergedMealPlanEntity({
+  MergedRecipePlanEntity({
     required this.date,
     this.breakfast,
     this.lunch,

@@ -1,6 +1,6 @@
-import 'package:foodkitchen/core/common/data/model/meal_type_model.dart';
+import 'package:foodkitchen/core/common/data/model/recipe_model.dart';
 import 'package:foodkitchen/core/common/data/model/pantry_model.dart';
-import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
 import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/core/global/functions/logs.dart';
@@ -22,7 +22,7 @@ class PlannerRepositoryImpl implements PlannerRepository {
   });
 
   @override
-  Future<Either<Failure, List<MealTypeEntity>>> generateRecipes({
+  Future<Either<Failure, List<RecipeEntity>>> generateRecipes({
     required String instructions,
     required String kitchenId,
   }) async {
@@ -32,7 +32,7 @@ class PlannerRepositoryImpl implements PlannerRepository {
         kitchenId: kitchenId,
       );
       final generatedRecipes = (response as List)
-          .map((e) => MealTypeModel.fromJson(e as Map<String, dynamic>))
+          .map((e) => RecipeModel.fromJson(e as Map<String, dynamic>))
           .toList();
 
       return Right(generatedRecipes);
@@ -44,11 +44,11 @@ class PlannerRepositoryImpl implements PlannerRepository {
   }
 
   @override
-  Future<Either<Failure, List<MealTypeEntity>>> favouriteRecipes() async {
+  Future<Either<Failure, List<RecipeEntity>>> favouriteRecipes() async {
     try {
       final response = await plannerRemoteDatasource.favouriteRecipes();
       final generatedRecipes = (response as List)
-          .map((e) => MealTypeModel.fromJson(e as Map<String, dynamic>))
+          .map((e) => RecipeModel.fromJson(e as Map<String, dynamic>))
           .toList();
 
       return Right(generatedRecipes);
@@ -95,11 +95,11 @@ class PlannerRepositoryImpl implements PlannerRepository {
 
   @override
   Future<Either<Failure, String>> addToWeeklyPlan({
-    required MealTypeEntity mealTypeEntity,
+    required RecipeEntity RecipeEntity,
   }) async {
     try {
       final response = await plannerLocalDatasource.addToWeeklyPlan(
-        newPlan: mealTypeEntity as MealTypeModel,
+        newPlan: RecipeEntity as RecipeModel,
       );
 
       return Right(response);
@@ -111,7 +111,7 @@ class PlannerRepositoryImpl implements PlannerRepository {
   }
 
   @override
-  Future<Either<Failure, List<MealTypeEntity>>> getAllWeeklyPlans() async {
+  Future<Either<Failure, List<RecipeEntity>>> getAllWeeklyPlans() async {
     try {
       final response = await plannerLocalDatasource.getWeeklyPlans();
 
@@ -139,7 +139,7 @@ class PlannerRepositoryImpl implements PlannerRepository {
   }
 
   @override
-  Future<Either<Failure, List<MealTypeEntity>>> deleteMealTypeFromWeeklyPlan({
+  Future<Either<Failure, List<RecipeEntity>>> deleteMealTypeFromWeeklyPlan({
     required String selectedDate,
     required String mealType,
   }) async {
@@ -273,7 +273,7 @@ class PlannerRepositoryImpl implements PlannerRepository {
   }
 
   @override
-  Future<Either<Failure, List<MealTypeEntity>>> listAllMealPlans({
+  Future<Either<Failure, List<RecipeEntity>>> listAllMealPlans({
     required String kitchenId,
   }) async {
     try {
@@ -284,7 +284,7 @@ class PlannerRepositoryImpl implements PlannerRepository {
       );
 
       final generatedRecipes = (response as List).map((e) {
-        return MealTypeModel.fromJson(e as Map<String, dynamic>);
+        return RecipeModel.fromJson(e as Map<String, dynamic>);
       }).toList();
 
       return Right(generatedRecipes);

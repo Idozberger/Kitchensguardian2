@@ -5,12 +5,12 @@ import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
 import 'package:foodkitchen/features/planner/presentation/widgets/recipes_tile.dart';
-import 'package:foodkitchen/core/common/data/model/meal_type_model.dart';
+import 'package:foodkitchen/core/common/data/model/recipe_model.dart';
 import 'package:go_router/go_router.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 
 class RecipeTileItem extends StatelessWidget {
-  final MealTypeModel recipe;
+  final RecipeModel recipe;
   final String selectedDate;
   final String? selectedMealType;
   final bool isPlan;

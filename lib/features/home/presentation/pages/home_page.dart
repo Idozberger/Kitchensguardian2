@@ -45,6 +45,7 @@ class _HomePageState extends State<HomePage> {
       homeBloc
         ..add(GetAllWeeklyPlansEventForHome())
         ..add(GetUserStorageAreaEvent(kitchenId))
+        ..add(GetRecipeSuggestionEvent(kitchenId))
         ..add(GetPantriesItemsEventForHome(kitchenId: kitchenId));
     }
   }
@@ -90,7 +91,7 @@ class _HomePageState extends State<HomePage> {
                   return Column(
                     children: [
                       LowStockAndExpiryBanner(),
-                      if (userState.mealTypeEntity.isNotEmpty)
+                      if (userState.recipeEntity.isNotEmpty)
                         RecipeInProgressNotification(
                           padding: gapOnly(
                             left: 20,
@@ -98,7 +99,7 @@ class _HomePageState extends State<HomePage> {
                             bottom: 0,
                             top: 14,
                           ),
-                          mealTypeEntity: userState.mealTypeEntity[0],
+                          recipeEntity: userState.recipeEntity[0],
                         ),
                       KitchenHomeView(
                         state: state,

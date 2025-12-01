@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantries_entity.dart';
 
 class UserState {
@@ -13,7 +13,7 @@ class UserState {
   final Uint8List? profilePictureFilePath;
   final String invitationCode;
   final bool entitlementIsActive;
-  final List<MealTypeEntity> mealTypeEntity;
+  final List<RecipeEntity> recipeEntity;
   final List<Map<String, dynamic>> doneSteps;
   final List<PantriesCommonEntity> userStorageAreas;
   const UserState({
@@ -27,7 +27,7 @@ class UserState {
     this.entitlementIsActive = false,
     this.activeKitchenId = '',
     this.invitationCode = '',
-    this.mealTypeEntity = const [],
+    this.recipeEntity = const [],
     this.doneSteps = const [],
     this.userStorageAreas = const [],
   });
@@ -43,7 +43,7 @@ class UserState {
     Uint8List? profilePictureFilePath,
     bool? isLoading,
     String? invitationCode,
-    List<MealTypeEntity>? mealTypeEntity,
+    List<RecipeEntity>? recipeEntity,
     List<Map<String, dynamic>>? doneSteps,
     List<PantriesCommonEntity>? userStorageAreas,
   }) {
@@ -59,7 +59,7 @@ class UserState {
       userId: userId ?? this.userId,
       profilePictureFilePath:
           profilePictureFilePath ?? this.profilePictureFilePath,
-      mealTypeEntity: mealTypeEntity ?? this.mealTypeEntity,
+      recipeEntity: recipeEntity ?? this.recipeEntity,
       doneSteps: doneSteps ?? this.doneSteps,
       userStorageAreas: userStorageAreas ?? this.userStorageAreas,
     );

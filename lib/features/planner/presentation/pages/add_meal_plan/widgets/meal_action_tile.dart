@@ -18,7 +18,7 @@ import 'package:go_router/go_router.dart';
 
 class MealActionRow extends StatelessWidget {
   final int selectedIndex;
-  final MergedMealPlanEntity plan;
+  final MergedRecipePlanEntity plan;
   final String buttonText;
   final VoidCallback? callback;
 

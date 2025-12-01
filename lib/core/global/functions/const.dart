@@ -59,4 +59,6 @@ class AppConstants {
   static const String getDateRange = "/api/kitchen/get_date_range";
   static const String setDateRange = "/api/kitchen/set_date_range";
   static const String getUserProfile = "/api/get_user_profile";
+  static const String suggestRecipe =
+      "/api/kitchen/suggest_recipes_expiring_items";
 }

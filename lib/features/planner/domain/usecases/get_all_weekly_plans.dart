@@ -1,16 +1,16 @@
 import 'package:foodkitchen/core/common/domain/usecase/get_current_user.dart';
-import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/core/common/usecase/usecase.dart';
 import 'package:foodkitchen/features/planner/domain/repository/planner_repository.dart';
 import 'package:fpdart/fpdart.dart';
 
-class GetAllWeeklyPlans implements UseCase<List<MealTypeEntity>, NoParams> {
+class GetAllWeeklyPlans implements UseCase<List<RecipeEntity>, NoParams> {
   final PlannerRepository plannerRepository;
   const GetAllWeeklyPlans(this.plannerRepository);
 
   @override
-  Future<Either<Failure, List<MealTypeEntity>>> call(NoParams params) async {
+  Future<Either<Failure, List<RecipeEntity>>> call(NoParams params) async {
     return await plannerRepository.getAllWeeklyPlans();
   }
 }

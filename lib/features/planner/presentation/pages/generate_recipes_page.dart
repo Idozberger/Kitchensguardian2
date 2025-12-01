@@ -86,14 +86,14 @@ class _GenerateRecipesPageState extends State<GenerateRecipesPage> {
                         plannerBloc.add(
                           UpdateStartRecipeEvent(
                             startRecipe: false,
-                            mealTypeEntity: [],
+                            RecipeEntity: [],
                             doneSteps: [],
                           ),
                         );
                       },
                       padding: gapOnly(bottom: 14),
                       canCancel: true,
-                      mealTypeEntity: state.startedRecipe[0],
+                      recipeEntity: state.startedRecipe[0],
                     ),
                   SearchBarWidgetForGenerateRecipes(
                     controller: searchController,

@@ -17,6 +17,7 @@ abstract interface class HomeRemoteDataSource {
   Future<List<Map<String, dynamic>>> getWeeklyPlans({
     required String kitchenId,
   });
+  Future<Map<String, dynamic>> getRecipeSuggestion({required String kitchenId});
 }
 
 class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
@@ -166,5 +167,32 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
 
   DateTime parseDate(String formattedDateString) {
     return DateFormat("dd/MM/yyyy").parse(formattedDateString);
+  }
+
+  @override
+  Future<Map<String, dynamic>> getRecipeSuggestion({
+    required String kitchenId,
+  }) async {
+    try {
+      final response = await dio.get(
+        "${AppConstants.suggestRecipe}?kitchen_id=$kitchenId",
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+
+        final message = data["error"];
+        debugPrint("Suggested Recipe: ${message}");
+        throw "This model's maximum context length is 128000 tokens";
+      }
+      debugPrint("Suggested Recipe: ${response.data}");
+      return response.data;
+    } on DioException catch (e) {
+      throw dio.handleError(e);
+    } catch (e) {
+      rethrow;
+    }
   }
 }

@@ -5,6 +5,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
+import 'package:foodkitchen/core/common/data/model/recipe_model.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
@@ -67,7 +68,7 @@ class _PlannerPageState extends State<PlannerPage> {
     return DateFormat('EEEE dd, yyyy').format(date);
   }
 
-  Widget _buildPlanSection(MergedMealPlanEntity plan) {
+  Widget _buildPlanSection(MergedRecipePlanEntity plan) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: DayPlanTile(
@@ -107,7 +108,7 @@ class _PlannerPageState extends State<PlannerPage> {
                 AddMealPlanEvent(
                   date: plan.date,
                   kitchenId: context.read<UserCubit>().state.activeKitchenId,
-                  mealPlan: meal,
+                  mealPlan: meal as RecipeModel,
                 ),
               );
             }
@@ -121,7 +122,7 @@ class _PlannerPageState extends State<PlannerPage> {
 
   Future<dynamic> _showDeleteDialog(
     BuildContext context, {
-    required MergedMealPlanEntity plan,
+    required MergedRecipePlanEntity plan,
   }) {
     return showCustomGenericDialog(
       context: context,

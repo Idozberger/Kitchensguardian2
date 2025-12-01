@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:foodkitchen/core/common/data/model/meal_type_model.dart';
+import 'package:foodkitchen/core/common/data/model/recipe_model.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dart';
@@ -45,7 +45,7 @@ class GeneratedRecipesSection extends StatelessWidget {
               final recipe = state.recipes![index];
               return RecipeTileItem(
                 isEdit: isEdit,
-                recipe: recipe as MealTypeModel,
+                recipe: recipe as RecipeModel,
                 selectedDate: selectedDate,
                 selectedMealType: selectedMealType,
                 isPlan: isPlan,

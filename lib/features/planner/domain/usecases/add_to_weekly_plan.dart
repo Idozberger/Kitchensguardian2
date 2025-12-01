@@ -1,4 +1,4 @@
-import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/core/common/usecase/usecase.dart';
 import 'package:foodkitchen/features/planner/domain/repository/planner_repository.dart';
@@ -11,12 +11,12 @@ class AddToWeeklyPlan implements UseCase<String, AddToWeeklyPlanParams> {
   @override
   Future<Either<Failure, String>> call(AddToWeeklyPlanParams params) async {
     return await plannerRepository.addToWeeklyPlan(
-      mealTypeEntity: params.mealTypeEntity,
+      RecipeEntity: params.recipeEntity,
     );
   }
 }
 
 class AddToWeeklyPlanParams {
-  final MealTypeEntity mealTypeEntity;
-  AddToWeeklyPlanParams(this.mealTypeEntity);
+  final RecipeEntity recipeEntity;
+  AddToWeeklyPlanParams(this.recipeEntity);
 }

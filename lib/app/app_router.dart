@@ -184,7 +184,7 @@ final GoRouter router = GoRouter(
         return buildPage(
           state.pageKey,
           RecipesDetailsPage(
-            mealTypeEntity: data["meal_type_entity"],
+            recipeEntity: data["meal_type_entity"],
             isPlan: data["is_plan"],
             isEdit: data["is_edit"],
           ),
@@ -240,11 +240,11 @@ final GoRouter router = GoRouter(
       name: Routes.viewPlanDetails,
       path: Routes.viewPlanDetails,
       pageBuilder: (context, state) {
-        final MergedMealPlanEntity mergedMealPlanEntity =
-            state.extra as MergedMealPlanEntity;
+        final MergedRecipePlanEntity mergedRecipePlanEntity =
+            state.extra as MergedRecipePlanEntity;
         return buildPage(
           state.pageKey,
-          ViewPlanDetailsPage(mergedMealPlanEntity: mergedMealPlanEntity),
+          ViewPlanDetailsPage(mergedRecipePlanEntity: mergedRecipePlanEntity),
         );
       },
     ),

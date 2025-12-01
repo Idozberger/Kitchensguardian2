@@ -1,15 +1,15 @@
-import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/features/planner/domain/entities/merged_meal_type_entity.dart';
 
 final class PlannerState {
-  final List<MealTypeEntity>? recipes;
-  final List<MealTypeEntity>? favouriteRecipes;
-  final List<MealTypeEntity> startedRecipe;
-  final List<MergedMealPlanEntity> getAllWeeklyPlans;
-  final List<MergedMealPlanEntity> dateBasedPlan;
+  final List<RecipeEntity>? recipes;
+  final List<RecipeEntity>? favouriteRecipes;
+  final List<RecipeEntity> startedRecipe;
+  final List<MergedRecipePlanEntity> getAllWeeklyPlans;
+  final List<MergedRecipePlanEntity> dateBasedPlan;
   final List<Map<String, dynamic>> doneSteps;
-  final List<MergedMealPlanEntity> mealPlans;
-  final List<MergedMealPlanEntity> editMealsPlans;
+  final List<MergedRecipePlanEntity> mealPlans;
+  final List<MergedRecipePlanEntity> editMealsPlans;
   final String? startDate;
   final String? endDate;
   final bool isLoading;
@@ -42,13 +42,13 @@ final class PlannerState {
   });
 
   PlannerState copyWith({
-    List<MealTypeEntity>? recipes,
-    List<MergedMealPlanEntity>? mealPlans,
-    List<MealTypeEntity>? favouriteRecipes,
-    List<MergedMealPlanEntity>? getAllWeeklyPlans,
-    List<MergedMealPlanEntity>? dateBasedPlan,
-    List<MealTypeEntity>? startedRecipe,
-    List<MergedMealPlanEntity>? editMealsPlans,
+    List<RecipeEntity>? recipes,
+    List<MergedRecipePlanEntity>? mealPlans,
+    List<RecipeEntity>? favouriteRecipes,
+    List<MergedRecipePlanEntity>? getAllWeeklyPlans,
+    List<MergedRecipePlanEntity>? dateBasedPlan,
+    List<RecipeEntity>? startedRecipe,
+    List<MergedRecipePlanEntity>? editMealsPlans,
     bool? isLoading,
     bool? isFinishingRecipe,
     bool? startRecipe,

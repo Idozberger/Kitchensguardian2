@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:foodkitchen/core/common/data/model/meal_type_model.dart';
-import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/common/data/model/recipe_model.dart';
+import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
@@ -18,7 +18,7 @@ import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dar
 import 'package:foodkitchen/features/planner/presentation/widgets/recipe_tile_item.dart';
 
 class GeneratedRecipeSection extends StatelessWidget {
-  final MergedMealPlanEntity mealPlan;
+  final MergedRecipePlanEntity mealPlan;
   final int selectedIndex;
   final String date;
   final bool isEdit;
@@ -71,7 +71,7 @@ class GeneratedRecipeSection extends StatelessWidget {
   Widget _buildMealTile(
     BuildContext context, {
     required String label,
-    required MealTypeEntity? meal,
+    required RecipeEntity? meal,
   }) {
     final bool isSameDate = mealPlan.date == date;
 
@@ -81,7 +81,7 @@ class GeneratedRecipeSection extends StatelessWidget {
         isDeletedIcon: true,
         svgAsset: AppAssets.deleteSvg,
         deleteCallback: () => _showDeleteDialog(context, meal),
-        recipe: meal as MealTypeModel,
+        recipe: meal as RecipeModel,
         selectedDate: mealPlan.date,
         selectedMealType: label,
         isPlan: false,
@@ -93,7 +93,7 @@ class GeneratedRecipeSection extends StatelessWidget {
 
   Future<void> _showDeleteDialog(
     BuildContext context,
-    MealTypeEntity meal,
+    RecipeEntity meal,
   ) async {
     await showPlannerDeleteDialog(
       context: context,

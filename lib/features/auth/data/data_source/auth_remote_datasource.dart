@@ -42,6 +42,7 @@ abstract interface class AuthRemoteDataSource {
     required String email,
   });
   Future<String> signInWithGoogle();
+  Future<String> signUpWithGoogle();
 }
 
 class AuthRemoteDatasourceImpl implements AuthRemoteDataSource {
@@ -194,7 +195,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource {
             ? jsonDecode(response.data)
             : response.data;
 
-        final message = data["error"];
+        final message = data["error"] ?? data["message"] ?? "Login failed";
         throw message;
       }
 
@@ -202,17 +203,31 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource {
           ? jsonDecode(response.data)
           : response.data;
 
-      final accessToken = data["access_token"];
-      final message = data["message"];
+      final String? accessToken = data["access_token"];
+      final String message = data["message"] ?? "Logged in successfully";
 
-      if (accessToken != null) {
-        await sharedPreferences.setString("access-token", accessToken);
-        debugPrint("Access token saved ✅");
+      if (accessToken == null || accessToken.isEmpty) {
+        throw "Invalid response: Access token is missing";
       }
 
-      return message ?? "Logged In Successfully";
+      await sharedPreferences.setString("access-token", accessToken);
+
+      await Future.delayed(const Duration(milliseconds: 100));
+
+      final savedToken = sharedPreferences.getString("access-token");
+      if (savedToken == null || savedToken != accessToken) {
+        debugPrint("Token save failed! Retrying...");
+        await sharedPreferences.setString("access-token", accessToken);
+      }
+
+      debugPrint("Access token saved & verified successfully");
+
+      return message;
     } on DioException catch (e) {
       throw dio.handleError(e);
+    } catch (e) {
+      debugPrint("Unexpected login error: $e");
+      rethrow;
     }
   }
 
@@ -256,8 +271,6 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<String> signInWithGoogle() async {
-    log("Google Sign-In: Starting Google Sign-In process...", name: "Auth");
-
     try {
       final GoogleSignIn googleSignIn = GoogleSignIn(
         serverClientId:
@@ -265,116 +278,179 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource {
         scopes: ['email', 'profile'],
       );
 
-      log("GoogleSignIn instance created with serverClientId", name: "Auth");
-
-      log("Google Sign-In: Showing Google account picker...", name: "Auth");
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      GoogleSignInAccount? googleUser = await googleSignIn.signInSilently();
 
       if (googleUser == null) {
-        log("Google Sign-In: Cancelled by user", name: "Auth");
-        return "Google Sign-In was cancelled";
+        log("No cached session → showing Google picker", name: "Auth");
+        googleUser = await googleSignIn.signIn();
+
+        if (googleUser == null) {
+          log("User cancelled Google Sign-In", name: "Auth");
+          throw "Sign in cancelled by user";
+        }
       }
 
-      log(
-        "Google Sign-In: User selected account → ${googleUser.email}",
-        name: "Auth",
-      );
+      log("Google Sign-In successful: ${googleUser.email}", name: "Auth");
 
-      log("Google Sign-In: Requesting authentication tokens...", name: "Auth");
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
 
-      final String? idToken = googleAuth.idToken;
-      final String? accessToken = googleAuth.accessToken;
-
-      if (idToken == null) {
-        log(
-          "Google Sign-In: Failed to retrieve idToken (null)",
-          name: "Auth",
-          error: "Check serverClientId in Google Cloud Console",
-        );
-        return "Failed to get ID token. Check serverClientId configuration.";
+      if (googleAuth.idToken != null) {
+        log("idToken received", name: "Auth");
       }
+
+      final String googlePermanentId = googleUser.id;
+      final String email = googleUser.email;
 
       log(
-        "Google Sign-In: idToken received (length: ${idToken.length})",
+        "Attempting login → Email: $email | GoogleID: $googlePermanentId",
         name: "Auth",
       );
-      if (accessToken != null) {
-        log("Google Sign-In: accessToken also received", name: "Auth");
+
+      final response = await dio.post(
+        AppConstants.login,
+        data: {"email": email, "password": googlePermanentId},
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+        final errorMsg = data["error"] ?? data["message"] ?? "Login failed";
+        log("Login failed: $errorMsg", name: "Auth");
+        throw errorMsg;
       }
 
-      final String email = googleUser.email;
-      final String? displayName = googleUser.displayName;
-      final String googleId = googleUser.id;
+      final String? token = response.data["access_token"];
+      final String message = response.data["message"] ?? "Welcome back!";
 
-      final String firstName = displayName?.split(" ").first ?? "User";
-      final String lastName = displayName != null && displayName.contains(" ")
-          ? displayName.split(" ").sublist(1).join(" ")
+      if (token == null || token.isEmpty) {
+        log("Login succeeded but no access_token returned!", name: "Auth");
+        throw "Invalid response from server";
+      }
+
+      await sharedPreferences.setString("access-token", token);
+      await sharedPreferences.commit();
+
+      log("GOOGLE LOGIN SUCCESS → Token saved", name: "Auth");
+      return message;
+    } on DioException catch (e) {
+      String errorMsg = "Login failed";
+
+      if (e.response?.statusCode == 401 || e.response?.statusCode == 404) {
+        errorMsg =
+            "No account found with this Google email. Please sign up first.";
+      } else if (e.response != null) {
+        final data = e.response?.data is String
+            ? jsonDecode(e.response!.data)
+            : e.response?.data;
+        errorMsg = data?["error"] ?? data?["message"] ?? "Login failed";
+      } else {
+        errorMsg = "No internet connection";
+      }
+
+      log("Google Sign-In failed: $errorMsg", name: "Auth", error: e);
+      throw errorMsg;
+    } on PlatformException catch (e) {
+      log("Platform error", name: "Auth", error: e);
+      throw "Sign in failed. Please try again.";
+    } catch (e) {
+      throw e.toString();
+    }
+  }
+
+  @override
+  Future<String> signUpWithGoogle() async {
+    try {
+      final GoogleSignIn googleSignIn = GoogleSignIn(
+        serverClientId:
+            "428640146273-a3i750lldh1etatql54i10b2sqebcqus.apps.googleusercontent.com",
+        scopes: ['email', 'profile'],
+      );
+
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+
+      if (googleUser == null) {
+        log("User cancelled Google Sign-Up", name: "Auth");
+        throw "Sign up cancelled by user";
+      }
+
+      log("Google Sign-Up: User selected → ${googleUser.email}", name: "Auth");
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      if (googleAuth.idToken != null) {
+        log("idToken received for signup", name: "Auth");
+      }
+
+      final String googlePermanentId = googleUser.id;
+      final String email = googleUser.email;
+      final String displayName = googleUser.displayName ?? "User";
+
+      final List<String> nameParts = displayName.trim().split(RegExp(r'\s+'));
+      final String firstName = nameParts.first;
+      final String lastName = nameParts.length > 1
+          ? nameParts.sublist(1).join(" ")
           : "";
 
-      log(
-        "Google User Info → Email: $email | Name: $firstName $lastName | GoogleID: $googleId",
-        name: "Auth",
+      log("Creating account → $firstName $lastName | $email", name: "Auth");
+
+      final UserModel userModel = UserModel(
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        password: googlePermanentId,
       );
 
-      // Try Login First
-      log("Auth: Attempting login with email: $email", name: "Auth");
-      try {
-        final response = await dio.post(
-          AppConstants.login,
-          data: {"email": email, "password": googleId},
-        );
+      final response = await dio.post(
+        AppConstants.createAccount,
+        data: userModel.toJson(),
+      );
 
-        final token = response.data["access_token"];
-        final message = response.data["message"] ?? "Login successful";
-
-        if (token != null) {
-          await sharedPreferences.setString("access-token", token);
-          log("Login SUCCESS → Token saved | Message: $message", name: "Auth");
-        } else {
-          log("Login succeeded but no token returned", name: "Auth");
-        }
-
-        return message;
-      } catch (loginError) {
-        log(
-          "Login FAILED → Trying to create new account...",
-          name: "Auth",
-          error: loginError,
-        );
-
-        // Create New Account
-        log("Auth: Creating new account for $email", name: "Auth");
-        final signupResponse = await dio.post(
-          AppConstants.createAccount,
-          data: {
-            "first_name": firstName,
-            "last_name": lastName,
-            "email": email,
-            "password": googleId,
-            "login_type": "google",
-          },
-        );
-
-        final token = signupResponse.data["access_token"];
-        final message =
-            signupResponse.data["message"] ?? "Account created successfully";
-
-        if (token != null) {
-          await sharedPreferences.setString("access-token", token);
-          log(
-            "Signup SUCCESS → New account created & token saved",
-            name: "Auth",
-          );
-        }
-
-        log("Signup completed → $message", name: "Auth");
-        return message;
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+        final errorMsg = data["error"] ?? data["message"] ?? "Sign up failed";
+        log("Google Sign-Up failed: $errorMsg", name: "Auth");
+        throw errorMsg;
       }
+
+      final String? token = response.data["access_token"];
+      final String message =
+          response.data["message"] ?? "Account created successfully!";
+
+      if (token == null || token.isEmpty) {
+        log("Sign up succeeded but no token returned!", name: "Auth");
+        throw "Account created but login failed. Please try again.";
+      }
+
+      await sharedPreferences.setString("access-token", token);
+      await sharedPreferences.commit();
+
+      log("GOOGLE SIGN-UP SUCCESS → Account created & logged in", name: "Auth");
+      return message;
+    } on DioException catch (e) {
+      String errorMsg = "Sign up failed";
+
+      if (e.response != null) {
+        final data = e.response!.data is String
+            ? jsonDecode(e.response!.data)
+            : e.response!.data;
+        errorMsg = data?["error"] ?? data?["message"] ?? "Sign up failed";
+      } else {
+        errorMsg = "No internet connection";
+      }
+
+      log("Google Sign-Up error: $errorMsg", name: "Auth", error: e);
+      throw errorMsg;
     } on PlatformException catch (e) {
-      log("Google Sign-In: Platform Exception", name: "Auth", error: e);
-      return "Sign-in failed: Network or platform issue";
+      log("Platform error during Google Sign-Up", name: "Auth", error: e);
+      throw "Sign up failed. Please try again.";
+    } catch (e) {
+      log("Unexpected error in Google Sign-Up", name: "Auth", error: e);
+      throw e.toString();
     }
   }
 

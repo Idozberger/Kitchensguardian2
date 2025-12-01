@@ -2,6 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:foodkitchen/core/common/data/model/recipe_model.dart';
+import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/recipes_details/app_bar_widget.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/recipes_details/complete_dialog_widget.dart';
@@ -15,7 +17,6 @@ import 'package:foodkitchen/features/planner/presentation/pages/recipes_details/
 import 'package:foodkitchen/features/planner/presentation/pages/recipes_details/secondary_actions_widget.dart';
 import 'package:go_router/go_router.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
-import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
@@ -28,13 +29,13 @@ import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dar
 import 'widgets/bottom_nav_recipe_details.dart';
 
 class RecipesDetailsPage extends StatefulWidget {
-  final MealTypeEntity mealTypeEntity;
+  final RecipeEntity recipeEntity;
   final bool isPlan;
   final bool isEdit;
 
   const RecipesDetailsPage({
     super.key,
-    required this.mealTypeEntity,
+    required this.recipeEntity,
     required this.isPlan,
     required this.isEdit,
   });
@@ -45,7 +46,7 @@ class RecipesDetailsPage extends StatefulWidget {
 
 class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
   late final PlannerBloc plannerBloc;
-  late MealTypeEntity recipe;
+  late RecipeEntity recipe;
 
   bool addPlanDummyLoading = false;
   bool isFav = false;
@@ -56,7 +57,7 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
   void initState() {
     super.initState();
     plannerBloc = context.read<PlannerBloc>();
-    recipe = widget.mealTypeEntity;
+    recipe = widget.recipeEntity;
     isFav = recipe.available;
     initlizeSteps();
   }
@@ -139,7 +140,7 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
         plannerBloc.add(
           UpdateStartRecipeEvent(
             startRecipe: true,
-            mealTypeEntity: [recipe],
+            RecipeEntity: [recipe as RecipeModel],
             doneSteps: steps,
           ),
         );
@@ -150,7 +151,7 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
         plannerBloc.add(
           UpdateStartRecipeEvent(
             startRecipe: false,
-            mealTypeEntity: [],
+            RecipeEntity: [],
             doneSteps: [],
           ),
         );
@@ -219,9 +220,9 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
     });
     plannerBloc.add(
       AddMealPlanEvent(
-        date: widget.mealTypeEntity.formatedDateString,
+        date: widget.recipeEntity.formatedDateString,
         kitchenId: context.read<UserCubit>().state.activeKitchenId,
-        mealPlan: recipe,
+        mealPlan: recipe as RecipeModel,
       ),
     );
     await Future.delayed(Duration(seconds: 1));
@@ -258,7 +259,7 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
             plannerBloc.add(
               UpdateStartRecipeEvent(
                 startRecipe: false,
-                mealTypeEntity: [],
+                RecipeEntity: [],
                 doneSteps: [],
               ),
             );
@@ -324,7 +325,7 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
         plannerBloc.add(
           UpdateStartRecipeEvent(
             startRecipe: false,
-            mealTypeEntity: [],
+            RecipeEntity: [],
             doneSteps: [],
           ),
         );

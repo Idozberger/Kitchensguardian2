@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
@@ -12,7 +12,7 @@ import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dart';
 
 class PrimaryActionsWidget extends StatelessWidget {
-  final MealTypeEntity recipe;
+  final RecipeEntity recipe;
   final bool addPlanDummyLoading;
   final bool isFinishing;
   final bool isPlan;

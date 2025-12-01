@@ -216,7 +216,7 @@ class _ScanMealPageState extends State<ScanMealPage>
         ],
       ),
       title: Text(
-        "Meal Scan",
+        "Scan Receipt",
         style: Theme.of(context).textTheme.headlineLarge,
       ),
       actions: [

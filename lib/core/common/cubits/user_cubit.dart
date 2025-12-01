@@ -4,7 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/data/datasource/common_remote_datasource.dart';
 import 'package:foodkitchen/core/common/data/model/pantries_model.dart';
-import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 
 import 'user_state.dart';
 
@@ -68,11 +68,11 @@ class UserCubit extends Cubit<UserState> {
     );
   }
 
-  Future<void> updateMealTypeEntity(
-    List<MealTypeEntity> mealTypeEntity,
+  Future<void> updateRecipeEntity(
+    List<RecipeEntity> RecipeEntity,
     List<Map<String, dynamic>> doneSteps,
   ) async {
-    emit(state.copyWith(mealTypeEntity: mealTypeEntity, doneSteps: doneSteps));
+    emit(state.copyWith(recipeEntity: RecipeEntity, doneSteps: doneSteps));
   }
 
   void toggleLoading(bool value) {

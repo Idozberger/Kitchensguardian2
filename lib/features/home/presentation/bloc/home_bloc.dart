@@ -10,6 +10,7 @@ import 'package:foodkitchen/features/home/domain/entities/kitchen.dart';
 import 'package:foodkitchen/features/home/domain/usecases/create_kitchen_usecase.dart';
 import 'package:foodkitchen/features/home/domain/usecases/get_all_weekly_plans_usecase.dart';
 import 'package:foodkitchen/features/home/domain/usecases/get_pantries_usecase.dart';
+import 'package:foodkitchen/features/home/domain/usecases/get_recipe_suggestion_usecase.dart';
 import 'package:foodkitchen/features/home/domain/usecases/join_kitchen_usecase.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_event.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_state.dart';
@@ -22,6 +23,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final JoinKitchen _joinKitchen;
   final GetPantriesForHome _getPantriesForHome;
   final GetAllWeeklyPlansForHome _getAllWeeklyPlansForHome;
+  final GetRecipeSuggestionUsecase _getRecipeSuggestionUsecase;
 
   HomeBloc({
     required UserCubit userCubit,
@@ -29,11 +31,13 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     required JoinKitchen joinKitchen,
     required GetPantriesForHome getPantriesForHome,
     required GetAllWeeklyPlansForHome getAllWeeklyPlansForHome,
+    required GetRecipeSuggestionUsecase getRecipeSuggestionUsecase,
   }) : _userCubit = userCubit,
        _createKitchen = createKitchen,
        _joinKitchen = joinKitchen,
        _getAllWeeklyPlansForHome = getAllWeeklyPlansForHome,
        _getPantriesForHome = getPantriesForHome,
+       _getRecipeSuggestionUsecase = getRecipeSuggestionUsecase,
 
        super(const HomeState()) {
     on<CreateKitchenEventForHome>(_onCreateKitchenEvent);
@@ -43,6 +47,25 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<ResetHomeStateEvent>(_onResetHomeState);
     on<GetUserStorageAreaEvent>(_onGetUserStorageArea);
     on<GenerateGroceryList>(_onGetGenerateGroceryList);
+    on<GetRecipeSuggestionEvent>(_onGetRecipeSuggestion);
+  }
+  Future<void> _onGetRecipeSuggestion(
+    GetRecipeSuggestionEvent event,
+    Emitter<HomeState> emit,
+  ) async {
+    emit(state.copyWith(isLoading: true));
+
+    final res = await _getRecipeSuggestionUsecase(
+      GetRecipeSuggestionUsecaseParams(event.kitchenId),
+    );
+    await res.fold(
+      (failure) async {
+        emit(state.copyWith(isLoading: false, errorMessage: failure.message));
+      },
+      (recipe) async {
+        emit(state.copyWith(isLoading: false, suggestedRecipe: [recipe]));
+      },
+    );
   }
 
   Future<void> _onGetGenerateGroceryList(

@@ -1,7 +1,7 @@
-import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/features/planner/domain/entities/merged_meal_type_entity.dart';
 
-class MergedMealPlanModel extends MergedMealPlanEntity {
+class MergedMealPlanModel extends MergedRecipePlanEntity {
   MergedMealPlanModel({
     required super.date,
     super.breakfast,
@@ -11,9 +11,9 @@ class MergedMealPlanModel extends MergedMealPlanEntity {
 
   MergedMealPlanModel copyWith({
     String? date,
-    MealTypeEntity? breakfast,
-    MealTypeEntity? lunch,
-    MealTypeEntity? dinner,
+    RecipeEntity? breakfast,
+    RecipeEntity? lunch,
+    RecipeEntity? dinner,
   }) {
     return MergedMealPlanModel(
       date: date ?? this.date,
@@ -23,7 +23,7 @@ class MergedMealPlanModel extends MergedMealPlanEntity {
     );
   }
 
-  factory MergedMealPlanModel.fromEntity(MergedMealPlanEntity entity) {
+  factory MergedMealPlanModel.fromEntity(MergedRecipePlanEntity entity) {
     return MergedMealPlanModel(
       date: entity.date,
       breakfast: entity.breakfast,

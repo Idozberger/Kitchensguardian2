@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 
 class IngredientsListWidget extends StatelessWidget {
-  final MealTypeEntity recipe;
+  final RecipeEntity recipe;
 
   const IngredientsListWidget({super.key, required this.recipe});
 

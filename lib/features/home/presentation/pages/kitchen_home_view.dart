@@ -121,7 +121,7 @@ class KitchenHomeView extends StatelessWidget {
               onGenerate: onGeneratePressed,
             ),
             gap(height: 14),
-            if (state.pantryItems.isNotEmpty)
+            if (state.suggestedRecipe.isNotEmpty)
               Padding(
                 padding: gapOnly(bottom: 14),
                 child: const SuggestionRecipes(),

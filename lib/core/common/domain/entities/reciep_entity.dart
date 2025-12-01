@@ -1,8 +1,9 @@
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
+import 'package:foodkitchen/core/common/domain/entities/expiring_item_entity.dart';
 import 'package:foodkitchen/features/planner/domain/entities/ingredient_entity.dart';
 
-class MealTypeEntity {
+class RecipeEntity {
   final String id;
   final String mealplanId;
   final String formatedDateString;
@@ -19,7 +20,7 @@ class MealTypeEntity {
   final bool missingItems;
   final bool available;
 
-  /// NEW
+  /// PLanner-specific fields
   final String recipeId;
   final String kitchenId;
   final String date;
@@ -29,7 +30,11 @@ class MealTypeEntity {
   final bool isCompleted;
   final String notes;
 
-  MealTypeEntity({
+  // Suggestion-specific fields
+  final int expiringItemsCount;
+  final List<ExpiringItemEntity> expiringItems;
+  final List<String> expiringItemsUsed;
+  RecipeEntity({
     required this.id,
     required this.mealplanId,
     required this.title,
@@ -53,5 +58,8 @@ class MealTypeEntity {
     required this.createdBy,
     required this.isCompleted,
     required this.notes,
+    this.expiringItemsCount = 0,
+    this.expiringItems = const [],
+    this.expiringItemsUsed = const [],
   });
 }

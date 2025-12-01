@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/planner/presentation/widgets/recipes_step_tile.dart';
 
 class RecipeStepsTile extends StatelessWidget {
-  final MealTypeEntity recipe;
+  final RecipeEntity recipe;
   final List<Map<String, dynamic>> steps;
   final bool startRecipe;
   final Function(int index, bool isCompleted) onStepToggle;

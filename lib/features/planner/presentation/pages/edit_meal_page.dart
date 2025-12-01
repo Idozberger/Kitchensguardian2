@@ -221,7 +221,7 @@ class _EditMealPageState extends State<EditMealPage>
     );
   }
 
-  Widget _buildEditMealRow(PlannerState state, MergedMealPlanEntity plan) {
+  Widget _buildEditMealRow(PlannerState state, MergedRecipePlanEntity plan) {
     if (state.mealTypeSelectedIndex == 0) {
       if (plan.breakfast == null || plan.breakfast!.mealplanId.isEmpty) {
         return MealActionRow(

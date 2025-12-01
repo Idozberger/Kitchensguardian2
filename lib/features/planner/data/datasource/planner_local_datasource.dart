@@ -1,16 +1,16 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:foodkitchen/core/common/data/model/meal_type_model.dart';
+import 'package:foodkitchen/core/common/data/model/recipe_model.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
 import 'package:foodkitchen/core/utils/date_format_to_string.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract interface class PlannerLocalDatasource {
-  Future<String> addToWeeklyPlan({required MealTypeModel newPlan});
-  Future<List<MealTypeModel>> getWeeklyPlans();
+  Future<String> addToWeeklyPlan({required RecipeModel newPlan});
+  Future<List<RecipeModel>> getWeeklyPlans();
   Future<String> deleteWeeklyPlan({required String selectedDate});
-  Future<List<MealTypeModel>> deleteMealTypeFromWeeklyPlan({
+  Future<List<RecipeModel>> deleteMealTypeFromWeeklyPlan({
     required String selectedDate,
     required String mealType,
   });
@@ -20,7 +20,7 @@ class PlannerLocalDatasourceImpl implements PlannerLocalDatasource {
   final SharedPreferences sharedPreferences;
   PlannerLocalDatasourceImpl(this.sharedPreferences);
   @override
-  Future<String> addToWeeklyPlan({required MealTypeModel newPlan}) async {
+  Future<String> addToWeeklyPlan({required RecipeModel newPlan}) async {
     try {
       final today = DateTime(
         DateTime.now().year,
@@ -115,17 +115,17 @@ class PlannerLocalDatasourceImpl implements PlannerLocalDatasource {
   }
 
   @override
-  Future<List<MealTypeModel>> getWeeklyPlans() async {
+  Future<List<RecipeModel>> getWeeklyPlans() async {
     try {
       final prefs = await SharedPreferences.getInstance();
 
       final List<String> jsonList = prefs.getStringList('weekly_plan') ?? [];
 
-      List<MealTypeModel> allPlans = jsonList
-          .map((jsonString) => MealTypeModel.fromJson(jsonDecode(jsonString)))
+      List<RecipeModel> allPlans = jsonList
+          .map((jsonString) => RecipeModel.fromJson(jsonDecode(jsonString)))
           .toList();
 
-      List<MealTypeModel> filteredPlans = [];
+      List<RecipeModel> filteredPlans = [];
 
       String? startDate = sharedPreferences.getString("start-date");
       debugPrint("Start date from SharedPreferences: $startDate");
@@ -166,7 +166,7 @@ class PlannerLocalDatasourceImpl implements PlannerLocalDatasource {
     }
   }
 
-  Future<void> saveThings(List<MealTypeModel> list) async {
+  Future<void> saveThings(List<RecipeModel> list) async {
     try {
       final prefs = await SharedPreferences.getInstance();
 
@@ -235,7 +235,7 @@ class PlannerLocalDatasourceImpl implements PlannerLocalDatasource {
   }
 
   @override
-  Future<List<MealTypeModel>> deleteMealTypeFromWeeklyPlan({
+  Future<List<RecipeModel>> deleteMealTypeFromWeeklyPlan({
     required String selectedDate,
     required String mealType,
   }) async {

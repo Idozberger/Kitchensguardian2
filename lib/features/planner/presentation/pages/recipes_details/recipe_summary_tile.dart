@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 
 class RecipeSummaryTile extends StatelessWidget {
-  final MealTypeEntity recipe;
+  final RecipeEntity recipe;
 
   const RecipeSummaryTile({super.key, required this.recipe});
 

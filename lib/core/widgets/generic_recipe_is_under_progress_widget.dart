@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
@@ -9,13 +9,13 @@ import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:go_router/go_router.dart';
 
 class RecipeInProgressNotification extends StatelessWidget {
-  final MealTypeEntity mealTypeEntity;
+  final RecipeEntity recipeEntity;
   final bool canCancel;
   final VoidCallback? onCancelRecipe;
   final EdgeInsetsGeometry padding;
   const RecipeInProgressNotification({
     super.key,
-    required this.mealTypeEntity,
+    required this.recipeEntity,
     required this.padding,
     this.canCancel = false,
     this.onCancelRecipe,
@@ -56,7 +56,7 @@ class RecipeInProgressNotification extends StatelessWidget {
                     SizedBox(
                       width: w(200),
                       child: Text(
-                        mealTypeEntity.title,
+                        recipeEntity.title,
                         style: Theme.of(context).textTheme.headlineSmall!
                             .copyWith(color: AppColors.primaryColor),
                       ),
@@ -73,7 +73,7 @@ class RecipeInProgressNotification extends StatelessWidget {
                     context.pushNamed(
                       Routes.generateRecipesDetails,
                       extra: {
-                        "meal_type_entity": mealTypeEntity,
+                        "meal_type_entity": RecipeEntity,
                         "is_plan": false,
                         "is_edit": false,
                       },

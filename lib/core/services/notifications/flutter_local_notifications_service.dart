@@ -241,7 +241,7 @@ class NotificationService {
   }
 
   Future<void> scheduleMealPlanReminders(
-    List<MergedMealPlanEntity> plans,
+    List<MergedRecipePlanEntity> plans,
   ) async {
     await cancelAllNotifications();
 
@@ -327,7 +327,7 @@ class NotificationService {
     log("All smart reminders scheduled!");
   }
 
-  String _missingItemsText(MergedMealPlanEntity plan) {
+  String _missingItemsText(MergedRecipePlanEntity plan) {
     final List<String> allMissing = [];
 
     if (plan.breakfast != null &&
@@ -355,7 +355,7 @@ class NotificationService {
     return allMissing.join("\n\n");
   }
 
-  bool _hasMissingIngredients(MergedMealPlanEntity plan) {
+  bool _hasMissingIngredients(MergedRecipePlanEntity plan) {
     return (plan.breakfast?.missingIngredients.isNotEmpty == true) ||
         (plan.lunch?.missingIngredients.isNotEmpty == true) ||
         (plan.dinner?.missingIngredients.isNotEmpty == true);

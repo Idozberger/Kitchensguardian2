@@ -1,6 +1,8 @@
+import 'dart:developer';
+
 import 'package:foodkitchen/core/common/data/datasource/common_remote_datasource.dart';
-import 'package:foodkitchen/core/common/data/model/meal_type_model.dart';
-import 'package:foodkitchen/core/common/domain/entities/meal_type_entity.dart';
+import 'package:foodkitchen/core/common/data/model/recipe_model.dart';
+import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/features/home/data/datasource/home_remote_datasource.dart';
@@ -75,21 +77,49 @@ class HomeRepositoryImpl implements HomeRepository {
   }
 
   @override
-  Future<Either<Failure, List<MealTypeEntity>>> getAllWeeklyPlans({
+  Future<Either<Failure, List<RecipeEntity>>> getAllWeeklyPlans({
     required String kicthenId,
   }) async {
     try {
-      logInfo("Fetching meal plans for kitchenId: $kicthenId");
-
       final response = await homeRemoteDataSource.getWeeklyPlans(
         kitchenId: kicthenId,
       );
 
       final generatedRecipes = (response as List).map((e) {
-        return MealTypeModel.fromJson(e as Map<String, dynamic>);
+        return RecipeModel.fromJson(e as Map<String, dynamic>);
       }).toList();
 
       return Right(generatedRecipes);
+    } on Failure catch (f) {
+      logInfo("Failure: ${f.message}");
+      return Left(f);
+    } catch (e) {
+      logInfo("Error: ${e.toString()}");
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, RecipeEntity>> getRecipeSuggestion({
+    required String kicthenId,
+  }) async {
+    try {
+      final response = await homeRemoteDataSource.getRecipeSuggestion(
+        kitchenId: kicthenId,
+      );
+
+      final recipeJson = response["recipe"] ?? {};
+
+      final mergedJson = {
+        ...recipeJson,
+        "expiring_items": response["expiring_items"],
+        "expiring_items_count": response["expiring_items_count"],
+        "expiring_items_used": recipeJson["expiring_items_used"],
+      };
+
+      final recipe = RecipeModel.fromJson(mergedJson as Map<String, dynamic>);
+      log("suggestion: $recipe");
+      return Right(recipe);
     } on Failure catch (f) {
       logInfo("Failure: ${f.message}");
       return Left(f);

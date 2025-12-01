@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/domain/usecase/get_current_user.dart';
@@ -109,6 +111,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     res.fold((failure) => emit(AuthFailure(failure.message)), (message) {
       emit(AuthSuccess(message));
+
       _onGetCurrentUser(AuthGetCurrentUser(), emit);
     });
   }
