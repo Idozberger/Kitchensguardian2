@@ -62,7 +62,7 @@ class _PlannerPageState extends State<PlannerPage> {
     );
   }
 
-  String formatDate(String inputDate) {
+  String formatDateOnView(String inputDate) {
     final DateTime date = DateTime.parse(inputDate);
 
     return DateFormat('EEEE dd, yyyy').format(date);
@@ -72,7 +72,7 @@ class _PlannerPageState extends State<PlannerPage> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: DayPlanTile(
-        dayLabel: formatDate(plan.date),
+        dayLabel: formatDateOnView(plan.date),
         meals: [
           if (plan.breakfast != null)
             MealTile(mealType: "Breakfast", mealName: plan.breakfast!.title),
@@ -222,6 +222,7 @@ class _PlannerPageState extends State<PlannerPage> {
                       listener: (context, state) {},
                       builder: (_, state) {
                         final plan = state.dateBasedPlan;
+                        log("datebase: $plan");
                         final todayOnly = DateTime(
                           DateTime.now().year,
                           DateTime.now().month,

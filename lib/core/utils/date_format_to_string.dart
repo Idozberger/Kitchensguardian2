@@ -11,8 +11,9 @@ DateTime parseDate(String formattedDateString) {
 }
 
 String formatDateToMeetBackendDate(DateTime date) {
-  log("calling [formatDateToMeetBackendDate]: $date");
-  return DateFormat('yyyy-MM-d').format(date);
+  final formatted = DateFormat('yyyy-MM-dd').format(date);
+  log("calling [formatDateToMeetBackendDate]: $date → $formatted");
+  return formatted;
 }
 
 DateTime formatStringDateToMeetBackendDate(String formattedDateString) {

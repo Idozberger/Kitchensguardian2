@@ -254,6 +254,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
         await NotificationService().scheduleMealPlanReminders(
           mergedMealPlanEntities,
         );
+        await Future.delayed(Duration(seconds: 500));
         add(GetDateBasedPlans(state.startDate ?? formatDate(DateTime.now())));
       },
     );
@@ -709,9 +710,13 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     emit(state.copyWith(isLoading: true));
 
     final allPlans = state.getAllWeeklyPlans;
-
+    log("datebase bloc: $allPlans");
     List<MergedRecipePlanEntity> dateBasedPlan = allPlans.where((plan) {
-      return plan.date == event.dateString;
+      final planDate = formatDateToMeetBackendDate(
+        formatStringDateToMeetBackendDate(plan.date),
+      );
+      log("ppppp: ${planDate}==${event.dateString}");
+      return planDate == event.dateString;
     }).toList();
 
     emit(
