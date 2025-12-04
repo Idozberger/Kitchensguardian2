@@ -24,7 +24,7 @@ class _SplashScreenState extends State<SplashScreen> {
   late UserBloc userBloc;
   late UserCubit userCubit;
 
-  String fullText = "FOOD KITCHEN";
+  String fullText = "KITCHEN GUARDIAN";
   List<bool> visibleLetters = [];
   int _charIndex = 0;
   Timer? _timer;
@@ -51,7 +51,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void _startTextAnimation() {
-    const duration = Duration(milliseconds: 150);
+    const duration = Duration(milliseconds: 100);
     _timer = Timer.periodic(duration, (timer) {
       if (_charIndex < fullText.length) {
         setState(() {
@@ -102,7 +102,7 @@ class _SplashScreenState extends State<SplashScreen> {
           } else if (state is UserOnBoarded) {
             context.go(Routes.signIn);
           } else if (state is UserSuccess) {
-            context.go(Routes.dashboard);
+            context.go(Routes.kitchenSelection);
           }
         },
         builder: (_, state) {

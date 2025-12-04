@@ -41,4 +41,5 @@ class Routes {
   static const String addPantryStorageType = "/add_pantry_storage_type";
   static const String allStorageArea = "/all_storage_areas";
   static const String smartCart = "/smart_cart";
+  static const String kitchenSelection = "/kitchen_selection";
 }

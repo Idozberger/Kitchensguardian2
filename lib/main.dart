@@ -32,14 +32,7 @@ Future<void> main() async {
     ]),
   ]);
   cameras = await availableCameras();
-  SystemChrome.setSystemUIOverlayStyle(
-    SystemUiOverlayStyle(
-      statusBarColor: Colors.white,
-      statusBarIconBrightness: Brightness.dark,
-      systemNavigationBarColor: Colors.grey.shade300,
-      systemNavigationBarIconBrightness: Brightness.dark,
-    ),
-  );
+
   runApp(
     MultiBlocProvider(
       providers: [

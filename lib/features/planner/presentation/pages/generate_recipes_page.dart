@@ -21,6 +21,7 @@ import 'package:foodkitchen/features/planner/presentation/widgets/generated_reci
 import 'package:foodkitchen/features/planner/presentation/widgets/saved_recipes_section.dart';
 import 'package:foodkitchen/features/planner/presentation/widgets/search_bar.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 
 class GenerateRecipesPage extends StatefulWidget {
   final String selectedDate;
@@ -101,12 +102,8 @@ class _GenerateRecipesPageState extends State<GenerateRecipesPage> {
                   ),
                   if (state.isLoading)
                     Padding(
-                      padding: gapOnly(top: 18),
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.primaryColor,
-                        ),
-                      ),
+                      padding: gapOnly(top: 100),
+                      child: Lottie.asset(AppAssets.loader),
                     )
                   else ...[
                     if (state.recipes != null && state.recipes!.isNotEmpty)

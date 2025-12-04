@@ -70,7 +70,7 @@ class _SignInPageState extends State<SignInPage> {
       listener: (BuildContext context, AuthState state) {
         if (state is AuthSuccess) {
           AppToast.show(state.successMessage, ToastType.success);
-          context.go(Routes.dashboard);
+          context.go(Routes.kitchenSelection);
         }
         if (state is AuthFailure) {
           AppToast.show(state.message, ToastType.error);

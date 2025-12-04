@@ -1,5 +1,7 @@
-import 'dart:developer';
+import 'dart:convert';
+import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:foodkitchen/core/common/data/datasource/common_remote_datasource.dart';
 import 'package:foodkitchen/core/common/data/model/recipe_model.dart';
 import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
@@ -108,24 +110,51 @@ class HomeRepositoryImpl implements HomeRepository {
         kitchenId: kicthenId,
       );
 
-      final recipeJson = response["recipe"] ?? {};
+      final Map<String, dynamic> recipeJson = Map<String, dynamic>.from(
+        response["recipe"] as Map? ?? {},
+      );
 
-      final mergedJson = {
+      print("(suggestionapi)-- Raw recipe: $recipeJson");
+
+      final Map<String, dynamic> mergedJson = {
         ...recipeJson,
         "expiring_items": response["expiring_items"],
         "expiring_items_count": response["expiring_items_count"],
-        "expiring_items_used": recipeJson["expiring_items_used"],
+        if (recipeJson.containsKey("expiring_items_used"))
+          "expiring_items_used": recipeJson["expiring_items_used"],
       };
 
-      final recipe = RecipeModel.fromJson(mergedJson as Map<String, dynamic>);
-      log("suggestion: $recipe");
+      if (mergedJson["thumbnail"] != null &&
+          mergedJson["thumbnail"] is String) {
+        try {
+          final String thumb = mergedJson["thumbnail"] as String;
+          final String cleanedBase64 = thumb.contains(',')
+              ? thumb.split(',').last.trim()
+              : thumb.trim();
+
+          mergedJson["thumbnail"] = base64Decode(cleanedBase64);
+        } catch (e) {
+          print("Thumbnail decode failed: $e");
+          mergedJson["thumbnail"] = Uint8List(0);
+        }
+      }
+
+      print(
+        "(suggestionapi)-- Final merged JSON with decoded thumbnail: $mergedJson",
+      );
+
+      // Now safe to parse
+      final recipe = RecipeModel.fromJson(mergedJson);
+
+      print("(suggestionapi)-- Success: $recipe");
       return Right(recipe);
     } on Failure catch (f) {
-      logInfo("Failure: ${f.message}");
+      logInfo("Known Failure: ${f.message}");
       return Left(f);
-    } catch (e) {
-      logInfo("Error: ${e.toString()}");
-      return Left(UnknownFailure(e.toString()));
+    } catch (e, stackTrace) {
+      logInfo("Unexpected Error: $e");
+      debugPrintStack(stackTrace: stackTrace);
+      return Left(UnknownFailure("Failed to load recipe suggestion"));
     }
   }
 }

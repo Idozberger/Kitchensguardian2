@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:foodkitchen/core/common/domain/entities/expiring_item_entity.dart';
 import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
@@ -58,11 +59,19 @@ class RecipeModel extends RecipeEntity {
     }).toList();
   }
 
-  static List<ExpiringItemEntity> _safeList(dynamic value) {
-    if (value is! List) return [];
+  static List<ExpiringItemEntity> _safeList(dynamic list) {
+    if (list is! List) return [];
 
-    return value.map((name) {
-      return ExpiringItemEntity(itemName: name);
+    return list.map((e) {
+      final field = Map<String, dynamic>.from(e);
+
+      return ExpiringItemEntity(
+        itemName: field["name"],
+        expiryStatus: field["expiry_status"],
+        itemId: field["item_id"],
+        quantity: field["quantity"],
+        unit: field["unit"],
+      );
     }).toList();
   }
 
@@ -162,7 +171,7 @@ class RecipeModel extends RecipeEntity {
   }) {
     return RecipeModel(
       id: id ?? this.id,
-      mealplanId: mealPlanId ?? this.mealplanId,
+      mealplanId: mealPlanId ?? mealplanId,
       title: title ?? this.title,
       calories: calories ?? this.calories,
       cookingTime: cookingTime ?? this.cookingTime,

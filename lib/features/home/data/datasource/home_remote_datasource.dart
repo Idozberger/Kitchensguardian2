@@ -184,10 +184,9 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
             : response.data;
 
         final message = data["error"];
-        debugPrint("Suggested Recipe: ${message}");
-        throw "This model's maximum context length is 128000 tokens";
+        debugPrint("Suggested Recipe: $message");
+        throw "Server error, please try again";
       }
-      debugPrint("Suggested Recipe: ${response.data}");
       return response.data;
     } on DioException catch (e) {
       throw dio.handleError(e);

@@ -2,7 +2,6 @@ import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
-import 'package:foodkitchen/core/common/data/model/recipe_model.dart';
 import 'package:foodkitchen/core/common/domain/usecase/get_current_user.dart';
 import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/core/services/notifications/flutter_local_notifications_service.dart';
@@ -177,7 +176,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
           final existingEndDate = formatStringDateToMeetBackendDate(
             dateRange.endDate,
           );
-          log("Existing date: ${existingEndDate}");
+          log("Existing date: $existingEndDate");
           final todayOnly = DateTime(
             DateTime.now().year,
             DateTime.now().month,
@@ -473,7 +472,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     Emitter<PlannerState> emit,
   ) async {
     emit(state.copyWith(addingToWeeklyPlan: true));
-    var plan = event.RecipeEntity as RecipeModel;
+    var plan = event.RecipeEntity;
     final res = await _addToWeeklyPlan(
       AddToWeeklyPlanParams(plan.copyWith(thumbnail: null)),
     );
@@ -715,7 +714,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
       final planDate = formatDateToMeetBackendDate(
         formatStringDateToMeetBackendDate(plan.date),
       );
-      log("ppppp: ${planDate}==${event.dateString}");
+      log("ppppp: $planDate==${event.dateString}");
       return planDate == event.dateString;
     }).toList();
 

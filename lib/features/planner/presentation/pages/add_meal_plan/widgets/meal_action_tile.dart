@@ -131,7 +131,7 @@ class MealActionRow extends StatelessWidget {
                                 formatStringDateToMeetBackendDate(
                                   state.endDate!,
                                 );
-                            log("Enddate = ${existingEndDate}");
+                            log("Enddate = $existingEndDate");
                             if (existingEndDate.isBefore(DateTime.now())) {
                               updateStartEndDate(plannerBloc);
                             }
