@@ -241,7 +241,7 @@ class KitchenBloc extends Bloc<KitchenEvent, KitchenState> {
     if (event.kitchen.invitationCode.isNotEmpty) {
       await _saveOrUpdateUserKitchen(kitchen: event.kitchen);
     }
-    add(FetchKitchens());
+    emit(OpenKitchen());
   }
 
   Future<void> _onDeleteOrLeaveKitchen(

@@ -53,17 +53,31 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     GetRecipeSuggestionEvent event,
     Emitter<HomeState> emit,
   ) async {
-    emit(state.copyWith(isLoading: true));
+    emit(state.copyWith(loadingRecipeSuggestion: true));
 
     final res = await _getRecipeSuggestionUsecase(
       GetRecipeSuggestionUsecaseParams(event.kitchenId),
     );
-    await res.fold(
-      (failure) async {
-        emit(state.copyWith(isLoading: false, errorMessage: failure.message));
+
+    res.fold(
+      (failure) {
+        emit(
+          state.copyWith(
+            loadingRecipeSuggestion: false,
+            errorMessage: failure.message,
+          ),
+        );
       },
-      (recipe) async {
-        emit(state.copyWith(isLoading: false, suggestedRecipe: [recipe]));
+      (recipe) {
+        final bool isValid =
+            recipe.title.isNotEmpty && recipe.recipeShortSummary.isNotEmpty;
+
+        emit(
+          state.copyWith(
+            loadingRecipeSuggestion: false,
+            suggestedRecipe: isValid ? [recipe] : [],
+          ),
+        );
       },
     );
   }
@@ -286,12 +300,23 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       GetAllWeeklyPlansForHomeParams(_userCubit.state.activeKitchenId),
     );
 
-    res.fold(
+    await res.fold(
       (failure) {
-        emit(state.copyWith(errorMessage: failure.message));
+        emit(
+          state.copyWith(
+            errorMessage: failure.message,
+            loadingWeeklyPlans: false,
+          ),
+        );
       },
-      (getAllWeeklyPlans) {
-        emit(state.copyWith(dateBasedPlan: getAllWeeklyPlans));
+      (getAllWeeklyPlans) async {
+        emit(
+          state.copyWith(
+            dateBasedPlan: getAllWeeklyPlans,
+            loadingWeeklyPlans: false,
+          ),
+        );
+        add(GenerateGroceryList());
       },
     );
   }

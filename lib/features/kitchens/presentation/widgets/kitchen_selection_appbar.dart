@@ -3,9 +3,7 @@ import 'package:foodkitchen/core/global/functions/resize.dart';
 
 class KitchenSelectionAppBar extends StatelessWidget
     implements PreferredSizeWidget {
-  final BuildContext parentContext;
-
-  const KitchenSelectionAppBar({super.key, required this.parentContext});
+  const KitchenSelectionAppBar({super.key});
 
   @override
   Size get preferredSize => Size.fromHeight(kToolbarHeight);

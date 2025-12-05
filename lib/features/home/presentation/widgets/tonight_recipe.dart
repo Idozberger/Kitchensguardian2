@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -29,7 +31,7 @@ class _TonightRecipeWidgetState extends State<TonightRecipeWidget> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(viewportFraction: 0.88, initialPage: 0);
+    _pageController = PageController(viewportFraction: 0.88);
   }
 
   @override
@@ -43,125 +45,127 @@ class _TonightRecipeWidgetState extends State<TonightRecipeWidget> {
     return BlocBuilder<HomeBloc, HomeState>(
       builder: (_, state) {
         final todayFormatted = formatDateToMeetBackendDate(DateTime.now());
-
-        final todayRecipes = state.dateBasedPlan.where((recipe) {
-          return recipe.date == todayFormatted;
-        }).toList();
-        const mealOrder = ["breakfast", "lunch", "dinner"];
+        final todayRecipes = state.dateBasedPlan
+            .where((r) => r.date == todayFormatted)
+            .toList();
 
         todayRecipes.sort((a, b) {
-          final aIndex = mealOrder.indexOf(a.mealType);
-          final bIndex = mealOrder.indexOf(b.mealType);
-          return aIndex.compareTo(bIndex);
+          const mealOrder = ["breakfast", "lunch", "dinner"];
+          return mealOrder
+              .indexOf(a.mealType)
+              .compareTo(mealOrder.indexOf(b.mealType));
         });
 
-        return UpperTile(
-          widget: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Today Plan",
-                    style: Theme.of(context).textTheme.headlineLarge!.copyWith(
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    maxLines: 1,
-                  ),
-                  SvgPicture.asset(AppAssets.recipesSvg),
-                ],
-              ),
-              SizedBox(height: h(20)),
+        final viewport = todayRecipes.length == 1 ? 1.0 : 0.88;
+        _pageController = PageController(
+          viewportFraction: viewport,
+          initialPage: _currentPage,
+        );
 
-              if (todayRecipes.isEmpty)
-                Center(
-                  child: Column(
-                    children: [
-                      Text(
-                        "No upcoming recipes found",
-                        style: Theme.of(context).textTheme.headlineMedium,
-                      ),
-                      gap(height: 4),
-                      TextButton(
-                        onPressed: () {
-                          context.read<PlannerBloc>()
-                            ..add(ResetMealPlanState())
-                            ..add(
-                              UpdateTypeSelectedAndDateEvent(
-                                date: DateTime.now(),
-                                index: 0,
+        return todayRecipes.isEmpty
+            ? SizedBox()
+            : UpperTile(
+                widget: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Today Plan",
+                          style: Theme.of(context).textTheme.headlineLarge,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        SvgPicture.asset(AppAssets.recipesSvg),
+                      ],
+                    ),
+                    SizedBox(height: h(20)),
+
+                    if (todayRecipes.isEmpty)
+                      Center(
+                        child: Column(
+                          children: [
+                            Text(
+                              "No upcoming recipes found",
+                              style: Theme.of(context).textTheme.headlineMedium,
+                            ),
+                            gap(height: 4),
+                            TextButton(
+                              onPressed: () {
+                                context.read<PlannerBloc>()
+                                  ..add(ResetMealPlanState())
+                                  ..add(
+                                    UpdateTypeSelectedAndDateEvent(
+                                      date: DateTime.now(),
+                                      index: 0,
+                                    ),
+                                  );
+                                context.push(Routes.addMeal);
+                              },
+                              child: const Text("Find Recipes"),
+                            ),
+                          ],
+                        ),
+                      )
+                    else
+                      SizedBox(
+                        height: h(300),
+                        child: PageView.builder(
+                          controller: _pageController,
+                          itemCount: todayRecipes.length,
+                          onPageChanged: (index) {
+                            setState(() => _currentPage = index);
+                          },
+                          itemBuilder: (context, index) {
+                            final recipe = todayRecipes[index];
+                            return Padding(
+                              padding: EdgeInsets.only(right: w(14)),
+                              child: FractionallySizedBox(
+                                widthFactor: todayRecipes.length == 1
+                                    ? 1.0
+                                    : 0.88,
+                                child: RecipeCard(
+                                  isTodayPlan: true,
+                                  mealType: recipe.mealType,
+                                  title: recipe.title,
+                                  description: recipe.recipeShortSummary,
+                                  imageBytes: recipe.thumbnail,
+                                  onTap: () {
+                                    context.pushNamed(
+                                      Routes.generateRecipesDetails,
+                                      extra: {
+                                        "meal_type_entity": recipe,
+                                        "is_plan": false,
+                                        "is_edit": false,
+                                      },
+                                    );
+                                  },
+                                ),
                               ),
                             );
-
-                          context.push(Routes.addMeal);
-                        },
-                        child: Text("Find Recipes"),
+                          },
+                        ),
                       ),
-                    ],
-                  ),
-                )
-              else
-                SizedBox(
-                  height: h(300),
-                  child: Align(
-                    alignment: Alignment.topLeft,
-                    child: PageView.builder(
-                      padEnds: false,
-
-                      controller: _pageController,
-                      itemCount: todayRecipes.length,
-                      onPageChanged: (index) {
-                        setState(() {
-                          _currentPage = index;
-                        });
-                      },
-                      itemBuilder: (context, index) {
-                        final recipe = todayRecipes[index];
-                        return Padding(
-                          padding: EdgeInsets.only(right: w(14)),
-                          child: RecipeCard(
-                            isTodayPlan: true,
-                            mealType: recipe.mealType,
-                            title: recipe.title,
-                            description: recipe.recipeShortSummary,
-                            imageBytes: recipe.thumbnail,
-                            onTap: () {
-                              context.pushNamed(
-                                Routes.generateRecipesDetails,
-                                extra: {
-                                  "meal_type_entity": recipe,
-                                  "is_plan": false,
-                                  "is_edit": false,
-                                },
-                              );
-                            },
+                    gap(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(todayRecipes.length, (index) {
+                        return Container(
+                          margin: EdgeInsets.symmetric(horizontal: w(4)),
+                          width: _currentPage == index ? w(8) : w(8),
+                          height: h(8),
+                          decoration: BoxDecoration(
+                            color: _currentPage == index
+                                ? AppColors.primaryColor
+                                : const Color(0xffD4D2D2),
+                            borderRadius: BorderRadius.circular(10),
                           ),
                         );
-                      },
+                      }),
                     ),
-                  ),
+                  ],
                 ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  todayRecipes.length,
-                  (index) => Container(
-                    margin: EdgeInsets.symmetric(horizontal: w(4)),
-                    width: _currentPage == index ? w(8) : w(8),
-                    height: h(8),
-                    decoration: BoxDecoration(
-                      color: _currentPage == index
-                          ? AppColors.primaryColor
-                          : const Color(0xffD4D2D2),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
+              );
       },
     );
   }

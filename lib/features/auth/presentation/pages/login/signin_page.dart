@@ -204,16 +204,21 @@ class _SignInPageState extends State<SignInPage> {
                                 onGoogleSignIn();
                               },
                         child: Ink(
-                          width: w(209),
+                          height: h(48),
+                          width: w(200),
                           padding: gapAll(10),
                           decoration: BoxDecoration(
                             color: Color(0xffF9F8F8),
                             borderRadius: BorderRadius.circular(h(10)),
                           ),
                           child: (state is GoogleAuthLoading)
-                              ? Center(
-                                  child: CircularProgressIndicator(
-                                    color: AppColors.primaryColor,
+                              ? Transform.scale(
+                                  scale: 0.7,
+                                  child: Align(
+                                    alignment: Alignment.center,
+                                    child: CircularProgressIndicator(
+                                      color: AppColors.primaryColor,
+                                    ),
                                   ),
                                 )
                               : Row(

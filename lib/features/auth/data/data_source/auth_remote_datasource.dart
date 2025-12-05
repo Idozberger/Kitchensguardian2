@@ -286,7 +286,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource {
 
         if (googleUser == null) {
           log("User cancelled Google Sign-In", name: "Auth");
-          throw "Sign in cancelled by user";
+          throw "Sign in cancelled";
         }
       }
 

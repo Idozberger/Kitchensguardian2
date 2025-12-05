@@ -51,6 +51,9 @@ class _KitchenPageState extends State<KitchenPage> {
       appBar: _buildAppBar(context),
       body: BlocConsumer<KitchenBloc, KitchenState>(
         listener: (_, state) {
+          if (state is OpenKitchen) {
+            fetchAllKitchens();
+          }
           if (state is KitchenSuccess) {
             AppToast.show(state.successMessage, ToastType.success);
             fetchAllKitchens();

@@ -3,6 +3,7 @@ import 'package:foodkitchen/features/home/domain/entities/pantry_data.dart';
 
 class HomeState {
   final bool isLoading;
+
   final bool loadingRecipeSuggestion;
   final bool loadingWeeklyPlans;
   final String? errorMessage;

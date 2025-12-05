@@ -135,7 +135,7 @@ class _GroceryBodyState extends State<GroceryBody> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  gap(height: 142),
+                  gap(height: 164),
                   Image.asset(AppAssets.groceryEmpty, width: w(112)),
                   gap(height: 12),
                   Text(

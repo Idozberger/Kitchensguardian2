@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print
 
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:dio/dio.dart';
@@ -169,7 +170,9 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
               return map;
             }).toList()
           : [];
-
+      log(
+        "ParsedItems: ${parsedItems.map((item) => item["recommended_storage"])}",
+      );
       return {"message": message, "items": parsedItems};
     } on DioException catch (e) {
       throw dio.handleError(e);

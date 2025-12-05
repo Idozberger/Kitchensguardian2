@@ -45,8 +45,6 @@ class _DashboardPageState extends State<DashboardPage> {
 
   void _onItemTapped(int index) {
     setState(() {
-      context.read<HomeBloc>().add(GetAllWeeklyPlansEventForHome());
-
       _selectedIndex = index;
     });
   }

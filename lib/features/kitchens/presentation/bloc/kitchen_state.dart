@@ -18,6 +18,10 @@ class KitchenFailure extends KitchenState {
   const KitchenFailure(this.errorMessage);
 }
 
+class OpenKitchen extends KitchenState {
+  const OpenKitchen();
+}
+
 class KitchenSuccess extends KitchenState {
   final String successMessage;
   const KitchenSuccess(this.successMessage);
