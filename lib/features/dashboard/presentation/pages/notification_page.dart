@@ -42,7 +42,6 @@ class _NotificationPageState extends State<NotificationPage> {
       builder: (_, state) {
         return PopScope(
           canPop: false,
-          // ignore: deprecated_member_use
           onPopInvoked: (didPop) async {
             if (!didPop) {
               await Future.delayed(Duration.zero);

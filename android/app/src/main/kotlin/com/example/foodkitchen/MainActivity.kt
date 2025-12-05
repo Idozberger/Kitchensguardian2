@@ -1,4 +1,4 @@
-package com.example.foodkitchen
+package com.itz.kitchen.guardian
 
 import io.flutter.embedding.android.FlutterActivity
 

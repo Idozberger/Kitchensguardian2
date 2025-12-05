@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
@@ -92,15 +94,18 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     ApproveRequestEvent event,
     Emitter<DashboardState> emit,
   ) async {
+    log("[approve]");
     emit(ApproveLoading());
     final userId = event.memberId;
-
+    log("[approve] $userId");
     final userDoc = await FirebaseFirestore.instance
         .collection('users')
         .doc(userId)
         .get();
-
+    log("[approve] $userDoc");
     if (!userDoc.exists) {
+      log("[approve] not exist $userDoc");
+      log("[approve] $userDoc");
       emit(DashboardFailure("User not found"));
       return;
     }
