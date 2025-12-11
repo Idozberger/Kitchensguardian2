@@ -85,6 +85,7 @@ class KitchenRemoteDataSourceImpl implements KitchenRemoteDatasource {
   }) async {
     try {
       log("userId: ${userId}");
+      log("userId: ${invitationCode}");
 
       final response = await dio.post(
         AppConstants.joinKitchen,
@@ -92,6 +93,7 @@ class KitchenRemoteDataSourceImpl implements KitchenRemoteDatasource {
       );
 
       if (response.statusCode != 200 && response.statusCode != 201) {
+        log("userId: error ${response.extra}");
         final data = response.data is String
             ? jsonDecode(response.data)
             : response.data;
@@ -99,7 +101,7 @@ class KitchenRemoteDataSourceImpl implements KitchenRemoteDatasource {
         final message = data["error"];
         throw message;
       }
-
+      log("userId: error ${response.extra}");
       return response.data["message"];
     } on DioException catch (e) {
       throw dio.handleError(e);
