@@ -90,7 +90,11 @@ class DioHelper {
   }
 
   Future<Response> post(String path, {dynamic data}) async {
-    return await _dio.post(path, data: data);
+    return await _dio.post(
+      path,
+      data: data,
+      options: Options(headers: {"Content-Type": "application/json"}),
+    );
   }
 
   Future<Failure> handleError(DioException e) async {

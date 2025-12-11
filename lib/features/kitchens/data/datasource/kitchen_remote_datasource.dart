@@ -6,6 +6,7 @@ import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract interface class KitchenRemoteDatasource {
@@ -78,33 +79,29 @@ class KitchenRemoteDataSourceImpl implements KitchenRemoteDatasource {
     }
   }
 
-  @override
   Future<String> joinKitchen({
     required String invitationCode,
     required String userId,
   }) async {
-    try {
-      log("userId: ${userId}");
-      log("userId: ${invitationCode}");
+    final url = Uri.parse("${AppConstants.baseUrl}${AppConstants.joinKitchen}");
 
-      final response = await dio.post(
-        AppConstants.joinKitchen,
-        data: {"invitation_code": invitationCode, "user_id": userId},
-      );
+    final body = jsonEncode({
+      "invitation_code": invitationCode,
+      "user_id": userId,
+    });
 
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        log("userId: error ${response.extra}");
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: body,
+    );
 
-        final message = data["error"];
-        throw message;
-      }
-      log("userId: error ${response.extra}");
-      return response.data["message"];
-    } on DioException catch (e) {
-      throw dio.handleError(e);
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final json = jsonDecode(response.body);
+      return json["message"];
+    } else {
+      final json = jsonDecode(response.body);
+      throw json["error"] ?? "Unknown error";
     }
   }
 
