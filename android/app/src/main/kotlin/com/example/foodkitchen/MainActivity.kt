@@ -1,4 +1,4 @@
-package com.itz.kitchen.guardian
+package com.itz.kitchens.guardian
 
 import io.flutter.embedding.android.FlutterActivity
 

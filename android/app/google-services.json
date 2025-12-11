@@ -1,128 +1,48 @@
 {
   "project_info": {
-    "project_number": "428640146273",
-    "project_id": "hide-me-d74a7",
-    "storage_bucket": "hide-me-d74a7.firebasestorage.app"
+    "project_number": "295968556562",
+    "project_id": "kdasda-976c4",
+    "storage_bucket": "kdasda-976c4.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:428640146273:android:b9936fcd239777299e2b20",
+        "mobilesdk_app_id": "1:295968556562:android:e593b0946516734e08facb",
         "android_client_info": {
-          "package_name": "com.example.foodkitchen"
+          "package_name": "com.itz.kitchens.guardian"
         }
       },
       "oauth_client": [
         {
-          "client_id": "428640146273-0iiu65rp8g514a8h0h3b8md4fjkpkjcd.apps.googleusercontent.com",
+          "client_id": "295968556562-o7c8lrqj1tfup8j5c8fb0868gv2or5ek.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.foodkitchen",
+            "package_name": "com.itz.kitchens.guardian",
             "certificate_hash": "4cadb918bff3c2b5419f908856f42903adb60fd0"
           }
         },
         {
-          "client_id": "428640146273-a3i750lldh1etatql54i10b2sqebcqus.apps.googleusercontent.com",
+          "client_id": "295968556562-3e8sicsicb6m6kh744bon398o8gaqu3k.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBAT1_CcBAyn3eZ3ZUBIO7W1E5WmjJ6Eyc"
+          "current_key": "AIzaSyDLCH82A3mYQgQVqApFzqF81LivETUppn4"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "428640146273-a3i750lldh1etatql54i10b2sqebcqus.apps.googleusercontent.com",
+              "client_id": "295968556562-3e8sicsicb6m6kh744bon398o8gaqu3k.apps.googleusercontent.com",
               "client_type": 3
             },
             {
-              "client_id": "428640146273-6ad3ontpf8vdr3vmbf7u4drbet46h6o0.apps.googleusercontent.com",
+              "client_id": "295968556562-4acvanbd77neqo4govbof4rm8d6ht3mh.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.foodkitchen"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:428640146273:android:df31f263b4d19f459e2b20",
-        "android_client_info": {
-          "package_name": "com.itz.kitchen.guardian"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "428640146273-a8l3fro7dm9b9jpg2elfraejen6isttu.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.itz.kitchen.guardian",
-            "certificate_hash": "4cadb918bff3c2b5419f908856f42903adb60fd0"
-          }
-        },
-        {
-          "client_id": "428640146273-a3i750lldh1etatql54i10b2sqebcqus.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyBAT1_CcBAyn3eZ3ZUBIO7W1E5WmjJ6Eyc"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "428640146273-a3i750lldh1etatql54i10b2sqebcqus.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "428640146273-6ad3ontpf8vdr3vmbf7u4drbet46h6o0.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.example.foodkitchen"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:428640146273:android:0ffba5f7219e6a0d9e2b20",
-        "android_client_info": {
-          "package_name": "com.quickfixtechnology.image2text"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "428640146273-a3i750lldh1etatql54i10b2sqebcqus.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyBAT1_CcBAyn3eZ3ZUBIO7W1E5WmjJ6Eyc"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "428640146273-a3i750lldh1etatql54i10b2sqebcqus.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "428640146273-6ad3ontpf8vdr3vmbf7u4drbet46h6o0.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.example.foodkitchen"
+                "bundle_id": "com.itz.kitchens.guardian"
               }
             }
           ]

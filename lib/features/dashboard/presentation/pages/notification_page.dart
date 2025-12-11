@@ -65,8 +65,13 @@ class _NotificationPageState extends State<NotificationPage> {
                         .orderBy('date', descending: true)
                         .snapshots(),
                     builder: (context, snapshot) {
-                      if (!snapshot.hasData) {
-                        return Center(child: Lottie.asset(AppAssets.loader));
+                      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                        return Center(
+                          child: Text(
+                            "No notifications yet",
+                            style: Theme.of(context).textTheme.headlineMedium,
+                          ),
+                        );
                       }
 
                       final allNotifications = snapshot.data!.docs;

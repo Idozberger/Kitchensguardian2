@@ -42,17 +42,6 @@ class KitchenHomeView extends StatefulWidget {
 }
 
 class _KitchenHomeViewState extends State<KitchenHomeView> {
-  bool _showGroceryShimmer = true;
-
-  @override
-  void initState() {
-    super.initState();
-
-    Timer(const Duration(seconds: 5), () {
-      if (mounted) setState(() => _showGroceryShimmer = false);
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final state = widget.state;
@@ -76,7 +65,6 @@ class _KitchenHomeViewState extends State<KitchenHomeView> {
                     if (status.isGranted) {
                       context.push(Routes.scanMeal);
                     } else {
-                      Navigator.pop(context);
                       PermissionStatus result = await Permission.camera
                           .request();
                       if (result.isGranted) {
@@ -118,29 +106,40 @@ class _KitchenHomeViewState extends State<KitchenHomeView> {
             ),
             gap(height: 8),
 
-            if (_showGroceryShimmer)
-              Padding(
-                padding: gapOnly(bottom: 8),
-                child: _buildGroceryShimmer(),
-              )
-            else
-              BlocBuilder<HomeBloc, HomeState>(
-                builder: (_, state) {
-                  if (state.groceryList.isEmpty) return SizedBox();
-                  return Padding(
-                    padding: gapOnly(bottom: 8),
-                    child: SmartCartTile(
-                      infoText: state.groceryList.length > 3
-                          ? "+${state.groceryList.length - 3} tap to see more"
-                          : null,
-                      isGenerated: state.groceryList.isNotEmpty,
-                      previewItems: state.groceryList.take(3).toList(),
-                      onGenerate: widget.onGeneratePressed,
+            BlocListener<HomeBloc, HomeState>(
+              listenWhen: (previous, current) {
+                return previous.dateBasedPlan != current.dateBasedPlan;
+              },
+              listener: (context, state) {
+                context.read<HomeBloc>().add(GenerateGroceryList());
+              },
+              child: Column(
+                children: [
+                  if (state.showGroceryShimmer)
+                    Padding(
+                      padding: gapOnly(bottom: 8),
+                      child: _buildGroceryShimmer(),
+                    )
+                  else
+                    BlocBuilder<HomeBloc, HomeState>(
+                      builder: (_, state) {
+                        if (state.groceryList.isEmpty) return SizedBox();
+                        return Padding(
+                          padding: gapOnly(bottom: 8),
+                          child: SmartCartTile(
+                            infoText: state.groceryList.length > 3
+                                ? "+${state.groceryList.length - 3} tap to see more"
+                                : null,
+                            isGenerated: state.groceryList.isNotEmpty,
+                            previewItems: state.groceryList.take(3).toList(),
+                            onGenerate: widget.onGeneratePressed,
+                          ),
+                        );
+                      },
                     ),
-                  );
-                },
+                ],
               ),
-
+            ),
             if (state.loadingRecipeSuggestion)
               Padding(
                 padding: gapOnly(bottom: 8),

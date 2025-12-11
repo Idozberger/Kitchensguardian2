@@ -295,7 +295,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     Emitter<HomeState> emit,
   ) async {
     if (_userCubit.state.activeKitchenId.isEmpty) return;
-    emit(state.copyWith(loadingWeeklyPlans: true));
+    emit(state.copyWith(loadingWeeklyPlans: true, showGroceryShimmer: true));
     final res = await _getAllWeeklyPlansForHome(
       GetAllWeeklyPlansForHomeParams(_userCubit.state.activeKitchenId),
     );
@@ -310,13 +310,16 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         );
       },
       (getAllWeeklyPlans) async {
+        logSuccess("Weekly meals: ${getAllWeeklyPlans}");
         emit(
           state.copyWith(
             dateBasedPlan: getAllWeeklyPlans,
             loadingWeeklyPlans: false,
           ),
         );
+
         add(GenerateGroceryList());
+        emit(state.copyWith(showGroceryShimmer: false));
       },
     );
   }

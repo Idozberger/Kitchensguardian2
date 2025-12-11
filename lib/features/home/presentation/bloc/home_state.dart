@@ -3,7 +3,7 @@ import 'package:foodkitchen/features/home/domain/entities/pantry_data.dart';
 
 class HomeState {
   final bool isLoading;
-
+  final bool showGroceryShimmer;
   final bool loadingRecipeSuggestion;
   final bool loadingWeeklyPlans;
   final String? errorMessage;
@@ -15,6 +15,7 @@ class HomeState {
 
   const HomeState({
     this.isLoading = false,
+    this.showGroceryShimmer = false,
     this.loadingRecipeSuggestion = false,
     this.loadingWeeklyPlans = false,
     this.errorMessage,
@@ -28,6 +29,7 @@ class HomeState {
 
   HomeState copyWith({
     bool? isLoading,
+    bool? showGroceryShimmer,
     bool? loadingRecipeSuggestion,
     bool? loadingWeeklyPlans,
     String? errorMessage,
@@ -48,6 +50,7 @@ class HomeState {
       dateBasedPlan: dateBasedPlan ?? this.dateBasedPlan,
       groceryList: groceryList ?? this.groceryList,
       suggestedRecipe: suggestedRecipe ?? this.suggestedRecipe,
+      showGroceryShimmer: showGroceryShimmer ?? this.showGroceryShimmer,
     );
   }
 }

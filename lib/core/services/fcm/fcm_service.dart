@@ -14,7 +14,7 @@ class FCMService {
   final String _serviceAccountPath = 'assets/services/service_account.json';
 
   final String _fcmUrl =
-      'https://fcm.googleapis.com/v1/projects/hide-me-d74a7/messages:send';
+      'https://fcm.googleapis.com/v1/projects/kdasda-976c4/messages:send';
 
   Future<String> _getAccessToken() async {
     try {
