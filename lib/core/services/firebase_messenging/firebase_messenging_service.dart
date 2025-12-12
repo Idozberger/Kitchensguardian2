@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:developer';
+
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -180,7 +182,10 @@ class FirebaseMessagingService {
 
   void _onMessageReceived(RemoteMessage message) {
     final notification = message.notification;
+
     if (notification != null) {
+      log("Message Received: ${notification.title}");
+      log("Message Received: ${notification.body}");
       NotificationService().showNotification(
         id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
         title: notification.title ?? 'New Notification',

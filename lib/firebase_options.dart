@@ -63,6 +63,9 @@ class DefaultFirebaseOptions {
     messagingSenderId: '295968556562',
     projectId: 'kdasda-976c4',
     storageBucket: 'kdasda-976c4.firebasestorage.app',
+    androidClientId: '295968556562-o7c8lrqj1tfup8j5c8fb0868gv2or5ek.apps.googleusercontent.com',
+    iosClientId: '295968556562-4acvanbd77neqo4govbof4rm8d6ht3mh.apps.googleusercontent.com',
     iosBundleId: 'com.itz.kitchens.guardian',
   );
+
 }

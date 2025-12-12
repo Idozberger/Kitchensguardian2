@@ -364,7 +364,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource {
     try {
       final GoogleSignIn googleSignIn = GoogleSignIn(
         serverClientId:
-            "428640146273-a3i750lldh1etatql54i10b2sqebcqus.apps.googleusercontent.com",
+            "295968556562-3e8sicsicb6m6kh744bon398o8gaqu3k.apps.googleusercontent.com",
         scopes: ['email', 'profile'],
       );
 

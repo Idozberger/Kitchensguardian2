@@ -116,32 +116,37 @@ class NotificationService {
     required String body,
     String? payload,
   }) async {
-    const AndroidNotificationDetails androidDetails =
-        AndroidNotificationDetails(
-          'main_channel_id',
-          'Main Channel',
-          channelDescription: 'General notifications',
-          importance: Importance.max,
-          priority: Priority.high,
-          playSound: true,
-          ongoing: true,
-        );
-    const NotificationDetails platformDetails = NotificationDetails(
-      android: androidDetails,
-      iOS: DarwinNotificationDetails(
-        presentSound: true,
-        presentAlert: true,
-        presentBadge: true,
-      ),
-    );
+    try {
+      const AndroidNotificationDetails androidDetails =
+          AndroidNotificationDetails(
+            'main_channel_id',
+            'Main Channel',
+            channelDescription: 'General notifications',
+            importance: Importance.max,
+            priority: Priority.high,
+            playSound: true,
+            ongoing: true,
+          );
 
-    await _flutterLocalNotificationsPlugin.show(
-      id,
-      title,
-      body,
-      platformDetails,
-      payload: payload,
-    );
+      const NotificationDetails platformDetails = NotificationDetails(
+        android: androidDetails,
+        iOS: DarwinNotificationDetails(
+          presentSound: true,
+          presentAlert: true,
+          presentBadge: true,
+        ),
+      );
+
+      await _flutterLocalNotificationsPlugin.show(
+        id,
+        title,
+        body,
+        platformDetails,
+        payload: payload,
+      );
+    } catch (e) {
+      print('Error showing notification: $e');
+    }
   }
 
   Future<void> scheduleNotification({
