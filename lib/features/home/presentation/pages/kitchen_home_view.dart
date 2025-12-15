@@ -21,7 +21,6 @@ import 'package:foodkitchen/features/home/presentation/widgets/pantry_section.da
 import 'package:foodkitchen/features/home/presentation/widgets/smart_cart.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/suggestion_recipes.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/tonight_recipe.dart';
-import 'package:foodkitchen/main.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';

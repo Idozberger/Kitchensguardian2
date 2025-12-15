@@ -108,11 +108,10 @@ class _HomePageState extends State<HomePage> {
         ),
       );
     }
-    Future.delayed(Duration(seconds: 2));
+
     return Column(
       children: [
-        LowStockAndExpiryBanner(),
-
+        // LowStockAndExpiryBanner(),
         if (userState.recipeEntity.isNotEmpty)
           RecipeInProgressNotification(
             padding: gapOnly(left: 20, right: 20, top: 14, bottom: 0),
