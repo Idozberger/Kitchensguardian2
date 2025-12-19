@@ -103,7 +103,7 @@ class FirebaseMessagingService {
       if (Platform.isIOS) {
         final apnsToken = await messaging.getAPNSToken();
         if (apnsToken != null) {
-          logSuccess('APNS token: $apnsToken');
+          // logSuccess('APNS token: $apnsToken');
         } else {
           logWarning('APNS token not available.');
         }
@@ -111,7 +111,7 @@ class FirebaseMessagingService {
 
       final fcmToken = await messaging.getToken();
       if (fcmToken != null) {
-        logSuccess('FCM token: $fcmToken');
+        // logSuccess('FCM token: $fcmToken');
         await _saveOrUpdateUserToken(
           userId: userId,
           firstName: firstName,
@@ -217,7 +217,5 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
         payload: jsonEncode(message.data),
       );
     }
-  } catch (e, st) {
-    logError(st.toString());
-  }
+  } catch (e, st) {}
 }

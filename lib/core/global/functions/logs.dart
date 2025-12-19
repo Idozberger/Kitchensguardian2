@@ -4,10 +4,6 @@ void logError(Object message) {
   _logWithColor(message, '❌', 31);
 }
 
-void logSuccess(Object message) {
-  _logWithColor(message, '✅', 32);
-}
-
 void logWarning(Object message) {
   _logWithColor(message, '📢', 33);
 }

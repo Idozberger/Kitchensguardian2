@@ -94,11 +94,15 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
     final res = await _addPantryItem(AddPantryItemParams(pantry: event.pantry));
 
     res.fold((failure) => emit(PantryFailure(failure.message)), (message) {
-      emit(PantrySuccess(message));
-      add(GetPantryItemsEvent(kitchenId: event.pantry.kitchenId));
-      _homeBloc.add(
-        GetPantriesItemsEventForHome(kitchenId: event.pantry.kitchenId),
-      );
+      Future.microtask(() {
+        _homeBloc.add(
+          GetPantriesItemsEventForHome(kitchenId: event.pantry.kitchenId),
+        );
+
+        add(GetPantryItemsEvent(kitchenId: event.pantry.kitchenId));
+
+        emit(PantrySuccess(message));
+      });
     });
   }
 
@@ -227,7 +231,7 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
     ScanReceiptEvent event,
     Emitter<PantryState> emit,
   ) async {
-    emit(PantryLoading());
+    emit(PantryScanItemsLoading());
     final res = await _scanReceiptUseCase(
       ScanReceiptUseCaseParams(filePath: event.filePath),
     );

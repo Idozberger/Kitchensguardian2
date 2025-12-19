@@ -26,10 +26,13 @@ import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_bloc.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_event.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_state.dart';
 import 'package:foodkitchen/features/pantry/presentation/models/pantry_items.dart';
+import 'package:foodkitchen/features/pantry/presentation/pages/receipt_details/animated_dots.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/receipt_details/confirm_button.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/receipt_details/image_preview.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_mlkit_document_scanner/google_mlkit_document_scanner.dart';
 import 'package:lottie/lottie.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class CaptureDetailsPage extends StatefulWidget {
   final String imagePath;
@@ -43,6 +46,7 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
   late PantryBloc pantryBloc;
   late UserCubit userCubit;
   List<PantryItem> _items = [];
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -57,24 +61,39 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
     return BlocConsumer<PantryBloc, PantryState>(
       listener: (context, state) {
         if (state is PantryFailure) {
-          AppToast.show(state.errorMessage, ToastType.error);
+          setState(() => _errorMessage = state.errorMessage);
         } else if (state is PantrySuccess) {
           AppToast.show(
             "Items added to your kitchen successfully!",
             ToastType.success,
           );
-
           context.go(Routes.dashboard);
         } else if (state is ScanReceiptLoaded) {
           _initializeItems(state.scanReceipt);
         }
       },
+
       builder: (context, state) {
+        if (_errorMessage != null) {
+          return Scaffold(
+            appBar: _buildAppBar(),
+            body: _buildErrorState(_errorMessage!),
+          );
+        }
+
         return Scaffold(
           appBar: _buildAppBar(),
           body: SafeArea(
             child: switch (state) {
               PantryLoading() => Center(
+                child: Lottie.asset(
+                  AppAssets.loader,
+
+                  height: h(400),
+                  fit: BoxFit.contain,
+                ),
+              ),
+              PantryScanItemsLoading() => Center(
                 child: Padding(
                   padding: gapAll(32),
                   child: Column(
@@ -204,7 +223,10 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
           bottomNavigationBar: _items.isNotEmpty
               ? ColoredBox(
                   color: Colors.white,
-                  child: ConfirmButtonWidget(onPressed: _validateAndSubmit),
+                  child: ConfirmButtonWidget(
+                    onPressed: _validateAndSubmit,
+                    isloading: state is PantryLoading,
+                  ),
                 )
               : null,
         );
@@ -288,6 +310,7 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
       _items = scanReceipt.items
           .map(
             (e) => PantryItem(
+              pantry: e.group,
               nameController: TextEditingController(text: e.name),
               qtyController: TextEditingController(text: e.amount),
               expireDate: TextEditingController(
@@ -609,7 +632,7 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
           SizedBox(width: w(16)),
           CircularIconButton(
             iconAsset: AppAssets.backArrowiOS,
-            onTap: () => Navigator.pop(context),
+            onTap: () => context.pop(),
           ),
         ],
       ),
@@ -628,50 +651,98 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
       ],
     );
   }
-}
 
-class AnimatedDotsText extends StatefulWidget {
-  final String text;
-  final TextStyle? style;
+  Widget _buildErrorState(String message) {
+    return Center(
+      child: Padding(
+        padding: gapSymmetric(horizontal: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Lottie.asset(
+            //   AppAssets.errorAnimation,
+            //   width: w(220),
+            //   height: h(220),
+            //   fit: BoxFit.contain,
+            // ),
+            SizedBox(height: h(24)),
+            Text(
+              "Oops!",
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontSize: t(24),
+                fontWeight: FontWeight.bold,
+                color: Colors.redAccent,
+              ),
+            ),
+            SizedBox(height: h(12)),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: t(15), color: Colors.grey.shade700),
+            ),
+            SizedBox(height: h(32)),
+            GenericButtonWidget(
+              text: "Retry",
+              onPressed: () {
+                setState(() => _errorMessage = null);
+                pantryBloc.add(ScanReceiptEvent(filePath: widget.imagePath));
+              },
+            ),
+            SizedBox(height: h(16)),
+            TextButton(
+              onPressed: () async {
+                PermissionStatus status = await Permission.camera.status;
 
-  const AnimatedDotsText({super.key, required this.text, this.style});
+                if (!status.isGranted) {
+                  final result = await Permission.camera.request();
+                  if (!result.isGranted) {
+                    if (result.isPermanentlyDenied) {
+                      openAppSettings();
+                    }
+                    return;
+                  }
+                }
 
-  @override
-  State<AnimatedDotsText> createState() => _AnimatedDotsTextState();
-}
+                final documentOptions = DocumentScannerOptions(
+                  documentFormat: DocumentFormat.jpeg,
+                  mode: ScannerMode.base,
+                  pageLimit: 1,
+                  isGalleryImport: false,
+                );
 
-class _AnimatedDotsTextState extends State<AnimatedDotsText>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  int _dotCount = 0;
+                final documentScanner = DocumentScanner(
+                  options: documentOptions,
+                );
 
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 1500),
-      vsync: this,
-    )..repeat();
-    _controller.addListener(() {
-      final count = (_controller.value * 4).floor();
-      if (count != _dotCount) {
-        setState(() => _dotCount = count);
-      }
-    });
-  }
+                try {
+                  _errorMessage = null;
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+                  final DocumentScanningResult result = await documentScanner
+                      .scanDocument();
 
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      "${widget.text}${'.' * _dotCount}",
-      style: widget.style,
-      textAlign: TextAlign.center,
+                  if (result.images.isNotEmpty) {
+                    final image = result.images.first;
+                    setState(() {});
+                    pantryBloc.add(ScanReceiptEvent(filePath: image));
+                  }
+                } catch (e) {
+                  debugPrint("Document scan error: $e");
+                } finally {
+                  documentScanner.close();
+                }
+              },
+              child: Text(
+                "Re take",
+                style: TextStyle(
+                  fontSize: t(15),
+                  color: AppColors.primaryColor,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

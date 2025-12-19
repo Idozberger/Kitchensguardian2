@@ -9,6 +9,7 @@ class ScanReceiptItemModel extends ScanReceiptItemEntity {
     required super.amount,
     required super.expireDate,
     required super.thumbnail,
+    required super.group,
   });
 
   factory ScanReceiptItemModel.fromJson(Map<String, dynamic>? json) {
@@ -18,6 +19,7 @@ class ScanReceiptItemModel extends ScanReceiptItemEntity {
       amount: json?['amount'] as String? ?? '0',
       expireDate: json?['expiry_date'] as String? ?? '0',
       thumbnail: json?['thumbnail'] as Uint8List? ?? Uint8List(0),
+      group: json?['group'] as String? ?? 'Refrigerator',
     );
   }
   Map<String, dynamic> toJson() {
@@ -27,6 +29,7 @@ class ScanReceiptItemModel extends ScanReceiptItemEntity {
       'amount': amount,
       'expiry_date': expireDate,
       'thumbnail': thumbnail,
+      'group': group,
     };
   }
 
@@ -36,6 +39,7 @@ class ScanReceiptItemModel extends ScanReceiptItemEntity {
     String? amount,
     String? expireDate,
     Uint8List? thumbnail,
+    String? group,
   }) {
     return ScanReceiptItemModel(
       name: name ?? this.name,
@@ -43,6 +47,7 @@ class ScanReceiptItemModel extends ScanReceiptItemEntity {
       amount: amount ?? this.amount,
       expireDate: expireDate ?? this.expireDate,
       thumbnail: thumbnail ?? this.thumbnail,
+      group: group ?? this.group,
     );
   }
 }

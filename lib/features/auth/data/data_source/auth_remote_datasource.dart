@@ -318,6 +318,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource {
             : response.data;
         final errorMsg = data["error"] ?? data["message"] ?? "Login failed";
         log("Login failed: $errorMsg", name: "Auth");
+
         throw errorMsg;
       }
 

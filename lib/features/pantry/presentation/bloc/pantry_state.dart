@@ -10,6 +10,8 @@ final class PantryInitial extends PantryState {}
 
 final class PantryLoading extends PantryState {}
 
+final class PantryScanItemsLoading extends PantryState {}
+
 class PantryLoaded extends PantryState {
   final List<PantryItemEntity> pantryItems;
   final List<PantryItemEntity> lowStockItems;

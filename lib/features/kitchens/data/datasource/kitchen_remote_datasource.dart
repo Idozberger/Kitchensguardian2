@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/widgets.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
 import 'package:http/http.dart' as http;
@@ -56,29 +57,77 @@ class KitchenRemoteDataSourceImpl implements KitchenRemoteDatasource {
         AppConstants.createKitchen,
         data: {"kitchen_name": kitchenName},
       );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+        throw data["error"];
+      }
+
+      final data = response.data;
+      final kitchenId = data["kitchen_id"];
+      final invitationCode = data["invitation_code"];
+      final role = data["role"];
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('kitchen_id', kitchenId.toString());
+      await prefs.setString('invitation_code', invitationCode.toString());
+      await prefs.setString('role', role.toString());
+
+      await createPantry(
+        kitchenId: kitchenId.toString(),
+        pantries: const [
+          "Shelves",
+          "Counter",
+          "Cabinet",
+          "Refrigerator",
+          "Freezer",
+          "Drawer",
+          "Countertop",
+        ],
+      );
+
+      return data["message"];
+    } on DioException catch (e) {
+      throw dio.handleError(e);
+    }
+  }
+
+  Future<String> createPantry({
+    required String kitchenId,
+    required List<String> pantries,
+  }) async {
+    try {
+      final pantryList = pantries.map((name) => {"pantry_name": name}).toList();
+
+      final requestData = {"kitchen_id": kitchenId, "pantries": pantryList};
+
+      final response = await dio.post(
+        AppConstants.createPantry,
+        data: requestData,
+      );
+
       if (response.statusCode != 200 && response.statusCode != 201) {
         final data = response.data is String
             ? jsonDecode(response.data)
             : response.data;
 
         final message = data["error"];
+        debugPrint('⚠️ [createPantry] Error Message: $message');
         throw message;
       }
-      final data = response.data;
 
-      final kitchenId = data["kitchen_id"];
-      final invitationCode = data["invitation_code"];
-      final role = data["role"];
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('kitchen_id', kitchenId.toString());
-      await prefs.setString('invitation_code', invitationCode.toString());
-      await prefs.setString('role', role.toString());
       return response.data["message"];
     } on DioException catch (e) {
       throw dio.handleError(e);
+    } catch (e, stacktrace) {
+      debugPrint('🧩 Stacktrace: $stacktrace');
+      rethrow;
     }
   }
 
+  @override
   Future<String> joinKitchen({
     required String invitationCode,
     required String userId,

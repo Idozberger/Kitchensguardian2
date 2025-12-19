@@ -46,7 +46,7 @@ class PantryRepositoryImpl implements PantryRepository {
       final response = await pantryRemoteDatasource.getPantryItems(
         kitchenId: kitchenId,
       );
-      log("[Pantry] ${response.first}");
+
       final pantryItems = (response as List).map((e) {
         return PantryItemModel.fromJson(e as Map<String, dynamic>);
       }).toList();
@@ -73,9 +73,11 @@ class PantryRepositoryImpl implements PantryRepository {
       List<ScanReceiptItemModel> items = [];
 
       for (var e in itemsJson) {
+        log("items: ${e["recommended_storage"]}");
         final name = e['name'] as String? ?? '';
         final unit = e['unit'] as String? ?? 'Unit';
         final amount = e['amount'].toString();
+        final group = e['recommended_storage'].toString();
         final expireDate = e['expiry_date'].toString();
         final thumbnail = e['thumbnail'];
 
@@ -85,6 +87,7 @@ class PantryRepositoryImpl implements PantryRepository {
 
         items.add(
           ScanReceiptItemModel(
+            group: group,
             name: name,
             unit: unit,
             amount: amount.isEmpty ? "1" : amount,

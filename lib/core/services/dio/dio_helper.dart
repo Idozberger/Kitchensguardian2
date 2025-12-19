@@ -6,7 +6,6 @@ import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:foodkitchen/core/error/failures.dart';
-import 'package:foodkitchen/core/global/functions/logs.dart';
 
 class DioHelper {
   final Dio _dio;
@@ -33,7 +32,6 @@ class DioHelper {
           return handler.next(options);
         },
         onResponse: (response, handler) {
-          logSuccess("✅ [RESPONSE]");
           return handler.next(response);
         },
         onError: (DioException e, handler) async {
@@ -73,9 +71,7 @@ class DioHelper {
                 return handler.reject(e);
               }
             }
-          } else {
-            logError("❌ [DIO ERROR] ${e.message}");
-          }
+          } else {}
 
           return handler.reject(e);
         },

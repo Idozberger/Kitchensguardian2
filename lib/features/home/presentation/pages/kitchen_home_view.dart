@@ -21,6 +21,7 @@ import 'package:foodkitchen/features/home/presentation/widgets/pantry_section.da
 import 'package:foodkitchen/features/home/presentation/widgets/smart_cart.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/suggestion_recipes.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/tonight_recipe.dart';
+import 'package:google_mlkit_document_scanner/google_mlkit_document_scanner.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -53,6 +54,7 @@ class _KitchenHomeViewState extends State<KitchenHomeView> {
         child: Column(
           children: [
             gap(height: 14),
+
             UpperTile(
               widget: SizedBox(
                 height: h(40),
@@ -63,18 +65,47 @@ class _KitchenHomeViewState extends State<KitchenHomeView> {
                   ),
                   onPressed: () async {
                     PermissionStatus status = await Permission.camera.status;
-                    if (status.isGranted) {
-                      context.push(Routes.scanMeal);
-                    } else {
-                      PermissionStatus result = await Permission.camera
-                          .request();
-                      if (result.isGranted) {
-                        context.push(Routes.scanMeal);
-                      } else if (result.isPermanentlyDenied) {
-                        openAppSettings();
+
+                    if (!status.isGranted) {
+                      final result = await Permission.camera.request();
+                      if (!result.isGranted) {
+                        if (result.isPermanentlyDenied) {
+                          openAppSettings();
+                        }
+                        return;
                       }
                     }
+
+                    final documentOptions = DocumentScannerOptions(
+                      documentFormat: DocumentFormat.jpeg,
+                      mode: ScannerMode.base,
+                      pageLimit: 1,
+                      isGalleryImport: false,
+                    );
+
+                    final documentScanner = DocumentScanner(
+                      options: documentOptions,
+                    );
+
+                    try {
+                      final DocumentScanningResult result =
+                          await documentScanner.scanDocument();
+
+                      if (result.images.isNotEmpty) {
+                        final image = result.images.first;
+
+                        context.pushNamed(
+                          Routes.capturedImageDetails,
+                          extra: {"image_path": image},
+                        );
+                      }
+                    } catch (e) {
+                      debugPrint("Document scan error: $e");
+                    } finally {
+                      documentScanner.close();
+                    }
                   },
+
                   label: Text(
                     "Scan Receipt",
                     style: Theme.of(context).textTheme.headlineMedium!.copyWith(
