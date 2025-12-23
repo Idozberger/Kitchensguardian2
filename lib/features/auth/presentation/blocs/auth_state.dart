@@ -56,3 +56,5 @@ final class ResendEmailVerficationCode extends AuthState {
 }
 
 final class GoogleAuthLoading extends AuthState {}
+
+final class GoogleAuthsignUpLoading extends AuthState {}

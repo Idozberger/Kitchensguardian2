@@ -36,7 +36,7 @@ class _HomePageState extends State<HomePage> {
     _userCubit = context.read<UserCubit>();
     _homeBloc = context.read<HomeBloc>();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadData());
+    _loadData();
   }
 
   void _loadData() async {

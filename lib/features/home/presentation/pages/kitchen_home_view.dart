@@ -153,19 +153,52 @@ class _KitchenHomeViewState extends State<KitchenHomeView> {
                       child: _buildGroceryShimmer(),
                     )
                   else
-                    BlocBuilder<HomeBloc, HomeState>(
-                      builder: (_, state) {
-                        if (state.groceryList.isEmpty) return SizedBox();
-                        return Padding(
-                          padding: gapOnly(bottom: 8),
-                          child: SmartCartTile(
-                            infoText: state.groceryList.length > 3
-                                ? "+${state.groceryList.length - 3} tap to see more"
-                                : null,
-                            isGenerated: state.groceryList.isNotEmpty,
-                            previewItems: state.groceryList.take(3).toList(),
-                            onGenerate: widget.onGeneratePressed,
-                          ),
+                    StatefulBuilder(
+                      builder: (context, setState) {
+                        bool showTile = false;
+
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          Future.delayed(const Duration(seconds: 3), () {
+                            if (mounted) {
+                              setState(() {
+                                showTile = true;
+                              });
+                              context.read<HomeBloc>().add(
+                                GenerateGroceryList(),
+                              );
+                            }
+                          });
+                        });
+
+                        return BlocBuilder<HomeBloc, HomeState>(
+                          builder: (_, state) {
+                            if (state.groceryList.isEmpty) {
+                              return const SizedBox.shrink();
+                            }
+
+                            if (!showTile) {
+                              return const SizedBox.shrink();
+                            }
+
+                            return AnimatedOpacity(
+                              opacity: showTile ? 1.0 : 0.0,
+                              duration: const Duration(milliseconds: 600),
+                              curve: Curves.easeOut,
+                              child: Padding(
+                                padding: gapOnly(bottom: 8),
+                                child: SmartCartTile(
+                                  infoText: state.groceryList.length > 3
+                                      ? "+${state.groceryList.length - 3} tap to see more"
+                                      : null,
+                                  isGenerated: state.groceryList.isNotEmpty,
+                                  previewItems: state.groceryList
+                                      .take(3)
+                                      .toList(),
+                                  onGenerate: widget.onGeneratePressed,
+                                ),
+                              ),
+                            );
+                          },
                         );
                       },
                     ),

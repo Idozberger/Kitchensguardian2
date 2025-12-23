@@ -1,4 +1,4 @@
-import 'package:foodkitchen/features/home/data/models/pantries__item_model.dart';
+import 'package:foodkitchen/features/home/data/models/pantries_item_model.dart';
 import 'package:foodkitchen/features/home/data/models/pantry_type_model.dart';
 import 'package:foodkitchen/features/home/domain/entities/pantry_data.dart';
 

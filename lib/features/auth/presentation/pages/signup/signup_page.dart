@@ -173,7 +173,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
 
                   Padding(
-                    padding: gapOnly(top: 20, bottom: 25),
+                    padding: gapOnly(top: 20, bottom: 12),
                     child: GenericButtonWidget(
                       onPressed: () {
                         String email = _emailController.text.trim();
@@ -276,7 +276,54 @@ class _SignUpPageState extends State<SignUpPage> {
                       isLoading: state is AuthLoading,
                     ),
                   ),
-
+                  Center(
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(h(10)),
+                      onTap: state is GoogleAuthsignUpLoading
+                          ? null
+                          : () {
+                              context.read<AuthBloc>().add(GoogleSignUpEvent());
+                            },
+                      child: Ink(
+                        height: h(48),
+                        width: w(200),
+                        padding: gapAll(10),
+                        decoration: BoxDecoration(
+                          color: Color(0xffF9F8F8),
+                          borderRadius: BorderRadius.circular(h(10)),
+                        ),
+                        child: (state is GoogleAuthsignUpLoading)
+                            ? Align(
+                                alignment: Alignment.center,
+                                child: CircularProgressIndicator(
+                                  color: AppColors.primaryColor,
+                                ),
+                              )
+                            : Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Image.asset(
+                                    AppAssets.googlePng,
+                                    height: h(22),
+                                    width: w(22),
+                                  ),
+                                  SizedBox(width: w(6)),
+                                  Text(
+                                    "Sign Up with Google",
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium!
+                                        .copyWith(
+                                          fontSize: t(12),
+                                          color: Color(0xff757575),
+                                        ),
+                                  ),
+                                ],
+                              ),
+                      ),
+                    ),
+                  ),
+                  gapVertical(10),
                   Center(
                     child: TextspanWidget(
                       buttonColor: AppColors.primaryColor,

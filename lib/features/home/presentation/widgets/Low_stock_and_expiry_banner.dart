@@ -1,5 +1,7 @@
 // ignore_for_file: file_names
 
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -10,8 +12,8 @@ import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
-import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_bloc.dart';
-import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_state.dart';
+import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
+import 'package:foodkitchen/features/home/presentation/bloc/home_state.dart';
 import 'package:go_router/go_router.dart';
 
 class LowStockAndExpiryBanner extends StatelessWidget {
@@ -21,9 +23,9 @@ class LowStockAndExpiryBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<PantryBloc, PantryState>(
+    return BlocBuilder<HomeBloc, HomeState>(
       builder: (context, state) {
-        if (state is! PantryLoaded) {
+        if (state.isLoading) {
           return const SizedBox.shrink();
         }
 

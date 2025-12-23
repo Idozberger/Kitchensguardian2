@@ -1,5 +1,6 @@
 import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/features/home/domain/entities/pantry_data.dart';
+import 'package:foodkitchen/features/home/domain/entities/pantry_items.dart';
 
 class HomeState {
   final bool isLoading;
@@ -12,6 +13,8 @@ class HomeState {
   final List<PantriesDataEntity> pantryItems;
   final List<RecipeEntity> dateBasedPlan;
   final List<RecipeEntity> suggestedRecipe;
+  final List<PantriesItemsEntity> lowStockItems;
+  final List<PantriesItemsEntity> expiringItems;
 
   const HomeState({
     this.isLoading = false,
@@ -25,6 +28,8 @@ class HomeState {
     this.dateBasedPlan = const [],
     this.groceryList = const [],
     this.suggestedRecipe = const [],
+    this.lowStockItems = const [],
+    this.expiringItems = const [],
   });
 
   HomeState copyWith({
@@ -38,6 +43,8 @@ class HomeState {
     String? successMessage,
     List<String>? groceryList,
     List<RecipeEntity>? suggestedRecipe,
+    List<PantriesItemsEntity>? lowStockItems,
+    List<PantriesItemsEntity>? expiringItems,
   }) {
     return HomeState(
       isLoading: isLoading ?? this.isLoading,
@@ -51,6 +58,8 @@ class HomeState {
       groceryList: groceryList ?? this.groceryList,
       suggestedRecipe: suggestedRecipe ?? this.suggestedRecipe,
       showGroceryShimmer: showGroceryShimmer ?? this.showGroceryShimmer,
+      lowStockItems: lowStockItems ?? this.lowStockItems,
+      expiringItems: expiringItems ?? this.expiringItems,
     );
   }
 }

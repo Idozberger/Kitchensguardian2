@@ -5,8 +5,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/core/services/fcm/fcm_service.dart';
+import 'package:foodkitchen/core/services/notifications/flutter_local_notifications_service.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/features/home/domain/entities/kitchen.dart';
+import 'package:foodkitchen/features/home/domain/entities/pantry_items.dart';
 import 'package:foodkitchen/features/home/domain/usecases/create_kitchen_usecase.dart';
 import 'package:foodkitchen/features/home/domain/usecases/get_all_weekly_plans_usecase.dart';
 import 'package:foodkitchen/features/home/domain/usecases/get_pantries_usecase.dart';
@@ -278,9 +280,112 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     res.fold(
       (failure) =>
           emit(state.copyWith(isLoading: false, errorMessage: failure.message)),
-      (pantries) =>
-          emit(state.copyWith(isLoading: false, pantryItems: [pantries])),
+      (pantries) async {
+        final List<PantriesItemsEntity> pantryItems = [];
+        final List<PantriesItemsEntity> lowStockItems = [];
+        final List<PantriesItemsEntity> expiringItems = [];
+
+        for (final item in pantries.items) {
+          if (item.stockStatus == "low_stock") {
+            lowStockItems.add(item);
+            continue;
+          }
+
+          if (item.expiryStatus == "expiring_soon") {
+            expiringItems.add(item);
+
+            continue;
+          }
+
+          if (item.stockStatus == "in_stock" ||
+              item.expiryStatus == "" ||
+              item.expiryStatus == "null") {
+            pantryItems.add(item);
+            continue;
+          }
+
+          pantryItems.add(item);
+        }
+
+        emit(
+          state.copyWith(
+            isLoading: false,
+            pantryItems: [pantries],
+            lowStockItems: lowStockItems,
+            expiringItems: expiringItems,
+          ),
+        );
+
+        await _schedulePantryNotifications(
+          lowStockItems: lowStockItems,
+          expiringItems: expiringItems,
+        );
+      },
     );
+  }
+
+  Future<void> _schedulePantryNotifications({
+    required List<PantriesItemsEntity> lowStockItems,
+    required List<PantriesItemsEntity> expiringItems,
+  }) async {
+    final notificationService = NotificationService();
+    await notificationService.cancelAllNotifications();
+    final DateTime now = DateTime.now();
+    final DateTime morningTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      9,
+      0,
+    ); // 9:00 AM
+    final DateTime eveningTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      18,
+      0,
+    ); // 6:00 PM
+
+    for (final item in lowStockItems) {
+      final int baseId = item.itemId.hashCode & 0x7fffffff;
+
+      await notificationService.scheduleDaily(
+        id: baseId,
+        title: 'Low stock: ${item.name}',
+        body:
+            'You are running low on ${item.name} (${item.quantity} ${item.unit}).',
+        dailyTime: morningTime,
+        payload: 'low_stock:${item.itemId}',
+      );
+
+      await notificationService.scheduleDaily(
+        id: baseId + 1, // evening
+        title: 'Low stock: ${item.name}',
+        body: 'Remember to restock ${item.name}.',
+        dailyTime: eveningTime,
+        payload: 'low_stock:${item.itemId}',
+      );
+    }
+
+    for (final item in expiringItems) {
+      final int baseId = (item.itemId.hashCode & 0x7fffffff) + 100000;
+
+      await notificationService.scheduleDaily(
+        id: baseId, // morning
+        title: 'Expiring soon: ${item.name}',
+        body: '${item.name} is expiring soon (${item.expireDate}).',
+        dailyTime: morningTime,
+        payload: 'expiring_soon:${item.itemId}',
+      );
+
+      await notificationService.scheduleDaily(
+        id: baseId + 1, // evening
+        title: 'Expiring soon: ${item.name}',
+        body: 'Use ${item.name} before it expires.',
+        dailyTime: eveningTime,
+        payload: 'expiring_soon:${item.itemId}',
+      );
+    }
   }
 
   Future<void> _onGetUserStorageArea(
@@ -310,7 +415,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         );
       },
       (getAllWeeklyPlans) async {
-        // logSuccess("Weekly meals: ${getAllWeeklyPlans}");
         emit(
           state.copyWith(
             dateBasedPlan: getAllWeeklyPlans,

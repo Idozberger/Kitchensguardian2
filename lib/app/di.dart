@@ -9,6 +9,7 @@ import 'package:foodkitchen/features/auth/data/data_source/auth_remote_datasourc
 import 'package:foodkitchen/features/auth/data/repository/auth_repository_impl.dart';
 import 'package:foodkitchen/features/auth/domain/repository/auth_repository.dart';
 import 'package:foodkitchen/features/auth/domain/usecase/google_sign_in_usecase.dart';
+import 'package:foodkitchen/features/auth/domain/usecase/google_signup_usecase.dart';
 import 'package:foodkitchen/features/auth/domain/usecase/send_password_reset_email_usecase.dart';
 import 'package:foodkitchen/features/auth/domain/usecase/send_user_email_verification_code_usecase.dart';
 import 'package:foodkitchen/features/auth/domain/usecase/set_user_new_password_usecase.dart';
@@ -197,6 +198,7 @@ void _initAuth() async {
     ..registerLazySingleton(
       () => AuthBloc(
         googleSignIn: GoogleSignInUsecase(sl()),
+        googleSignup: GoogleSignupUsecase(sl()),
         userSignUp: UserSignUp(sl()),
         sendUserEmailVerificationCode: SendUserEmailVerificationCode(sl()),
         userSignIn: UserSignIn(sl()),
