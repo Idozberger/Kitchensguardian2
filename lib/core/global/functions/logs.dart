@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 
-void logError(Object message) {
-  _logWithColor(message, '❌', 31);
-}
-
 void logWarning(Object message) {
   _logWithColor(message, '📢', 33);
 }

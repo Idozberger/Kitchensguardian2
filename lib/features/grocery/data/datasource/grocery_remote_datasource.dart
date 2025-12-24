@@ -189,6 +189,7 @@ class GroceryRemoteDatasourceImpl implements GroceryRemoteDatasource {
         AppConstants.deleteKitchenItems,
         data: {"kitchen_id": kitchenId, "item_ids": itemsIds},
       );
+
       if (response.statusCode != 200 && response.statusCode != 201) {
         final data = response.data is String
             ? jsonDecode(response.data)

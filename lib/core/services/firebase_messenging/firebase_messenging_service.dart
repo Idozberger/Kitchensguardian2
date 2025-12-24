@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/core/services/notifications/flutter_local_notifications_service.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
@@ -85,8 +86,8 @@ class FirebaseMessagingService {
         logWarning('Unexpected authorization status: $status');
       }
     } catch (e, st) {
-      logError('Error requesting notification permission: $e');
-      logError(st.toString());
+      debugPrint('Error requesting notification permission: $e');
+      debugPrint(st.toString());
     }
   }
 
@@ -126,7 +127,7 @@ class FirebaseMessagingService {
         await _updateUserToken(userId: userId, token: newToken);
       });
     } catch (e, st) {
-      logError(st.toString());
+      debugPrint(st.toString());
     }
   }
 
@@ -160,7 +161,7 @@ class FirebaseMessagingService {
         await userRef.set(data);
       }
     } catch (e, st) {
-      logError(st.toString());
+      debugPrint(st.toString());
     }
   }
 
@@ -175,8 +176,8 @@ class FirebaseMessagingService {
         'updated_at': FieldValue.serverTimestamp(),
       });
     } catch (e, st) {
-      logError('Failed to update user token: $e');
-      logError(st.toString());
+      debugPrint('Failed to update user token: $e');
+      debugPrint(st.toString());
     }
   }
 

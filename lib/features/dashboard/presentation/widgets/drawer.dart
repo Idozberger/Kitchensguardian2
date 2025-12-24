@@ -8,7 +8,6 @@ import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
-import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
@@ -123,7 +122,7 @@ class AppDrawer extends StatelessWidget {
                 if (state.activeKitchenId.isNotEmpty) {
                   if (state.invitationCode.isNotEmpty) {
                     context.pop();
-                    logError("inivitaion code ${state.invitationCode}");
+                    debugPrint("inivitaion code ${state.invitationCode}");
                     _showRefferalCodeDialog(context, state.invitationCode);
                   } else {
                     AppToast.show(

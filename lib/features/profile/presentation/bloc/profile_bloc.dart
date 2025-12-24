@@ -92,11 +92,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
           emit(state.copyWith(isLoading: false, errorMessage: failure.message)),
       (successMessage) {
         emit(state.copyWith(isLoading: false, successMessage: successMessage));
-        _userCubit.setUser(
-          firstName: event.firstName,
-          lastName: event.lastName,
-          profilePicture: base64Decode(event.thumbnail),
-        );
+        _userCubit.setUser();
       },
     );
   }

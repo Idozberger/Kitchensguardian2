@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
@@ -22,6 +23,7 @@ class SignInPage extends StatefulWidget {
 }
 
 class _SignInPageState extends State<SignInPage> {
+  late UserCubit _userCubit;
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController _emailController = TextEditingController();
@@ -32,6 +34,13 @@ class _SignInPageState extends State<SignInPage> {
     setState(() {
       _isObscure = !_isObscure;
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _userCubit = context.read<UserCubit>();
+    _userCubit.setGoogleSignUpUserModel(firstName: "", lastName: "", email: "");
   }
 
   void onLogin() {
@@ -76,15 +85,28 @@ class _SignInPageState extends State<SignInPage> {
           AppToast.show(state.message, ToastType.error);
 
           if (state.message == "User not verified") {
-            context.pushNamed(
-              "verify_email",
-              extra: UserModel(
-                email: _emailController.text.trim(),
-                firstName: "",
-                lastName: "",
-                password: _passwordController.text.trim(),
-              ),
-            );
+            if (_userCubit.state.userModel != null &&
+                _userCubit.state.userModel!.email.isNotEmpty) {
+              context.pushNamed(
+                "verify_email",
+                extra: UserModel(
+                  email: _userCubit.state.userModel!.email,
+                  firstName: "",
+                  lastName: "",
+                  password: "",
+                ),
+              );
+            } else {
+              context.pushNamed(
+                "verify_email",
+                extra: UserModel(
+                  email: _emailController.text.trim(),
+                  firstName: "",
+                  lastName: "",
+                  password: _passwordController.text.trim(),
+                ),
+              );
+            }
           }
         }
       },

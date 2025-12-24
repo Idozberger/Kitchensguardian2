@@ -6,7 +6,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:foodkitchen/core/common/data/model/pantry_model.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
-import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
 import 'package:foodkitchen/features/planner/domain/entities/meal_plan_entity.dart';
 
@@ -82,7 +81,7 @@ class PlannerRemoteDatasourceImpl implements PlannerRemoteDatasource {
       if (data is List) {
         return data.map<Map<String, dynamic>>((e) {
           final recipe = Map<String, dynamic>.from(e);
-          logError(recipe);
+          debugPrint(recipe.toString());
           final thumbnailBase64 = recipe["thumbnail"];
 
           if (thumbnailBase64 is String && thumbnailBase64.isNotEmpty) {

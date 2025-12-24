@@ -5,7 +5,6 @@ import 'package:foodkitchen/core/common/cubits/user_state.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
-import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_recipe_is_under_progress_widget.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
@@ -97,7 +96,7 @@ class _HomePageState extends State<HomePage> {
     required HomeState homeState,
     required bool hasKitchen,
   }) {
-    logError("${userState.userStorageAreas}");
+    debugPrint("${userState.userStorageAreas}");
     if (!hasKitchen) return const NoKitchenView();
 
     if (homeState.isLoading) {

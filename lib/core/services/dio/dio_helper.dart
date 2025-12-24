@@ -25,8 +25,8 @@ class DioHelper {
             "➡️ [REQUEST]\n"
             "URL: ${options.uri}\n"
             "Method: ${options.method}\n"
-            "Headers: ${options.headers}\n"
-            "Data: ${options.data}",
+            "Headers: ${options.headers}\n",
+            // "Data: ${options.data}",
           );
 
           return handler.next(options);

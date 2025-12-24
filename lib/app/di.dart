@@ -188,6 +188,7 @@ void _initAuth() async {
         connectionChecker: sl(),
         dio: sl(),
         sharedPreferences: sl(),
+        userCubit: sl(),
       ),
     )
     // Repository

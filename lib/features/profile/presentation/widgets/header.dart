@@ -73,7 +73,9 @@ class ProfileHeader extends StatelessWidget {
                     builder: (_, state) {
                       return ProfileStatTile(
                         title: "Meals Planned",
-                        value: state.getAllWeeklyPlans.length.toString(),
+                        value: state.getAllWeeklyPlans.isEmpty
+                            ? "None"
+                            : state.getAllWeeklyPlans.length.toString(),
                       );
                     },
                   ),
@@ -82,7 +84,9 @@ class ProfileHeader extends StatelessWidget {
                       return ProfileStatTile(
                         title: "Shopping Lists",
                         value: (state.finalListItemsList != null)
-                            ? state.finalListItemsList!.length.toString()
+                            ? state.finalListItemsList!.isEmpty
+                                  ? "None"
+                                  : state.finalListItemsList!.length.toString()
                             : "0",
                       );
                     },

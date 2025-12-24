@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
@@ -22,7 +23,14 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
+  late UserCubit _userCubit;
   final _formKey = GlobalKey<FormState>();
+  @override
+  void initState() {
+    super.initState();
+    _userCubit = context.read<UserCubit>();
+    _userCubit.setGoogleSignUpUserModel(firstName: "", lastName: "", email: "");
+  }
 
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
@@ -64,16 +72,28 @@ class _SignUpPageState extends State<SignUpPage> {
         }
         if (state is AuthUserCreatedSuccess) {
           AppToast.show(state.successMessage, ToastType.success);
-
-          context.pushNamed(
-            "verify_email",
-            extra: UserModel(
-              email: _emailController.text.trim(),
-              firstName: _firstNameController.text,
-              lastName: _lastNameController.text,
-              password: _passwordController.text.trim(),
-            ),
-          );
+          if (_userCubit.state.userModel != null &&
+              _userCubit.state.userModel!.email.isNotEmpty) {
+            context.pushNamed(
+              "verify_email",
+              extra: UserModel(
+                email: _userCubit.state.userModel!.email,
+                firstName: _userCubit.state.userModel!.firstName,
+                lastName: _userCubit.state.userModel!.lastName,
+                password: _userCubit.state.userModel!.password,
+              ),
+            );
+          } else {
+            context.pushNamed(
+              "verify_email",
+              extra: UserModel(
+                email: _emailController.text.trim(),
+                firstName: _firstNameController.text,
+                lastName: _lastNameController.text,
+                password: _passwordController.text.trim(),
+              ),
+            );
+          }
         }
       },
       builder: (BuildContext context, AuthState state) {

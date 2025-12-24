@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/widgets.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
 
@@ -40,6 +41,7 @@ class DashboardRemoteDatasourceImpl implements DashboardRemoteDatasource {
       final data = response.data["members"];
 
       if (data is List) {
+        debugPrint("Kitchen members: ${data.map((member) => member)}");
         return data.map((e) => Map<String, dynamic>.from(e)).toList();
       } else {
         throw Exception("Invalid data");

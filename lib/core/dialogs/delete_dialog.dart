@@ -16,7 +16,7 @@ Future<dynamic> showCustomGenericDialog({
 }) {
   return showDialog(
     context: context,
-    barrierDismissible: true,
+    barrierDismissible: false,
     builder: (context) {
       return GenericDialog(
         borderRadius: h(20),

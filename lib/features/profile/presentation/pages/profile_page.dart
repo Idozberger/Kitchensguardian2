@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
@@ -15,6 +17,8 @@ import 'package:foodkitchen/features/profile/presentation/bloc/profile_event.dar
 import 'package:foodkitchen/features/profile/presentation/bloc/profile_state.dart';
 import 'package:foodkitchen/features/profile/presentation/widgets/header.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -149,10 +153,23 @@ class _ProfilePageState extends State<ProfilePage> {
                                 title: "Tell a friend!",
                                 subTitle: "",
                                 callback: () {
-                                  AppToast.show(
-                                    "Tell a friend!",
-                                    ToastType.success,
-                                  );
+                                  final String shareText =
+                                      '''
+Hey!
+
+I’m loving com.itz.kitchens.guardian – the easiest way to plan weekly meals, create shopping lists automatically, and save time in the kitchen!
+
+You should try it too – it’s free and super helpful for busy families.
+
+Download here: https://play.google.com/store/apps/details?id=com.itz.kitchens.guardian
+
+Happy cooking!
+
+Shared with love from KitchenGuardian
+'''
+                                          .trim();
+
+                                  Share.share(shareText);
                                 },
                               ),
                               gap(height: 5),
@@ -162,8 +179,34 @@ class _ProfilePageState extends State<ProfilePage> {
                                 assetPath: AppAssets.starSvg,
                                 title: "Rate app",
                                 subTitle: "",
-                                callback: () {
-                                  AppToast.show("Rate app", ToastType.success);
+                                callback: () async {
+                                  const String androidUrl =
+                                      'https://play.google.com/store/apps/details?id=com.itz.kitchens.guardian';
+                                  const String iosUrl =
+                                      'https://apps.apple.com/app/idYOUR_APPLE_APP_ID';
+
+                                  final Uri uri = Uri.parse(
+                                    Platform.isAndroid ? androidUrl : iosUrl,
+                                  );
+
+                                  try {
+                                    if (await canLaunchUrl(uri)) {
+                                      await launchUrl(
+                                        uri,
+                                        mode: LaunchMode.externalApplication,
+                                      );
+                                    } else {
+                                      AppToast.show(
+                                        "Could not open store",
+                                        ToastType.error,
+                                      );
+                                    }
+                                  } catch (e) {
+                                    AppToast.show(
+                                      "Something went wrong",
+                                      ToastType.error,
+                                    );
+                                  }
                                 },
                               ),
                             ],

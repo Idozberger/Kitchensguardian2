@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
@@ -9,7 +10,7 @@ abstract interface class CommonRemoteDatasource {
   Future<List<Map<String, dynamic>>> getAllStorageArea({
     required String kitchenId,
   });
-  Future<Uint8List> getUserAvatar();
+  Future<Map<String, dynamic>> getProfileData();
 }
 
 class CommonRemoteDatasourceImpl implements CommonRemoteDatasource {
@@ -44,7 +45,7 @@ class CommonRemoteDatasourceImpl implements CommonRemoteDatasource {
   }
 
   @override
-  Future<Uint8List> getUserAvatar() async {
+  Future<Map<String, dynamic>> getProfileData() async {
     try {
       final response = await dio.get(AppConstants.getUserProfile);
 
@@ -53,25 +54,37 @@ class CommonRemoteDatasourceImpl implements CommonRemoteDatasource {
             ? jsonDecode(response.data)
             : response.data;
 
-        final message = data["error"];
-        throw message;
+        throw data["error"];
       }
 
-      final avatar = response.data["avatar"];
+      final data = response.data is String
+          ? jsonDecode(response.data)
+          : response.data;
 
-      if (avatar == null || avatar.isEmpty) {
-        return Uint8List(0);
+      final avatar = data["avatar"];
+      Uint8List avatarBytes = Uint8List(0);
+
+      if (avatar != null && avatar.toString().isNotEmpty) {
+        try {
+          final base64String = avatar.toString().split(',').last;
+          avatarBytes = base64Decode(base64String);
+        } catch (_) {
+          avatarBytes = Uint8List(0);
+        }
       }
 
-      final base64String = avatar.split(',').last;
-
-      try {
-        return base64Decode(base64String);
-      } catch (_) {
-        return Uint8List(0);
-      }
-    } catch (_) {
-      return Uint8List(0);
+      return {
+        "avatar": avatarBytes,
+        "first_name": data["first_name"],
+        "last_name": data["last_name"],
+        "email": data["email"],
+        "user_id": data["user_id"],
+        "verified": data["verified"],
+        "created_at": data["created_at"],
+      };
+    } catch (e, s) {
+      log("getUserAvatar error: $e\n$s");
+      return {};
     }
   }
 }

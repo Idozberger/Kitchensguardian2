@@ -53,12 +53,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
           return;
         }
 
-        _userCubit.setUser(
-          userId: user.userId ?? "",
-          firstName: user.firstName ?? "",
-          lastName: user.lastName ?? "",
-          email: user.email ?? "",
-        );
+        _userCubit.setUser();
 
         emit(UserSuccess());
       },

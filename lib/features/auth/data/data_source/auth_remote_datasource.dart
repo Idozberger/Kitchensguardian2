@@ -6,6 +6,7 @@ import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/services/connection/connection_checker.dart';
 import 'package:foodkitchen/features/auth/data/model/user_model.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
@@ -48,11 +49,13 @@ abstract interface class AuthRemoteDataSource {
 class AuthRemoteDatasourceImpl implements AuthRemoteDataSource {
   final DioHelper dio;
   final ConnectionChecker connectionChecker;
+  final UserCubit userCubit;
   final SharedPreferences sharedPreferences;
   AuthRemoteDatasourceImpl({
     required this.connectionChecker,
     required this.dio,
     required this.sharedPreferences,
+    required this.userCubit,
   });
   @override
   Future<String> signUpUserWithEmailAndPassword({
@@ -306,7 +309,11 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource {
         "Attempting login → Email: $email | GoogleID: $googlePermanentId",
         name: "Auth",
       );
-
+      userCubit.setGoogleSignUpUserModel(
+        firstName: "",
+        lastName: "",
+        email: email,
+      );
       final response = await dio.post(
         AppConstants.login,
         data: {"email": email, "password": googlePermanentId},
@@ -403,7 +410,11 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource {
         email: email,
         password: googlePermanentId,
       );
-
+      userCubit.setGoogleSignUpUserModel(
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+      );
       final response = await dio.post(
         AppConstants.createAccount,
         data: userModel.toJson(),
@@ -418,19 +429,9 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource {
         throw errorMsg;
       }
 
-      final String? token = response.data["access_token"];
       final String message =
           response.data["message"] ?? "Account created successfully!";
 
-      if (token == null || token.isEmpty) {
-        log("Sign up succeeded but no token returned!", name: "Auth");
-        throw "Account created but login failed. Please try again.";
-      }
-
-      await sharedPreferences.setString("access-token", token);
-      await sharedPreferences.commit();
-
-      log("GOOGLE SIGN-UP SUCCESS → Account created & logged in", name: "Auth");
       return message;
     } on DioException catch (e) {
       String errorMsg = "Sign up failed";

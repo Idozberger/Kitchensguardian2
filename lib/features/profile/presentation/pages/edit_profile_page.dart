@@ -43,6 +43,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     userCubit = context.read<UserCubit>();
     _firstNameController.text = userCubit.state.firstName;
     _lastNameController.text = userCubit.state.lastName;
+    imageBytes = userCubit.state.profilePictureFilePath;
     super.initState();
   }
 
@@ -58,7 +59,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
     if (image != null) {
       imageBytes = image.readAsBytesSync();
       setState(() {});
-      // profileBloc.add(UpdateProfilePicture(image.path));
     }
   }
 
@@ -115,14 +115,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
   String? _validateName(String name, String fieldName) {
     if (name.isEmpty || name.length < 3) {
       return '$fieldName must be at least 3 characters long';
-    }
-
-    if (name.length > 10) {
-      return '$fieldName must not exceed 10 characters';
-    }
-
-    if (name.split(RegExp(r'\s+')).length > 2) {
-      return '$fieldName can contain up to 2 words only';
     }
 
     return null;

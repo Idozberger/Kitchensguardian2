@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/data/datasource/common_remote_datasource.dart';
 import 'package:foodkitchen/core/common/data/model/pantries_model.dart';
 import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
+import 'package:foodkitchen/features/auth/data/model/user_model.dart';
 
 import 'user_state.dart';
 
@@ -14,27 +15,45 @@ class UserCubit extends Cubit<UserState> {
   UserCubit({required CommonRemoteDatasource commonRemoteDatasource})
     : _commonRemoteDatasource = commonRemoteDatasource,
       super(const UserState());
-  Future<Uint8List?> fetchUserAvatar() async {
-    final bytes = await _commonRemoteDatasource.getUserAvatar();
-    emit(state.copyWith(profilePictureFilePath: bytes));
-    return bytes;
+  Future<Map<String, dynamic>> fetchUserProfile() async {
+    final response = await _commonRemoteDatasource.getProfileData();
+
+    return response;
   }
 
-  void setUser({
+  void setGoogleSignUpUserModel({
     required String firstName,
     required String lastName,
-    String? email,
+    required String email,
     String? userId,
     Uint8List? profilePicture,
   }) async {
-    Uint8List? imageBytes = await fetchUserAvatar();
     emit(
       state.copyWith(
-        firstName: firstName,
-        lastName: lastName,
-        email: email,
-        userId: userId,
-        profilePictureFilePath: imageBytes,
+        userModel: UserModel(
+          firstName: firstName,
+          lastName: lastName,
+          email: email,
+          password: "",
+        ),
+      ),
+    );
+  }
+
+  void setUser() async {
+    final response = await fetchUserProfile();
+
+    final Uint8List? avatarBytes = response["avatar"] is Uint8List
+        ? response["avatar"]
+        : null;
+
+    emit(
+      state.copyWith(
+        firstName: response["first_name"] ?? "",
+        lastName: response["last_name"] ?? "",
+        email: response["email"],
+        userId: response["user_id"],
+        profilePictureFilePath: avatarBytes,
       ),
     );
   }

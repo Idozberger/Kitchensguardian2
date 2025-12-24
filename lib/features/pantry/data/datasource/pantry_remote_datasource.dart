@@ -8,7 +8,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
-import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
 import 'package:foodkitchen/core/common/data/model/pantry_model.dart';
 import 'package:foodkitchen/core/services/notifications/flutter_local_notifications_service.dart';
@@ -268,7 +267,6 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
       );
 
       if (response.statusCode != 200 && response.statusCode != 201) {
-        logError(response.data);
         final data = response.data is String
             ? jsonDecode(response.data)
             : response.data;
@@ -325,7 +323,7 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
         AppConstants.updateKitchenItems,
         data: pantryModel.toJson(),
       );
-      print("dsfasdfdsfadsfads");
+
       if (response.statusCode != 200 && response.statusCode != 201) {
         final data = response.data is String
             ? jsonDecode(response.data)

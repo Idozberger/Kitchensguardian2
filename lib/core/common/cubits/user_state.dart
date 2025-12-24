@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantries_entity.dart';
+import 'package:foodkitchen/features/auth/data/model/user_model.dart';
 
 class UserState {
   final String firstName;
@@ -16,6 +17,7 @@ class UserState {
   final List<RecipeEntity> recipeEntity;
   final List<Map<String, dynamic>> doneSteps;
   final List<PantriesCommonEntity> userStorageAreas;
+  final UserModel? userModel;
   const UserState({
     this.firstName = '',
     this.lastName = '',
@@ -30,6 +32,7 @@ class UserState {
     this.recipeEntity = const [],
     this.doneSteps = const [],
     this.userStorageAreas = const [],
+    this.userModel,
   });
 
   UserState copyWith({
@@ -46,6 +49,7 @@ class UserState {
     List<RecipeEntity>? recipeEntity,
     List<Map<String, dynamic>>? doneSteps,
     List<PantriesCommonEntity>? userStorageAreas,
+    UserModel? userModel,
   }) {
     return UserState(
       firstName: firstName ?? this.firstName,
@@ -62,6 +66,7 @@ class UserState {
       recipeEntity: recipeEntity ?? this.recipeEntity,
       doneSteps: doneSteps ?? this.doneSteps,
       userStorageAreas: userStorageAreas ?? this.userStorageAreas,
+      userModel: userModel ?? this.userModel,
     );
   }
 }

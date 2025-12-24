@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/features/grocery/data/datasource/grocery_remote_datasource.dart';
 import 'package:foodkitchen/core/common/data/model/requested_items_model.dart';
@@ -78,6 +79,8 @@ class GroceryRepositoryImpl implements GroceryRepository {
       final data = (response as List)
           .map((e) => RequestedItemModel.fromJson(e))
           .toList();
+
+      debugPrint("Aigenerated list: ${data.map((item) => item.toJson())}");
       return Right(data);
     } on Failure catch (f) {
       return Left(f);

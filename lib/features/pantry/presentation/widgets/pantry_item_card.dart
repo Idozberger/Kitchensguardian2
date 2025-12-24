@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -101,12 +103,15 @@ class _PantryItemCardState extends State<PantryItemCard> {
                         children: [
                           SizedBox(
                             width: w(38),
-                            child: _buildInlineInfo(widget.quantity),
+                            child: Align(
+                              alignment: Alignment.topRight,
+                              child: _buildInlineInfo(widget.quantity),
+                            ),
                           ),
                           SizedBox(width: w(24), child: _dot()),
 
                           SizedBox(
-                            width: w(18),
+                            width: w(38),
                             child: _buildInlineInfo(widget.unit),
                           ),
                           SizedBox(width: w(24), child: _dot()),
@@ -193,17 +198,15 @@ class _PantryItemCardState extends State<PantryItemCard> {
         ),
       );
     } else {
-      return SizedBox(
-        width: w(50),
-        child: Text(
-          text,
-          overflow: TextOverflow.ellipsis,
-          maxLines: 1,
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontSize: t(14),
-            color: const Color(0xff787878),
-            fontWeight: FontWeight.w400,
-          ),
+      return Text(
+        text,
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
+        textAlign: TextAlign.left,
+        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+          fontSize: t(14),
+          color: const Color(0xff787878),
+          fontWeight: FontWeight.w400,
         ),
       );
     }
@@ -337,7 +340,8 @@ class _PantryItemCardState extends State<PantryItemCard> {
                                 unit: unit,
                                 group: pantry,
                                 expireDate: expireDate.text,
-                                thumbnail: pantryItem.thumbnail,
+                                thumbnail:
+                                    "data:image/jpeg;base64,${base64Encode(pantryItem.thumbnailBytes!)}",
                                 expiryStatus: pantryItem.expiryStatus,
                                 stockStatus: pantryItem.stockStatus,
                               );

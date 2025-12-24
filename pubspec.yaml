@@ -45,6 +45,7 @@ dependencies:
   shimmer: ^3.0.0
   syncfusion_flutter_sliders: ^31.1.19
   timezone: ^0.10.1
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_test:

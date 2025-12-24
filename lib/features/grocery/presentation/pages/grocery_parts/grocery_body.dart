@@ -206,6 +206,7 @@ class _GroceryBodyState extends State<GroceryBody> {
   }
 
   bool _isChecked(String itemId) {
+    debugPrint("Aigenerated list selected: $itemId");
     return requestedAndAiGeneratedSelectedList.contains(itemId);
   }
 

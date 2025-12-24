@@ -57,8 +57,6 @@ class ProfileRemoteDatasourceImpl implements ProfileRemoteDatasource {
     required String newPassword,
   }) async {
     try {
-      logError("Current password: ${currentPassword}");
-      logError("Current password: ${newPassword}");
       final response = await dio.post(
         AppConstants.changePassword,
         data: {

@@ -112,12 +112,12 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
             missingIngredientNames.add(ingredientName);
           }
 
-          logError(
+          debugPrint(
             'Grocery: $ingredientName → ${DateFormat('EEE, MMM d').format(planDate)}',
           );
         }
       } on FormatException catch (e) {
-        logError('Invalid date format in plan: ${plan.date}, error: $e');
+        debugPrint('Invalid date format in plan: ${plan.date}, error: $e');
       }
     }
 
@@ -455,7 +455,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
       await kitchenRef.set(data);
     } catch (e, st) {
-      logError(st.toString());
+      debugPrint(st.toString());
     }
   }
 }
