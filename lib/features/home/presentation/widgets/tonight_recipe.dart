@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -123,7 +121,7 @@ class _TonightRecipeWidgetState extends State<TonightRecipeWidget> {
                               child: FractionallySizedBox(
                                 widthFactor: todayRecipes.length == 1
                                     ? 1.0
-                                    : 0.88,
+                                    : 1.0,
                                 child: RecipeCard(
                                   isTodayPlan: true,
                                   mealType: recipe.mealType,

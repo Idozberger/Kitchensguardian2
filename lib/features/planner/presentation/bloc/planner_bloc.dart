@@ -10,6 +10,7 @@ import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_bloc.dart';
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_event.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
+import 'package:foodkitchen/features/home/presentation/bloc/home_event.dart';
 import 'package:foodkitchen/features/planner/data/models/merged_meal_plan_model.dart';
 import 'package:foodkitchen/features/planner/domain/entities/merged_meal_type_entity.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/add_to_favourite_recipe.dart';
@@ -363,6 +364,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
       (successMessage) async {
         await Future.delayed(Duration(seconds: 4));
         add(GetAllWeeklyPlansEvent(_userCubit.state.activeKitchenId, null));
+        _homeBloc.add(GetAllWeeklyPlansEventForHome());
 
         emit(state.copyWith(successMessage: successMessage, isLoading: false));
       },

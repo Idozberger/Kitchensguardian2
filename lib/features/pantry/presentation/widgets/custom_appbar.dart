@@ -7,6 +7,8 @@ import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_mlkit_document_scanner/google_mlkit_document_scanner.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 /// Custom AppBar
 AppBar buildAppBar(BuildContext context) {
@@ -34,8 +36,48 @@ AppBar buildAppBar(BuildContext context) {
               child: SizedBox(
                 height: h(40),
                 child: OutlinedButton.icon(
-                  onPressed: () {
-                    context.push(Routes.scanMeal);
+                  onPressed: () async {
+                    PermissionStatus status = await Permission.camera.status;
+
+                    if (!status.isGranted) {
+                      final result = await Permission.camera.request();
+                      if (!result.isGranted) {
+                        if (result.isPermanentlyDenied) {
+                          openAppSettings();
+                        }
+                        return;
+                      }
+                    }
+
+                    final documentOptions = DocumentScannerOptions(
+                      documentFormat: DocumentFormat.jpeg,
+                      mode: ScannerMode.base,
+                      pageLimit: 1,
+                      isGalleryImport: false,
+                    );
+
+                    final documentScanner = DocumentScanner(
+                      options: documentOptions,
+                    );
+
+                    try {
+                      final DocumentScanningResult result =
+                          await documentScanner.scanDocument();
+
+                      if (result.images.isNotEmpty) {
+                        final image = result.images.first;
+
+                        // ignore: use_build_context_synchronously
+                        context.pushNamed(
+                          Routes.capturedImageDetails,
+                          extra: {"image_path": image},
+                        );
+                      }
+                    } catch (e) {
+                      debugPrint("Document scan error: $e");
+                    } finally {
+                      documentScanner.close();
+                    }
                   },
                   icon: SvgPicture.asset(AppAssets.scanSvg),
                   label: Text(
