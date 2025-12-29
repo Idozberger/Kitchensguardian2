@@ -109,6 +109,7 @@ class _TonightRecipeWidgetState extends State<TonightRecipeWidget> {
                       SizedBox(
                         height: h(300),
                         child: PageView.builder(
+                          padEnds: false,
                           controller: _pageController,
                           itemCount: todayRecipes.length,
                           onPageChanged: (index) {

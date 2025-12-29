@@ -169,62 +169,102 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
     required List<PantryItemEntity> expiringItems,
   }) async {
     final notificationService = NotificationService();
-
     final DateTime now = DateTime.now();
-    final DateTime morningTime = DateTime(
-      now.year,
-      now.month,
-      now.day,
-      9,
-      0,
-    ); // 9:00 AM
-    final DateTime eveningTime = DateTime(
-      now.year,
-      now.month,
-      now.day,
-      18,
-      0,
-    ); // 6:00 PM
+    final DateTime morningTime = DateTime(now.year, now.month, now.day, 9, 0);
+    final DateTime eveningTime = DateTime(now.year, now.month, now.day, 18, 0);
 
+    // Current items' base IDs
+    final currentItemIds = <int>{};
     for (final item in lowStockItems) {
-      final int baseId = item.itemId.hashCode & 0x7fffffff;
-
-      await notificationService.scheduleDaily(
-        id: baseId,
-        title: 'Low stock: ${item.name}',
-        body:
-            'You are running low on ${item.name} (${item.quantity} ${item.unit}).',
-        dailyTime: morningTime,
-        payload: 'low_stock:${item.itemId}',
-      );
-
-      await notificationService.scheduleDaily(
-        id: baseId + 1, // evening
-        title: 'Low stock: ${item.name}',
-        body: 'Remember to restock ${item.name}.',
-        dailyTime: eveningTime,
-        payload: 'low_stock:${item.itemId}',
-      );
+      currentItemIds.add(item.itemId.hashCode & 0x7fffffff); // morning
+      currentItemIds.add((item.itemId.hashCode & 0x7fffffff) + 1); // evening
+    }
+    for (final item in expiringItems) {
+      currentItemIds.add(
+        (item.itemId.hashCode & 0x7fffffff) + 100000,
+      ); // morning
+      currentItemIds.add(
+        (item.itemId.hashCode & 0x7fffffff) + 100001,
+      ); // evening
     }
 
+    // Pending notifications
+    final pendingNotifications = await notificationService
+        .pendingNotifications();
+
+    // Cancel notifications for items that no longer exist
+    for (final pending in pendingNotifications) {
+      if (!currentItemIds.contains(pending.id)) {
+        await notificationService.cancelNotification(pending.id);
+        print("Canceled obsolete notification (ID: ${pending.id})");
+      }
+    }
+
+    final scheduledIds = pendingNotifications.map((e) => e.id).toSet();
+
+    // Schedule notifications for current low stock items
+    for (final item in lowStockItems) {
+      final int morningId = item.itemId.hashCode & 0x7fffffff;
+      final int eveningId = morningId + 1;
+
+      if (!scheduledIds.contains(morningId)) {
+        await notificationService.scheduleDaily(
+          id: morningId,
+          title: 'Low stock: ${item.name}',
+          body:
+              'You are running low on ${item.name} (${item.quantity} ${item.unit}).',
+          dailyTime: morningTime,
+          payload: 'low_stock:${item.itemId}',
+        );
+        print(
+          "Scheduled morning low stock notification for ${item.name} (ID: $morningId)",
+        );
+      }
+
+      if (!scheduledIds.contains(eveningId)) {
+        await notificationService.scheduleDaily(
+          id: eveningId,
+          title: 'Low stock: ${item.name}',
+          body: 'Remember to restock ${item.name}.',
+          dailyTime: eveningTime,
+          payload: 'low_stock:${item.itemId}',
+        );
+        print(
+          "Scheduled evening low stock notification for ${item.name} (ID: $eveningId)",
+        );
+      }
+    }
+
+    // Schedule notifications for current expiring items
     for (final item in expiringItems) {
-      final int baseId = (item.itemId.hashCode & 0x7fffffff) + 100000;
+      final int morningId = (item.itemId.hashCode & 0x7fffffff) + 100000;
+      final int eveningId = morningId + 1;
 
-      await notificationService.scheduleDaily(
-        id: baseId, // morning
-        title: 'Expiring soon: ${item.name}',
-        body: '${item.name} is expiring soon (${item.expireDate}).',
-        dailyTime: morningTime,
-        payload: 'expiring_soon:${item.itemId}',
-      );
+      if (!scheduledIds.contains(morningId)) {
+        await notificationService.scheduleDaily(
+          id: morningId,
+          title: 'Expiring soon: ${item.name}',
+          body: '${item.name} is expiring soon (${item.expireDate}).',
+          dailyTime: morningTime,
+          payload: 'expiring_soon:${item.itemId}',
+        );
+        print(
+          "Scheduled morning expiring notification for ${item.name} (ID: $morningId)",
+        );
+      }
 
-      await notificationService.scheduleDaily(
-        id: baseId + 1, // evening
-        title: 'Expiring soon: ${item.name}',
-        body: 'Use ${item.name} before it expires.',
-        dailyTime: eveningTime,
-        payload: 'expiring_soon:${item.itemId}',
-      );
+      if (!scheduledIds.contains(eveningId)) {
+        await notificationService.scheduleDaily(
+          id: eveningId,
+          title: 'Expiring soon: ${item.name}',
+          body: 'Use ${item.name} before it expires.',
+          dailyTime: eveningTime,
+          payload: 'expiring_soon:${item.itemId}',
+        );
+        print(
+          "Scheduled evening expiring notification for ${item.name} (ID: $eveningId)",
+        );
+      }
     }
   }
 

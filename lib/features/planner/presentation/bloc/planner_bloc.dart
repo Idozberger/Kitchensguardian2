@@ -254,7 +254,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
         await NotificationService().scheduleMealPlanReminders(
           mergedMealPlanEntities,
         );
-        await Future.delayed(Duration(seconds: 500));
+        await Future.delayed(Duration(milliseconds: 500));
         add(GetDateBasedPlans(state.startDate ?? formatDate(DateTime.now())));
       },
     );

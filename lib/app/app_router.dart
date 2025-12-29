@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/core/dialogs/logout.dart';
 import 'package:foodkitchen/core/dialogs/not_found_404.dart';
 import 'package:foodkitchen/features/auth/data/model/user_model.dart';
@@ -181,7 +184,9 @@ final GoRouter router = GoRouter(
       name: Routes.generateRecipesDetails,
       path: Routes.generateRecipesDetails,
       pageBuilder: (context, state) {
+        log("Recipe is in progress: []");
         final Map<String, dynamic> data = state.extra as Map<String, dynamic>;
+        log("Recipe is in progress: [${data["meal_type_entity"]}]");
         return buildPage(
           state.pageKey,
           RecipesDetailsPage(

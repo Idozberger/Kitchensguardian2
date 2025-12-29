@@ -3,12 +3,13 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
+import 'package:foodkitchen/features/history/domain/entities/scan_item_entity.dart';
 import 'package:foodkitchen/features/history/presentation/widgets/history_item_details.dart';
 
 class HistoryListTile extends StatefulWidget {
   final String title;
   final String date;
-  final List<String> details;
+  final List<ScanItemEntity> details;
 
   const HistoryListTile({
     super.key,

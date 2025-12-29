@@ -20,6 +20,7 @@ final class PlannerState {
   final String successMessage;
   final int mealTypeSelectedIndex;
   final DateTime? selectedDate;
+
   const PlannerState({
     this.recipes,
     this.favouriteRecipes,

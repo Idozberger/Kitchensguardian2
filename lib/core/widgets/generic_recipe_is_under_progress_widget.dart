@@ -73,7 +73,7 @@ class RecipeInProgressNotification extends StatelessWidget {
                     context.pushNamed(
                       Routes.generateRecipesDetails,
                       extra: {
-                        "meal_type_entity": RecipeEntity,
+                        "meal_type_entity": recipeEntity,
                         "is_plan": false,
                         "is_edit": false,
                       },

@@ -56,10 +56,6 @@ class _PlannerPageState extends State<PlannerPage> {
     _plannerBloc.add(
       GetDateRangeEvent(kitchenId: _userCubit.state.activeKitchenId),
     );
-    await Future.delayed(Duration(seconds: 4));
-    _plannerBloc.add(
-      GetAllWeeklyPlansEvent(_userCubit.state.activeKitchenId, null),
-    );
   }
 
   String formatDateOnView(String inputDate) {

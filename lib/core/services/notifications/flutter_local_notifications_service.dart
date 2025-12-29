@@ -248,13 +248,17 @@ class NotificationService {
   Future<void> scheduleMealPlanReminders(
     List<MergedRecipePlanEntity> plans,
   ) async {
-    await cancelAllNotifications();
-
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final tomorrow = today.add(const Duration(days: 1));
 
-    int notificationId = 1000;
+    int notificationId = plans.first.breakfast != null
+        ? plans.first.breakfast!.date.hashCode & 0x7fffffff
+        : plans.first.lunch != null
+        ? plans.first.lunch!.date.hashCode & 0x7fffffff
+        : plans.first.dinner != null
+        ? plans.first.dinner!.date.hashCode & 0x7fffffff
+        : 0;
 
     // Helper: Get missing ingredients as bullet list
 

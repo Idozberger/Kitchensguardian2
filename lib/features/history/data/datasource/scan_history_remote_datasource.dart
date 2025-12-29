@@ -18,9 +18,8 @@ class ScanHistoryRemoteDatasourceImpl implements ScanHistoryRemoteDatasource {
     required String pageNumber,
   }) async {
     try {
-      final response = await dio.get(
-        "${AppConstants.getScanHistory}?page=$pageNumber",
-      );
+      final response = await dio.get("${AppConstants.getScanHistory}?page=");
+
       if (response.statusCode != 200 && response.statusCode != 201) {
         final data = response.data is String
             ? jsonDecode(response.data)

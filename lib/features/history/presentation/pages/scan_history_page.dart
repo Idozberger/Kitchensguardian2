@@ -39,9 +39,7 @@ class _ScanHistoryPageState extends State<ScanHistoryPage> {
       if (_scrollController.position.pixels ==
               _scrollController.position.maxScrollExtent &&
           !isFetchingMore &&
-          !_scanHistoryCubit.state.isLoading) {
-        _loadNextPage();
-      }
+          !_scanHistoryCubit.state.isLoading) {}
     });
   }
 
@@ -51,23 +49,6 @@ class _ScanHistoryPageState extends State<ScanHistoryPage> {
       await _scanHistoryCubit.fetchHistory(pageNumber: pageNumber);
     } catch (e, st) {
       debugPrint('Error fetching history: $e\n$st');
-    }
-  }
-
-  Future<void> _loadNextPage() async {
-    if (_isDisposed || isFetchingMore) return;
-
-    isFetchingMore = true;
-    try {
-      pageNumber++;
-      await _fetchHistory(pageNumber.toString());
-    } catch (e, st) {
-      debugPrint('Error loading next page: $e\n$st');
-    } finally {
-      if (!_isDisposed) {
-        await Future.delayed(const Duration(seconds: 3));
-        isFetchingMore = false;
-      }
     }
   }
 
@@ -109,11 +90,7 @@ class _ScanHistoryPageState extends State<ScanHistoryPage> {
                             child: HistoryListTile(
                               title: "Scanned Receipt",
                               date: formatDate(historyData.scannedAt),
-                              details: historyData.items
-                                  .map(
-                                    (e) => "${e.name} - ${e.amount} ${e.unit}",
-                                  )
-                                  .toList(),
+                              details: historyData.items,
                             ),
                           );
                         } else {
@@ -129,17 +106,6 @@ class _ScanHistoryPageState extends State<ScanHistoryPage> {
                       },
                     ),
                   ),
-                  if (pageNumber == 1)
-                    GenericButtonWidget(
-                      onPressed: () async {
-                        if (pageNumber > 11) {
-                          await _fetchHistory((pageNumber + 1).toString());
-                        } else {
-                          AppToast.show("No more data", ToastType.info);
-                        }
-                      },
-                      text: "Load More",
-                    ),
                 ],
               ),
             ),
