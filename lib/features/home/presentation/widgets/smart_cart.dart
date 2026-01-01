@@ -40,10 +40,7 @@ class SmartCartTile extends StatelessWidget {
           Visibility(visible: isGenerated, child: _preview(context)),
           Visibility(visible: isGenerated == false, child: _noItems(context)),
           gap(height: 12),
-          GenericButtonWidget(
-            text: "Generate Grocery List",
-            onPressed: onGenerate,
-          ),
+          GenericButtonWidget(text: "See More", onPressed: onGenerate),
         ],
       ),
     );

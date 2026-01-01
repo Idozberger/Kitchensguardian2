@@ -155,7 +155,7 @@ class _HomePageState extends State<HomePage> {
   void _handleGeneratePressed() {
     final state = _homeBloc.state;
 
-    if (_generatedRecipes && state.groceryList.isNotEmpty) {
+    if (state.groceryList.isNotEmpty) {
       context.push(Routes.smartCart);
     }
 

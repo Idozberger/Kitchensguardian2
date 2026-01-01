@@ -209,7 +209,7 @@ class _PlannerPageState extends State<PlannerPage> {
       builder: (context, state) {
         return Scaffold(
           backgroundColor: const Color(0xffF9F9F9),
-          body: state.isLoading
+          body: state.loadingPlans
               ? Center(child: Lottie.asset(AppAssets.loader))
               : SafeArea(
                   child: Padding(

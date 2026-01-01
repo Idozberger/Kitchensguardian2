@@ -230,7 +230,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
   ) async {
     if (event.kitchenId.isEmpty) return;
 
-    emit(state.copyWith(isLoading: true));
+    emit(state.copyWith(loadingPlans: true));
 
     final res = await _getAllPlans(
       GetAllPlansParams(kitchenId: event.kitchenId),
@@ -238,7 +238,9 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
 
     await res.fold(
       (failure) {
-        emit(state.copyWith(errorMessage: failure.message, isLoading: false));
+        emit(
+          state.copyWith(errorMessage: failure.message, loadingPlans: false),
+        );
       },
       (getAllWeeklyPlans) async {
         List<MergedRecipePlanEntity> mergedMealPlanEntities =
@@ -247,7 +249,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
         emit(
           state.copyWith(
             getAllWeeklyPlans: mergedMealPlanEntities,
-            isLoading: false,
+            loadingPlans: false,
           ),
         );
         log("start date : ${state.startDate}");
@@ -309,7 +311,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     DeletePlanFromRemoteDbEvent event,
     Emitter<PlannerState> emit,
   ) async {
-    emit(state.copyWith(isLoading: true));
+    emit(state.copyWith(isLoading: true, loadingPlans: true));
 
     final res = await _deletePlanRemoteDb(
       DeletePlanRemoteDbParams(
@@ -329,7 +331,13 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
             ),
           );
         });
-        emit(state.copyWith(errorMessage: failure.message, isLoading: false));
+        emit(
+          state.copyWith(
+            errorMessage: failure.message,
+            isLoading: false,
+            loadingPlans: false,
+          ),
+        );
       },
       (successMessage) async {
         await Future.delayed(Duration(seconds: 4));
@@ -341,7 +349,13 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
             ),
           );
         });
-        emit(state.copyWith(successMessage: successMessage, isLoading: false));
+        emit(
+          state.copyWith(
+            successMessage: successMessage,
+            isLoading: false,
+            loadingPlans: false,
+          ),
+        );
       },
     );
   }
