@@ -1,10 +1,12 @@
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/services/fcm/fcm_service.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
+import 'package:foodkitchen/features/dashboard/domain/usecases/get_consumption_confirmation_pending.dart';
 import 'package:foodkitchen/features/dashboard/domain/usecases/get_kitchen_members.dart';
 import 'package:foodkitchen/features/dashboard/domain/usecases/kick_member.dart';
 import 'package:foodkitchen/features/dashboard/domain/usecases/make_cohost.dart';
@@ -18,7 +20,8 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   final GetKitchenMembers _getKitchenMembers;
   final MakeCohost _makeCohost;
   final KickMember _kickMember;
-  // ignore: unused_field
+  final GetConsumptionConfirmationPendingUsecase
+  _getConsumptionConfirmationPending;
   final KitchenBloc _kitchenBloc;
   final UserCubit _userCubit;
   DashboardBloc({
@@ -27,11 +30,14 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     required KickMember kickMember,
     required KitchenBloc kitchenBloc,
     required UserCubit userCubit,
+    required GetConsumptionConfirmationPendingUsecase
+    getConsumptionConfirmationPending,
   }) : _getKitchenMembers = getMembers,
        _makeCohost = makeCohost,
        _kickMember = kickMember,
        _kitchenBloc = kitchenBloc,
        _userCubit = userCubit,
+       _getConsumptionConfirmationPending = getConsumptionConfirmationPending,
 
        super(DashboardInitial()) {
     on<GetKitchenMembersEvent>(_onGetDashboardMembers);
@@ -39,7 +45,42 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     on<KickMemberEvent>(_onKickMemberEvent);
     on<ApproveRequestEvent>(_onApproveRequestEvent);
     on<DeclineRequestEvent>(_onDeclineRequestEvent);
-    // on<DeclineRequest>(_onDeclineRequest);
+    on<GetConsumptionConfirmationPendingEvent>(
+      _onGetConsumptionConfirmationPending,
+    );
+  }
+
+  Future<void> _onGetConsumptionConfirmationPending(
+    GetConsumptionConfirmationPendingEvent event,
+    Emitter<DashboardState> emit,
+  ) async {
+    emit(DashboardLoading());
+
+    final res = await _getConsumptionConfirmationPending(
+      GetConsumptionConfirmationPendingUsecaseParams(
+        kitchenId: event.kitchenId,
+      ),
+    );
+
+    res.fold((failure) => emit(DashboardFailure(failure.message)), (
+      comsumptionConfirmationPending,
+    ) {
+      final currentState = state;
+
+      if (currentState is DashboardLoaded) {
+        emit(
+          currentState.copyWith(
+            comsumptionConfirmationPending: comsumptionConfirmationPending,
+          ),
+        );
+      } else {
+        emit(
+          DashboardLoaded(
+            comsumptionConfirmationPending: comsumptionConfirmationPending,
+          ),
+        );
+      }
+    });
   }
 
   Future<void> _onGetDashboardMembers(
@@ -47,12 +88,19 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     Emitter<DashboardState> emit,
   ) async {
     emit(DashboardLoading());
+
     final res = await _getKitchenMembers(
       GetKitchenMembersParams(kitchenId: event.activeKitchenId),
     );
 
     res.fold((failure) => emit(DashboardFailure(failure.message)), (members) {
-      emit(DashboardLoaded(members));
+      final currentState = state;
+
+      if (currentState is DashboardLoaded) {
+        emit(currentState.copyWith(kitchenMembers: members));
+      } else {
+        emit(DashboardLoaded(kitchenMembers: members));
+      }
     });
   }
 

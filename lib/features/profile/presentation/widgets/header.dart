@@ -71,11 +71,18 @@ class ProfileHeader extends StatelessWidget {
                 children: [
                   BlocBuilder<PlannerBloc, PlannerState>(
                     builder: (_, state) {
+                      final int totalMeals = state.getAllWeeklyPlans
+                          .map(
+                            (e) =>
+                                (e.breakfast != null ? 1 : 0) +
+                                (e.lunch != null ? 1 : 0) +
+                                (e.dinner != null ? 1 : 0),
+                          )
+                          .fold(0, (a, b) => a + b);
+
                       return ProfileStatTile(
                         title: "Meals Planned",
-                        value: state.getAllWeeklyPlans.isEmpty
-                            ? "None"
-                            : state.getAllWeeklyPlans.length.toString(),
+                        value: totalMeals == 0 ? "None" : totalMeals.toString(),
                       );
                     },
                   ),

@@ -7,6 +7,11 @@ final class PantryAddItemEvent extends PantryEvent {
   PantryAddItemEvent({required this.pantry});
 }
 
+final class PantryAddScannedItemEvent extends PantryEvent {
+  final Pantry pantry;
+  PantryAddScannedItemEvent({required this.pantry});
+}
+
 final class GetPantryItemsEvent extends PantryEvent {
   final String kitchenId;
   GetPantryItemsEvent({required this.kitchenId});

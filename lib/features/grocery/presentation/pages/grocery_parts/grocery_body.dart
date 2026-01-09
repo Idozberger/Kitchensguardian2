@@ -200,6 +200,7 @@ class _GroceryBodyState extends State<GroceryBody> {
                       );
                     },
                   ),
+                SizedBox(height: h(12)),
               ],
             ),
     );

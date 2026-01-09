@@ -8,6 +8,8 @@ import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/services/firebase_messenging/firebase_messenging_service.dart';
+import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_bloc.dart';
+import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_event.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/drawer.dart';
 import 'package:foodkitchen/features/grocery/presentation/pages/grocery_page.dart';
@@ -27,11 +29,17 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   int _selectedIndex = 0;
   late UserCubit userCubit;
+  late DashboardBloc dashboardBloc;
   @override
   void initState() {
     userCubit = context.read<UserCubit>();
+    dashboardBloc = context.read<DashboardBloc>();
     _initializeFirebaseMessaging();
-
+    dashboardBloc.add(
+      GetConsumptionConfirmationPendingEvent(
+        kitchenId: userCubit.state.activeKitchenId,
+      ),
+    );
     super.initState();
   }
 

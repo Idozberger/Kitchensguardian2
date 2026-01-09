@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
@@ -16,6 +17,9 @@ abstract interface class DashboardRemoteDatasource {
   Future<String> kickMember({
     required String kitchenId,
     required String memberId,
+  });
+  Future<List<Map<String, dynamic>>> getConsumptionConfirmationPending({
+    required String kitchenId,
   });
 }
 
@@ -94,6 +98,32 @@ class DashboardRemoteDatasourceImpl implements DashboardRemoteDatasource {
         throw message;
       }
       return response.data["message"];
+    } on DioException catch (e) {
+      throw dio.handleError(e);
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getConsumptionConfirmationPending({
+    required String kitchenId,
+  }) async {
+    try {
+      final response = await dio.get(
+        "${AppConstants.consumptionConfirmationPending}?kitchen_id=$kitchenId",
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+
+        final message = data["error"];
+        throw message;
+      }
+      final data = response.data is String
+          ? jsonDecode(response.data)
+          : response.data;
+      return List<Map<String, dynamic>>.from(data['confirmations']);
     } on DioException catch (e) {
       throw dio.handleError(e);
     }

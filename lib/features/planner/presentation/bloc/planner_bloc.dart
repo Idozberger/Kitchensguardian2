@@ -253,9 +253,11 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
           ),
         );
         log("start date : ${state.startDate}");
-        await NotificationService().scheduleMealPlanReminders(
-          mergedMealPlanEntities,
-        );
+        if (getAllWeeklyPlans.isNotEmpty) {
+          await NotificationService().scheduleMealPlanReminders(
+            mergedMealPlanEntities,
+          );
+        }
         await Future.delayed(Duration(milliseconds: 500));
         add(GetDateBasedPlans(state.startDate ?? formatDate(DateTime.now())));
       },

@@ -51,7 +51,7 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
         AppConstants.addPantryItem,
         data: pantryModel.toJson(),
       );
-
+      log("add pantry status: ${response}");
       if (response.statusCode != 200 && response.statusCode != 201) {
         final data = response.data is String
             ? jsonDecode(response.data)

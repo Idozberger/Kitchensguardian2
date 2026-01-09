@@ -109,7 +109,12 @@ class _PlannerPageState extends State<PlannerPage> {
               );
             }
           }
-
+          _plannerBloc.add(
+            UpdateTypeSelectedAndDateEvent(
+              index: 0,
+              date: formatStringDateToMeetBackendDate(plan.date),
+            ),
+          );
           context.push(Routes.editMeal);
         },
       ),
@@ -218,7 +223,7 @@ class _PlannerPageState extends State<PlannerPage> {
                       listener: (context, state) {},
                       builder: (_, state) {
                         final plan = state.dateBasedPlan;
-                        log("datebase: $plan");
+
                         final todayOnly = DateTime(
                           DateTime.now().year,
                           DateTime.now().month,

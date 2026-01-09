@@ -17,7 +17,6 @@ import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_state
 import 'package:foodkitchen/features/dashboard/presentation/pages/user_information_page.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lottie/lottie.dart';
 
 class NotificationPage extends StatefulWidget {
   const NotificationPage({super.key});

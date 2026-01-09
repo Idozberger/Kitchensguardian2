@@ -40,3 +40,9 @@ final class DeclineRequestEvent extends DashboardEvent {
     required this.kitchenId,
   });
 }
+
+final class GetConsumptionConfirmationPendingEvent extends DashboardEvent {
+  final String kitchenId;
+
+  GetConsumptionConfirmationPendingEvent({required this.kitchenId});
+}

@@ -115,7 +115,7 @@ class GeneratedRecipeSection extends StatelessWidget {
           context.read<PlannerBloc>().add(
             DeletePlanFromRemoteDbEvent(mealPlanId: meal.mealplanId),
           );
-          await Future.delayed(Duration(seconds: 2));
+          await Future.delayed(Duration(seconds: 6));
           AppToast.show("Item removed", ToastType.success);
         }
 

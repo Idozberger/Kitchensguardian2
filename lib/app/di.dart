@@ -26,6 +26,7 @@ import 'package:foodkitchen/core/common/domain/usecase/get_current_user.dart';
 import 'package:foodkitchen/features/dashboard/data/datasource/dashboard_remote_datasource.dart';
 import 'package:foodkitchen/features/dashboard/data/repository/dashboard_repository_impl.dart';
 import 'package:foodkitchen/features/dashboard/domain/repository/dashboard_repository.dart';
+import 'package:foodkitchen/features/dashboard/domain/usecases/get_consumption_confirmation_pending.dart';
 import 'package:foodkitchen/features/dashboard/domain/usecases/get_kitchen_members.dart';
 import 'package:foodkitchen/features/dashboard/domain/usecases/kick_member.dart';
 import 'package:foodkitchen/features/dashboard/domain/usecases/make_cohost.dart';
@@ -289,12 +290,15 @@ void _initDashboard() async {
     ..registerFactory(() => GetKitchenMembers(sl()))
     ..registerFactory(() => MakeCohost(sl()))
     ..registerFactory(() => KickMember(sl()))
+    ..registerFactory(() => GetConsumptionConfirmationPendingUsecase(sl()))
     // Bloc
     ..registerLazySingleton(
       () => DashboardBloc(
         getMembers: GetKitchenMembers(sl()),
         makeCohost: MakeCohost(sl()),
         kickMember: KickMember(sl()),
+        getConsumptionConfirmationPending:
+            GetConsumptionConfirmationPendingUsecase(sl()),
         userCubit: sl(),
         kitchenBloc: sl(),
       ),

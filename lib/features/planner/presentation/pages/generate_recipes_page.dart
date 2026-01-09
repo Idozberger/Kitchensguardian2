@@ -142,7 +142,6 @@ class _GenerateRecipesPageState extends State<GenerateRecipesPage> {
           CircularIconButton(
             iconAsset: AppAssets.backArrowiOS,
             onTap: () {
-              plannerBloc.add(GetDateBasedPlans(formatDate(DateTime.now())));
               context.pop();
             },
           ),

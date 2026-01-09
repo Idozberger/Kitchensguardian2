@@ -1,4 +1,5 @@
 import 'package:foodkitchen/core/error/failures.dart';
+import 'package:foodkitchen/features/dashboard/domain/entities/consumption_confirmation.dart';
 import 'package:foodkitchen/features/dashboard/domain/entities/member.dart';
 import 'package:fpdart/fpdart.dart';
 
@@ -14,4 +15,6 @@ abstract interface class DashboardRepository {
     required String kitchenId,
     required String memberId,
   });
+  Future<Either<Failure, List<ConsumptionConfirmation>>>
+  getConsumptionConfirmationPending({required String kitchenId});
 }

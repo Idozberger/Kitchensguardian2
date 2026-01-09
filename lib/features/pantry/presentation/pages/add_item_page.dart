@@ -154,9 +154,9 @@ class _AddItemPageState extends State<AddItemPage> {
                 _addMoreButton(context),
                 SizedBox(height: h(22)),
                 GenericButtonWidget(
-                  isLoading: state is PantryLoading,
+                  isLoading: state is SubmittingItemLoading,
                   text: "Add Item",
-                  onPressed: state is PantryLoading
+                  onPressed: state is SubmittingItemLoading
                       ? () {}
                       : () async {
                           for (final item in _items) {

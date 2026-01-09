@@ -61,4 +61,8 @@ class AppConstants {
   static const String getUserProfile = "/api/get_user_profile";
   static const String suggestRecipe =
       "/api/kitchen/suggest_recipes_expiring_items";
+
+  //// consumption endpoints
+  static const String consumptionConfirmationPending =
+      "/api/consumption/confirmations/pending";
 }

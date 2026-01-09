@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
@@ -5,7 +7,6 @@ import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
-import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/date_format_to_string.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
@@ -91,13 +92,6 @@ class _EditMealPageState extends State<EditMealPage>
       }
     }
 
-    plannerBloc.add(
-      UpdateTypeSelectedAndDateEvent(
-        index: 0, // breakfast
-        date: startDate,
-      ),
-    );
-
     setState(() => isLoading = false);
   }
 
@@ -136,6 +130,7 @@ class _EditMealPageState extends State<EditMealPage>
         }
       },
       builder: (_, state) {
+        log("meal type index: ${state.mealTypeSelectedIndex}");
         return PopScope(
           canPop: false,
           onPopInvokedWithResult: (_, _) async =>
@@ -143,13 +138,7 @@ class _EditMealPageState extends State<EditMealPage>
           child: Scaffold(
             backgroundColor: const Color(0xffF9F9F9),
             appBar: _buildAppBar(context),
-            body: state.isLoading
-                ? Center(
-                    child: CircularProgressIndicator(
-                      color: AppColors.primaryColor,
-                    ),
-                  )
-                : isLoading
+            body: isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : SafeArea(
                     child: SingleChildScrollView(
@@ -157,11 +146,15 @@ class _EditMealPageState extends State<EditMealPage>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          MealTypeSelector(
-                            selectedIndex: state.mealTypeSelectedIndex,
-                            onSelected: (index) => plannerBloc.add(
-                              UpdateTypeSelectedAndDateEvent(index: index),
-                            ),
+                          BlocBuilder<PlannerBloc, PlannerState>(
+                            builder: (context, state) {
+                              return MealTypeSelector(
+                                selectedIndex: state.mealTypeSelectedIndex,
+                                onSelected: (index) => plannerBloc.add(
+                                  UpdateTypeSelectedAndDateEvent(index: index),
+                                ),
+                              );
+                            },
                           ),
                           _buildGenerateRecipeButton(),
                           _buildMealPlanContent(state),
@@ -280,6 +273,7 @@ class _EditMealPageState extends State<EditMealPage>
     return Padding(
       padding: gapOnly(top: 20),
       child: GenericButtonWidget(
+        isLoading: isLoading,
         text: "Generate Recipe",
         onPressed: () {
           context.pushNamed(

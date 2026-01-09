@@ -84,13 +84,35 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
     on<CartItemsEvent>(_onCartItem);
     on<DeleteItemEvent>(_onDeleteItem);
     on<UpdateItemEvent>(_onUpdateItem);
+    on<PantryAddScannedItemEvent>(_addScanItemsToPantry);
+  }
+
+  Future<void> _addScanItemsToPantry(
+    PantryAddScannedItemEvent event,
+    Emitter<PantryState> emit,
+  ) async {
+    emit(PantryLoading());
+
+    final res = await _addPantryItem(AddPantryItemParams(pantry: event.pantry));
+
+    res.fold((failure) => emit(PantryFailure(failure.message)), (
+      message,
+    ) async {
+      _homeBloc.add(
+        GetPantriesItemsEventForHome(kitchenId: event.pantry.kitchenId),
+      );
+
+      add(GetPantryItemsEvent(kitchenId: event.pantry.kitchenId));
+
+      emit(PantrySuccess(message));
+    });
   }
 
   Future<void> _onAddPantryItem(
     PantryAddItemEvent event,
     Emitter<PantryState> emit,
   ) async {
-    emit(PantryLoading());
+    emit(SubmittingItemLoading());
 
     final res = await _addPantryItem(AddPantryItemParams(pantry: event.pantry));
 
@@ -111,7 +133,6 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
     GetPantryItemsEvent event,
     Emitter<PantryState> emit,
   ) async {
-    print("PantryBloc: ${event.kitchenId}");
     emit(PantryLoading());
 
     final res = await _getPantryItems(

@@ -273,10 +273,45 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
             ),
 
             SizedBox(height: h(48)),
-
             GenericButtonWidget(
-              onPressed: () {
-                context.pop();
+              onPressed: () async {
+                PermissionStatus status = await Permission.camera.status;
+
+                if (!status.isGranted) {
+                  final result = await Permission.camera.request();
+                  if (!result.isGranted) {
+                    if (result.isPermanentlyDenied) {
+                      openAppSettings();
+                    }
+                    return;
+                  }
+                }
+
+                final documentScanner = DocumentScanner(
+                  options: DocumentScannerOptions(
+                    documentFormat: DocumentFormat.jpeg,
+                    mode: ScannerMode.base,
+                    pageLimit: 1,
+                    isGalleryImport: false,
+                  ),
+                );
+
+                try {
+                  final result = await documentScanner.scanDocument();
+
+                  if (result.images.isNotEmpty) {
+                    final image = result.images.first;
+
+                    context.pushReplacementNamed(
+                      Routes.capturedImageDetails,
+                      extra: {"image_path": image},
+                    );
+                  }
+                } catch (e) {
+                  debugPrint("Document scan error: $e");
+                } finally {
+                  documentScanner.close();
+                }
               },
               text: "Retake",
             ),
@@ -436,7 +471,7 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
       items: pantryItems,
     );
 
-    pantryBloc.add(PantryAddItemEvent(pantry: pantryModel));
+    pantryBloc.add(PantryAddScannedItemEvent(pantry: pantryModel));
   }
 
   Widget _buildPantryItemForm(
@@ -723,7 +758,10 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
                   if (result.images.isNotEmpty) {
                     final image = result.images.first;
                     setState(() {});
-                    pantryBloc.add(ScanReceiptEvent(filePath: image));
+                    context.pushReplacementNamed(
+                      Routes.capturedImageDetails,
+                      extra: {"image_path": image},
+                    );
                   }
                 } catch (e) {
                   debugPrint("Document scan error: $e");
