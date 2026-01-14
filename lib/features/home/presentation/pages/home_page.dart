@@ -34,122 +34,17 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _userCubit = context.read<UserCubit>();
     _homeBloc = context.read<HomeBloc>();
-
-    _loadData();
   }
 
-  void _loadData() async {
-    final kitchenId = _userCubit.state.activeKitchenId;
-    if (kitchenId.isEmpty) return;
+  void _handleToastMessage(HomeState state) {
+    final successMsg = state.successMessage;
+    final errorMsg = state.errorMessage;
 
-    _homeBloc
-      ..add(GetAllWeeklyPlansEventForHome())
-      ..add(GetUserStorageAreaEvent(kitchenId))
-      ..add(GetRecipeSuggestionEvent(kitchenId))
-      ..add(GetPantriesItemsEventForHome(kitchenId: kitchenId))
-      ..add(GenerateGroceryList());
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xffF9F9F9),
-      body: BlocBuilder<UserCubit, UserState>(
-        builder: (_, userState) {
-          final hasKitchen = userState.activeKitchenId.isNotEmpty;
-
-          return BlocBuilder<HomeBloc, HomeState>(
-            builder: (_, state) {
-              return SingleChildScrollView(
-                child: MultiBlocListener(
-                  listeners: [
-                    BlocListener<HomeBloc, HomeState>(
-                      listenWhen: (prev, curr) =>
-                          prev.successMessage != curr.successMessage ||
-                          prev.errorMessage != curr.errorMessage,
-                      listener: (_, state) {
-                        final msg = state.successMessage ?? state.errorMessage;
-                        final type = state.successMessage != null
-                            ? ToastType.success
-                            : ToastType.error;
-
-                        if (msg != null) AppToast.show(msg, type);
-                      },
-                    ),
-                  ],
-                  child: _buildContent(
-                    userState: userState,
-                    homeState: state,
-                    hasKitchen: hasKitchen,
-                  ),
-                ),
-              );
-            },
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildContent({
-    required UserState userState,
-    required HomeState homeState,
-    required bool hasKitchen,
-  }) {
-    debugPrint("${userState.userStorageAreas}");
-    if (!hasKitchen) return const NoKitchenView();
-
-    if (homeState.isLoading) {
-      return Center(
-        child: Padding(
-          padding: gapOnly(top: MediaQuery.of(context).size.height * 0.14),
-          child: Lottie.asset(AppAssets.loader),
-        ),
-      );
+    if (successMsg != null) {
+      AppToast.show(successMsg, ToastType.success);
+    } else if (errorMsg != null) {
+      AppToast.show(errorMsg, ToastType.error);
     }
-
-    return Column(
-      children: [
-        LowStockAndExpiryBanner(),
-        if (userState.recipeEntity.isNotEmpty)
-          RecipeInProgressNotification(
-            padding: gapOnly(left: 20, right: 20, top: 14, bottom: 0),
-            recipeEntity: userState.recipeEntity.first,
-          ),
-
-        AnimatedSwitcher(
-          duration: const Duration(milliseconds: 500),
-          switchInCurve: Curves.easeOut,
-          switchOutCurve: Curves.easeIn,
-          transitionBuilder: (child, animation) {
-            final offsetAnimation = Tween<Offset>(
-              begin: const Offset(1.0, 0.0),
-              end: Offset.zero,
-            ).animate(animation);
-
-            return SlideTransition(
-              position: offsetAnimation,
-              child: FadeTransition(opacity: animation, child: child),
-            );
-          },
-          child: userState.userStorageAreas.isNotEmpty
-              ? KitchenHomeView(
-                  key: ValueKey(
-                    "kitchen_view_${userState.userStorageAreas.length}",
-                  ),
-                  state: homeState,
-                  isGeneratedRecipes: _generatedRecipes,
-                  onGeneratePressed: _handleGeneratePressed,
-                )
-              : StorageAreasSection(
-                  key: ValueKey(
-                    "storage_view_${userState.userStorageAreas.length}",
-                  ),
-                  state: userState,
-                ),
-        ),
-      ],
-    );
   }
 
   void _handleGeneratePressed() {
@@ -157,9 +52,133 @@ class _HomePageState extends State<HomePage> {
 
     if (state.groceryList.isNotEmpty) {
       context.push(Routes.smartCart);
+      return;
     }
 
     _homeBloc.add(GenerateGroceryList());
     setState(() => _generatedRecipes = true);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF9F9F9),
+      body: BlocListener<HomeBloc, HomeState>(
+        listenWhen: (prev, curr) =>
+            prev.successMessage != curr.successMessage ||
+            prev.errorMessage != curr.errorMessage,
+        listener: (_, state) => _handleToastMessage(state),
+        child: BlocBuilder<UserCubit, UserState>(
+          builder: (_, userState) {
+            final hasKitchen = userState.activeKitchenId.isNotEmpty;
+
+            return BlocBuilder<HomeBloc, HomeState>(
+              builder: (_, homeState) {
+                return _buildBody(
+                  userState: userState,
+                  homeState: homeState,
+                  hasKitchen: hasKitchen,
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBody({
+    required UserState userState,
+    required HomeState homeState,
+    required bool hasKitchen,
+  }) {
+    if (!hasKitchen) {
+      return const SingleChildScrollView(
+        physics: BouncingScrollPhysics(),
+        child: NoKitchenView(),
+      );
+    }
+
+    if (homeState.isLoading) {
+      return _buildLoadingView();
+    }
+
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      child: _buildContent(userState: userState, homeState: homeState),
+    );
+  }
+
+  Widget _buildLoadingView() {
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.only(
+          top: MediaQuery.of(context).size.height * 0.01,
+        ),
+        child: Lottie.asset(AppAssets.loader),
+      ),
+    );
+  }
+
+  Widget _buildContent({
+    required UserState userState,
+    required HomeState homeState,
+  }) {
+    final hasStorageAreas = userState.userStorageAreas.isNotEmpty;
+    final hasRecipeInProgress = userState.recipeEntity.isNotEmpty;
+
+    return Column(
+      children: [
+        const LowStockAndExpiryBanner(),
+        if (hasRecipeInProgress)
+          RecipeInProgressNotification(
+            padding: gapOnly(left: 20, right: 20, top: 14, bottom: 0),
+            recipeEntity: userState.recipeEntity.first,
+          ),
+        RepaintBoundary(
+          child: _buildAnimatedContent(
+            userState: userState,
+            homeState: homeState,
+            hasStorageAreas: hasStorageAreas,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAnimatedContent({
+    required UserState userState,
+    required HomeState homeState,
+    required bool hasStorageAreas,
+  }) {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 500),
+      switchInCurve: Curves.easeOut,
+      switchOutCurve: Curves.easeIn,
+      transitionBuilder: (child, animation) {
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(1.0, 0.0),
+            end: Offset.zero,
+          ).animate(animation),
+          child: FadeTransition(opacity: animation, child: child),
+        );
+      },
+      child: hasStorageAreas
+          ? KitchenHomeView(
+              key: ValueKey(
+                "kitchen_view_${userState.userStorageAreas.length}",
+              ),
+              state: homeState,
+              isGeneratedRecipes: _generatedRecipes,
+              onGeneratePressed: _handleGeneratePressed,
+            )
+          : StorageAreasSection(
+              key: ValueKey(
+                "storage_view_${userState.userStorageAreas.length}",
+              ),
+              state: userState,
+            ),
+    );
   }
 }

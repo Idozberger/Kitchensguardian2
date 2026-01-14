@@ -11,6 +11,8 @@ import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
+import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_bloc.dart';
+import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_event.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_bloc.dart';
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_event.dart';
@@ -356,6 +358,11 @@ class _KitchenPageState extends State<KitchenPage> {
                             );
 
                             kitchenBloc.add(SwitchKitchenEvent(kitchen));
+                            context.read<DashboardBloc>().add(
+                              GetConsumptionConfirmationPendingCountEvent(
+                                kitchenId: kitchen.kitchenId,
+                              ),
+                            );
                             await userCubit.getUserStorageArea(
                               kitchenId: kitchen.kitchenId,
                             );

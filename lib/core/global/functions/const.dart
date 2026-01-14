@@ -65,4 +65,8 @@ class AppConstants {
   //// consumption endpoints
   static const String consumptionConfirmationPending =
       "/api/consumption/confirmations/pending";
+  static const String consumptionConfirmationRespond =
+      "/api/consumption/confirmations/respond";
+  static const String consumptionConfirmationCount =
+      "/api/consumption/confirmations/count";
 }

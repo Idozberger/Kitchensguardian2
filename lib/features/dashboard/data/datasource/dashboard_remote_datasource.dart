@@ -18,9 +18,15 @@ abstract interface class DashboardRemoteDatasource {
     required String kitchenId,
     required String memberId,
   });
+  Future<String> respondConsumptionConfirmation({
+    required String confirmationId,
+    required String responseText,
+    required String actualQuantityRemaining,
+  });
   Future<List<Map<String, dynamic>>> getConsumptionConfirmationPending({
     required String kitchenId,
   });
+  Future<String> getConsumptionConfirmationCount({required String kitchenId});
 }
 
 class DashboardRemoteDatasourceImpl implements DashboardRemoteDatasource {
@@ -108,6 +114,7 @@ class DashboardRemoteDatasourceImpl implements DashboardRemoteDatasource {
     required String kitchenId,
   }) async {
     try {
+      log("comsumption confirmation pending: ");
       final response = await dio.get(
         "${AppConstants.consumptionConfirmationPending}?kitchen_id=$kitchenId",
       );
@@ -120,10 +127,64 @@ class DashboardRemoteDatasourceImpl implements DashboardRemoteDatasource {
         final message = data["error"];
         throw message;
       }
+      log("comsumption confirmation pending: ${response.data}");
       final data = response.data is String
           ? jsonDecode(response.data)
           : response.data;
       return List<Map<String, dynamic>>.from(data['confirmations']);
+    } on DioException catch (e) {
+      throw dio.handleError(e);
+    }
+  }
+
+  @override
+  Future<String> respondConsumptionConfirmation({
+    required String confirmationId,
+    required String responseText,
+    required String actualQuantityRemaining,
+  }) async {
+    try {
+      log("confirmatin id: $confirmationId");
+      final response = await dio.post(
+        AppConstants.consumptionConfirmationRespond,
+        data: {
+          "confirmation_id": confirmationId,
+          "response": responseText,
+          "actual_quantity_remaining": actualQuantityRemaining,
+        },
+      );
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+
+        final message = data["error"];
+        throw message;
+      }
+      return response.data["message"];
+    } on DioException catch (e) {
+      throw dio.handleError(e);
+    }
+  }
+
+  @override
+  Future<String> getConsumptionConfirmationCount({
+    required String kitchenId,
+  }) async {
+    try {
+      final response = await dio.get(
+        "${AppConstants.consumptionConfirmationCount}?kitchen_id=$kitchenId",
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+
+        final message = data["error"];
+        throw message;
+      }
+      return response.data["pending_count"].toString();
     } on DioException catch (e) {
       throw dio.handleError(e);
     }

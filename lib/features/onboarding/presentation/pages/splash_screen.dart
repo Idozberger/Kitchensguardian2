@@ -1,4 +1,4 @@
-import 'dart:async';
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,25 +20,33 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
-  late UserBloc userBloc;
-  late UserCubit userCubit;
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
+  late final UserBloc _userBloc;
+  late final UserCubit _userCubit;
+  late final AnimationController _animationController;
 
-  String fullText = "KITCHEN GUARDIAN";
-  List<bool> visibleLetters = [];
-  int _charIndex = 0;
-  Timer? _timer;
+  static const String _fullText = "KITCHEN GUARDIAN";
+  static const Duration _animationDuration = Duration(milliseconds: 1700);
 
   @override
   void initState() {
     super.initState();
-    userBloc = context.read<UserBloc>();
-    userCubit = context.read<UserCubit>();
 
-    getCurrentUser();
-    visibleLetters = List.filled(fullText.length, false);
-    _startTextAnimation();
+    _userBloc = context.read<UserBloc>();
+    _userCubit = context.read<UserCubit>();
 
+    _animationController = AnimationController(
+      vsync: this,
+      duration: _animationDuration,
+    )..forward();
+
+    _configureSystemUI();
+
+    _initializeApp();
+  }
+
+  void _configureSystemUI() {
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -46,111 +54,86 @@ class _SplashScreenState extends State<SplashScreen> {
         systemNavigationBarIconBrightness: Brightness.light,
       ),
     );
-
-    updatePlansStartDate();
   }
 
-  void _startTextAnimation() {
-    const duration = Duration(milliseconds: 100);
-    _timer = Timer.periodic(duration, (timer) {
-      if (_charIndex < fullText.length) {
-        setState(() {
-          visibleLetters[_charIndex] = true;
-          _charIndex++;
-        });
-      } else {
-        timer.cancel();
-      }
-    });
+  Future<void> _initializeApp() async {
+    await Future.wait([_getCurrentUser(), _updatePlansStartDate()]);
   }
 
-  Future<void> getCurrentUser() async {
-    userBloc.add(GetCurrentUser());
-    userCubit.updateActiveKitchenIdInvitationCodeAndRole(
+  Future<void> _getCurrentUser() async {
+    _userBloc.add(GetCurrentUser());
+    _userCubit.updateActiveKitchenIdInvitationCodeAndRole(
       activeKitchenId: "",
       invitationCode: "",
       role: "",
     );
   }
 
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
+  Future<void> _updatePlansStartDate() async {
+    try {
+      final sharedPreferences = await SharedPreferences.getInstance();
+      final endDateString = sharedPreferences.getString("end-date");
+
+      if (endDateString == null) return;
+
+      final today = _getStartOfDay(DateTime.now());
+      final endDate = parseDate(endDateString);
+
+      if (today.isAfter(endDate)) {
+        final newEndDate = today.add(const Duration(days: 3));
+        await Future.wait([
+          sharedPreferences.setString("start-date", formatDate(today)),
+          sharedPreferences.setString("end-date", formatDate(newEndDate)),
+        ]);
+      }
+    } catch (e) {
+      log('Error updating plans start date: $e');
+    }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: BlocConsumer<UserBloc, UserState>(
-        listener: (context, state) {
-          if (state is TokenExpired) {
-            showErrorSnackBar(
-              context,
-              "Your session has ended. You’ve been logged out, please sign in again!",
-            );
-            context.go(Routes.signIn);
-          } else if (state is NoInternet) {
-            showErrorSnackBar(context, "No Internet Connection");
-          } else if (state is UserInitial) {
-            context.go(Routes.onBoarding);
-          } else if (state is UserOnBoarded) {
-            context.go(Routes.signIn);
-          } else if (state is UserSuccess) {
-            context.go(Routes.kitchenSelection);
-          }
-        },
-        builder: (_, state) {
-          if (state is NoInternet) {
-            return Container(
-              width: double.infinity,
-              height: double.infinity,
-              color: Colors.white,
-              child: NoInternetDialog(
-                callback: getCurrentUser,
-                loading: state is UserLoading,
-              ),
-            );
-          }
-
-          return Container(
-            alignment: Alignment.center,
-            width: double.infinity,
-            height: double.infinity,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage(AppAssets.onBoardingBg),
-                fit: BoxFit.cover,
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(fullText.length, (index) {
-                final letter = fullText[index];
-                return AnimatedOpacity(
-                  opacity: visibleLetters[index] ? 1 : 0,
-                  duration: const Duration(milliseconds: 200),
-                  child: Text(
-                    letter,
-                    style: Theme.of(context).textTheme.headlineLarge!.copyWith(
-                      fontWeight: FontWeight.bold,
-                      fontSize: t(28),
-                      color: Colors.black87,
-                    ),
-                  ),
-                );
-              }),
-            ),
-          );
-        },
-      ),
-    );
+  DateTime _getStartOfDay(DateTime date) {
+    return DateTime(date.year, date.month, date.day);
   }
 
-  void showErrorSnackBar(BuildContext context, String message) {
-    rootScaffoldMessengerKey.currentState!.showSnackBar(
+  void _handleUserState(UserState state) {
+    if (!mounted) return;
+
+    switch (state.runtimeType) {
+      case TokenExpired:
+        _showErrorAndNavigate(
+          "Your session has ended. You've been logged out, please sign in again!",
+          Routes.signIn,
+        );
+        break;
+      case NoInternet:
+        _showError("No Internet Connection");
+        break;
+      case UserInitial:
+        context.go(Routes.onBoarding);
+        break;
+      case UserOnBoarded:
+        context.go(Routes.signIn);
+        break;
+      case UserSuccess:
+        context.go(Routes.kitchenSelection);
+        break;
+    }
+  }
+
+  void _showError(String message) {
+    _showSnackBar(message, Colors.red);
+  }
+
+  void _showErrorAndNavigate(String message, String route) {
+    _showSnackBar(message, Colors.red);
+    context.go(route);
+  }
+
+  void _showSnackBar(String message, Color backgroundColor) {
+    if (!mounted) return;
+
+    rootScaffoldMessengerKey.currentState?.showSnackBar(
       SnackBar(
-        key: UniqueKey(),
         content: Text(
           message,
           style: const TextStyle(
@@ -158,7 +141,7 @@ class _SplashScreenState extends State<SplashScreen> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        backgroundColor: Colors.red,
+        backgroundColor: backgroundColor,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         duration: const Duration(seconds: 3),
@@ -166,23 +149,113 @@ class _SplashScreenState extends State<SplashScreen> {
     );
   }
 
-  void updatePlansStartDate() async {
-    final today = DateTime(
-      DateTime.now().year,
-      DateTime.now().month,
-      DateTime.now().day,
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: BlocListener<UserBloc, UserState>(
+        listener: (context, state) => _handleUserState(state),
+        child: BlocBuilder<UserBloc, UserState>(
+          builder: (context, state) {
+            if (state is NoInternet) {
+              return _NoInternetView(
+                onRetry: _getCurrentUser,
+                isLoading: state is UserLoading,
+              );
+            }
+
+            return _SplashContent(
+              animationController: _animationController,
+              text: _fullText,
+            );
+          },
+        ),
+      ),
     );
+  }
+}
 
-    final sharedPreferences = await SharedPreferences.getInstance();
-    final getEndDate = sharedPreferences.getString("end-date");
-    if (getEndDate != null) {
-      DateTime endDate = parseDate(getEndDate);
+class _NoInternetView extends StatelessWidget {
+  final VoidCallback onRetry;
+  final bool isLoading;
 
-      if (today.isAfter(endDate)) {
-        sharedPreferences.setString("start-date", formatDate(today));
-        final endDate = today.add(Duration(days: 3));
-        sharedPreferences.setString("end-date", formatDate(endDate));
-      }
-    }
+  const _NoInternetView({required this.onRetry, required this.isLoading});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      color: Colors.white,
+      child: NoInternetDialog(callback: onRetry, loading: isLoading),
+    );
+  }
+}
+
+class _SplashContent extends StatelessWidget {
+  final AnimationController animationController;
+  final String text;
+
+  const _SplashContent({required this.animationController, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      alignment: Alignment.center,
+      width: double.infinity,
+      height: double.infinity,
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage(AppAssets.onBoardingBg),
+          fit: BoxFit.cover,
+        ),
+      ),
+      child: _AnimatedText(controller: animationController, text: text),
+    );
+  }
+}
+
+class _AnimatedText extends StatelessWidget {
+  final AnimationController controller;
+  final String text;
+
+  const _AnimatedText({required this.controller, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(text.length, (index) {
+        final delay = index / text.length;
+        final animation = Tween<double>(begin: 0, end: 1).animate(
+          CurvedAnimation(
+            parent: controller,
+            curve: Interval(
+              delay,
+              delay + (1 / text.length),
+              curve: Curves.easeIn,
+            ),
+          ),
+        );
+
+        return FadeTransition(
+          opacity: animation,
+          child: Text(
+            text[index],
+            style: Theme.of(context).textTheme.headlineLarge!.copyWith(
+              fontWeight: FontWeight.bold,
+              fontSize: t(28),
+              color: Colors.black87,
+            ),
+          ),
+        );
+      }),
+    );
   }
 }

@@ -17,4 +17,12 @@ abstract interface class DashboardRepository {
   });
   Future<Either<Failure, List<ConsumptionConfirmation>>>
   getConsumptionConfirmationPending({required String kitchenId});
+  Future<Either<Failure, String>> getConsumptionConfirmationCount({
+    required String kitchenId,
+  });
+  Future<Either<Failure, String>> respondConsumptionConfirmation({
+    required String confirmationId,
+    required String responseText,
+    required String actualQuantityRemaining,
+  });
 }

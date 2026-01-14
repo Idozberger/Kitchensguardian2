@@ -234,10 +234,12 @@ class _SignInPageState extends State<SignInPage> {
                             borderRadius: BorderRadius.circular(h(10)),
                           ),
                           child: (state is GoogleAuthLoading)
-                              ? Align(
-                                  alignment: Alignment.center,
-                                  child: CircularProgressIndicator(
-                                    color: AppColors.primaryColor,
+                              ? FittedBox(
+                                  child: Align(
+                                    alignment: Alignment.center,
+                                    child: CircularProgressIndicator(
+                                      color: AppColors.primaryColor,
+                                    ),
                                   ),
                                 )
                               : Row(

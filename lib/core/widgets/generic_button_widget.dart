@@ -51,6 +51,9 @@ class GenericButtonWidget extends StatelessWidget {
           : ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: color,
+                shape: borderRadius != null
+                    ? RoundedRectangleBorder(borderRadius: borderRadius!)
+                    : null,
                 disabledBackgroundColor: AppColors.disabledPrimaryColor,
               ),
               onPressed: isDisabled ? null : onPressed,

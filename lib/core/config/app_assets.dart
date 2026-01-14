@@ -80,6 +80,7 @@ class AppAssets {
 
   /////[DRAWERITEMS]
   static String favouriteSvg = "assets/svgs/favourite.svg";
+  static String consumptionPending = "assets/svgs/consumption_pending.svg";
   static String favouriteFilledSvg = "assets/svgs/favourite_filled.svg";
   static String myKitchenMember = "assets/svgs/add_kitchen_member.svg";
   static String kitchenSvg = "assets/svgs/kitchens.svg";

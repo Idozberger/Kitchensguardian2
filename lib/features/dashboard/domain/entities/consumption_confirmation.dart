@@ -1,6 +1,7 @@
 class ConsumptionConfirmation {
   final String id;
   final String itemName;
+  final String confirmationId;
   final double quantity;
   final String unit;
   final DateTime addedAt;
@@ -15,6 +16,7 @@ class ConsumptionConfirmation {
     required this.unit,
     required this.addedAt,
     required this.predictedDepletionDate,
+    required this.confirmationId,
     required this.status,
     required this.expiresAt,
   });

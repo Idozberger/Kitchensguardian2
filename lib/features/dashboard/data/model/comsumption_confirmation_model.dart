@@ -10,11 +10,13 @@ class ConsumptionConfirmationModel extends ConsumptionConfirmation {
     required super.predictedDepletionDate,
     required super.status,
     required super.expiresAt,
+    required super.confirmationId,
   });
 
   factory ConsumptionConfirmationModel.fromJson(Map<String, dynamic> json) {
     return ConsumptionConfirmationModel(
-      id: json['confirmation_id'] as String,
+      id: json['_id'] as String,
+      confirmationId: json['confirmation_id'] as String,
       itemName: json['item_name'] as String,
       quantity: (json['quantity'] as num).toDouble(),
       unit: json['unit'] as String,
@@ -29,7 +31,8 @@ class ConsumptionConfirmationModel extends ConsumptionConfirmation {
 
   Map<String, dynamic> toJson() {
     return {
-      'confirmation_id': id,
+      '_id': id,
+      'confirmation_id': confirmationId,
       'item_name': itemName,
       'quantity': quantity,
       'unit': unit,
@@ -45,6 +48,7 @@ class ConsumptionConfirmationModel extends ConsumptionConfirmation {
   ) {
     return ConsumptionConfirmationModel(
       id: entity.id,
+      confirmationId: entity.confirmationId,
       itemName: entity.itemName,
       quantity: entity.quantity,
       unit: entity.unit,

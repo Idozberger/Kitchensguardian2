@@ -42,4 +42,6 @@ class Routes {
   static const String allStorageArea = "/all_storage_areas";
   static const String smartCart = "/smart_cart";
   static const String kitchenSelection = "/kitchen_selection";
+  static const String pendingconsumptionconfirmation =
+      "/pendingconsumptionconfirmation";
 }

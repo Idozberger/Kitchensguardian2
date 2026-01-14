@@ -10,10 +10,10 @@ import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/services/firebase_messenging/firebase_messenging_service.dart';
 import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_event.dart';
+import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_state.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/drawer.dart';
 import 'package:foodkitchen/features/grocery/presentation/pages/grocery_page.dart';
-
 import 'package:foodkitchen/features/home/presentation/pages/home_page.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/planner_page.dart';
 import 'package:foodkitchen/features/profile/presentation/pages/profile_page.dart';
@@ -27,89 +27,37 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  int _selectedIndex = 0;
-  late UserCubit userCubit;
-  late DashboardBloc dashboardBloc;
-  @override
-  void initState() {
-    userCubit = context.read<UserCubit>();
-    dashboardBloc = context.read<DashboardBloc>();
-    _initializeFirebaseMessaging();
-    dashboardBloc.add(
-      GetConsumptionConfirmationPendingEvent(
-        kitchenId: userCubit.state.activeKitchenId,
-      ),
-    );
-    super.initState();
-  }
-
-  final List<Widget> _pages = const [
+  static const _pages = [
     HomePage(),
     PlannerPage(),
     GroceryPage(),
     ProfilePage(),
   ];
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
+  static const _fcmInitDelay = Duration(seconds: 3);
+  static const _backPressWindow = Duration(seconds: 2);
 
-  Future<void> _initializeFirebaseMessaging() async {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await Future.delayed(const Duration(seconds: 3));
-
-      try {
-        final userState = userCubit.state;
-        if (userState.userId.isNotEmpty && userState.email.isNotEmpty) {
-          await FirebaseMessagingService.instance().init(
-            userId: userState.userId,
-            firstName: userState.firstName,
-            lastName: userState.lastName,
-            email: userState.email,
-          );
-        } else {
-          debugPrint('Skipping FCM init — missing userId or email.');
-        }
-      } catch (e, st) {
-        debugPrint('Error initializing FCM: $e');
-        debugPrint('Stack trace: $st');
-      }
-    });
-  }
-
+  int _selectedIndex = 0;
   DateTime? _lastBackPressed;
+
+  late final UserCubit _userCubit;
+  late final DashboardBloc _dashboardBloc;
+
+  @override
+  void initState() {
+    super.initState();
+    _userCubit = context.read<UserCubit>();
+    _dashboardBloc = context.read<DashboardBloc>();
+
+    _initializeFirebaseMessaging();
+    _fetchConsumptionData();
+  }
 
   @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvokedWithResult: (didPop, result) async {
-        if (_selectedIndex != 0) {
-          _onItemTapped(0);
-          return;
-        }
-
-        final now = DateTime.now();
-
-        if (_lastBackPressed == null ||
-            now.difference(_lastBackPressed!) > const Duration(seconds: 2)) {
-          _lastBackPressed = now;
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Press back again to exit"),
-              duration: Duration(seconds: 2),
-            ),
-          );
-
-          return;
-        }
-
-        _lastBackPressed = null;
-        SystemNavigator.pop();
-      },
+      onPopInvokedWithResult: (didPop, result) => _handleBackPress(),
       child: Scaffold(
         drawer: const AppDrawer(),
         appBar: _buildAppBar(context),
@@ -125,36 +73,84 @@ class _DashboardPageState extends State<DashboardPage> {
     return AppBar(
       leadingWidth: w(55),
       centerTitle: false,
-      leading: Builder(
-        builder: (context) {
-          return Row(
-            children: [
-              SizedBox(width: w(16)),
-              CircularIconButton(
-                iconAsset: AppAssets.drawerSvg,
-                onTap: () async {
-                  Scaffold.of(context).openDrawer();
-                },
-              ),
-            ],
-          );
-        },
-      ),
-      actions: [
-        IconButton(
-          onPressed: () => context.push(Routes.subscription),
-          icon: Image.asset(AppAssets.gemPNG, height: h(16), width: w(22)),
-        ),
-        CircularIconButton(
-          iconAsset: AppAssets.notificationSvg,
-          onTap: () => context.push(Routes.notification),
-        ),
-        SizedBox(width: w(20)),
-      ],
+      leading: _buildDrawerButton(),
       title: Text(
-        "Kitchen’s Guardian",
+        "Kitchen's Guardian",
         style: Theme.of(context).textTheme.headlineLarge,
       ),
+      actions: [
+        _buildSubscriptionButton(),
+        SizedBox(width: w(6)),
+        _buildConsumptionPendingButton(),
+        SizedBox(width: w(6)),
+        _buildNotificationButton(),
+        SizedBox(width: w(20)),
+      ],
+    );
+  }
+
+  Widget _buildSubscriptionButton() {
+    return InkWell(
+      onTap: () => context.push(Routes.subscription),
+      child: Image.asset(AppAssets.gemPNG, height: h(16), fit: BoxFit.cover),
+    );
+  }
+
+  Widget _buildDrawerButton() {
+    return Builder(
+      builder: (context) => Row(
+        children: [
+          SizedBox(width: w(16)),
+          CircularIconButton(
+            size: 32,
+            iconAsset: AppAssets.drawerSvg,
+            onTap: () => Scaffold.of(context).openDrawer(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildConsumptionPendingButton() {
+    return BlocBuilder<DashboardBloc, DashboardState>(
+      builder: (context, state) {
+        final String pendingCount =
+            state is DashboardLoaded &&
+                state.comsumptionConfirmationPendingCount != "0"
+            ? state.comsumptionConfirmationPendingCount
+            : "";
+
+        final bool showBadge = pendingCount.isNotEmpty;
+
+        return Badge(
+          backgroundColor: const Color(0xffFF3300),
+          isLabelVisible: showBadge,
+          label: Text(
+            pendingCount,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          child: CircularIconButton(
+            size: 32,
+            iconAsset: AppAssets.consumptionPending,
+            onTap: () => context.pushNamed(
+              Routes.pendingconsumptionconfirmation,
+              extra: _userCubit.state.activeKitchenId,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildNotificationButton() {
+    return CircularIconButton(
+      size: 32,
+      iconAsset: AppAssets.notificationSvg,
+      onTap: () => context.push(Routes.notification),
     );
   }
 
@@ -169,36 +165,123 @@ class _DashboardPageState extends State<DashboardPage> {
         currentIndex: _selectedIndex,
         elevation: 0,
         onTap: _onItemTapped,
-        items: [
-          BottomNavigationBarItem(
-            activeIcon: icon(AppAssets.homeActiveSvg),
-            icon: icon(AppAssets.homeInactiveSvg),
-            label: "Home",
-          ),
-          BottomNavigationBarItem(
-            activeIcon: icon(AppAssets.plannerActiveSvg),
-            icon: icon(AppAssets.plannerInactiveSvg),
-            label: "Planner",
-          ),
-          BottomNavigationBarItem(
-            activeIcon: icon(AppAssets.groceryActiveSvg),
-            icon: icon(AppAssets.groceryInactiveSvg),
-            label: "Grocery",
-          ),
-          BottomNavigationBarItem(
-            activeIcon: icon(AppAssets.profileActiveSvg),
-            icon: icon(AppAssets.profileInactiveSvg),
-            label: "Profile",
-          ),
-        ],
+        items: _buildNavItems(),
       ),
     );
   }
 
-  Widget icon(String assetPath) {
+  List<BottomNavigationBarItem> _buildNavItems() {
+    return [
+      _buildNavItem(
+        activeIcon: AppAssets.homeActiveSvg,
+        inactiveIcon: AppAssets.homeInactiveSvg,
+        label: "Home",
+      ),
+      _buildNavItem(
+        activeIcon: AppAssets.plannerActiveSvg,
+        inactiveIcon: AppAssets.plannerInactiveSvg,
+        label: "Planner",
+      ),
+      _buildNavItem(
+        activeIcon: AppAssets.groceryActiveSvg,
+        inactiveIcon: AppAssets.groceryInactiveSvg,
+        label: "Grocery",
+      ),
+      _buildNavItem(
+        activeIcon: AppAssets.profileActiveSvg,
+        inactiveIcon: AppAssets.profileInactiveSvg,
+        label: "Profile",
+      ),
+    ];
+  }
+
+  BottomNavigationBarItem _buildNavItem({
+    required String activeIcon,
+    required String inactiveIcon,
+    required String label,
+  }) {
+    return BottomNavigationBarItem(
+      activeIcon: _buildNavIcon(activeIcon),
+      icon: _buildNavIcon(inactiveIcon),
+      label: label,
+    );
+  }
+
+  Widget _buildNavIcon(String assetPath) {
     return Padding(
       padding: gapOnly(top: 8),
       child: SvgPicture.asset(assetPath),
     );
+  }
+
+  void _showExitSnackBar() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Press back again to exit"),
+        duration: _backPressWindow,
+      ),
+    );
+  }
+
+  Future<void> _handleBackPress() async {
+    if (_selectedIndex != 0) {
+      _onItemTapped(0);
+      return;
+    }
+
+    final now = DateTime.now();
+    final isDoublePress =
+        _lastBackPressed != null &&
+        now.difference(_lastBackPressed!) <= _backPressWindow;
+
+    if (isDoublePress) {
+      _lastBackPressed = null;
+      SystemNavigator.pop();
+      return;
+    }
+
+    _lastBackPressed = now;
+    _showExitSnackBar();
+  }
+
+  void _fetchConsumptionData() {
+    _dashboardBloc.add(
+      GetConsumptionConfirmationPendingCountEvent(
+        kitchenId: _userCubit.state.activeKitchenId,
+      ),
+    );
+  }
+
+  Future<void> _initializeFirebaseMessaging() async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Future.delayed(_fcmInitDelay);
+
+      try {
+        final userState = _userCubit.state;
+
+        if (_canInitializeFCM(userState)) {
+          await FirebaseMessagingService.instance().init(
+            userId: userState.userId,
+            firstName: userState.firstName,
+            lastName: userState.lastName,
+            email: userState.email,
+          );
+        } else {
+          debugPrint('Skipping FCM init — missing userId or email.');
+        }
+      } catch (e, st) {
+        debugPrint('Error initializing FCM: $e\nStack trace: $st');
+      }
+    });
+  }
+
+  bool _canInitializeFCM(dynamic userState) {
+    return userState.userId.isNotEmpty && userState.email.isNotEmpty;
+  }
+
+  void _onItemTapped(int index) {
+    if (_selectedIndex != index) {
+      setState(() => _selectedIndex = index);
+    }
   }
 }

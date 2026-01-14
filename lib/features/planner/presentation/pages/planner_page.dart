@@ -1,7 +1,4 @@
 // ignore_for_file: unnecessary_brace_in_string_interps
-
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
@@ -10,13 +7,11 @@ import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
-import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/utils/date_format_to_string.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_date_picker_widget.dart';
-import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/no_kitchen_found.dart';
 import 'package:foodkitchen/features/planner/domain/entities/merged_meal_type_entity.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
@@ -36,94 +31,366 @@ class PlannerPage extends StatefulWidget {
 }
 
 class _PlannerPageState extends State<PlannerPage> {
-  bool isLoading = true;
-  String? localDbPlanStartTime;
-
   late final PlannerBloc _plannerBloc;
   late final UserCubit _userCubit;
-  DateTime? _selectedDate;
+  late final PlannerController _controller;
 
   @override
   void initState() {
     super.initState();
     _plannerBloc = context.read<PlannerBloc>();
     _userCubit = context.read<UserCubit>();
-    _fetchInitialPlans();
+    _controller = PlannerController(
+      plannerBloc: _plannerBloc,
+      userCubit: _userCubit,
+    );
+    _controller.initialize();
   }
 
-  void _fetchInitialPlans() async {
-    if (_userCubit.state.activeKitchenId.isEmpty) return;
-    _plannerBloc.add(
-      GetDateRangeEvent(kitchenId: _userCubit.state.activeKitchenId),
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<PlannerBloc, PlannerState>(
+      listener: _controller.handleStateChanges,
+      builder: (context, state) {
+        if (state.loadingPlans) {
+          return const PlannerLoadingView();
+        }
+
+        return Scaffold(
+          backgroundColor: const Color(0xffF9F9F9),
+          body: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: PlannerContent(state: state, controller: _controller),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class PlannerController {
+  final PlannerBloc plannerBloc;
+  final UserCubit userCubit;
+
+  PlannerController({required this.plannerBloc, required this.userCubit});
+
+  void initialize() {
+    if (userCubit.state.activeKitchenId.isEmpty) return;
+    plannerBloc.add(
+      GetDateRangeEvent(kitchenId: userCubit.state.activeKitchenId),
     );
   }
 
-  String formatDateOnView(String inputDate) {
-    final DateTime date = DateTime.parse(inputDate);
-
-    return DateFormat('EEEE dd, yyyy').format(date);
+  void handleStateChanges(BuildContext context, PlannerState state) {
+    if (state.successMessage.isNotEmpty) {
+      AppToast.show(state.successMessage, ToastType.success);
+    }
+    if (state.errorMessage?.isNotEmpty ?? false) {
+      AppToast.show(state.errorMessage!, ToastType.error);
+    }
   }
 
-  Widget _buildPlanSection(MergedRecipePlanEntity plan) {
+  void onDateSelected(DateTime date) {
+    plannerBloc.add(
+      GetDateBasedPlans(PlannerDateFormatter.toBackendFormat(date)),
+    );
+  }
+
+  void onAddMealPressed(BuildContext context, PlannerState state) {
+    plannerBloc.add(ResetMealPlanState());
+    final date = _getEffectiveDate(state);
+    plannerBloc.add(UpdateTypeSelectedAndDateEvent(date: date, index: 0));
+    context.push(Routes.addMeal);
+  }
+
+  void onEditPlan(BuildContext context, MergedRecipePlanEntity plan) {
+    plannerBloc.add(ResetMealPlanState());
+
+    _addMealsToBloc(plan);
+
+    plannerBloc.add(
+      UpdateTypeSelectedAndDateEvent(
+        index: 0,
+        date: PlannerDateFormatter.parseBackendDate(plan.date),
+      ),
+    );
+    context.push(Routes.editMeal);
+  }
+
+  void onDeletePlan(BuildContext context, MergedRecipePlanEntity plan) {
+    PlannerDialogs.showDeleteConfirmation(
+      context: context,
+      onConfirm: () {
+        plannerBloc.add(
+          DeletePlanFromRemoteDbEvent(
+            mealPlanId: plan.breakfast?.mealplanId ?? "",
+            date: plan.date,
+            kitchenId: userCubit.state.activeKitchenId,
+          ),
+        );
+        Navigator.pop(context);
+      },
+    );
+  }
+
+  void onAddToCart(BuildContext context) {
+    if (AppConstants.entitlementIsActive) {
+      AppToast.show("Added to cart", ToastType.success);
+    } else {
+      AppToast.show("Only premium users can add to cart", ToastType.error);
+    }
+  }
+
+  DateTime _getEffectiveDate(PlannerState state) {
+    if (state.startDate?.isNotEmpty ?? false) {
+      return PlannerDateFormatter.parseBackendDate(state.startDate!);
+    }
+    return DateTime.now();
+  }
+
+  void _addMealsToBloc(MergedRecipePlanEntity plan) {
+    final meals = [plan.breakfast, plan.lunch, plan.dinner];
+    for (final meal in meals) {
+      if (meal != null) {
+        plannerBloc.add(
+          AddMealPlanEvent(
+            date: plan.date,
+            kitchenId: userCubit.state.activeKitchenId,
+            mealPlan: meal as RecipeModel,
+          ),
+        );
+      }
+    }
+  }
+
+  void dispose() {}
+}
+
+class PlannerContent extends StatelessWidget {
+  final PlannerState state;
+  final PlannerController controller;
+
+  const PlannerContent({
+    super.key,
+    required this.state,
+    required this.controller,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          PlannerHeader(
+            onAddMeal: () => controller.onAddMealPressed(context, state),
+          ),
+          const SizedBox(height: 15),
+          if (state.getAllWeeklyPlans.isEmpty)
+            const Padding(
+              padding: EdgeInsets.only(top: 120),
+              child: PlannerEmptyState(),
+            )
+          else
+            PlannerList(state: state, controller: controller),
+        ],
+      ),
+    );
+  }
+}
+
+class PlannerHeader extends StatelessWidget {
+  final VoidCallback onAddMeal;
+
+  const PlannerHeader({super.key, required this.onAddMeal});
+
+  @override
+  Widget build(BuildContext context) {
+    return UpperTile(
+      widget: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            "Plan your meals for the week ahead",
+            style: Theme.of(context).textTheme.headlineLarge,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 15),
+          GenericButtonWidget(onPressed: onAddMeal, text: "+ Add Meal"),
+        ],
+      ),
+    );
+  }
+}
+
+class PlannerList extends StatefulWidget {
+  final PlannerState state;
+  final PlannerController controller;
+
+  const PlannerList({super.key, required this.state, required this.controller});
+
+  @override
+  State<PlannerList> createState() => _PlannerListState();
+}
+
+class _PlannerListState extends State<PlannerList> {
+  DateTime? _selectedDate;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDate = PlannerDateFormatter.getInitialDate(widget.state);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        SelectDateWidget(
+          entitlementIsActive: AppConstants.entitlementIsActive,
+          startDate: PlannerDateFormatter.getStartDate(widget.state),
+          selectedDate: _selectedDate,
+          onChanged: (date) {
+            setState(() => _selectedDate = date);
+            widget.controller.onDateSelected(date);
+          },
+        ),
+        const SizedBox(height: 15),
+        _buildPlanForSelectedDate(),
+      ],
+    );
+  }
+
+  Widget _buildPlanForSelectedDate() {
+    final plan = widget.state.dateBasedPlan;
+
+    if (plan.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.only(top: 64),
+        child: PlannerEmptyState(),
+      );
+    }
+
+    final selectedDateStr = PlannerDateFormatter.toBackendFormat(
+      _selectedDate!,
+    );
+    if (plan[0].date != selectedDateStr) {
+      return const Padding(
+        padding: EdgeInsets.only(top: 64),
+        child: PlannerEmptyState(),
+      );
+    }
+
+    return PlanCard(plan: plan[0], controller: widget.controller);
+  }
+}
+
+class PlanCard extends StatelessWidget {
+  final MergedRecipePlanEntity plan;
+  final PlannerController controller;
+
+  const PlanCard({super.key, required this.plan, required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: DayPlanTile(
-        dayLabel: formatDateOnView(plan.date),
-        meals: [
-          if (plan.breakfast != null)
-            MealTile(mealType: "Breakfast", mealName: plan.breakfast!.title),
-          if (plan.lunch != null)
-            MealTile(mealType: "Lunch", mealName: plan.lunch!.title),
-          if (plan.dinner != null)
-            MealTile(mealType: "Dinner", mealName: plan.dinner!.title),
-        ],
-        viewRecipe: () {
-          context.pushNamed(Routes.viewPlanDetails, extra: plan);
-        },
-        addToCart: () {
-          if (AppConstants.entitlementIsActive) {
-            AppToast.show("Added to cart", ToastType.success);
-          } else {
-            AppToast.show(
-              "Only premium users can add to cart",
-              ToastType.error,
-            );
-          }
-        },
-
-        deletePlan: () async {
-          _showDeleteDialog(context, plan: plan);
-        },
-        editPlan: () {
-          _plannerBloc.add(ResetMealPlanState());
-          final meals = [plan.breakfast, plan.lunch, plan.dinner];
-
-          for (final meal in meals) {
-            if (meal != null) {
-              _plannerBloc.add(
-                AddMealPlanEvent(
-                  date: plan.date,
-                  kitchenId: context.read<UserCubit>().state.activeKitchenId,
-                  mealPlan: meal as RecipeModel,
-                ),
-              );
-            }
-          }
-          _plannerBloc.add(
-            UpdateTypeSelectedAndDateEvent(
-              index: 0,
-              date: formatStringDateToMeetBackendDate(plan.date),
-            ),
-          );
-          context.push(Routes.editMeal);
-        },
+        dayLabel: PlannerDateFormatter.toDisplayFormat(plan.date),
+        meals: _buildMealsList(),
+        viewRecipe: () =>
+            context.pushNamed(Routes.viewPlanDetails, extra: plan),
+        addToCart: () => controller.onAddToCart(context),
+        deletePlan: () => controller.onDeletePlan(context, plan),
+        editPlan: () => controller.onEditPlan(context, plan),
       ),
     );
   }
 
-  Future<dynamic> _showDeleteDialog(
-    BuildContext context, {
-    required MergedRecipePlanEntity plan,
+  List<MealTile> _buildMealsList() {
+    return [
+      if (plan.breakfast != null)
+        MealTile(mealType: "Breakfast", mealName: plan.breakfast!.title),
+      if (plan.lunch != null)
+        MealTile(mealType: "Lunch", mealName: plan.lunch!.title),
+      if (plan.dinner != null)
+        MealTile(mealType: "Dinner", mealName: plan.dinner!.title),
+    ];
+  }
+}
+
+class PlannerEmptyState extends StatelessWidget {
+  const PlannerEmptyState({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: EmptyStateWidget(
+        context,
+        imagePath: AppAssets.noKitchenFound,
+        title: 'No meal found here',
+      ),
+    );
+  }
+}
+
+class PlannerLoadingView extends StatelessWidget {
+  const PlannerLoadingView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xffF9F9F9),
+      body: Center(child: Lottie.asset(AppAssets.loader)),
+    );
+  }
+}
+
+class PlannerDateFormatter {
+  static String toDisplayFormat(String backendDate) {
+    final date = DateTime.parse(backendDate);
+    return DateFormat('EEEE dd, yyyy').format(date);
+  }
+
+  static String toBackendFormat(DateTime date) {
+    return formatDateToMeetBackendDate(date);
+  }
+
+  static DateTime parseBackendDate(String backendDate) {
+    return formatStringDateToMeetBackendDate(backendDate);
+  }
+
+  static DateTime getInitialDate(PlannerState state) {
+    if (state.startDate?.isNotEmpty ?? false) {
+      try {
+        return parseBackendDate(state.startDate!);
+      } catch (_) {
+        return DateTime.now();
+      }
+    }
+    return DateTime.now();
+  }
+
+  static DateTime getStartDate(PlannerState state) {
+    final dateStr = (state.startDate?.isEmpty ?? true)
+        ? toBackendFormat(DateTime.now())
+        : state.startDate!;
+    return parseBackendDate(dateStr);
+  }
+}
+
+class PlannerDialogs {
+  static Future<void> showDeleteConfirmation({
+    required BuildContext context,
+    required VoidCallback onConfirm,
   }) {
     return showCustomGenericDialog(
       context: context,
@@ -131,203 +398,8 @@ class _PlannerPageState extends State<PlannerPage> {
       subtitle: "Are you sure you want to delete this plan?",
       primaryButtonText: "Yes",
       secondaryButtonText: "Cancel",
-      onPrimaryPressed: () {
-        _plannerBloc.add(
-          DeletePlanFromRemoteDbEvent(
-            mealPlanId: plan.breakfast?.mealplanId ?? "",
-            date: plan.date,
-            kitchenId: context.read<UserCubit>().state.activeKitchenId,
-          ),
-        );
-
-        Navigator.pop(context);
-      },
-
-      onSecondaryPressed: () {
-        Navigator.pop(context);
-      },
-    );
-  }
-
-  Widget _buildEmptyState() => Center(
-    child: EmptyStateWidget(
-      context,
-      imagePath: AppAssets.noKitchenFound,
-      title: 'No meal found here',
-    ),
-  );
-
-  Widget _buildHeader(BuildContext context) => UpperTile(
-    widget: BlocBuilder<PlannerBloc, PlannerState>(
-      builder: (context, state) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              "Plan your meals for the week ahead",
-              style: Theme.of(context).textTheme.headlineLarge,
-              textAlign: TextAlign.center,
-            ),
-            gap(height: 15),
-            GenericButtonWidget(
-              onPressed: () async {
-                _plannerBloc.add(ResetMealPlanState());
-                DateTime date = _getCurrentDateForBackend(state);
-                log("start-date button: ${date}");
-                _plannerBloc.add(
-                  UpdateTypeSelectedAndDateEvent(date: date, index: 0),
-                );
-
-                // ignore: use_build_context_synchronously
-                context.push(Routes.addMeal);
-              },
-              text: "+ Add Meal",
-            ),
-          ],
-        );
-      },
-    ),
-  );
-  DateTime _getCurrentDateForBackend(PlannerState state) {
-    if (state.startDate != null && state.startDate!.isNotEmpty) {
-      log("start-date: ${state.startDate}");
-      return formatStringDateToMeetBackendDate(state.startDate!);
-    }
-
-    final String selectedDateString = formatDateToMeetBackendDate(
-      _selectedDate!,
-    );
-    return formatStringDateToMeetBackendDate(selectedDateString);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocConsumer<PlannerBloc, PlannerState>(
-      listener: (context, state) {
-        if (state.successMessage.isNotEmpty) {
-          AppToast.show(state.successMessage, ToastType.success);
-        }
-        if (state.errorMessage != null && state.errorMessage!.isNotEmpty) {
-          AppToast.show(state.errorMessage!, ToastType.error);
-        }
-      },
-      builder: (context, state) {
-        return Scaffold(
-          backgroundColor: const Color(0xffF9F9F9),
-          body: state.loadingPlans
-              ? Center(child: Lottie.asset(AppAssets.loader))
-              : SafeArea(
-                  child: Padding(
-                    padding: gapOnly(left: 20, right: 20, top: 14, bottom: 14),
-                    child: BlocConsumer<PlannerBloc, PlannerState>(
-                      listener: (context, state) {},
-                      builder: (_, state) {
-                        final plan = state.dateBasedPlan;
-
-                        final todayOnly = DateTime(
-                          DateTime.now().year,
-                          DateTime.now().month,
-                          DateTime.now().day,
-                        );
-                        String startDate =
-                            state.startDate == null || state.startDate!.isEmpty
-                            ? formatDateToMeetBackendDate(todayOnly)
-                            : state.startDate!;
-
-                        if (startDate.isNotEmpty) {
-                          try {
-                            _selectedDate ??= formatStringDateToMeetBackendDate(
-                              startDate,
-                            );
-                          } catch (_) {}
-                        } else {
-                          _selectedDate = todayOnly;
-                        }
-
-                        return SingleChildScrollView(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildHeader(context),
-                              gap(height: 15),
-                              if (state.getAllWeeklyPlans.isEmpty)
-                                Padding(
-                                  padding: gapOnly(top: 120),
-                                  child: _buildEmptyState(),
-                                )
-                              else ...[
-                                BlocBuilder<PlannerBloc, PlannerState>(
-                                  builder: (context, state) {
-                                    if (state.startDate != null &&
-                                        state.startDate!.isNotEmpty &&
-                                        _selectedDate == null) {
-                                      try {
-                                        _selectedDate = DateTime.parse(
-                                          state.startDate!,
-                                        );
-                                      } catch (e) {
-                                        _selectedDate = DateTime.now();
-                                      }
-                                    }
-
-                                    if (state.isLoading &&
-                                        state.mealPlans.isEmpty &&
-                                        state.startDate == null) {
-                                      return Center(
-                                        child: Lottie.asset(AppAssets.loader),
-                                      );
-                                    }
-
-                                    return SelectDateWidget(
-                                      entitlementIsActive:
-                                          AppConstants.entitlementIsActive,
-                                      startDate:
-                                          formatStringDateToMeetBackendDate(
-                                            state.startDate == null
-                                                ? formatDateToMeetBackendDate(
-                                                    DateTime.now(),
-                                                  )
-                                                : state.startDate!.isEmpty
-                                                ? formatDateToMeetBackendDate(
-                                                    DateTime.now(),
-                                                  )
-                                                : state.startDate!,
-                                          ),
-                                      selectedDate: _selectedDate,
-                                      onChanged: (date) {
-                                        setState(() => _selectedDate = date);
-
-                                        _plannerBloc.add(
-                                          GetDateBasedPlans(
-                                            formatDateToMeetBackendDate(date),
-                                          ),
-                                        );
-                                      },
-                                    );
-                                  },
-                                ),
-                                gap(height: 15),
-                                if (plan.isNotEmpty &&
-                                    plan[0].date ==
-                                        formatDateToMeetBackendDate(
-                                          _selectedDate!,
-                                        ))
-                                  _buildPlanSection(plan[0])
-                                else
-                                  Padding(
-                                    padding: gapOnly(top: 64),
-                                    child: _buildEmptyState(),
-                                  ),
-                              ],
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-        );
-      },
+      onPrimaryPressed: onConfirm,
+      onSecondaryPressed: () => Navigator.pop(context),
     );
   }
 }

@@ -313,10 +313,12 @@ class _SignUpPageState extends State<SignUpPage> {
                           borderRadius: BorderRadius.circular(h(10)),
                         ),
                         child: (state is GoogleAuthsignUpLoading)
-                            ? Align(
-                                alignment: Alignment.center,
-                                child: CircularProgressIndicator(
-                                  color: AppColors.primaryColor,
+                            ? FittedBox(
+                                child: Align(
+                                  alignment: Alignment.center,
+                                  child: CircularProgressIndicator(
+                                    color: AppColors.primaryColor,
+                                  ),
                                 ),
                               )
                             : Row(

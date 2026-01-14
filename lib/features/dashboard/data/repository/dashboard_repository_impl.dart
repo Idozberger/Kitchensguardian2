@@ -89,4 +89,42 @@ class DashboardRepositoryImpl implements DashboardRepository {
       return Left(UnknownFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, String>> getConsumptionConfirmationCount({
+    required String kitchenId,
+  }) async {
+    try {
+      final response = await dashboardRemoteDatasource
+          .getConsumptionConfirmationCount(kitchenId: kitchenId);
+
+      return Right(response);
+    } on Failure catch (f) {
+      return Left(f);
+    } catch (e) {
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, String>> respondConsumptionConfirmation({
+    required String confirmationId,
+    required String responseText,
+    required String actualQuantityRemaining,
+  }) async {
+    try {
+      final response = await dashboardRemoteDatasource
+          .respondConsumptionConfirmation(
+            confirmationId: confirmationId,
+            responseText: responseText,
+            actualQuantityRemaining: actualQuantityRemaining,
+          );
+
+      return Right(response);
+    } on Failure catch (f) {
+      return Left(f);
+    } catch (e) {
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
 }

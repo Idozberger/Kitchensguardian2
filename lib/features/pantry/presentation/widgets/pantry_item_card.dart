@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -85,8 +84,22 @@ class _PantryItemCardState extends State<PantryItemCard> {
                         height: h(28),
                         width: h(28),
                         fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            height: h(28),
+                            width: h(28),
+                            alignment: Alignment.center,
+                            color: Colors.grey.shade200,
+                            child: Icon(
+                              Icons.food_bank,
+                              size: h(16),
+                              color: Colors.grey.shade500,
+                            ),
+                          );
+                        },
                       ),
                     ),
+
                     gap(width: 8),
                     SizedBox(
                       width: _isExpanded ? null : w(54),

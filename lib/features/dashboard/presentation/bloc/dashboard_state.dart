@@ -12,20 +12,31 @@ final class DashboardLoading extends DashboardState {}
 final class DashboardLoaded extends DashboardState {
   final List<Member> kitchenMembers;
   final List<ConsumptionConfirmation> comsumptionConfirmationPending;
+  final String comsumptionConfirmationPendingCount;
+  final bool respondingOnConsumptionLoader;
 
   DashboardLoaded({
     this.comsumptionConfirmationPending = const [],
     this.kitchenMembers = const [],
+    this.comsumptionConfirmationPendingCount = "",
+    this.respondingOnConsumptionLoader = false,
   });
 
   DashboardLoaded copyWith({
     List<Member>? kitchenMembers,
     List<ConsumptionConfirmation>? comsumptionConfirmationPending,
+    String? comsumptionConfirmationPendingCount,
+    bool? respondingOnConsumptionLoader,
   }) {
     return DashboardLoaded(
       kitchenMembers: kitchenMembers ?? this.kitchenMembers,
       comsumptionConfirmationPending:
           comsumptionConfirmationPending ?? this.comsumptionConfirmationPending,
+      comsumptionConfirmationPendingCount:
+          comsumptionConfirmationPendingCount ??
+          this.comsumptionConfirmationPendingCount,
+      respondingOnConsumptionLoader:
+          respondingOnConsumptionLoader ?? this.respondingOnConsumptionLoader,
     );
   }
 }
