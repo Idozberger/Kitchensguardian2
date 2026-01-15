@@ -11,8 +11,7 @@ import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
-import 'package:foodkitchen/core/services/date_picker/date_picker_service.dart'
-    show DatePickerService;
+import 'package:foodkitchen/core/services/date_picker/date_picker_service.dart';
 import 'package:foodkitchen/core/services/image_picker/image_picker_service.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/format_date_for_backend.dart';
@@ -39,16 +38,15 @@ class AddItemPage extends StatefulWidget {
 }
 
 class _AddItemPageState extends State<AddItemPage> {
-  late PantryBloc pantryBloc;
-  late UserCubit userCubit;
+  late PantryBloc _pantryBloc;
+  late UserCubit _userCubit;
   List<PantryItem> _items = [];
 
   @override
   void initState() {
-    pantryBloc = context.read<PantryBloc>();
-    userCubit = context.read<UserCubit>();
-
     super.initState();
+    _pantryBloc = context.read<PantryBloc>();
+    _userCubit = context.read<UserCubit>();
     _addNewItem();
   }
 
@@ -65,7 +63,7 @@ class _AddItemPageState extends State<AddItemPage> {
     });
   }
 
-  void resetState() {
+  void _resetState() {
     setState(() {
       _items = [];
       _addNewItem();
@@ -76,7 +74,6 @@ class _AddItemPageState extends State<AddItemPage> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      // ignore: deprecated_member_use
       onPopInvoked: (didPop) async {
         if (!didPop) {
           await Future.delayed(Duration.zero);
@@ -84,20 +81,19 @@ class _AddItemPageState extends State<AddItemPage> {
         }
       },
       child: Scaffold(
-        backgroundColor: const Color(0xffF9F9F9),
-        appBar: _buildAppBar(context),
+        backgroundColor: const Color(0xFFF9F9F9),
+        appBar: _buildAppBar(),
         body: BlocConsumer<PantryBloc, PantryState>(
           listener: (context, state) {
             if (state is PantryFailure) {
               AppToast.show(state.errorMessage, ToastType.error);
-              resetState();
-            }
-            if (state is PantrySuccess) {
+              _resetState();
+            } else if (state is PantrySuccess) {
               AppToast.show(state.successMessage, ToastType.success);
-              resetState();
+              _resetState();
             }
           },
-          builder: (_, state) {
+          builder: (context, state) {
             return SafeArea(
               child: Padding(
                 padding: gapSymmetric(horizontal: 20, vertical: 0),
@@ -106,7 +102,7 @@ class _AddItemPageState extends State<AddItemPage> {
                     gap(height: 14),
                     Expanded(
                       child: BlocBuilder<UserCubit, UserState>(
-                        builder: (_, userState) {
+                        builder: (context, userState) {
                           return ListView.builder(
                             padding: gapZero,
                             shrinkWrap: true,
@@ -114,7 +110,7 @@ class _AddItemPageState extends State<AddItemPage> {
                             itemBuilder: (context, index) {
                               final item = _items[index];
                               return Padding(
-                                padding: gapOnly(bottom: 10),
+                                padding: gapOnly(bottom: 12),
                                 child: UpperTile(
                                   widget: _buildPantryItemForm(
                                     context,
@@ -134,123 +130,30 @@ class _AddItemPageState extends State<AddItemPage> {
             );
           },
         ),
-
-        bottomNavigationBar: _bottomNavBar(),
+        bottomNavigationBar: _buildBottomNavBar(),
       ),
     );
   }
 
-  BlocBuilder<PantryBloc, PantryState> _bottomNavBar() {
+  Widget _buildBottomNavBar() {
     return BlocBuilder<PantryBloc, PantryState>(
-      builder: (_, state) {
+      builder: (context, state) {
         return SafeArea(
           child: Container(
             width: double.infinity,
-            decoration: BoxDecoration(color: const Color(0xffF9F9F9)),
+            decoration: const BoxDecoration(color: Color(0xFFF9F9F9)),
             padding: gapOnly(left: 20, right: 20, bottom: 14, top: 14),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _addMoreButton(context),
+                _buildAddMoreButton(),
                 SizedBox(height: h(22)),
                 GenericButtonWidget(
                   isLoading: state is SubmittingItemLoading,
                   text: "Add Item",
                   onPressed: state is SubmittingItemLoading
                       ? () {}
-                      : () async {
-                          for (final item in _items) {
-                            final name = item.nameController.text.trim();
-                            final qty = item.qtyController.text.trim();
-                            final unit = item.unit?.trim() ?? '';
-                            final pantry = item.pantry?.trim() ?? '';
-                            final expireDate = item.expireDate.text.trim();
-                            if (item.file == null) {
-                              AppToast.show(
-                                "Please add an image.",
-                                ToastType.error,
-                              );
-                              return;
-                            }
-
-                            if (name.isEmpty) {
-                              AppToast.show(
-                                "Please enter the item name.",
-                                ToastType.error,
-                              );
-                              return;
-                            } else if (name.length < 3) {
-                              AppToast.show(
-                                "Item name must be at least 3 characters long.",
-                                ToastType.error,
-                              );
-                              return;
-                            }
-                            if (qty.isEmpty) {
-                              AppToast.show(
-                                "Please enter the quantity.",
-                                ToastType.error,
-                              );
-                              return;
-                            }
-
-                            if (unit.isEmpty) {
-                              AppToast.show(
-                                "Please select a unit.",
-                                ToastType.error,
-                              );
-                              return;
-                            }
-
-                            if (pantry.isEmpty) {
-                              AppToast.show(
-                                "Please select a pantry.",
-                                ToastType.error,
-                              );
-                              return;
-                            }
-
-                            if (expireDate.isEmpty) {
-                              AppToast.show(
-                                "Please select an expiry date.",
-                                ToastType.error,
-                              );
-                              return;
-                            }
-                          }
-
-                          final List<PantryItemEntity> pantryItems = [];
-                          for (final item in _items) {
-                            String bytes = await compressImage(item.file!);
-                            pantryItems.add(
-                              PantryItemEntity(
-                                name: item.nameController.text.trim(),
-                                quantity:
-                                    double.tryParse(
-                                      item.qtyController.text.trim(),
-                                    ) ??
-                                    0,
-                                unit: item.unit ?? '',
-                                group: item.pantry ?? '',
-                                expireDate: formatExpiry(item.expireDate.text),
-
-                                thumbnail: bytes,
-                                expiryStatus: "",
-                                stockStatus: "",
-                                itemId: "",
-                              ),
-                            );
-                          }
-
-                          final pantryModel = Pantry(
-                            kitchenId: userCubit.state.activeKitchenId,
-                            items: pantryItems,
-                          );
-
-                          pantryBloc.add(
-                            PantryAddItemEvent(pantry: pantryModel),
-                          );
-                        },
+                      : () => _handleSubmitItems(),
                 ),
               ],
             ),
@@ -258,6 +161,62 @@ class _AddItemPageState extends State<AddItemPage> {
         );
       },
     );
+  }
+
+  Future<void> _handleSubmitItems() async {
+    for (int i = 0; i < _items.length; i++) {
+      final item = _items[i];
+      final validation = _validateItem(item);
+      if (validation != null) {
+        AppToast.show(validation, ToastType.error);
+        return;
+      }
+    }
+
+    final pantryItems = <PantryItemEntity>[];
+    for (final item in _items) {
+      final compressedImage = await _compressImage(item.file!);
+      pantryItems.add(
+        PantryItemEntity(
+          name: item.nameController.text.trim(),
+          quantity: double.tryParse(item.qtyController.text.trim()) ?? 0,
+          unit: item.unit ?? '',
+          group: item.pantry ?? '',
+          expireDate: formatExpiry(item.expireDate.text),
+          thumbnail: compressedImage,
+          expiryStatus: '',
+          stockStatus: '',
+          itemId: '',
+        ),
+      );
+    }
+
+    final pantryModel = Pantry(
+      kitchenId: _userCubit.state.activeKitchenId,
+      items: pantryItems,
+    );
+
+    _pantryBloc.add(PantryAddItemEvent(pantry: pantryModel));
+  }
+
+  String? _validateItem(PantryItem item) {
+    final name = item.nameController.text.trim();
+    final qty = item.qtyController.text.trim();
+    final unit = item.unit?.trim() ?? '';
+    final pantry = item.pantry?.trim() ?? '';
+    final expireDate = item.expireDate.text.trim();
+
+    if (item.file == null) return "Please add an image.";
+    if (name.isEmpty) return "Please enter the item name.";
+    if (name.length < 3) {
+      return "Item name must be at least 3 characters long.";
+    }
+    if (qty.isEmpty) return "Please enter the quantity.";
+    if (unit.isEmpty) return "Please select a unit.";
+    if (pantry.isEmpty) return "Please select a pantry.";
+    if (expireDate.isEmpty) return "Please select an expiry date.";
+
+    return null;
   }
 
   Widget _buildPantryItemForm(
@@ -268,97 +227,47 @@ class _AddItemPageState extends State<AddItemPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _formLabel(
-          context,
+        _buildFormLabel(
           "Item Image",
           action: _items.first == item
               ? null
               : CircularIconButton(
                   iconAsset: AppAssets.deleteSvg,
                   onTap: () {
-                    _items.remove(item);
-                    setState(() {});
+                    setState(() => _items.remove(item));
                   },
                 ),
         ),
         SizedBox(height: h(10)),
-        Material(
-          color: Colors.transparent,
-          shape: const CircleBorder(),
-          child: InkWell(
-            customBorder: const CircleBorder(),
-            onTap: () async {
-              item.file = await ImagePickerService.showImageSourceDialog(
-                context,
-              );
-              setState(() {});
-            },
-            child: Stack(
-              alignment: Alignment.center,
-              clipBehavior: Clip.none,
-              children: [
-                CircleAvatar(
-                  radius: t(24),
-                  backgroundColor: Colors.grey.shade200,
-                  child: Icon(Icons.person, color: Colors.grey, size: t(24)),
-                ),
-                if (item.file != null)
-                  CircleAvatar(
-                    radius: t(24),
-                    backgroundImage: FileImage(item.file!),
-                    backgroundColor: Colors.transparent,
-                  ),
-
-                Positioned(
-                  bottom: h(-2),
-                  right: w(-4),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
-                    padding: gapAll(4),
-                    child: CircleAvatar(
-                      radius: t(8),
-                      backgroundColor: Colors.blue,
-                      child: Icon(Icons.add, size: t(12), color: Colors.white),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+        _buildImagePicker(item),
         SizedBox(height: h(10)),
-        _formLabel(context, "Item name"),
+        _buildFormLabel("Item name"),
         SizedBox(height: h(10)),
         AppTextField(
           textInputAction: TextInputAction.next,
           color: AppColors.apptextFieldStyleTextColor,
           controller: item.nameController,
           hintText: "Enter item name",
-          fillColor: const Color(0xffF9F9F9),
+          fillColor: const Color(0xFFF9F9F9),
           isFilled: true,
           isLabled: false,
           keyboardType: TextInputType.text,
-          label: "",
+          label: '',
         ),
         SizedBox(height: h(15)),
-        _formLabel(context, "Quantity"),
+        _buildFormLabel("Quantity"),
         SizedBox(height: h(10)),
         AppTextField(
           textInputAction: TextInputAction.next,
           color: AppColors.apptextFieldStyleTextColor,
           controller: item.qtyController,
           hintText: "Enter item quantity",
-          fillColor: const Color(0xffF9F9F9),
+          fillColor: const Color(0xFFF9F9F9),
           isFilled: true,
           keyboardType: TextInputType.number,
           isLabled: false,
-
-          label: "",
+          label: '',
         ),
-
         SizedBox(height: h(15)),
         Row(
           spacing: w(12),
@@ -368,7 +277,7 @@ class _AddItemPageState extends State<AddItemPage> {
                 label: "Units",
                 hint: "Select Units",
                 value: item.unit,
-                items: ["Kg", "Gram", "Litre", "Piece"],
+                items: const ["Kg", "Gram", "Litre", "Piece"],
                 onChanged: (val) => setState(() => item.unit = val),
               ),
             ),
@@ -386,36 +295,84 @@ class _AddItemPageState extends State<AddItemPage> {
           ],
         ),
         SizedBox(height: h(15)),
-
-        _formLabel(context, "Expiring date"),
+        _buildFormLabel("Expiring date"),
         SizedBox(height: h(10)),
-        GestureDetector(
-          onTap: () async {
-            final pickedDate = await DatePickerService.pickDate(
-              context: context,
-            );
-            if (pickedDate != null) {
-              setState(() => item.expireDate.text = pickedDate);
-            }
-          },
-          child: AppTextField(
-            textInputAction: TextInputAction.next,
-            enabled: false,
-            color: AppColors.apptextFieldStyleTextColor,
-            controller: item.expireDate,
-            hintText: "Expiring date",
-            fillColor: const Color(0xffF9F9F9),
-            isFilled: true,
-            isLabled: false,
-            keyboardType: TextInputType.text,
-            label: "",
-          ),
-        ),
+        _buildDatePicker(item),
       ],
     );
   }
 
-  Widget _formLabel(BuildContext context, String label, {Widget? action}) {
+  Widget _buildImagePicker(PantryItem item) {
+    return Material(
+      color: Colors.transparent,
+      shape: const CircleBorder(),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: () async {
+          item.file = await ImagePickerService.showImageSourceDialog(context);
+          setState(() {});
+        },
+        child: Stack(
+          alignment: Alignment.center,
+          clipBehavior: Clip.none,
+          children: [
+            CircleAvatar(
+              radius: t(24),
+              backgroundColor: Colors.grey.shade200,
+              child: Icon(Icons.person, color: Colors.grey, size: t(24)),
+            ),
+            if (item.file != null)
+              CircleAvatar(
+                radius: t(24),
+                backgroundImage: FileImage(item.file!),
+                backgroundColor: Colors.transparent,
+              ),
+            Positioned(
+              bottom: h(-2),
+              right: w(-4),
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+                padding: gapAll(4),
+                child: CircleAvatar(
+                  radius: t(8),
+                  backgroundColor: Colors.blue,
+                  child: Icon(Icons.add, size: t(12), color: Colors.white),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDatePicker(PantryItem item) {
+    return GestureDetector(
+      onTap: () async {
+        final pickedDate = await DatePickerService.pickDate(context: context);
+        if (pickedDate != null) {
+          setState(() => item.expireDate.text = pickedDate);
+        }
+      },
+      child: AppTextField(
+        textInputAction: TextInputAction.next,
+        enabled: false,
+        color: AppColors.apptextFieldStyleTextColor,
+        controller: item.expireDate,
+        hintText: "Expiring date",
+        fillColor: const Color(0xFFF9F9F9),
+        isFilled: true,
+        isLabled: false,
+        keyboardType: TextInputType.text,
+        label: '',
+      ),
+    );
+  }
+
+  Widget _buildFormLabel(String label, {Widget? action}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -423,7 +380,8 @@ class _AddItemPageState extends State<AddItemPage> {
           label,
           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
             fontSize: t(15),
-            color: Colors.black,
+            color: Colors.black87,
+            fontWeight: FontWeight.w600,
           ),
         ),
         if (action != null) action,
@@ -431,39 +389,7 @@ class _AddItemPageState extends State<AddItemPage> {
     );
   }
 
-  Widget pantryItemTile({required String label, required Widget child}) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _formLabel(context, label),
-          SizedBox(height: h(10)),
-          child,
-        ],
-      ),
-    );
-  }
-
-  AppBar _buildAppBar(BuildContext context) {
-    return AppBar(
-      leadingWidth: w(55),
-      centerTitle: true,
-      leading: Row(
-        children: [
-          SizedBox(width: w(16)),
-          CircularIconButton(
-            iconAsset: AppAssets.backArrowiOS,
-            onTap: () {
-              _handleBackNavigation();
-            },
-          ),
-        ],
-      ),
-      title: Text("Add Item", style: Theme.of(context).textTheme.headlineLarge),
-    );
-  }
-
-  Center _addMoreButton(BuildContext context) {
+  Widget _buildAddMoreButton() {
     return Center(
       child: SizedBox(
         width: w(188),
@@ -472,16 +398,16 @@ class _AddItemPageState extends State<AddItemPage> {
           onPressed: _addNewItem,
           icon: SvgPicture.asset(
             AppAssets.addSvg,
-            // ignore: deprecated_member_use
             color: AppColors.primaryColor,
             width: w(18),
             height: h(18),
           ),
           label: Text(
             "Tap to add more",
-            style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
               fontSize: t(15),
               color: AppColors.primaryColor,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ),
@@ -489,52 +415,64 @@ class _AddItemPageState extends State<AddItemPage> {
     );
   }
 
-  void goBack() {
+  AppBar _buildAppBar() {
+    return AppBar(
+      leadingWidth: w(55),
+      centerTitle: true,
+      leading: Row(
+        children: [
+          SizedBox(width: w(16)),
+          CircularIconButton(
+            iconAsset: AppAssets.backArrowiOS,
+            onTap: _handleBackNavigation,
+          ),
+        ],
+      ),
+      title: Text("Add Item", style: Theme.of(context).textTheme.headlineLarge),
+    );
+  }
+
+  void _handleBackNavigation() {
+    if (_items.isEmpty) {
+      _goBack();
+      return;
+    }
+
+    final hasUserInput = _items.any(
+      (item) =>
+          item.file != null ||
+          item.nameController.text.trim().isNotEmpty ||
+          item.qtyController.text.trim().isNotEmpty ||
+          (item.unit != null && item.unit!.isNotEmpty) ||
+          (item.pantry != null && item.pantry!.isNotEmpty) ||
+          item.expireDate.text.isNotEmpty,
+    );
+
+    if (hasUserInput) {
+      _showConfirmDialog(
+        title: "Go Back",
+        subtitle:
+            "If you go back, the items you just added will be removed. Continue?",
+        onConfirm: () {
+          Navigator.of(context).pop();
+          _goBack();
+        },
+      );
+    } else {
+      _goBack();
+    }
+  }
+
+  void _goBack() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final router = GoRouter.of(context);
       if (router.canPop()) {
         router.pop();
-      } else {
-        debugPrint('⚠️ No route to pop. Ignoring.');
       }
     });
   }
 
-  void _handleBackNavigation() {
-    final hasItems = _items.isNotEmpty;
-
-    if (hasItems) {
-      final hasUserInput = _items.any(
-        (item) =>
-            item.file != null ||
-            item.nameController.text.trim().isNotEmpty ||
-            item.qtyController.text.trim().isNotEmpty ||
-            (item.unit != null && item.unit!.isNotEmpty) ||
-            (item.pantry != null && item.pantry!.isNotEmpty) ||
-            item.expireDate.text.isNotEmpty,
-      );
-
-      if (hasUserInput) {
-        _showConfirmDialog(
-          context,
-          title: "Go Back",
-          subtitle:
-              "If you go back, the items you just added will be removed. Continue?",
-          onConfirm: () {
-            Navigator.of(context).pop();
-            goBack();
-          },
-        );
-      } else {
-        goBack();
-      }
-    } else {
-      goBack();
-    }
-  }
-
-  Future<void> _showConfirmDialog(
-    BuildContext context, {
+  Future<void> _showConfirmDialog({
     required String title,
     required String subtitle,
     required VoidCallback onConfirm,
@@ -550,8 +488,8 @@ class _AddItemPageState extends State<AddItemPage> {
     );
   }
 
-  Future<String> compressImage(File imageFile) async {
-    var result = await FlutterImageCompress.compressWithList(
+  Future<String> _compressImage(File imageFile) async {
+    final result = await FlutterImageCompress.compressWithList(
       imageFile.readAsBytesSync(),
       minWidth: 800,
       minHeight: 600,
@@ -562,10 +500,6 @@ class _AddItemPageState extends State<AddItemPage> {
       format: CompressFormat.jpeg,
       keepExif: false,
     );
-    String base64Thumbnail = base64Encode(result);
-
-    String dataUri = "data:image/jpeg;base64,$base64Thumbnail";
-
-    return dataUri;
+    return "data:image/jpeg;base64,${base64Encode(result)}";
   }
 }

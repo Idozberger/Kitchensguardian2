@@ -17,6 +17,7 @@ final class PlannerState {
   final bool addingToWeeklyPlan;
   final bool startRecipe;
   final bool isFinishingRecipe;
+  final bool isRecipeFinished;
   final String? errorMessage;
   final String successMessage;
   final int mealTypeSelectedIndex;
@@ -34,6 +35,7 @@ final class PlannerState {
     this.loadingPlans = true,
     this.isFinishingRecipe = false,
     this.addingToWeeklyPlan = false,
+    this.isRecipeFinished = false,
     this.errorMessage,
     this.successMessage = "",
     this.dateBasedPlan = const [],
@@ -58,6 +60,7 @@ final class PlannerState {
     bool? loadingPlans,
     bool? addingToWeeklyPlan,
     String? errorMessage,
+    bool? isRecipeFinished,
     String? successMessage,
     List<Map<String, dynamic>>? doneSteps,
     int? mealTypeSelectedIndex,
@@ -86,6 +89,7 @@ final class PlannerState {
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
       loadingPlans: loadingPlans ?? this.loadingPlans,
+      isRecipeFinished: isRecipeFinished ?? this.isRecipeFinished,
     );
   }
 }

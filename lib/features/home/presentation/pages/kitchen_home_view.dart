@@ -1,7 +1,3 @@
-// ignore_for_file: use_build_context_synchronously
-
-import 'dart:async';
-import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
@@ -9,6 +5,7 @@ import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
+import 'package:foodkitchen/core/services/document_scanning/document_scanning_service.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
@@ -21,11 +18,9 @@ import 'package:foodkitchen/features/home/presentation/widgets/pantry_section.da
 import 'package:foodkitchen/features/home/presentation/widgets/smart_cart.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/suggestion_recipes.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/tonight_recipe.dart';
-import 'package:google_mlkit_document_scanner/google_mlkit_document_scanner.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class KitchenHomeView extends StatefulWidget {
   final HomeState state;
@@ -54,152 +49,113 @@ class _KitchenHomeViewState extends State<KitchenHomeView> {
         child: Column(
           children: [
             gap(height: 14),
-
-            UpperTile(
-              widget: SizedBox(
-                height: h(40),
-                child: ElevatedButton.icon(
-                  icon: SvgPicture.asset(
-                    AppAssets.scanSvg,
-                    color: Colors.black,
-                  ),
-                  onPressed: () async {
-                    PermissionStatus status = await Permission.camera.status;
-
-                    if (!status.isGranted) {
-                      final result = await Permission.camera.request();
-                      if (!result.isGranted) {
-                        if (result.isPermanentlyDenied) {
-                          openAppSettings();
-                        }
-                        return;
-                      }
-                    }
-
-                    final documentOptions = DocumentScannerOptions(
-                      documentFormat: DocumentFormat.jpeg,
-                      mode: ScannerMode.base,
-                      pageLimit: 1,
-                      isGalleryImport: false,
-                    );
-
-                    final documentScanner = DocumentScanner(
-                      options: documentOptions,
-                    );
-
-                    try {
-                      final DocumentScanningResult result =
-                          await documentScanner.scanDocument();
-
-                      if (result.images.isNotEmpty) {
-                        final image = result.images.first;
-
-                        context.pushNamed(
-                          Routes.capturedImageDetails,
-                          extra: {"image_path": image},
-                        );
-                      }
-                    } catch (e) {
-                      debugPrint("Document scan error: $e");
-                    } finally {
-                      documentScanner.close();
-                    }
-                  },
-
-                  label: Text(
-                    "Scan Receipt",
-                    style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                      fontSize: t(12),
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            gap(height: 8),
+            _buildScanReceiptButton(context),
+            gap(height: 12),
             PantrySection(state: state),
-            gap(height: 8),
-            ActionTile(
-              title: "Find Recipes",
-              buttonText: "Find Recipes",
-              svgPath: AppAssets.findRecipesSvg,
-              onTap: () {
-                final date = DateFormat('dd/MM/yyyy').format(DateTime.now());
-                context.pushNamed(
-                  Routes.generateRecipes,
-                  extra: {
-                    "selected_date": date,
-                    "selected_meal_type": "Breakfast",
-                    "is_plan": false,
-                    "is_edit": false,
-                  },
-                );
-              },
-            ),
-            gap(height: 8),
-
-            BlocListener<HomeBloc, HomeState>(
-              listenWhen: (previous, current) {
-                return previous.dateBasedPlan != current.dateBasedPlan;
-              },
-              listener: (context, state) {
-                context.read<HomeBloc>().add(GenerateGroceryList());
-              },
-              child: Column(
-                children: [
-                  if (state.showGroceryShimmer)
-                    Padding(
-                      padding: gapOnly(bottom: 8),
-                      child: _buildGroceryShimmer(),
-                    )
-                  else
-                    AnimatedOpacity(
-                      opacity: state.groceryList.isEmpty ? 0.0 : 1.0,
-                      duration: const Duration(milliseconds: 800),
-                      curve: Curves.easeOut,
-                      child: state.groceryList.isEmpty
-                          ? const SizedBox.shrink()
-                          : Padding(
-                              padding: gapOnly(bottom: 8),
-                              child: SmartCartTile(
-                                infoText: state.groceryList.length > 3
-                                    ? "+${state.groceryList.length - 3} tap to see more"
-                                    : null,
-                                isGenerated: state.groceryList.isNotEmpty,
-                                previewItems: state.groceryList
-                                    .take(3)
-                                    .toList(),
-                                onGenerate: widget.onGeneratePressed,
-                              ),
-                            ),
-                    ),
-                ],
-              ),
-            ),
-
-            if (state.loadingRecipeSuggestion)
-              Padding(
-                padding: gapOnly(bottom: 8),
-                child: _buildSuggestionShimmer(),
-              )
-            else if (state.suggestedRecipe.isNotEmpty)
-              Padding(
-                padding: gapOnly(bottom: 8),
-                child: const SuggestionRecipes(),
-              ),
-
-            if (state.loadingWeeklyPlans)
-              Padding(
-                padding: gapOnly(bottom: 8),
-                child: _buildTonightShimmer(),
-              )
-            else if (state.dateBasedPlan.isNotEmpty)
-              const TonightRecipeWidget(),
-
+            gap(height: 12),
+            _buildFindRecipesButton(context),
+            gap(height: 12),
+            _buildGrocerySection(state),
+            gap(height: 12),
+            _buildRecipeSuggestionsSection(state),
+            gap(height: 12),
+            _buildTonightRecipeSection(state),
             gap(height: 14),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildScanReceiptButton(BuildContext context) {
+    return UpperTile(
+      widget: SizedBox(
+        height: h(40),
+        child: ElevatedButton.icon(
+          icon: SvgPicture.asset(AppAssets.scanSvg, color: Colors.black),
+          onPressed: () => scanDocument(context),
+          label: Text(
+            "Scan Receipt",
+            style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+              fontSize: t(12),
+              color: Colors.black,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void scanDocument(BuildContext context) async {
+    await DocumentScannerService().scanDocument(context);
+  }
+
+  Widget _buildFindRecipesButton(BuildContext context) {
+    return ActionTile(
+      title: "Find Recipes",
+      buttonText: "Find Recipes",
+      svgPath: AppAssets.findRecipesSvg,
+      onTap: () => navigateToGenerateRecipes(),
+    );
+  }
+
+  void navigateToGenerateRecipes() {
+    final date = DateFormat('dd/MM/yyyy').format(DateTime.now());
+    context.pushNamed(
+      Routes.generateRecipes,
+      extra: {
+        "selected_date": date,
+        "selected_meal_type": "Breakfast",
+        "is_plan": false,
+        "is_edit": false,
+      },
+    );
+  }
+
+  Widget _buildGrocerySection(HomeState state) {
+    return BlocListener<HomeBloc, HomeState>(
+      listenWhen: (previous, current) =>
+          previous.dateBasedPlan != current.dateBasedPlan,
+      listener: (context, state) {
+        context.read<HomeBloc>().add(GenerateGroceryList());
+      },
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 400),
+        child: state.showGroceryShimmer
+            ? _buildGroceryShimmer()
+            : state.groceryList.isEmpty
+            ? const SizedBox.shrink()
+            : SmartCartTile(
+                infoText: state.groceryList.length > 3
+                    ? "+${state.groceryList.length - 3} tap to see more"
+                    : null,
+                isGenerated: true,
+                previewItems: state.groceryList.take(3).toList(),
+                onGenerate: widget.onGeneratePressed,
+              ),
+      ),
+    );
+  }
+
+  Widget _buildRecipeSuggestionsSection(HomeState state) {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 400),
+      child: state.loadingRecipeSuggestion
+          ? _buildSuggestionShimmer()
+          : state.suggestedRecipe.isNotEmpty
+          ? const SuggestionRecipes()
+          : const SizedBox.shrink(),
+    );
+  }
+
+  Widget _buildTonightRecipeSection(HomeState state) {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 400),
+      child: state.loadingWeeklyPlans
+          ? _buildTonightShimmer()
+          : state.dateBasedPlan.isNotEmpty
+          ? const TonightRecipeWidget()
+          : const SizedBox.shrink(),
     );
   }
 
@@ -212,7 +168,7 @@ class _KitchenHomeViewState extends State<KitchenHomeView> {
           height: h(100),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(h(12)),
           ),
         ),
       ),
@@ -229,30 +185,30 @@ class _KitchenHomeViewState extends State<KitchenHomeView> {
               Shimmer.fromColors(
                 baseColor: Colors.grey.shade300,
                 highlightColor: Colors.grey.shade100,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    height: h(20),
-                    width: w(120),
+                child: Container(
+                  height: h(20),
+                  width: w(120),
+                  decoration: BoxDecoration(
                     color: Colors.white,
+                    borderRadius: BorderRadius.circular(h(8)),
                   ),
                 ),
               ),
               Shimmer.fromColors(
                 baseColor: Colors.grey.shade300,
                 highlightColor: Colors.grey.shade100,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    height: h(24),
-                    width: h(24),
+                child: Container(
+                  height: h(24),
+                  width: h(24),
+                  decoration: BoxDecoration(
                     color: Colors.white,
+                    borderRadius: BorderRadius.circular(h(8)),
                   ),
                 ),
               ),
             ],
           ),
-          SizedBox(height: h(10)),
+          SizedBox(height: h(12)),
           Shimmer.fromColors(
             baseColor: Colors.grey.shade300,
             highlightColor: Colors.grey.shade100,
@@ -261,7 +217,7 @@ class _KitchenHomeViewState extends State<KitchenHomeView> {
               height: h(260),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(h(14)),
               ),
             ),
           ),
@@ -281,56 +237,50 @@ class _KitchenHomeViewState extends State<KitchenHomeView> {
               Shimmer.fromColors(
                 baseColor: Colors.grey.shade300,
                 highlightColor: Colors.grey.shade100,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    height: h(20),
-                    width: w(120),
+                child: Container(
+                  height: h(20),
+                  width: w(120),
+                  decoration: BoxDecoration(
                     color: Colors.white,
+                    borderRadius: BorderRadius.circular(h(8)),
                   ),
                 ),
               ),
               Shimmer.fromColors(
                 baseColor: Colors.grey.shade300,
                 highlightColor: Colors.grey.shade100,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    height: h(24),
-                    width: h(24),
+                child: Container(
+                  height: h(24),
+                  width: h(24),
+                  decoration: BoxDecoration(
                     color: Colors.white,
+                    borderRadius: BorderRadius.circular(h(8)),
                   ),
                 ),
               ),
             ],
           ),
-
-          SizedBox(height: h(10)),
-
+          SizedBox(height: h(12)),
           SizedBox(
             height: h(200),
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: 2,
               separatorBuilder: (_, __) => SizedBox(width: w(14)),
-              itemBuilder: (_, __) {
-                return Shimmer.fromColors(
-                  baseColor: Colors.grey.shade300,
-                  highlightColor: Colors.grey.shade100,
-                  child: Container(
-                    width: w(260),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(14),
-                    ),
+              itemBuilder: (_, __) => Shimmer.fromColors(
+                baseColor: Colors.grey.shade300,
+                highlightColor: Colors.grey.shade100,
+                child: Container(
+                  width: w(260),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(h(14)),
                   ),
-                );
-              },
+                ),
+              ),
             ),
           ),
-
-          SizedBox(height: h(10)),
-
+          SizedBox(height: h(12)),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(3, (index) {
@@ -344,7 +294,7 @@ class _KitchenHomeViewState extends State<KitchenHomeView> {
                     height: h(8),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(w(4)),
                     ),
                   ),
                 ),
@@ -359,19 +309,22 @@ class _KitchenHomeViewState extends State<KitchenHomeView> {
 
 class NoKitchenView extends StatelessWidget {
   const NoKitchenView({super.key});
+
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: gapOnly(left: 20, right: 20, bottom: 20, top: 14),
-    child: Column(
-      children: [
-        const CreateOrJoinKitchenTile(),
-        gap(height: 140),
-        EmptyStateWidget(
-          context,
-          imagePath: AppAssets.noKitchenFound,
-          title: 'No Kitchen found',
-        ),
-      ],
-    ),
-  );
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: gapOnly(left: 20, right: 20, bottom: 20, top: 14),
+      child: Column(
+        children: [
+          const CreateOrJoinKitchenTile(),
+          gap(height: 140),
+          EmptyStateWidget(
+            context,
+            imagePath: AppAssets.noKitchenFound,
+            title: 'No Kitchen found',
+          ),
+        ],
+      ),
+    );
+  }
 }

@@ -15,10 +15,10 @@ class GenericButtonWidget extends StatelessWidget {
   final BorderRadiusGeometry? borderRadius;
   final Color? color;
   final bool isDisabled;
+
   const GenericButtonWidget({
     super.key,
     required this.onPressed,
-
     required this.text,
     this.backgroundColor,
     this.textStyle,
@@ -38,39 +38,61 @@ class GenericButtonWidget extends StatelessWidget {
       width: width,
       height: h(height!),
       child: isOutlined
-          ? OutlinedButton(
-              onPressed: onPressed,
-              child: Text(
-                text,
-                style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                  fontSize: t(12),
-                  color: AppColors.primaryColor,
-                ),
-              ),
-            )
-          : ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: color,
-                shape: borderRadius != null
-                    ? RoundedRectangleBorder(borderRadius: borderRadius!)
-                    : null,
-                disabledBackgroundColor: AppColors.disabledPrimaryColor,
-              ),
-              onPressed: isDisabled ? null : onPressed,
-              child: isLoading
-                  ? Transform.scale(
-                      scale: 0.7,
-                      child: CircularProgressIndicator(),
-                    )
-                  : Text(
-                      text,
-                      style: Theme.of(context).textTheme.headlineMedium!
-                          .copyWith(
-                            fontSize: t(12),
-                            color: color != null ? Colors.white : Colors.black,
-                          ),
-                    ),
-            ),
+          ? _buildOutlinedButton(context)
+          : _buildElevatedButton(context),
     );
+  }
+
+  Widget _buildOutlinedButton(BuildContext context) {
+    return OutlinedButton(
+      onPressed: isDisabled ? null : onPressed,
+      child: Text(
+        text,
+        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+          fontSize: t(12),
+          color: AppColors.primaryColor,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildElevatedButton(BuildContext context) {
+    return ElevatedButton(
+      style: _buildButtonStyle(),
+      onPressed: isDisabled ? null : onPressed,
+      child: isLoading ? _buildLoadingIndicator() : _buildButtonText(context),
+    );
+  }
+
+  ButtonStyle _buildButtonStyle() {
+    return ElevatedButton.styleFrom(
+      backgroundColor: color,
+      shape: borderRadius != null
+          ? RoundedRectangleBorder(borderRadius: borderRadius!)
+          : null,
+      disabledBackgroundColor: AppColors.disabledPrimaryColor,
+    );
+  }
+
+  Widget _buildLoadingIndicator() {
+    return Transform.scale(
+      scale: 0.7,
+      child: const CircularProgressIndicator(),
+    );
+  }
+
+  Widget _buildButtonText(BuildContext context) {
+    return Text(
+      text,
+      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+        fontSize: t(12),
+        color: _getTextColor(),
+      ),
+    );
+  }
+
+  Color _getTextColor() {
+    if (isDisabled) return Colors.grey;
+    return color != null ? Colors.white : Colors.black;
   }
 }

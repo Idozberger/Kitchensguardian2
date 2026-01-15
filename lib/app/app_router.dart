@@ -110,7 +110,7 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: Routes.emailVerifiedSuccess,
       pageBuilder: (context, state) =>
-          buildPage(state.pageKey, EmailVerfiedSuccesPage()),
+          buildPage(state.pageKey, EmailVerifiedSuccessPage()),
     ),
     GoRoute(
       path: Routes.dashboard,

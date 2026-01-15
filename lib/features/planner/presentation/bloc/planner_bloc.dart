@@ -780,7 +780,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     MarkRecipeFinishedEvent event,
     Emitter<PlannerState> emit,
   ) async {
-    emit(state.copyWith(isFinishingRecipe: true));
+    emit(state.copyWith(isFinishingRecipe: true, isRecipeFinished: false));
     final res = await _markRecipeFinished(
       MarkRecipeFinishedParams(
         kitchenId: event.kitchenId,
@@ -795,11 +795,18 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
             errorMessage: failure.message,
             isFinishingRecipe: false,
             startRecipe: false,
+            isRecipeFinished: false,
           ),
         );
       },
       (successMessage) async {
-        emit(state.copyWith(isFinishingRecipe: false, startRecipe: false));
+        emit(
+          state.copyWith(
+            isFinishingRecipe: false,
+            startRecipe: false,
+            isRecipeFinished: true,
+          ),
+        );
         AppToast.show(
           successMessage,
           ToastType.success,

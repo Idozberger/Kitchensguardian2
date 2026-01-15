@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
@@ -25,6 +27,7 @@ class SignUpPage extends StatefulWidget {
 class _SignUpPageState extends State<SignUpPage> {
   late UserCubit _userCubit;
   final _formKey = GlobalKey<FormState>();
+
   @override
   void initState() {
     super.initState();
@@ -48,7 +51,7 @@ class _SignUpPageState extends State<SignUpPage> {
     });
   }
 
-  void updateObsecure() {
+  void updateObscure() {
     setState(() {
       _isObscure = !_isObscure;
     });
@@ -60,6 +63,7 @@ class _SignUpPageState extends State<SignUpPage> {
     _lastNameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -110,43 +114,51 @@ class _SignUpPageState extends State<SignUpPage> {
               padding: gapSymmetric(horizontal: 20, vertical: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Form(
                     key: _formKey,
                     child: Column(
                       children: [
-                        AppTextField(
-                          controller: _firstNameController,
-                          label: "First name",
-                          textInputAction: TextInputAction.next,
-                          hintText: "Enter your first name",
+                        Row(
+                          children: [
+                            Expanded(
+                              child: AppTextField(
+                                controller: _firstNameController,
+                                label: "First name",
+                                textInputAction: TextInputAction.next,
+                                hintText: "First name",
+                              ),
+                            ),
+                            SizedBox(width: w(12)),
+                            Expanded(
+                              child: AppTextField(
+                                controller: _lastNameController,
+                                label: "Last name",
+                                textInputAction: TextInputAction.next,
+                                hintText: "Last name",
+                              ),
+                            ),
+                          ],
                         ),
                         SizedBox(height: h(20)),
-                        AppTextField(
-                          controller: _lastNameController,
-                          label: "Last name",
-                          textInputAction: TextInputAction.next,
-                          hintText: "Enter your last name",
-                        ),
-                        SizedBox(height: h(20)),
+
                         AppTextField(
                           controller: _emailController,
                           label: "Email address",
                           keyboardType: TextInputType.emailAddress,
                           textInputAction: TextInputAction.next,
-                          hintText: "Enter your email",
+                          hintText: "your.email@example.com",
                         ),
-
                         SizedBox(height: h(20)),
+
                         AppTextField(
                           controller: _passwordController,
                           label: "Password",
                           textInputAction: TextInputAction.next,
-                          hintText: "Enter your password",
+                          hintText: "At least 6 characters",
                           obscureText: _isObscure,
                           suffixIcon: GestureDetector(
-                            onTap: () => updateObsecure(),
+                            onTap: () => updateObscure(),
                             child: Padding(
                               padding: gapSymmetric(
                                 vertical: 13,
@@ -157,18 +169,18 @@ class _SignUpPageState extends State<SignUpPage> {
                                     ? AppAssets.eyeVisibilitySvg
                                     : AppAssets.eyeSvg,
                                 height: h(16),
-                                // ignore: deprecated_member_use
                                 color: AppColors.greyColor,
                               ),
                             ),
                           ),
                         ),
                         SizedBox(height: h(20)),
+
                         AppTextField(
                           controller: _confirmPasswordController,
                           label: "Confirm Password",
                           textInputAction: TextInputAction.done,
-                          hintText: "Enter your password",
+                          hintText: "Re-enter your password",
                           obscureText: _isConfirmPasswordObscure,
                           suffixIcon: GestureDetector(
                             onTap: () => updateIsConfirmPasswordObscure(),
@@ -182,7 +194,6 @@ class _SignUpPageState extends State<SignUpPage> {
                                     ? AppAssets.eyeVisibilitySvg
                                     : AppAssets.eyeSvg,
                                 height: h(16),
-                                // ignore: deprecated_member_use
                                 color: AppColors.greyColor,
                               ),
                             ),
@@ -193,167 +204,67 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
 
                   Padding(
-                    padding: gapOnly(top: 20, bottom: 12),
+                    padding: gapOnly(top: 28, bottom: 16),
                     child: GenericButtonWidget(
-                      onPressed: () {
-                        String email = _emailController.text.trim();
-                        String password = _passwordController.text.trim();
-                        String confirmPassword = _confirmPasswordController.text
-                            .trim();
-                        String firstName = _firstNameController.text.trim();
-                        String lastName = _lastNameController.text.trim();
-
-                        if (firstName.isEmpty) {
-                          AppToast.show(
-                            "First name is required",
-                            ToastType.error,
-                          );
-                          return;
-                        }
-                        if (firstName.length < 2) {
-                          AppToast.show(
-                            "First name must be at least 2 characters",
-                            ToastType.error,
-                          );
-                          return;
-                        }
-
-                        if (lastName.isEmpty) {
-                          AppToast.show(
-                            "Last name is required",
-                            ToastType.error,
-                          );
-                          return;
-                        }
-                        if (lastName.length < 2) {
-                          AppToast.show(
-                            "Last name must be at least 2 characters",
-                            ToastType.error,
-                          );
-                          return;
-                        }
-
-                        if (email.isEmpty) {
-                          AppToast.show("Email is required", ToastType.error);
-                          return;
-                        }
-                        if (!RegExp(
-                          r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$",
-                        ).hasMatch(email)) {
-                          AppToast.show(
-                            "Please enter a valid email address",
-                            ToastType.error,
-                          );
-                          return;
-                        }
-
-                        if (password.isEmpty) {
-                          AppToast.show(
-                            "Password is required",
-                            ToastType.error,
-                          );
-                          return;
-                        }
-                        if (password.length < 6) {
-                          AppToast.show(
-                            "Password must be at least 6 characters",
-                            ToastType.error,
-                          );
-                          return;
-                        }
-                        if (confirmPassword.isEmpty) {
-                          AppToast.show(
-                            "Confirm Password is required",
-                            ToastType.error,
-                          );
-                          return;
-                        }
-                        if (confirmPassword.length < 6) {
-                          AppToast.show(
-                            "Confirm Password must be at least 6 characters",
-                            ToastType.error,
-                          );
-                          return;
-                        }
-                        if (confirmPassword != password) {
-                          AppToast.show(
-                            "Passwords do not match",
-                            ToastType.error,
-                          );
-                          return;
-                        }
-
-                        context.read<AuthBloc>().add(
-                          AuthSignUp(
-                            email: email,
-                            firstName: firstName,
-                            lastName: lastName,
-                            password: password,
-                          ),
-                        );
-                      },
+                      onPressed: () => _handleSignUp(context, state),
                       text: "Sign up",
                       isLoading: state is AuthLoading,
                     ),
                   ),
-                  Center(
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(h(10)),
-                      onTap: state is GoogleAuthsignUpLoading
-                          ? null
-                          : () {
-                              context.read<AuthBloc>().add(GoogleSignUpEvent());
-                            },
-                      child: Ink(
-                        height: h(48),
-                        width: w(200),
-                        padding: gapAll(10),
-                        decoration: BoxDecoration(
-                          color: Color(0xffF9F8F8),
-                          borderRadius: BorderRadius.circular(h(10)),
+
+                  Padding(
+                    padding: gapSymmetric(vertical: 8),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Container(height: 1, color: Colors.grey[300]),
                         ),
-                        child: (state is GoogleAuthsignUpLoading)
-                            ? FittedBox(
-                                child: Align(
-                                  alignment: Alignment.center,
-                                  child: CircularProgressIndicator(
-                                    color: AppColors.primaryColor,
-                                  ),
+                        Padding(
+                          padding: gapSymmetric(horizontal: 12),
+                          child: Text(
+                            "Or",
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Colors.grey[600],
+                                  fontSize: t(12),
                                 ),
-                              )
-                            : Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset(
-                                    AppAssets.googlePng,
-                                    height: h(22),
-                                    width: w(22),
-                                  ),
-                                  SizedBox(width: w(6)),
-                                  Text(
-                                    "Sign Up with Google",
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium!
-                                        .copyWith(
-                                          fontSize: t(12),
-                                          color: Color(0xff757575),
-                                        ),
-                                  ),
-                                ],
-                              ),
-                      ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Container(height: 1, color: Colors.grey[300]),
+                        ),
+                      ],
                     ),
                   ),
-                  gapVertical(10),
-                  Center(
-                    child: TextspanWidget(
-                      buttonColor: AppColors.primaryColor,
-                      callback: () {
-                        Navigator.of(context).pop();
+                  SocialAuthButton(
+                    isLoading: state is GoogleAuthsignUpLoading,
+                    iconPath: AppAssets.googleSvg,
+                    text: "Continue with Google",
+                    onTap: () {
+                      context.read<AuthBloc>().add(GoogleSignUpEvent());
+                    },
+                  ),
+                  if (Platform.isIOS)
+                    SocialAuthButton(
+                      isLoading: state is AppleSignUpLoading,
+                      iconPath: AppAssets.appleSvg,
+                      text: "Continue with Apple",
+                      onTap: () {
+                        context.read<AuthBloc>().add(AppleSignUpEvent());
                       },
-                      text: "Already have an account?",
-                      buttonText: "Login",
+                    ),
+
+                  Padding(
+                    padding: gapOnly(top: 20),
+                    child: Center(
+                      child: TextspanWidget(
+                        buttonColor: AppColors.primaryColor,
+                        callback: () {
+                          Navigator.of(context).pop();
+                        },
+                        text: "Already have an account?",
+                        buttonText: "Login",
+                      ),
                     ),
                   ),
                 ],
@@ -362,6 +273,137 @@ class _SignUpPageState extends State<SignUpPage> {
           ),
         );
       },
+    );
+  }
+
+  void _handleSignUp(BuildContext context, AuthState state) {
+    String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
+    String confirmPassword = _confirmPasswordController.text.trim();
+    String firstName = _firstNameController.text.trim();
+    String lastName = _lastNameController.text.trim();
+
+    if (firstName.isEmpty) {
+      AppToast.show("First name is required", ToastType.error);
+      return;
+    }
+    if (firstName.length < 2) {
+      AppToast.show(
+        "First name must be at least 2 characters",
+        ToastType.error,
+      );
+      return;
+    }
+
+    if (lastName.isEmpty) {
+      AppToast.show("Last name is required", ToastType.error);
+      return;
+    }
+    if (lastName.length < 2) {
+      AppToast.show("Last name must be at least 2 characters", ToastType.error);
+      return;
+    }
+
+    if (email.isEmpty) {
+      AppToast.show("Email is required", ToastType.error);
+      return;
+    }
+    if (!RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$").hasMatch(email)) {
+      AppToast.show("Please enter a valid email address", ToastType.error);
+      return;
+    }
+
+    if (password.isEmpty) {
+      AppToast.show("Password is required", ToastType.error);
+      return;
+    }
+    if (password.length < 6) {
+      AppToast.show("Password must be at least 6 characters", ToastType.error);
+      return;
+    }
+    if (confirmPassword.isEmpty) {
+      AppToast.show("Confirm Password is required", ToastType.error);
+      return;
+    }
+    if (confirmPassword.length < 6) {
+      AppToast.show(
+        "Confirm Password must be at least 6 characters",
+        ToastType.error,
+      );
+      return;
+    }
+    if (confirmPassword != password) {
+      AppToast.show("Passwords do not match", ToastType.error);
+      return;
+    }
+
+    context.read<AuthBloc>().add(
+      AuthSignUp(
+        email: email,
+        firstName: firstName,
+        lastName: lastName,
+        password: password,
+      ),
+    );
+  }
+}
+
+class SocialAuthButton extends StatelessWidget {
+  final VoidCallback? onTap;
+  final bool isLoading;
+  final String text;
+  final String iconPath;
+
+  const SocialAuthButton({
+    super.key,
+    required this.onTap,
+    required this.isLoading,
+    required this.text,
+    required this.iconPath,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: gapSymmetric(vertical: 4),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(h(10)),
+        onTap: isLoading ? null : onTap,
+        child: Ink(
+          height: h(48),
+          decoration: BoxDecoration(
+            color: Colors.grey[50],
+            border: Border.all(color: Colors.grey[300]!, width: 1),
+            borderRadius: BorderRadius.circular(h(10)),
+          ),
+          child: isLoading
+              ? Center(
+                  child: SizedBox(
+                    width: w(24),
+                    height: h(24),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.primaryColor,
+                    ),
+                  ),
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SvgPicture.asset(iconPath, height: h(20), width: w(20)),
+                    SizedBox(width: w(10)),
+                    Text(
+                      text,
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                        fontSize: t(14),
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[800],
+                      ),
+                    ),
+                  ],
+                ),
+        ),
+      ),
     );
   }
 }

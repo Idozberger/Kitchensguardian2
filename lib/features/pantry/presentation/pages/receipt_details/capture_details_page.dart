@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -10,6 +9,7 @@ import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/services/date_picker/date_picker_service.dart';
+import 'package:foodkitchen/core/services/document_scanning/document_scanning_service.dart';
 import 'package:foodkitchen/core/services/image_picker/image_picker_service.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/date_format_to_string.dart';
@@ -30,9 +30,7 @@ import 'package:foodkitchen/features/pantry/presentation/pages/receipt_details/a
 import 'package:foodkitchen/features/pantry/presentation/pages/receipt_details/confirm_button.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/receipt_details/image_preview.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_mlkit_document_scanner/google_mlkit_document_scanner.dart';
 import 'package:lottie/lottie.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class CaptureDetailsPage extends StatefulWidget {
   final String imagePath;
@@ -43,194 +41,183 @@ class CaptureDetailsPage extends StatefulWidget {
 }
 
 class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
-  late PantryBloc pantryBloc;
-  late UserCubit userCubit;
+  late PantryBloc _pantryBloc;
+  late UserCubit _userCubit;
   List<PantryItem> _items = [];
   String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
-    pantryBloc = context.read<PantryBloc>();
-    userCubit = context.read<UserCubit>();
-    pantryBloc.add(ScanReceiptEvent(filePath: widget.imagePath));
+    _pantryBloc = context.read<PantryBloc>();
+    _userCubit = context.read<UserCubit>();
+    _pantryBloc.add(ScanReceiptEvent(filePath: widget.imagePath));
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<PantryBloc, PantryState>(
-      listener: (context, state) {
-        if (state is PantryFailure) {
-          setState(() => _errorMessage = state.errorMessage);
-        } else if (state is PantrySuccess) {
-          AppToast.show(
-            "Items added to your kitchen successfully!",
-            ToastType.success,
-          );
-          context.go(Routes.dashboard);
-        } else if (state is ScanReceiptLoaded) {
-          _initializeItems(state.scanReceipt);
-        }
-      },
-
-      builder: (context, state) {
-        if (_errorMessage != null) {
-          return Scaffold(
-            appBar: _buildAppBar(),
-            body: _buildErrorState(_errorMessage!),
-          );
-        }
-
-        return Scaffold(
-          appBar: _buildAppBar(),
-          body: SafeArea(
-            child: switch (state) {
-              PantryLoading() => Center(
-                child: Lottie.asset(
-                  AppAssets.loader,
-
-                  height: h(400),
-                  fit: BoxFit.contain,
+      listener: _handleStateChange,
+      builder: (context, state) => Scaffold(
+        appBar: _buildAppBar(),
+        body: _buildBody(state),
+        bottomNavigationBar: _items.isNotEmpty && state is! PantryLoading
+            ? ColoredBox(
+                color: Colors.white,
+                child: ConfirmButtonWidget(
+                  onPressed: _validateAndSubmit,
+                  isloading: state is PantryLoading,
                 ),
-              ),
-              PantryScanItemsLoading() => Center(
-                child: Padding(
-                  padding: gapAll(32),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          SizedBox(
-                            width: w(140),
-                            height: h(140),
-                            child: CircularProgressIndicator(
-                              strokeWidth: 6,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                AppColors.primaryColor.withOpacity(0.3),
-                              ),
-                              backgroundColor: Colors.transparent,
-                            ),
-                          ),
-                          TweenAnimationBuilder<double>(
-                            tween: Tween(begin: 0.7, end: 1.0),
-                            duration: const Duration(milliseconds: 1500),
-                            curve: Curves.easeInOut,
-                            builder: (_, scale, child) {
-                              return Transform.scale(
-                                scale: scale,
-                                child: Container(
-                                  width: w(100),
-                                  height: h(100),
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        AppColors.primaryColor.withOpacity(0.6),
-                                        AppColors.primaryColor.withOpacity(0.2),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
+              )
+            : null,
+      ),
+    );
+  }
 
-                          Lottie.asset(
-                            AppAssets.loader,
-                            width: w(120),
-                            height: h(120),
-                            fit: BoxFit.contain,
-                          ),
-                        ],
-                      ),
+  void _handleStateChange(BuildContext context, PantryState state) {
+    if (state is PantryFailure) {
+      setState(() => _errorMessage = state.errorMessage);
+    } else if (state is PantrySuccess) {
+      AppToast.show(
+        "Items added to your kitchen successfully!",
+        ToastType.success,
+      );
+      context.go(Routes.dashboard);
+    } else if (state is ScanReceiptLoaded) {
+      _initializeItems(state.scanReceipt);
+    }
+  }
 
-                      SizedBox(height: h(40)),
+  Widget _buildBody(PantryState state) {
+    if (_errorMessage != null) {
+      return _buildErrorState(_errorMessage!);
+    }
 
-                      Text(
-                        "Scanning your receipt...",
-                        style: Theme.of(context).textTheme.headlineMedium
-                            ?.copyWith(
-                              fontSize: t(22),
-                              fontWeight: FontWeight.w700,
-                              color: Colors.black87,
-                            ),
-                      ),
+    return SafeArea(
+      child: switch (state) {
+        PantryLoading() => _buildLoadingState(),
+        PantryScanItemsLoading() => _buildScanningState(),
+        ScanReceiptLoaded() =>
+          _items.isEmpty ? _buildEmptyState() : _buildItemsListView(),
+        _ => const SizedBox(),
+      },
+    );
+  }
 
-                      SizedBox(height: h(16)),
+  Widget _buildLoadingState() {
+    return Center(
+      child: Lottie.asset(
+        AppAssets.loader,
+        height: h(400),
+        fit: BoxFit.contain,
+      ),
+    );
+  }
 
-                      AnimatedDotsText(
-                        text: "Analyzing items with AI",
-                        style: TextStyle(
-                          fontSize: t(15),
-                          color: Colors.grey.shade600,
-                          height: 1.5,
-                        ),
-                      ),
-
-                      SizedBox(height: h(20)),
-
-                      Text(
-                        "This usually takes a few seconds",
-                        style: TextStyle(
-                          fontSize: t(13),
-                          color: Colors.grey.shade500,
-                        ),
-                      ),
-                    ],
+  Widget _buildScanningState() {
+    return Center(
+      child: Padding(
+        padding: gapAll(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                SizedBox(
+                  width: w(140),
+                  height: h(140),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 6,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      AppColors.primaryColor.withOpacity(0.3),
+                    ),
+                    backgroundColor: Colors.transparent,
                   ),
                 ),
-              ),
-              ScanReceiptLoaded() =>
-                _items.isEmpty
-                    ? _buildEmptyState()
-                    : SingleChildScrollView(
-                        child: Padding(
-                          padding: gapAll(20),
-                          child: Column(
-                            children: [
-                              ImagePreviewWidget(imagePath: widget.imagePath),
-                              SizedBox(height: h(12)),
-                              ListView.separated(
-                                shrinkWrap: true,
-                                physics: NeverScrollableScrollPhysics(),
-                                padding: EdgeInsets.only(bottom: h(20)),
-                                itemCount: _items.length,
-                                separatorBuilder: (_, _) => Padding(
-                                  padding: gapOnly(bottom: 16),
-                                  child: const Divider(
-                                    color: Color(0xFFF4F4F4),
-                                    height: 1,
-                                  ),
-                                ),
-                                itemBuilder: (context, index) {
-                                  final item = _items[index];
-                                  return _buildPantryItemForm(
-                                    context,
-                                    item,
-                                    index,
-                                  );
-                                },
-                              ),
+                TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0.7, end: 1.0),
+                  duration: const Duration(milliseconds: 1500),
+                  curve: Curves.easeInOut,
+                  builder: (_, scale, child) {
+                    return Transform.scale(
+                      scale: scale,
+                      child: Container(
+                        width: w(100),
+                        height: h(100),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            colors: [
+                              AppColors.primaryColor.withOpacity(0.6),
+                              AppColors.primaryColor.withOpacity(0.2),
                             ],
                           ),
                         ),
                       ),
-              _ => const SizedBox(),
-            },
-          ),
-          bottomNavigationBar: _items.isNotEmpty
-              ? ColoredBox(
-                  color: Colors.white,
-                  child: ConfirmButtonWidget(
-                    onPressed: _validateAndSubmit,
-                    isloading: state is PantryLoading,
-                  ),
-                )
-              : null,
-        );
-      },
+                    );
+                  },
+                ),
+                Lottie.asset(
+                  AppAssets.loader,
+                  width: w(120),
+                  height: h(120),
+                  fit: BoxFit.contain,
+                ),
+              ],
+            ),
+            SizedBox(height: h(40)),
+            Text(
+              "Scanning your receipt...",
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontSize: t(22),
+                fontWeight: FontWeight.w700,
+                color: Colors.black87,
+              ),
+            ),
+            SizedBox(height: h(16)),
+            AnimatedDotsText(
+              text: "Analyzing items with AI",
+              style: TextStyle(
+                fontSize: t(15),
+                color: Colors.grey.shade600,
+                height: 1.5,
+              ),
+            ),
+            SizedBox(height: h(20)),
+            Text(
+              "This usually takes a few seconds",
+              style: TextStyle(fontSize: t(13), color: Colors.grey.shade500),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildItemsListView() {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: gapAll(20),
+        child: Column(
+          children: [
+            ImagePreviewWidget(imagePath: widget.imagePath),
+            SizedBox(height: h(12)),
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: EdgeInsets.only(bottom: h(20)),
+              itemCount: _items.length,
+              separatorBuilder: (_, __) => Padding(
+                padding: gapOnly(bottom: 16),
+                child: const Divider(color: Color(0xFFF4F4F4), height: 1),
+              ),
+              itemBuilder: (context, index) =>
+                  _buildPantryItemForm(context, _items[index], index),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -247,9 +234,7 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
               height: h(220),
               fit: BoxFit.contain,
             ),
-
             SizedBox(height: h(32)),
-
             Text(
               "No items detected",
               textAlign: TextAlign.center,
@@ -259,9 +244,7 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
                 color: Colors.black87,
               ),
             ),
-
             SizedBox(height: h(16)),
-
             Text(
               "We couldn't recognize any items from this receipt.\nTry taking a clearer photo or add items manually.",
               textAlign: TextAlign.center,
@@ -271,57 +254,17 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
                 height: 1.6,
               ),
             ),
-
             SizedBox(height: h(48)),
             GenericButtonWidget(
-              onPressed: () async {
-                PermissionStatus status = await Permission.camera.status;
-
-                if (!status.isGranted) {
-                  final result = await Permission.camera.request();
-                  if (!result.isGranted) {
-                    if (result.isPermanentlyDenied) {
-                      openAppSettings();
-                    }
-                    return;
-                  }
-                }
-
-                final documentScanner = DocumentScanner(
-                  options: DocumentScannerOptions(
-                    documentFormat: DocumentFormat.jpeg,
-                    mode: ScannerMode.base,
-                    pageLimit: 1,
-                    isGalleryImport: false,
-                  ),
-                );
-
-                try {
-                  final result = await documentScanner.scanDocument();
-
-                  if (result.images.isNotEmpty) {
-                    final image = result.images.first;
-
-                    context.pushReplacementNamed(
-                      Routes.capturedImageDetails,
-                      extra: {"image_path": image},
-                    );
-                  }
-                } catch (e) {
-                  debugPrint("Document scan error: $e");
-                } finally {
-                  documentScanner.close();
-                }
-              },
+              onPressed: () => DocumentScannerService().scanDocument(
+                context,
+                replacement: true,
+              ),
               text: "Retake",
             ),
-
             SizedBox(height: h(16)),
-
             TextButton(
-              onPressed: () {
-                context.push(Routes.addItem);
-              },
+              onPressed: () => context.push(Routes.addItem),
               child: Text(
                 "Add Items Manually",
                 style: TextStyle(
@@ -330,6 +273,56 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
                   fontWeight: FontWeight.w600,
                   decoration: TextDecoration.underline,
                   decorationColor: AppColors.primaryColor,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorState(String message) {
+    return Center(
+      child: Padding(
+        padding: gapSymmetric(horizontal: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "Oops!",
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontSize: t(24),
+                fontWeight: FontWeight.bold,
+                color: Colors.redAccent,
+              ),
+            ),
+            SizedBox(height: h(12)),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: t(15), color: Colors.grey.shade700),
+            ),
+            SizedBox(height: h(32)),
+            GenericButtonWidget(
+              text: "Retry",
+              onPressed: () {
+                setState(() => _errorMessage = null);
+                _pantryBloc.add(ScanReceiptEvent(filePath: widget.imagePath));
+              },
+            ),
+            SizedBox(height: h(16)),
+            TextButton(
+              onPressed: () => DocumentScannerService().scanDocument(
+                context,
+                replacement: true,
+              ),
+              child: Text(
+                "Retake",
+                style: TextStyle(
+                  fontSize: t(15),
+                  color: AppColors.primaryColor,
+                  decoration: TextDecoration.underline,
                 ),
               ),
             ),
@@ -364,53 +357,42 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
 
   void _validateAndSubmit() {
     for (int i = 0; i < _items.length; i++) {
-      final item = _items[i];
-      final name = item.nameController.text.trim();
-      final qty = item.qtyController.text.trim();
-      final unit = item.unit?.trim();
-      final pantry = item.pantry?.trim();
-      final expiry = item.expireDate.text.trim();
-
-      final displayName = name.isEmpty ? "Item ${i + 1}" : name;
-
-      if (name.isEmpty) {
-        AppToast.show(
-          "$displayName: please enter the item name.",
-          ToastType.error,
-        );
-        return;
-      } else if (name.length < 3) {
-        AppToast.show(
-          "$displayName: item name must be at least 3 characters long.",
-          ToastType.error,
-        );
-        return;
-      } else if (qty.isEmpty) {
-        AppToast.show(
-          "$displayName: please enter the quantity.",
-          ToastType.error,
-        );
-        return;
-      } else if (unit == null || unit.isEmpty) {
-        AppToast.show("$displayName: please select a unit.", ToastType.error);
-        return;
-      } else if (pantry == null || pantry.isEmpty) {
-        AppToast.show("$displayName: please select a pantry.", ToastType.error);
-        return;
-      } else if (expiry.isEmpty) {
-        AppToast.show(
-          "$displayName: please enter the expiring date.",
-          ToastType.error,
-        );
+      final validation = _validateItem(_items[i], i);
+      if (validation != null) {
+        AppToast.show(validation, ToastType.error);
         return;
       }
     }
-
     _confirmItems();
   }
 
-  Future<String> compressImage(File imageFile) async {
-    var result = await FlutterImageCompress.compressWithList(
+  String? _validateItem(PantryItem item, int index) {
+    final name = item.nameController.text.trim();
+    final qty = item.qtyController.text.trim();
+    final unit = item.unit?.trim();
+    final pantry = item.pantry?.trim();
+    final expiry = item.expireDate.text.trim();
+    final displayName = name.isEmpty ? "Item ${index + 1}" : name;
+
+    if (name.isEmpty) return "$displayName: please enter the item name.";
+    if (name.length < 3) {
+      return "$displayName: item name must be at least 3 characters long.";
+    }
+    if (qty.isEmpty) return "$displayName: please enter the quantity.";
+    if (unit == null || unit.isEmpty) {
+      return "$displayName: please select a unit.";
+    }
+    if (pantry == null || pantry.isEmpty) {
+      return "$displayName: please select a pantry.";
+    }
+    if (expiry.isEmpty) {
+      return "$displayName: please enter the expiring date.";
+    }
+    return null;
+  }
+
+  Future<String> _compressImage(File imageFile) async {
+    final result = await FlutterImageCompress.compressWithList(
       imageFile.readAsBytesSync(),
       minWidth: 800,
       minHeight: 600,
@@ -421,35 +403,27 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
       format: CompressFormat.jpeg,
       keepExif: false,
     );
-    String base64Thumbnail = base64Encode(result);
-
-    String dataUri = "data:image/jpeg;base64,$base64Thumbnail";
-
-    return dataUri;
+    return "data:image/jpeg;base64,${base64Encode(result)}";
   }
 
-  void _confirmItems() async {
+  Future<String?> _getImageBase64(PantryItem item) async {
+    try {
+      if (item.file != null) {
+        return await _compressImage(item.file!);
+      } else if (item.fileBytes != null && item.fileBytes!.isNotEmpty) {
+        return "data:image/jpeg;base64,${base64Encode(item.fileBytes!)}";
+      }
+    } catch (e) {
+      debugPrint("Image compression failed: $e");
+    }
+    return null;
+  }
+
+  Future<void> _confirmItems() async {
     final pantryItems = <PantryItemEntity>[];
 
     for (final item in _items) {
-      String? thumbnailBase64;
-
-      if (item.file != null) {
-        try {
-          thumbnailBase64 = await compressImage(item.file!);
-        } catch (e) {
-          debugPrint("Image compression failed: $e");
-          try {
-            final bytes = await item.file!.readAsBytes();
-            thumbnailBase64 = "data:image/jpeg;base64,${base64Encode(bytes)}";
-          } catch (_) {
-            thumbnailBase64 = null;
-          }
-        }
-      } else if (item.fileBytes != null && item.fileBytes!.isNotEmpty) {
-        final base64Str = base64Encode(item.fileBytes!);
-        thumbnailBase64 = "data:image/jpeg;base64,$base64Str";
-      }
+      final thumbnailBase64 = await _getImageBase64(item);
 
       pantryItems.add(
         PantryItemEntity(
@@ -467,11 +441,11 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
     }
 
     final pantryModel = Pantry(
-      kitchenId: userCubit.state.activeKitchenId,
+      kitchenId: _userCubit.state.activeKitchenId,
       items: pantryItems,
     );
 
-    pantryBloc.add(PantryAddScannedItemEvent(pantry: pantryModel));
+    _pantryBloc.add(PantryAddScannedItemEvent(pantry: pantryModel));
   }
 
   Widget _buildPantryItemForm(
@@ -483,85 +457,23 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
       widget: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _formLabel(
+          _buildFormLabel(
             context,
             "Item Image",
-            action: _items.first == item
-                ? null
-                : CircularIconButton(
+            action: _items.first != item
+                ? CircularIconButton(
                     iconAsset: AppAssets.deleteSvg,
                     onTap: () {
                       _items.remove(item);
                       setState(() {});
                     },
-                  ),
+                  )
+                : null,
           ),
           SizedBox(height: h(10)),
-          Material(
-            color: Colors.transparent,
-            shape: const CircleBorder(),
-            child: InkWell(
-              customBorder: const CircleBorder(),
-              onTap: () async {
-                item.file = await ImagePickerService.showImageSourceDialog(
-                  context,
-                );
-                setState(() {});
-              },
-              child: Stack(
-                alignment: Alignment.center,
-                clipBehavior: Clip.none,
-                children: [
-                  CircleAvatar(
-                    radius: t(24),
-                    backgroundColor: Colors.grey.shade200,
-                    child: Icon(Icons.person, color: Colors.grey, size: t(24)),
-                  ),
-                  if (item.file != null)
-                    CircleAvatar(
-                      radius: t(24),
-                      backgroundImage: FileImage(item.file!),
-                      backgroundColor: Colors.transparent,
-                    )
-                  else if (item.fileBytes != null && item.fileBytes!.isNotEmpty)
-                    CircleAvatar(
-                      radius: t(24),
-                      backgroundImage: MemoryImage(item.fileBytes!),
-                      backgroundColor: Colors.transparent,
-                    )
-                  else
-                    const CircleAvatar(
-                      radius: 24,
-                      backgroundColor: Colors.grey,
-                      child: Icon(Icons.image, color: Colors.white),
-                    ),
-
-                  Positioned(
-                    bottom: h(-2),
-                    right: w(-4),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                      ),
-                      padding: gapAll(4),
-                      child: CircleAvatar(
-                        radius: t(8),
-                        backgroundColor: Colors.blue,
-                        child: Icon(
-                          Icons.add,
-                          size: t(12),
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          _buildImagePicker(item),
           SizedBox(height: h(10)),
-          _formLabel(context, "Item name"),
+          _buildFormLabel(context, "Item name"),
           SizedBox(height: h(10)),
           AppTextField(
             label: '',
@@ -573,7 +485,7 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
             isLabled: false,
           ),
           SizedBox(height: h(15)),
-          _formLabel(context, "Quantity"),
+          _buildFormLabel(context, "Quantity"),
           SizedBox(height: h(10)),
           AppTextField(
             label: '',
@@ -586,64 +498,129 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
             isLabled: false,
           ),
           SizedBox(height: h(15)),
-          Row(
-            spacing: w(12),
-            children: [
-              Flexible(
-                child: PopupDropdownField(
-                  label: "Units",
-                  hint: "Select Units",
-                  value: item.unit,
-                  items: const ["Kg", "Gram", "Litre", "Piece"],
-                  onChanged: (val) => setState(() => item.unit = val),
-                ),
-              ),
-              Flexible(
-                child: PopupDropdownField(
-                  label: "Pantry",
-                  hint: "Select Pantry",
-                  value: item.pantry,
-                  items: userCubit.state.userStorageAreas
-                      .map((storage) => storage.pantryName)
-                      .toList(),
-                  onChanged: (val) => setState(() => item.pantry = val),
-                ),
-              ),
-            ],
-          ),
+          _buildDropdownsRow(item),
           SizedBox(height: h(15)),
-          _formLabel(context, "Expiring date"),
+          _buildFormLabel(context, "Expiring date"),
           SizedBox(height: h(10)),
-          GestureDetector(
-            onTap: () async {
-              final pickedDate = await DatePickerService.pickDate(
-                context: context,
-              );
-              if (pickedDate != null) {
-                setState(() => item.expireDate.text = pickedDate);
-              }
-            },
-            child: AppTextField(
-              enabled: false,
-              suffixIcon: Icon(
-                Icons.date_range,
-                color: AppColors.appTextFieldBorderColor,
-              ),
-              color: AppColors.apptextFieldStyleTextColor,
-              controller: item.expireDate,
-              hintText: "Expiring date",
-              fillColor: const Color(0xffF9F9F9),
-              isFilled: true,
-              isLabled: false,
-              label: '',
-            ),
-          ),
+          _buildDatePicker(item),
         ],
       ),
     );
   }
 
-  Widget _formLabel(BuildContext context, String label, {Widget? action}) {
+  Widget _buildImagePicker(PantryItem item) {
+    return Material(
+      color: Colors.transparent,
+      shape: const CircleBorder(),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: () async {
+          item.file = await ImagePickerService.showImageSourceDialog(context);
+          setState(() {});
+        },
+        child: Stack(
+          alignment: Alignment.center,
+          clipBehavior: Clip.none,
+          children: [
+            CircleAvatar(
+              radius: t(24),
+              backgroundColor: Colors.grey.shade200,
+              child: Icon(Icons.person, color: Colors.grey, size: t(24)),
+            ),
+            if (item.file != null)
+              CircleAvatar(
+                radius: t(24),
+                backgroundImage: FileImage(item.file!),
+                backgroundColor: Colors.transparent,
+              )
+            else if (item.fileBytes != null && item.fileBytes!.isNotEmpty)
+              CircleAvatar(
+                radius: t(24),
+                backgroundImage: MemoryImage(item.fileBytes!),
+                backgroundColor: Colors.transparent,
+              )
+            else
+              const CircleAvatar(
+                radius: 24,
+                backgroundColor: Colors.grey,
+                child: Icon(Icons.image, color: Colors.white),
+              ),
+            Positioned(
+              bottom: h(-2),
+              right: w(-4),
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+                padding: gapAll(4),
+                child: CircleAvatar(
+                  radius: t(8),
+                  backgroundColor: Colors.blue,
+                  child: Icon(Icons.add, size: t(12), color: Colors.white),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDropdownsRow(PantryItem item) {
+    return Row(
+      spacing: w(12),
+      children: [
+        Flexible(
+          child: PopupDropdownField(
+            label: "Units",
+            hint: "Select Units",
+            value: item.unit,
+            items: const ["Kg", "Gram", "Litre", "Piece"],
+            onChanged: (val) => setState(() => item.unit = val),
+          ),
+        ),
+        Flexible(
+          child: PopupDropdownField(
+            label: "Pantry",
+            hint: "Select Pantry",
+            value: item.pantry,
+            items: _userCubit.state.userStorageAreas
+                .map((storage) => storage.pantryName)
+                .toList(),
+            onChanged: (val) => setState(() => item.pantry = val),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDatePicker(PantryItem item) {
+    return GestureDetector(
+      onTap: () async {
+        final pickedDate = await DatePickerService.pickDate(context: context);
+        if (pickedDate != null) {
+          setState(() => item.expireDate.text = pickedDate);
+        }
+      },
+      child: AppTextField(
+        enabled: false,
+        suffixIcon: Icon(
+          Icons.date_range,
+          color: AppColors.appTextFieldBorderColor,
+        ),
+        color: AppColors.apptextFieldStyleTextColor,
+        controller: item.expireDate,
+        hintText: "Expiring date",
+        fillColor: const Color(0xffF9F9F9),
+        isFilled: true,
+        isLabled: false,
+        label: '',
+      ),
+    );
+  }
+
+  Widget _buildFormLabel(BuildContext context, String label, {Widget? action}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -680,107 +657,13 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
           padding: EdgeInsets.symmetric(horizontal: w(16)),
           child: CircularIconButton(
             iconAsset: AppAssets.cameraSwitchSvg,
-            onTap: () => context.pop(),
+            onTap: () => DocumentScannerService().scanDocument(
+              context,
+              replacement: true,
+            ),
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildErrorState(String message) {
-    return Center(
-      child: Padding(
-        padding: gapSymmetric(horizontal: 32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Lottie.asset(
-            //   AppAssets.errorAnimation,
-            //   width: w(220),
-            //   height: h(220),
-            //   fit: BoxFit.contain,
-            // ),
-            SizedBox(height: h(24)),
-            Text(
-              "Oops!",
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontSize: t(24),
-                fontWeight: FontWeight.bold,
-                color: Colors.redAccent,
-              ),
-            ),
-            SizedBox(height: h(12)),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: t(15), color: Colors.grey.shade700),
-            ),
-            SizedBox(height: h(32)),
-            GenericButtonWidget(
-              text: "Retry",
-              onPressed: () {
-                setState(() => _errorMessage = null);
-                pantryBloc.add(ScanReceiptEvent(filePath: widget.imagePath));
-              },
-            ),
-            SizedBox(height: h(16)),
-            TextButton(
-              onPressed: () async {
-                PermissionStatus status = await Permission.camera.status;
-
-                if (!status.isGranted) {
-                  final result = await Permission.camera.request();
-                  if (!result.isGranted) {
-                    if (result.isPermanentlyDenied) {
-                      openAppSettings();
-                    }
-                    return;
-                  }
-                }
-
-                final documentOptions = DocumentScannerOptions(
-                  documentFormat: DocumentFormat.jpeg,
-                  mode: ScannerMode.base,
-                  pageLimit: 1,
-                  isGalleryImport: false,
-                );
-
-                final documentScanner = DocumentScanner(
-                  options: documentOptions,
-                );
-
-                try {
-                  _errorMessage = null;
-
-                  final DocumentScanningResult result = await documentScanner
-                      .scanDocument();
-
-                  if (result.images.isNotEmpty) {
-                    final image = result.images.first;
-                    setState(() {});
-                    context.pushReplacementNamed(
-                      Routes.capturedImageDetails,
-                      extra: {"image_path": image},
-                    );
-                  }
-                } catch (e) {
-                  debugPrint("Document scan error: $e");
-                } finally {
-                  documentScanner.close();
-                }
-              },
-              child: Text(
-                "Re take",
-                style: TextStyle(
-                  fontSize: t(15),
-                  color: AppColors.primaryColor,
-                  decoration: TextDecoration.underline,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

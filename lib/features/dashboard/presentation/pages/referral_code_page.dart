@@ -17,9 +17,9 @@ class ReferralCodePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<UserCubit, UserState>(
-      builder: (_, state) {
+      builder: (context, state) {
         return Scaffold(
-          backgroundColor: Color(0xffF9F9F9),
+          backgroundColor: const Color(0xFFF9F9F9),
           appBar: _buildAppBar(context),
           body: SafeArea(
             child: Padding(
@@ -28,59 +28,10 @@ class ReferralCodePage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: h(12),
                 children: [
-                  Text(
-                    "Invite a friend!",
-                    style: Theme.of(context).textTheme.headlineLarge,
-                  ),
-                  Text(
-                    "Share this referral link to your friends and followers",
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Clipboard.setData(
-                        ClipboardData(text: state.invitationCode),
-                      );
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            "Referral code copied to clipboard",
-                            style: Theme.of(context).textTheme.headlineMedium!
-                                .copyWith(color: Colors.white),
-                          ),
-                        ),
-                      );
-                    },
-                    child: AppTextField(
-                      suffixIcon: Icon(Icons.copy),
-                      label: "Referral Code",
-                      hintText: "Enter your referral code",
-                      enabled: false,
-                      controller: TextEditingController(
-                        text: state.invitationCode,
-                      ),
-                    ),
-                  ),
-                  SizedBox(),
-                  Center(
-                    child: SizedBox(
-                      height: h(40),
-
-                      child: OutlinedButton(
-                        onPressed: () {
-                          // ignore: deprecated_member_use
-                          Share.share(
-                            "Join Kitchen's Guardian using my referral code: ${state.invitationCode}",
-                          );
-                        },
-                        child: Text(
-                          "Share Referral Code",
-                          style: Theme.of(context).textTheme.headlineMedium!
-                              .copyWith(color: AppColors.primaryColor),
-                        ),
-                      ),
-                    ),
-                  ),
+                  _buildHeader(context),
+                  _buildReferralCodeField(context, state.invitationCode),
+                  SizedBox(height: h(8)),
+                  _buildShareButton(context, state.invitationCode),
                 ],
               ),
             ),
@@ -88,6 +39,71 @@ class ReferralCodePage extends StatelessWidget {
         );
       },
     );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: h(8),
+      children: [
+        Text(
+          "Invite a friend!",
+          style: Theme.of(context).textTheme.headlineLarge,
+        ),
+        Text(
+          "Share this referral link to your friends and followers",
+          style: Theme.of(context).textTheme.headlineMedium,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildReferralCodeField(BuildContext context, String code) {
+    return GestureDetector(
+      onTap: () => _copyToClipboard(context, code),
+      child: AppTextField(
+        suffixIcon: const Icon(Icons.copy),
+        label: "Referral Code",
+        hintText: "Enter your referral code",
+        enabled: false,
+        controller: TextEditingController(text: code),
+      ),
+    );
+  }
+
+  Widget _buildShareButton(BuildContext context, String code) {
+    return Center(
+      child: SizedBox(
+        height: h(40),
+        child: OutlinedButton(
+          onPressed: () => _handleShare(code),
+          child: Text(
+            "Share Referral Code",
+            style: Theme.of(
+              context,
+            ).textTheme.headlineMedium?.copyWith(color: AppColors.primaryColor),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _copyToClipboard(BuildContext context, String code) {
+    Clipboard.setData(ClipboardData(text: code));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          "Referral code copied to clipboard",
+          style: Theme.of(
+            context,
+          ).textTheme.headlineMedium?.copyWith(color: Colors.white),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handleShare(String code) async {
+    await Share.share("Join Kitchen's Guardian using my referral code: $code");
   }
 
   AppBar _buildAppBar(BuildContext context) {

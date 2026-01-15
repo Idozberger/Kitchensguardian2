@@ -12,39 +12,50 @@ class ShareButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GenericButtonWidget(
       text: "Share List",
-      onPressed: () async {
-        if (groceryList.isEmpty) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text("No items to share")));
-          return;
-        }
+      onPressed: () => _handleShare(context),
+    );
+  }
 
-        final String shareString = groceryList
-            .asMap()
-            .entries
-            .map((entry) {
-              final index = entry.key + 1;
-              final item = entry.value;
-              final name = item.name;
-              final quantity = item.quantity.toString();
-              final unit = item.unit;
-              return "$index️⃣  $name\n     Quantity: $quantity $unit";
-            })
-            .join("\n\n");
+  Future<void> _handleShare(BuildContext context) async {
+    if (groceryList.isEmpty) {
+      _showEmptyListSnackBar(context);
+      return;
+    }
 
-        final formattedList =
-            """
+    final formattedList = _buildFormattedList();
+    await Share.share(formattedList, subject: 'My Grocery List');
+  }
+
+  void _showEmptyListSnackBar(BuildContext context) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text("No items to share")));
+  }
+
+  String _buildFormattedList() {
+    final itemsList = _buildItemsList();
+    return _formatListWithBorders(itemsList);
+  }
+
+  String _buildItemsList() {
+    return groceryList
+        .asMap()
+        .entries
+        .map((entry) => _formatListItem(entry.key + 1, entry.value))
+        .join("\n\n");
+  }
+
+  String _formatListItem(int index, RequestedItemEntity item) {
+    return "$index️⃣  ${item.name}\n     Quantity: ${item.quantity} ${item.unit}";
+  }
+
+  String _formatListWithBorders(String itemsList) {
+    return """
 🛒 *My Grocery List*  
 ━━━━━━━━━━━━━━━  
-$shareString  
+$itemsList  
 ━━━━━━━━━━━━━━━  
 🗓️ Shared via MyGroceryApp
 """;
-
-        // ignore: deprecated_member_use
-        await Share.share(formattedList, subject: 'My Grocery List');
-      },
-    );
   }
 }

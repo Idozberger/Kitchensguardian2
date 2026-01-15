@@ -1,5 +1,3 @@
-// ignore_for_file: unnecessary_brace_in_string_interps, unnecessary_nullable_for_final_variable_declarations
-
 import 'dart:convert';
 import 'dart:developer';
 
@@ -13,6 +11,7 @@ import 'package:foodkitchen/core/global/functions/const.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 abstract interface class AuthRemoteDataSource {
   Future<String> signUpUserWithEmailAndPassword({
@@ -44,6 +43,8 @@ abstract interface class AuthRemoteDataSource {
   });
   Future<String> signInWithGoogle();
   Future<String> signUpWithGoogle();
+  Future<String> signInWithApple();
+  Future<String> signUpWithApple();
 }
 
 class AuthRemoteDatasourceImpl implements AuthRemoteDataSource {
@@ -112,6 +113,8 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource {
         final message = data["error"];
         throw message;
       }
+      await sharedPreferences.setString("access-token", data["access_token"]);
+      await sharedPreferences.commit();
       final message = data["message"];
 
       return message ?? "Verification successful";
@@ -275,13 +278,14 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource {
   @override
   Future<String> signInWithGoogle() async {
     try {
-      final GoogleSignIn googleSignIn = GoogleSignIn(
+      GoogleSignIn googleSignIn = GoogleSignIn(
         serverClientId:
             "295968556562-3e8sicsicb6m6kh744bon398o8gaqu3k.apps.googleusercontent.com",
         scopes: ['email', 'profile'],
       );
 
-      GoogleSignInAccount? googleUser = await googleSignIn.signInSilently();
+      await googleSignIn.disconnect();
+      GoogleSignInAccount? googleUser = await googleSignIn.signIn();
 
       if (googleUser == null) {
         log("No cached session → showing Google picker", name: "Auth");
@@ -375,7 +379,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource {
             "295968556562-3e8sicsicb6m6kh744bon398o8gaqu3k.apps.googleusercontent.com",
         scopes: ['email', 'profile'],
       );
-
+      await googleSignIn.signOut();
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
 
       if (googleUser == null) {
@@ -412,9 +416,10 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource {
       );
       userCubit.setGoogleSignUpUserModel(
         firstName: firstName,
-        lastName: lastName,
+        lastName: "sdfadsf",
         email: email,
       );
+      log("missing fields: ${userModel.toJson()}");
       final response = await dio.post(
         AppConstants.createAccount,
         data: userModel.toJson(),
@@ -452,6 +457,122 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource {
       throw "Sign up failed. Please try again.";
     } catch (e) {
       log("Unexpected error in Google Sign-Up", name: "Auth", error: e);
+      throw e.toString();
+    }
+  }
+
+  @override
+  Future<String> signInWithApple() async {
+    try {
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+      log("apple sign in ${credential.email}");
+
+      final String applePermanentId = credential.userIdentifier ?? "";
+      final String email = credential.email ?? "";
+
+      if (applePermanentId.isEmpty) {
+        throw "Sign in failed";
+      }
+
+      userCubit.setGoogleSignUpUserModel(
+        firstName: "",
+        lastName: "",
+        email: email,
+      );
+
+      final response = await dio.post(
+        AppConstants.login,
+        data: {"email": email, "password": applePermanentId},
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+        throw data["error"] ?? data["message"] ?? "Login failed";
+      }
+
+      final String? token = response.data["access_token"];
+      final String message = response.data["message"] ?? "Welcome back!";
+
+      if (token == null || token.isEmpty) {
+        throw "Invalid response from server";
+      }
+
+      await sharedPreferences.setString("access-token", token);
+      await sharedPreferences.commit();
+
+      return message;
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401 || e.response?.statusCode == 404) {
+        throw "No account found with this Apple ID. Please sign up first.";
+      }
+      final data = e.response?.data is String
+          ? jsonDecode(e.response!.data)
+          : e.response?.data;
+      throw data?["error"] ?? data?["message"] ?? "Login failed";
+    } catch (e) {
+      log("apple sign in ${e.toString()}");
+      throw e.toString();
+    }
+  }
+
+  @override
+  Future<String> signUpWithApple() async {
+    try {
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+
+      final String applePermanentId = credential.userIdentifier ?? "";
+      final String email = credential.email ?? "";
+      final String firstName = credential.givenName ?? "";
+      final String lastName = credential.familyName ?? "";
+
+      if (applePermanentId.isEmpty) {
+        throw "Sign up failed";
+      }
+
+      final UserModel userModel = UserModel(
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        password: applePermanentId,
+      );
+
+      userCubit.setGoogleSignUpUserModel(
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+      );
+
+      final response = await dio.post(
+        AppConstants.createAccount,
+        data: userModel.toJson(),
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+        throw data["error"] ?? data["message"] ?? "Sign up failed";
+      }
+
+      return response.data["message"] ?? "Account created successfully!";
+    } on DioException catch (e) {
+      final data = e.response?.data is String
+          ? jsonDecode(e.response!.data)
+          : e.response?.data;
+      throw data?["error"] ?? data?["message"] ?? "Sign up failed";
+    } catch (e) {
       throw e.toString();
     }
   }

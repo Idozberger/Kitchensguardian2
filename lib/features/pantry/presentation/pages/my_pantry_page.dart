@@ -1,5 +1,3 @@
-// ignore_for_file: use_build_context_synchronously
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -8,7 +6,6 @@ import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
-import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/services/notifications/flutter_local_notifications_service.dart';
@@ -19,7 +16,6 @@ import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_event.dart'
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_state.dart';
 import 'package:foodkitchen/features/pantry/presentation/widgets/custom_appbar.dart';
 import 'package:foodkitchen/features/pantry/presentation/widgets/pantry_item_card.dart';
-import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
 
 class MyPantryPage extends StatefulWidget {
@@ -45,35 +41,7 @@ class _MyPantryPageState extends State<MyPantryPage> {
   }
 
   Future<void> _initializePantry() async {
-    await _checkAndRequestPermissions();
     _loadPantryItems();
-  }
-
-  Future<void> _checkAndRequestPermissions() async {
-    if (!Platform.isAndroid) return;
-
-    final hasPermission = await _notificationService.isExactAlarmAllowed();
-    if (!hasPermission && mounted) {
-      _showPermissionDialog();
-    }
-  }
-
-  void _showPermissionDialog() {
-    showCustomGenericDialog(
-      context: context,
-      title: "Exact Alarm Permission Needed",
-      subtitle:
-          "To schedule accurate notifications, please allow this permission.",
-      primaryButtonText: "Allow",
-      secondaryButtonText: "Cancel",
-      onPrimaryPressed: () async {
-        await _notificationService.requestPermission();
-        if (mounted) context.pop();
-      },
-      onSecondaryPressed: () {
-        if (mounted) context.pop();
-      },
-    );
   }
 
   void _loadPantryItems() {
@@ -86,28 +54,11 @@ class _MyPantryPageState extends State<MyPantryPage> {
       );
       return;
     }
+    getPantryItems(kitchenId);
+  }
 
+  void getPantryItems(String kitchenId) {
     _pantryBloc.add(GetPantryItemsEvent(kitchenId: kitchenId));
-  }
-
-  void _handlePantryStateChange(PantryState state) {
-    if (state is PantryFailure) {
-      AppToast.show(state.errorMessage, ToastType.error);
-    } else if (state is PantrySuccess) {
-      AppToast.show(state.successMessage, ToastType.success);
-    }
-  }
-
-  void _handleAddToCart(PantryItemEntity item, int index) {
-    _pantryBloc.add(
-      CartItemsEvent(
-        pantry: Pantry(
-          kitchenId: _userCubit.state.activeKitchenId,
-          items: [item],
-        ),
-        index: index,
-      ),
-    );
   }
 
   @override
@@ -117,20 +68,18 @@ class _MyPantryPageState extends State<MyPantryPage> {
       child: Scaffold(
         backgroundColor: const Color(0xFFF9F9F9),
         appBar: buildAppBar(context),
-        body: BlocListener<PantryBloc, PantryState>(
+        body: BlocConsumer<PantryBloc, PantryState>(
           listener: (_, state) => _handlePantryStateChange(state),
-          child: SafeArea(
-            child: Column(
-              children: [
-                _buildTabBar(),
-                Expanded(
-                  child: BlocBuilder<PantryBloc, PantryState>(
-                    builder: (_, state) => _buildContent(state),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          builder: (context, state) {
+            return SafeArea(
+              child: Column(
+                children: [
+                  _buildTabBar(),
+                  Expanded(child: _buildContent(state)),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );
@@ -182,6 +131,26 @@ class _MyPantryPageState extends State<MyPantryPage> {
       ],
     );
   }
+
+  void _handlePantryStateChange(PantryState state) {
+    if (state is PantryFailure) {
+      AppToast.show(state.errorMessage, ToastType.error);
+    } else if (state is PantrySuccess) {
+      AppToast.show(state.successMessage, ToastType.success);
+    }
+  }
+
+  void _handleAddToCart(PantryItemEntity item, int index) {
+    _pantryBloc.add(
+      CartItemsEvent(
+        pantry: Pantry(
+          kitchenId: _userCubit.state.activeKitchenId,
+          items: [item],
+        ),
+        index: index,
+      ),
+    );
+  }
 }
 
 class _PantryItemList extends StatelessWidget {
@@ -211,7 +180,7 @@ class _PantryItemList extends StatelessWidget {
       shrinkWrap: true,
       separatorBuilder: (_, __) =>
           const Divider(color: Color(0xFFF4F4F4), height: 1),
-      padding: gapSymmetric(horizontal: 20, vertical: 12),
+      padding: gapSymmetric(horizontal: 12, vertical: 12),
       itemBuilder: (context, index) {
         final item = items[index];
         return Padding(

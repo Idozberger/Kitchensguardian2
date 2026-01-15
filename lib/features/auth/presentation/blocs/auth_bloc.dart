@@ -1,6 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/domain/usecase/get_current_user.dart';
+import 'package:foodkitchen/features/auth/domain/usecase/apple_sign_in_usecase.dart';
+import 'package:foodkitchen/features/auth/domain/usecase/apple_sign_up_usecase.dart';
 import 'package:foodkitchen/features/auth/domain/usecase/google_sign_in_usecase.dart';
 import 'package:foodkitchen/features/auth/domain/usecase/google_signup_usecase.dart';
 import 'package:foodkitchen/features/auth/domain/usecase/send_password_reset_email_usecase.dart';
@@ -23,6 +25,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final VerifyUserEmail _verifyUserEmail;
   final GoogleSignInUsecase _googleSignInUsecase;
   final GoogleSignupUsecase _googleSignupUsecase;
+  final AppleSignInUsecase _appleSignInUsecase;
+  final AppleSignUpUsecase _appleSignUpUsecase;
 
   AuthBloc({
     required UserCubit userCubit,
@@ -35,6 +39,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required GetCurrentUserUseCase getCurrentUser,
     required GoogleSignInUsecase googleSignIn,
     required GoogleSignupUsecase googleSignup,
+    required AppleSignInUsecase appleSignIn,
+    required AppleSignUpUsecase appleSignUp,
   }) : _userCubit = userCubit,
        _userSignUp = userSignUp,
        _sendUserEmailVerificationCode = sendUserEmailVerificationCode,
@@ -45,6 +51,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
        _getCurrentUser = getCurrentUser,
        _googleSignInUsecase = googleSignIn,
        _googleSignupUsecase = googleSignup,
+       _appleSignInUsecase = appleSignIn,
+       _appleSignUpUsecase = appleSignUp,
 
        super(AuthInitial()) {
     on<AuthSignUp>(_onAuthSignUp);
@@ -53,11 +61,44 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthSendPasswordResetEmail>(_onSendPasswordResetEmail);
     on<AuthSetUserNewPassword>(_onSetUserNewPassword);
     on<AuthVerifyEmail>(_onVerifyUserEmail);
-    on<AuthGetCurrentUser>(_onGetCurrentUser);
+    on<AuthGetCurrentUser>(onGetCurrentUser);
     on<ResendEmailVerficationCodeEvent>(_onResendEmailVerficationCode);
     on<GoogleSignUpEvent>(_onGoogleSignUp);
     on<GoogleSignInEvent>(_onGoogleSignIn);
+    on<AppleSignInEvent>(_onAppleSignIn);
+    on<AppleSignUpEvent>(_onAppleSignUp);
+    on<MoveSignUpUserToHome>(_onMoveSignUpUserToDashboard);
   }
+  Future<void> _onMoveSignUpUserToDashboard(
+    MoveSignUpUserToHome event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(FetchingUserDetails());
+    final res = await _getCurrentUser(NoParams());
+
+    res.fold(
+      (failure) {
+        emit(ErrorFetchingUserDetails(failure.message));
+      },
+      (user) {
+        _userCubit.setUser();
+        emit(FetchedUserDetails());
+      },
+    );
+  }
+
+  Future<void> _onAppleSignUp(
+    AppleSignUpEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AppleSignUpLoading());
+    final res = await _appleSignUpUsecase(NoParams());
+
+    res.fold((failure) => emit(AuthFailure(failure.message)), (message) {
+      emit(AuthUserCreatedSuccess(message));
+    });
+  }
+
   Future<void> _onGoogleSignUp(
     GoogleSignUpEvent event,
     Emitter<AuthState> emit,
@@ -70,6 +111,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     });
   }
 
+  Future<void> _onAppleSignIn(
+    AppleSignInEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AppleSignInLoading());
+    final res = await _appleSignInUsecase(NoParams());
+
+    res.fold((failure) => emit(AuthFailure(failure.message)), (message) {
+      emit(AuthSuccess(message));
+      onGetCurrentUser(AuthGetCurrentUser(), emit);
+    });
+  }
+
   Future<void> _onGoogleSignIn(
     GoogleSignInEvent event,
     Emitter<AuthState> emit,
@@ -79,7 +133,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     res.fold((failure) => emit(AuthFailure(failure.message)), (message) {
       emit(AuthSuccess(message));
-      _onGetCurrentUser(AuthGetCurrentUser(), emit);
+      onGetCurrentUser(AuthGetCurrentUser(), emit);
     });
   }
 
@@ -127,7 +181,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     res.fold((failure) => emit(AuthFailure(failure.message)), (message) {
       emit(AuthSuccess(message));
 
-      _onGetCurrentUser(AuthGetCurrentUser(), emit);
+      onGetCurrentUser(AuthGetCurrentUser(), emit);
     });
   }
 
@@ -198,7 +252,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
   }
 
-  Future<void> _onGetCurrentUser(
+  Future<void> onGetCurrentUser(
     AuthGetCurrentUser event,
     Emitter<AuthState> emit,
   ) async {

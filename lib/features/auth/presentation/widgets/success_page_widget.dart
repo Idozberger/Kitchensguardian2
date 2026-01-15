@@ -15,6 +15,7 @@ class SuccessScreen extends StatelessWidget {
   final String subtitle;
   final String buttonText;
   final VoidCallback onButtonPressed;
+  final bool isLoading;
 
   const SuccessScreen({
     super.key,
@@ -22,6 +23,7 @@ class SuccessScreen extends StatelessWidget {
     required this.subtitle,
     this.buttonText = "Go to login",
     required this.onButtonPressed,
+    this.isLoading = false,
   });
 
   @override
@@ -75,7 +77,7 @@ class SuccessScreen extends StatelessWidget {
               padding: gapSymmetric(horizontal: 20, vertical: 33),
               child: GenericButtonWidget(
                 onPressed: onButtonPressed,
-
+                isLoading: isLoading,
                 text: buttonText,
               ),
             ),

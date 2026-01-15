@@ -20,7 +20,7 @@ class UserModel extends User {
   Map<String, dynamic> toJson() {
     return {
       "first_name": firstName,
-      "last_name": lastName,
+      "last_name": lastName.isEmpty ? "N/A" : lastName,
       "email": email,
       "password": password,
     };

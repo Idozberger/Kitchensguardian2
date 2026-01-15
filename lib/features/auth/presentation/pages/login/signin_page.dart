@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
@@ -12,6 +14,7 @@ import 'package:foodkitchen/features/auth/data/model/user_model.dart';
 import 'package:foodkitchen/features/auth/presentation/blocs/auth_bloc.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
+import 'package:foodkitchen/features/auth/presentation/pages/signup/signup_page.dart';
 import 'package:foodkitchen/features/auth/presentation/widgets/textspan_widget.dart';
 import 'package:go_router/go_router.dart';
 
@@ -30,7 +33,7 @@ class _SignInPageState extends State<SignInPage> {
   final TextEditingController _passwordController = TextEditingController();
   bool _isObscure = true;
 
-  void updateObsecure() {
+  void updateObscure() {
     setState(() {
       _isObscure = !_isObscure;
     });
@@ -43,27 +46,57 @@ class _SignInPageState extends State<SignInPage> {
     _userCubit.setGoogleSignUpUserModel(firstName: "", lastName: "", email: "");
   }
 
-  void onLogin() {
+  void _handleLogin(AuthState state) {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
 
     if (email.isEmpty) {
       AppToast.show("Email is required", ToastType.error);
-    } else if (!RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$").hasMatch(email)) {
-      AppToast.show("Please enter a valid email address", ToastType.error);
-    } else if (password.isEmpty) {
-      AppToast.show("Password is required", ToastType.error);
-    } else if (password.length < 6) {
-      AppToast.show("Password must be at least 6 characters", ToastType.error);
-    } else {
-      context.read<AuthBloc>().add(
-        AuthSignIn(email: email, password: password),
-      );
+      return;
     }
+    if (!RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$").hasMatch(email)) {
+      AppToast.show("Please enter a valid email address", ToastType.error);
+      return;
+    }
+    if (password.isEmpty) {
+      AppToast.show("Password is required", ToastType.error);
+      return;
+    }
+    if (password.length < 6) {
+      AppToast.show("Password must be at least 6 characters", ToastType.error);
+      return;
+    }
+
+    context.read<AuthBloc>().add(AuthSignIn(email: email, password: password));
   }
 
-  Future<void> onGoogleSignIn() async {
+  void _handleGoogleSignIn() {
     context.read<AuthBloc>().add(GoogleSignInEvent());
+  }
+
+  void _navigateToVerifyEmail(String email, String password) {
+    if (_userCubit.state.userModel != null &&
+        _userCubit.state.userModel!.email.isNotEmpty) {
+      context.pushNamed(
+        "verify_email",
+        extra: UserModel(
+          email: _userCubit.state.userModel!.email,
+          firstName: "",
+          lastName: "",
+          password: "",
+        ),
+      );
+    } else {
+      context.pushNamed(
+        "verify_email",
+        extra: UserModel(
+          email: email,
+          firstName: "",
+          lastName: "",
+          password: password,
+        ),
+      );
+    }
   }
 
   @override
@@ -85,198 +118,200 @@ class _SignInPageState extends State<SignInPage> {
           AppToast.show(state.message, ToastType.error);
 
           if (state.message == "User not verified") {
-            if (_userCubit.state.userModel != null &&
-                _userCubit.state.userModel!.email.isNotEmpty) {
-              context.pushNamed(
-                "verify_email",
-                extra: UserModel(
-                  email: _userCubit.state.userModel!.email,
-                  firstName: "",
-                  lastName: "",
-                  password: "",
-                ),
-              );
-            } else {
-              context.pushNamed(
-                "verify_email",
-                extra: UserModel(
-                  email: _emailController.text.trim(),
-                  firstName: "",
-                  lastName: "",
-                  password: _passwordController.text.trim(),
-                ),
-              );
-            }
+            _navigateToVerifyEmail(
+              _emailController.text.trim(),
+              _passwordController.text.trim(),
+            );
           }
         }
       },
       builder: (BuildContext context, AuthState state) {
         return Scaffold(
-          resizeToAvoidBottomInset: false,
+          resizeToAvoidBottomInset: true,
           body: SafeArea(
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: SingleChildScrollView(
-                padding: gapSymmetric(horizontal: 20),
+            child: SingleChildScrollView(
+              padding: gapSymmetric(horizontal: 20, vertical: 24),
+              child: IntrinsicHeight(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Text(
-                      "Welcome back",
-                      style: Theme.of(context).textTheme.headlineLarge,
+                    SizedBox(height: h(32)),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Welcome back",
+                          style: Theme.of(context).textTheme.headlineLarge
+                              ?.copyWith(fontWeight: FontWeight.w700),
+                        ),
+                        SizedBox(height: h(8)),
+                        Text(
+                          "Login to your account",
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(
+                                color: Colors.grey[600],
+                                fontWeight: FontWeight.w400,
+                              ),
+                        ),
+                      ],
                     ),
-                    SizedBox(height: h(5)),
-                    Text(
-                      "Login to your account.",
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                    SizedBox(height: h(39)),
-                    Form(
-                      key: _formKey,
-                      child: Column(
-                        children: [
-                          AppTextField(
-                            textInputAction: TextInputAction.next,
-                            controller: _emailController,
-                            label: "Email address",
 
-                            keyboardType: TextInputType.emailAddress,
-                            hintText: "Enter your email address",
+                    Column(
+                      children: [
+                        SizedBox(height: h(32)),
+
+                        SizedBox(
+                          height: h(180),
+                          child: Form(
+                            key: _formKey,
+                            child: Column(
+                              children: [
+                                AppTextField(
+                                  textInputAction: TextInputAction.next,
+                                  controller: _emailController,
+                                  label: "Email address",
+                                  keyboardType: TextInputType.emailAddress,
+                                  hintText: "your.email@example.com",
+                                ),
+                                SizedBox(height: h(20)),
+                                AppTextField(
+                                  controller: _passwordController,
+                                  label: "Password",
+                                  textInputAction: TextInputAction.done,
+                                  hintText: "At least 6 characters",
+                                  obscureText: _isObscure,
+                                  suffixIcon: GestureDetector(
+                                    onTap: () => updateObscure(),
+                                    child: Padding(
+                                      padding: gapSymmetric(
+                                        vertical: 13,
+                                        horizontal: 15,
+                                      ),
+                                      child: SvgPicture.asset(
+                                        _isObscure == false
+                                            ? AppAssets.eyeVisibilitySvg
+                                            : AppAssets.eyeSvg,
+                                        height: h(16),
+                                        color: AppColors.greyColor,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
+                        ),
 
-                          SizedBox(height: h(20)),
-                          AppTextField(
-                            controller: _passwordController,
-                            label: "Password",
-                            textInputAction: TextInputAction.done,
-
-                            hintText: "Enter your password",
-                            obscureText: _isObscure,
-                            suffixIcon: GestureDetector(
-                              onTap: () => updateObsecure(),
-                              child: Padding(
-                                padding: gapSymmetric(
-                                  vertical: 13,
-                                  horizontal: 15,
-                                ),
-                                child: SvgPicture.asset(
-                                  _isObscure == false
-                                      ? AppAssets.eyeVisibilitySvg
-                                      : AppAssets.eyeSvg,
-                                  height: h(16),
-                                  // ignore: deprecated_member_use
-                                  color: AppColors.greyColor,
-                                ),
+                        Padding(
+                          padding: gapOnly(top: 0, bottom: 24),
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: () =>
+                                  context.push(Routes.forgotPassword),
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              child: Text(
+                                "Forgot Password?",
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(
+                                      color: AppColors.primaryColor,
+                                      fontWeight: FontWeight.w500,
+                                    ),
                               ),
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: h(6)),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () => context.push(Routes.forgotPassword),
-                        child: Text(
-                          "Forgot Password?",
-                          style: Theme.of(context).textTheme.bodyMedium!
-                              .copyWith(color: AppColors.primaryColor),
                         ),
-                      ),
-                    ),
 
-                    Padding(
-                      padding: gapOnly(top: 16, bottom: 25),
-                      child: GenericButtonWidget(
-                        onPressed: () => onLogin(),
-                        text: "Login",
-                        isLoading: state is AuthLoading,
-                      ),
-                    ),
-
-                    Center(
-                      child: TextspanWidget(
-                        buttonColor: AppColors.primaryColor,
-                        callback: () {
-                          context.push(Routes.signUp);
-                        },
-                        text: "Don’t have an account? ",
-                        buttonText: "Sign Up",
-                      ),
-                    ),
-                    SizedBox(height: h(20)),
-                    Center(
-                      child: Text(
-                        "Or with",
-                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                          color: AppColors.greyColor,
-                          fontWeight: FontWeight.w400,
+                        GenericButtonWidget(
+                          onPressed: () => _handleLogin(state),
+                          text: "Login",
+                          isLoading: state is AuthLoading,
                         ),
-                      ),
-                    ),
-                    SizedBox(height: h(20)),
-                    Center(
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(h(10)),
-                        onTap: state is GoogleAuthLoading
-                            ? null
-                            : () {
-                                onGoogleSignIn();
-                              },
-                        child: Ink(
-                          height: h(48),
-                          width: w(200),
-                          padding: gapAll(10),
-                          decoration: BoxDecoration(
-                            color: Color(0xffF9F8F8),
-                            borderRadius: BorderRadius.circular(h(10)),
-                          ),
-                          child: (state is GoogleAuthLoading)
-                              ? FittedBox(
-                                  child: Align(
-                                    alignment: Alignment.center,
-                                    child: CircularProgressIndicator(
-                                      color: AppColors.primaryColor,
-                                    ),
-                                  ),
-                                )
-                              : Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Image.asset(
-                                      AppAssets.googlePng,
-                                      height: h(22),
-                                      width: w(22),
-                                    ),
-                                    SizedBox(width: w(6)),
-                                    Text(
-                                      "Sign In with Google",
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium!
-                                          .copyWith(
-                                            fontSize: t(12),
-                                            color: Color(0xff757575),
-                                          ),
-                                    ),
-                                  ],
+
+                        Padding(
+                          padding: gapSymmetric(vertical: 20),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  height: 1,
+                                  color: Colors.grey[300],
                                 ),
+                              ),
+                              Padding(
+                                padding: gapSymmetric(horizontal: 12),
+                                child: Text(
+                                  "Or",
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(
+                                        color: Colors.grey[600],
+                                        fontSize: t(12),
+                                      ),
+                                ),
+                              ),
+                              Expanded(
+                                child: Container(
+                                  height: 1,
+                                  color: Colors.grey[300],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
+                        SocialAuthButton(
+                          isLoading: state is GoogleAuthLoading,
+                          iconPath: AppAssets.googleSvg,
+                          text: "Continue with Google",
+                          onTap: () {
+                            _handleGoogleSignIn();
+                          },
+                        ),
+                        if (Platform.isIOS)
+                          SocialAuthButton(
+                            isLoading: state is AppleSignInLoading,
+                            iconPath: AppAssets.appleSvg,
+                            text: "Continue with Apple",
+                            onTap: () {
+                              context.read<AuthBloc>().add(AppleSignInEvent());
+                            },
+                          ),
+
+                        Padding(
+                          padding: gapOnly(top: 20),
+                          child: Center(
+                            child: TextspanWidget(
+                              buttonColor: AppColors.primaryColor,
+                              callback: () {
+                                context.push(Routes.signUp);
+                              },
+                              text: "Don't have an account?",
+                              buttonText: "Sign Up",
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    SizedBox(height: h(110)),
-                    Text(
-                      "By logging in, you agree to the terms and conditions of this application.",
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                        fontSize: t(14),
-                        color: Color(0xff8F8F8F),
-                        fontWeight: FontWeight.w400,
-                      ),
+
+                    Column(
+                      children: [
+                        SizedBox(height: h(18)),
+                        Text(
+                          "By logging in, you agree to the terms and conditions of this application.",
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                fontSize: t(12),
+                                color: Colors.grey[600],
+                                fontWeight: FontWeight.w400,
+                                height: 1.5,
+                              ),
+                        ),
+                      ],
                     ),
-                    SizedBox(height: h(37)),
                   ],
                 ),
               ),

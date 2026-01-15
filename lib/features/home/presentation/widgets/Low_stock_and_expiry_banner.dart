@@ -1,5 +1,3 @@
-// ignore_for_file: file_names
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -27,11 +25,11 @@ class LowStockAndExpiryBanner extends StatelessWidget {
           return const SizedBox.shrink();
         }
 
-        final expiringCount = state.expiringItems.length ?? 0;
-        final lowStockCount = state.lowStockItems.length ?? 0;
-        final total = expiringCount + lowStockCount;
+        final expiringCount = state.expiringItems.length;
+        final lowStockCount = state.lowStockItems.length;
+        final totalAlerts = expiringCount + lowStockCount;
 
-        if (total == 0) {
+        if (totalAlerts == 0) {
           return const SizedBox.shrink();
         }
 
@@ -39,62 +37,19 @@ class LowStockAndExpiryBanner extends StatelessWidget {
           padding: gapOnly(left: 16, right: 16, top: 16, bottom: 0),
           child: UpperTile(
             verticalPadding: 14,
-            color: Color(0xffFFFBEB),
-            borderColor: Color(0xffFFDD98),
-
+            color: const Color(0xFFFFFBEB),
+            borderColor: const Color(0xFFFFDD98),
             widget: GestureDetector(
               onTap: onTap ?? () => context.push(Routes.myPantry),
               child: Row(
                 children: [
-                  SvgPicture.asset(
-                    AppAssets.notificationSvg,
-                    width: w(18),
-                    height: w(18),
-                    colorFilter: ColorFilter.mode(
-                      AppColors.primaryColor,
-                      BlendMode.srcIn,
-                    ), // white base
-                  ),
+                  _buildIcon(),
                   gap(width: 14),
                   Expanded(
-                    child: RichText(
-                      text: TextSpan(
-                        style: Theme.of(context).textTheme.headlineMedium
-                            ?.copyWith(
-                              color: AppColors.primaryColor,
-                              height: 1.3,
-                            ),
-                        children: [
-                          if (expiringCount > 0) ...[
-                            TextSpan(
-                              text: "$expiringCount ",
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            TextSpan(
-                              text:
-                                  "item${expiringCount == 1 ? "" : "s"} expiring soon",
-                            ),
-                            if (lowStockCount > 0) const TextSpan(text: " • "),
-                          ],
-                          if (lowStockCount > 0) ...[
-                            TextSpan(
-                              text: "$lowStockCount ",
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            TextSpan(
-                              text:
-                                  "item${lowStockCount == 1 ? "" : "s"} running low",
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
+                    child: _buildAlertText(
+                      context,
+                      expiringCount,
+                      lowStockCount,
                     ),
                   ),
                 ],
@@ -104,5 +59,62 @@ class LowStockAndExpiryBanner extends StatelessWidget {
         );
       },
     );
+  }
+
+  Widget _buildIcon() {
+    return SvgPicture.asset(
+      AppAssets.notificationSvg,
+      width: w(18),
+      height: w(18),
+      colorFilter: ColorFilter.mode(AppColors.primaryColor, BlendMode.srcIn),
+    );
+  }
+
+  Widget _buildAlertText(
+    BuildContext context,
+    int expiringCount,
+    int lowStockCount,
+  ) {
+    return RichText(
+      text: TextSpan(
+        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+          color: AppColors.primaryColor,
+          height: 1.3,
+        ),
+        children: [
+          if (expiringCount > 0) ..._buildExpiringSpans(expiringCount),
+          if (expiringCount > 0 && lowStockCount > 0)
+            const TextSpan(text: " • "),
+          if (lowStockCount > 0) ..._buildLowStockSpans(lowStockCount),
+        ],
+      ),
+    );
+  }
+
+  List<TextSpan> _buildExpiringSpans(int count) {
+    return [
+      TextSpan(
+        text: "$count ",
+        style: const TextStyle(fontWeight: FontWeight.w700),
+      ),
+      TextSpan(text: "item${_getPluralSuffix(count)} expiring soon"),
+    ];
+  }
+
+  List<TextSpan> _buildLowStockSpans(int count) {
+    return [
+      TextSpan(
+        text: "$count ",
+        style: const TextStyle(fontWeight: FontWeight.w700),
+      ),
+      TextSpan(
+        text: "item${_getPluralSuffix(count)} running low",
+        style: const TextStyle(fontWeight: FontWeight.w500),
+      ),
+    ];
+  }
+
+  String _getPluralSuffix(int count) {
+    return count == 1 ? "" : "s";
   }
 }

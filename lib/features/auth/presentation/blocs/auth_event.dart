@@ -17,6 +17,8 @@ final class AuthSignUp extends AuthEvent {
 
 class AuthGetCurrentUser extends AuthEvent {}
 
+class MoveSignUpUserToHome extends AuthEvent {}
+
 final class AuthSendUserEmailVerficationCode extends AuthEvent {
   final String firstName;
   final String lastName;
@@ -70,3 +72,7 @@ final class ResendEmailVerficationCodeEvent extends AuthEvent {
 final class GoogleSignInEvent extends AuthEvent {}
 
 final class GoogleSignUpEvent extends AuthEvent {}
+
+final class AppleSignInEvent extends AuthEvent {}
+
+final class AppleSignUpEvent extends AuthEvent {}

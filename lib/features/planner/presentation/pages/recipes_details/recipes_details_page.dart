@@ -1,5 +1,7 @@
 // ignore_for_file: use_build_context_synchronously, unused_local_variable, avoid_function_literals_in_foreach_calls, duplicate_ignore
 
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/data/model/recipe_model.dart';
@@ -82,6 +84,9 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
           if (state.successMessage.isNotEmpty) {
             AppToast.show(state.successMessage, ToastType.success);
           }
+          if (state.isRecipeFinished) {
+            context.pop();
+          }
         },
         builder: (_, state) => _buildContent(context, state),
       ),
@@ -155,11 +160,10 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
             doneSteps: [],
           ),
         );
-        // ignore: avoid_function_literals_in_foreach_calls
         setState(() => steps.forEach((step) => step["completed"] = false));
       },
       onFinish: () {
-        _showFinishConfirmationDialog(context);
+        _showFinishConfirmationDialog(context, state);
       },
     );
   }
@@ -313,8 +317,12 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
     );
   }
 
-  Future<dynamic> _showFinishConfirmationDialog(BuildContext context) {
+  Future<dynamic> _showFinishConfirmationDialog(
+    BuildContext context,
+    PlannerState state,
+  ) {
     return showCustomGenericDialog(
+      isloading: state.isFinishingRecipe,
       context: context,
       title: "Finish Recipe?",
       subtitle:
@@ -336,7 +344,6 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
           ),
         );
         setState(() => steps.forEach((step) => step["completed"] = false));
-        context.pop();
       },
       onSecondaryPressed: () {
         context.pop();

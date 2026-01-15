@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/utils/date_format_to_string.dart';
-import 'package:foodkitchen/core/utils/show_toast.dart';
-import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
-import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/features/history/presentation/bloc/scan_history_cubit.dart';
 import 'package:foodkitchen/features/history/presentation/bloc/scan_history_state.dart';
 import 'package:lottie/lottie.dart';
@@ -23,32 +21,66 @@ class ScanHistoryPage extends StatefulWidget {
 
 class _ScanHistoryPageState extends State<ScanHistoryPage> {
   late final ScanHistoryCubit _scanHistoryCubit;
-  int pageNumber = 1;
-  final ScrollController _scrollController = ScrollController();
-  bool isFetchingMore = false;
+  late final ScrollController _scrollController;
+
+  int _pageNumber = 1;
+  bool _isFetchingMore = false;
   bool _isDisposed = false;
 
   @override
   void initState() {
     super.initState();
-    _scanHistoryCubit = context.read<ScanHistoryCubit>();
-    _scanHistoryCubit.clearState();
-    _fetchHistory(pageNumber.toString());
+    initHistoryState();
+  }
 
+  void initHistoryState() {
+    _scanHistoryCubit = context.read<ScanHistoryCubit>();
+    _scrollController = ScrollController();
+
+    _scanHistoryCubit.clearState();
+    _loadInitialHistory();
+    _setupScrollListener();
+  }
+
+  void _setupScrollListener() {
     _scrollController.addListener(() {
-      if (_scrollController.position.pixels ==
-              _scrollController.position.maxScrollExtent &&
-          !isFetchingMore &&
-          !_scanHistoryCubit.state.isLoading) {}
+      if (_isAtEndOfList() &&
+          !_isFetchingMore &&
+          !_scanHistoryCubit.state.isLoading) {
+        _loadMoreHistory();
+      }
     });
   }
 
-  Future<void> _fetchHistory(String pageNumber) async {
+  bool _isAtEndOfList() {
+    return _scrollController.position.pixels ==
+        _scrollController.position.maxScrollExtent;
+  }
+
+  Future<void> _loadInitialHistory() async {
     if (_isDisposed) return;
     try {
-      await _scanHistoryCubit.fetchHistory(pageNumber: pageNumber);
+      await _scanHistoryCubit.fetchHistory(pageNumber: _pageNumber.toString());
     } catch (e, st) {
-      debugPrint('Error fetching history: $e\n$st');
+      debugPrint('Error loading history: $e\n$st');
+    }
+  }
+
+  Future<void> _loadMoreHistory() async {
+    if (_isDisposed || _isFetchingMore) return;
+
+    setState(() => _isFetchingMore = true);
+    _pageNumber++;
+
+    try {
+      await _scanHistoryCubit.fetchHistory(pageNumber: _pageNumber.toString());
+    } catch (e, st) {
+      debugPrint('Error loading more history: $e\n$st');
+      _pageNumber--;
+    } finally {
+      if (!_isDisposed) {
+        setState(() => _isFetchingMore = false);
+      }
     }
   }
 
@@ -62,60 +94,71 @@ class _ScanHistoryPageState extends State<ScanHistoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xffF9F9F9),
-      appBar: _buildAppBar(context),
+      backgroundColor: const Color(0xFFF9F9F9),
+      appBar: _buildAppBar(),
       body: BlocBuilder<ScanHistoryCubit, ScanHistoryState>(
-        builder: (_, state) {
-          if (state.isLoading && state.items.isEmpty) {
-            return const HistoryLoadingView();
-          }
-
-          if (state.items.isEmpty) return const HistoryEmptyView();
-
-          return SafeArea(
-            child: Padding(
-              padding: gapSymmetric(horizontal: 20, vertical: 0),
-              child: Column(
-                children: [
-                  Expanded(
-                    child: ListView.builder(
-                      controller: _scrollController,
-                      itemCount: state.items.length + 1,
-                      padding: gapSymmetric(vertical: 12),
-                      itemBuilder: (context, index) {
-                        if (index < state.items.length) {
-                          final historyData = state.items[index];
-                          return Padding(
-                            padding: gapOnly(bottom: 12),
-                            child: HistoryListTile(
-                              title: "Scanned Receipt",
-                              date: formatDate(historyData.scannedAt),
-                              details: historyData.items,
-                            ),
-                          );
-                        } else {
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            child: Center(
-                              child: isFetchingMore
-                                  ? Lottie.asset(AppAssets.loader)
-                                  : const SizedBox.shrink(),
-                            ),
-                          );
-                        }
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
+        builder: (context, state) => _buildBody(state),
       ),
     );
   }
 
-  AppBar _buildAppBar(BuildContext context) {
+  Widget _buildBody(ScanHistoryState state) {
+    if (state.isLoading && state.items.isEmpty) {
+      return const HistoryLoadingView();
+    }
+
+    if (state.items.isEmpty) {
+      return const HistoryEmptyView();
+    }
+
+    return SafeArea(
+      child: Padding(
+        padding: gapSymmetric(horizontal: 20, vertical: 0),
+        child: _buildHistoryList(state),
+      ),
+    );
+  }
+
+  Widget _buildHistoryList(ScanHistoryState state) {
+    return Column(
+      children: [
+        Expanded(
+          child: ListView.builder(
+            controller: _scrollController,
+            itemCount: state.items.length + (_isFetchingMore ? 1 : 0),
+            padding: gapSymmetric(vertical: 12),
+            itemBuilder: (context, index) {
+              if (index < state.items.length) {
+                return _buildHistoryTile(index, state.items[index]);
+              } else {
+                return _buildLoadingIndicator();
+              }
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHistoryTile(int index, dynamic historyData) {
+    return Padding(
+      padding: gapOnly(bottom: 12),
+      child: HistoryListTile(
+        title: "Scanned Receipt",
+        date: formatDate(historyData.scannedAt),
+        details: historyData.items,
+      ),
+    );
+  }
+
+  Widget _buildLoadingIndicator() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Center(child: Lottie.asset(AppAssets.loader)),
+    );
+  }
+
+  AppBar _buildAppBar() {
     return AppBar(
       leadingWidth: w(55),
       leading: Row(

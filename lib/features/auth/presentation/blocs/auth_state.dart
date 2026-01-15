@@ -13,6 +13,15 @@ final class AuthEmailVerificationCodeSent extends AuthState {
   AuthEmailVerificationCodeSent(this.successMessage);
 }
 
+final class FetchingUserDetails extends AuthState {}
+
+final class FetchedUserDetails extends AuthState {}
+
+final class ErrorFetchingUserDetails extends AuthState {
+  final String errorMessage;
+  ErrorFetchingUserDetails(this.errorMessage);
+}
+
 final class AuthUserPasswordChanged extends AuthState {
   final String successMessage;
   AuthUserPasswordChanged(this.successMessage);
@@ -58,3 +67,7 @@ final class ResendEmailVerficationCode extends AuthState {
 final class GoogleAuthLoading extends AuthState {}
 
 final class GoogleAuthsignUpLoading extends AuthState {}
+
+final class AppleSignInLoading extends AuthState {}
+
+final class AppleSignUpLoading extends AuthState {}

@@ -8,6 +8,8 @@ import 'package:foodkitchen/core/services/notifications/flutter_local_notificati
 import 'package:foodkitchen/features/auth/data/data_source/auth_remote_datasource.dart';
 import 'package:foodkitchen/features/auth/data/repository/auth_repository_impl.dart';
 import 'package:foodkitchen/features/auth/domain/repository/auth_repository.dart';
+import 'package:foodkitchen/features/auth/domain/usecase/apple_sign_in_usecase.dart';
+import 'package:foodkitchen/features/auth/domain/usecase/apple_sign_up_usecase.dart';
 import 'package:foodkitchen/features/auth/domain/usecase/google_sign_in_usecase.dart';
 import 'package:foodkitchen/features/auth/domain/usecase/google_signup_usecase.dart';
 import 'package:foodkitchen/features/auth/domain/usecase/send_password_reset_email_usecase.dart';
@@ -212,6 +214,8 @@ void _initAuth() async {
         verifyUserEmail: VerifyUserEmail(sl()),
         userCubit: sl(),
         getCurrentUser: GetCurrentUserUseCase(sl()),
+        appleSignIn: AppleSignInUsecase(sl()),
+        appleSignUp: AppleSignUpUsecase(sl()),
       ),
     );
 }

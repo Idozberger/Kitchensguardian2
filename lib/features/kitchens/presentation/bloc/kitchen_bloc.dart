@@ -6,8 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/services/fcm/fcm_service.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
-import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_bloc.dart';
-import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_event.dart';
+
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_bloc.dart';
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_event.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
@@ -237,26 +236,22 @@ class KitchenBloc extends Bloc<KitchenEvent, KitchenState> {
     emit(KitchensLoading());
 
     final kitchenId = event.kitchen.kitchenId;
+
+    if (event.kitchen.invitationCode.isNotEmpty) {
+      await _saveOrUpdateUserKitchen(kitchen: event.kitchen);
+    }
     _plannerBloc.add(GetDateRangeEvent(kitchenId: kitchenId));
+    _plannerBloc.add(GetAllWeeklyPlansEvent(kitchenId, null));
+
+    _homeBloc.add(GetAllWeeklyPlansEventForHome());
+    _homeBloc.add(GetUserStorageAreaEvent(kitchenId));
+    _homeBloc.add(GetRecipeSuggestionEvent(kitchenId));
+    _homeBloc.add(GetPantriesItemsEventForHome(kitchenId: kitchenId));
+    _homeBloc.add(GenerateGroceryList());
+
+    _groceryBloc.add(RequestedGroceryEvent(kitchenId: kitchenId));
 
     emit(OpenKitchen());
-
-    Future.microtask(() {
-      _plannerBloc.add(GetDateRangeEvent(kitchenId: kitchenId));
-      _homeBloc.add(GetAllWeeklyPlansEventForHome());
-      _homeBloc.add(GetUserStorageAreaEvent(kitchenId));
-      _homeBloc.add(GetRecipeSuggestionEvent(kitchenId));
-      _homeBloc.add(GetPantriesItemsEventForHome(kitchenId: kitchenId));
-      _homeBloc.add(GenerateGroceryList());
-
-      _groceryBloc.add(RequestedGroceryEvent(kitchenId: kitchenId));
-
-      _plannerBloc.add(GetAllWeeklyPlansEvent(kitchenId, null));
-
-      if (event.kitchen.invitationCode.isNotEmpty) {
-        _saveOrUpdateUserKitchen(kitchen: event.kitchen);
-      }
-    });
   }
 
   Future<void> _onDeleteOrLeaveKitchen(

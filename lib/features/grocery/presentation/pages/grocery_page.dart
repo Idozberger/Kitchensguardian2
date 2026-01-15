@@ -15,23 +15,24 @@ class GroceryPage extends StatefulWidget {
 }
 
 class _GroceryPageState extends State<GroceryPage> {
-  late final UserCubit userCubit;
-  late final GroceryBloc groceryBloc;
+  late final UserCubit _userCubit;
+  late final GroceryBloc _groceryBloc;
   final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    userCubit = context.read<UserCubit>();
-    groceryBloc = context.read<GroceryBloc>();
+    _userCubit = context.read<UserCubit>();
+    _groceryBloc = context.read<GroceryBloc>();
     _searchController.addListener(() => setState(() {}));
-    _fetchInitialData();
+    _loadInitialData();
   }
 
-  void _fetchInitialData() {
-    final kitchenId = userCubit.state.activeKitchenId;
+  void _loadInitialData() {
+    final kitchenId = _userCubit.state.activeKitchenId;
     if (kitchenId.isEmpty) return;
-    groceryBloc
+
+    _groceryBloc
       ..add(RequestedGroceryEvent(kitchenId: kitchenId))
       ..add(GetAiGeneratedItemsEvent(kitchenId: kitchenId));
   }
@@ -39,26 +40,32 @@ class _GroceryPageState extends State<GroceryPage> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<GroceryBloc, GroceryState>(
-      listener: (context, state) {
-        if (state.errorMessage != null) {
-          AppToast.show(state.errorMessage!, ToastType.error);
-        } else if (state.successMessage != null) {
-          AppToast.show(state.successMessage!, ToastType.success);
-        }
-      },
+      listener: _handleStateChanges,
       child: BlocBuilder<GroceryBloc, GroceryState>(
-        builder: (context, state) {
-          return Scaffold(
-            backgroundColor: const Color(0xffF9F9F9),
-            body: GroceryBody(
-              state: state,
-              userCubit: userCubit,
-              groceryBloc: groceryBloc,
-              controller: _searchController,
-            ),
-          );
-        },
+        builder: (context, state) => Scaffold(
+          backgroundColor: const Color(0xFFF9F9F9),
+          body: GroceryBody(
+            state: state,
+            userCubit: _userCubit,
+            groceryBloc: _groceryBloc,
+            controller: _searchController,
+          ),
+        ),
       ),
     );
+  }
+
+  void _handleStateChanges(BuildContext context, GroceryState state) {
+    if (state.errorMessage != null) {
+      AppToast.show(state.errorMessage!, ToastType.error);
+    } else if (state.successMessage != null) {
+      AppToast.show(state.successMessage!, ToastType.success);
+    }
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 }
