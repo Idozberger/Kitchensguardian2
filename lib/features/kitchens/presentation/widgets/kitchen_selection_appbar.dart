@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'package:foodkitchen/core/global/functions/resize.dart';
 
 class KitchenSelectionAppBar extends StatelessWidget

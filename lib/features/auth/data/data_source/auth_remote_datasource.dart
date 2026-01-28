@@ -284,7 +284,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource {
         scopes: ['email', 'profile'],
       );
 
-      await googleSignIn.disconnect();
+      await googleSignIn.signOut();
       GoogleSignInAccount? googleUser = await googleSignIn.signIn();
 
       if (googleUser == null) {

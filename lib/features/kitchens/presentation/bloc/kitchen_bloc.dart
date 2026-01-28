@@ -312,6 +312,11 @@ class KitchenBloc extends Bloc<KitchenEvent, KitchenState> {
 
   Future<void> _saveOrUpdateUserKitchen({required Kitchen kitchen}) async {
     try {
+      if (kitchen.role != 'host') {
+        debugPrint('Skipping kitchen update — user is not host');
+        return;
+      }
+
       final firestore = FirebaseFirestore.instance;
 
       final kitchenRef = firestore
@@ -324,13 +329,12 @@ class KitchenBloc extends Bloc<KitchenEvent, KitchenState> {
         'kitchen_name': kitchen.kitchenName,
         'role': kitchen.role,
         'invitation_code': kitchen.invitationCode,
-        'created_at': FieldValue.serverTimestamp(),
         'updated_at': FieldValue.serverTimestamp(),
       };
 
-      await kitchenRef.set(data);
+      await kitchenRef.set(data, SetOptions(merge: true));
     } catch (e, st) {
-      debugPrint(st.toString());
+      debugPrint('Kitchen update failed: $e\n$st');
     }
   }
 }

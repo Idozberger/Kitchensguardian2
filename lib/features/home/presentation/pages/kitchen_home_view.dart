@@ -1,8 +1,11 @@
+// ignore_for_file: use_build_context_synchronously, unnecessary_underscores
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
+import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/services/document_scanning/document_scanning_service.dart';
@@ -18,6 +21,8 @@ import 'package:foodkitchen/features/home/presentation/widgets/pantry_section.da
 import 'package:foodkitchen/features/home/presentation/widgets/smart_cart.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/suggestion_recipes.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/tonight_recipe.dart';
+import 'package:foodkitchen/features/pantry/presentation/widgets/custom_appbar.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -87,7 +92,21 @@ class _KitchenHomeViewState extends State<KitchenHomeView> {
   }
 
   void scanDocument(BuildContext context) async {
-    await DocumentScannerService().scanDocument(context);
+    final status = await Permission.camera.request();
+
+    if (status.isGranted) {
+      await DocumentScannerService().scanDocument(context);
+    } else if (status.isDenied) {
+    } else if (status.isPermanentlyDenied) {
+      _showPermissionDialog(context, isPermanent: true);
+    }
+  }
+
+  void _showPermissionDialog(BuildContext context, {bool isPermanent = false}) {
+    showDialog(
+      context: context,
+      builder: (context) => PermissionDialog(isPermanent: isPermanent),
+    );
   }
 
   Widget _buildFindRecipesButton(BuildContext context) {

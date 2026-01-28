@@ -1,12 +1,12 @@
+// ignore_for_file: avoid_print
+
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:foodkitchen/core/common/data/datasource/common_remote_datasource.dart';
 import 'package:foodkitchen/core/common/data/model/recipe_model.dart';
 import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/core/error/failures.dart';
-import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/features/home/data/datasource/home_remote_datasource.dart';
 import 'package:foodkitchen/features/home/data/models/kitchen_model.dart';
 import 'package:foodkitchen/features/home/data/models/pantry_data_model.dart';
@@ -93,10 +93,8 @@ class HomeRepositoryImpl implements HomeRepository {
 
       return Right(generatedRecipes);
     } on Failure catch (f) {
-      logInfo("Failure: ${f.message}");
       return Left(f);
     } catch (e) {
-      logInfo("Error: ${e.toString()}");
       return Left(UnknownFailure(e.toString()));
     }
   }
@@ -149,10 +147,8 @@ class HomeRepositoryImpl implements HomeRepository {
       print("(suggestionapi)-- Success: $recipe");
       return Right(recipe);
     } on Failure catch (f) {
-      logInfo("Known Failure: ${f.message}");
       return Left(f);
     } catch (e, stackTrace) {
-      logInfo("Unexpected Error: $e");
       debugPrintStack(stackTrace: stackTrace);
       return Left(UnknownFailure("Failed to load recipe suggestion"));
     }

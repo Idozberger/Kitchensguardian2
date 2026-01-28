@@ -1,7 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:foodkitchen/app/app_router.dart';
 import 'package:foodkitchen/core/config/routes.dart';
@@ -145,7 +145,9 @@ class NotificationService {
         payload: payload,
       );
     } catch (e) {
-      print('Error showing notification: $e');
+      if (kDebugMode) {
+        print('Error showing notification: $e');
+      }
     }
   }
 

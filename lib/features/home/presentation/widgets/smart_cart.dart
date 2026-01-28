@@ -6,7 +6,6 @@ import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
-import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/rounded_text_container.dart';
 
 class SmartCartTile extends StatelessWidget {
@@ -102,7 +101,10 @@ class SmartCartTile extends StatelessWidget {
 
   Widget _buildInfoButton() {
     return IntrinsicWidth(
-      child: InkWell(child: RoundedTextContainer(text: infoText!)),
+      child: InkWell(
+        onTap: onGenerate,
+        child: RoundedTextContainer(text: infoText!),
+      ),
     );
   }
 

@@ -11,7 +11,7 @@ class AddToWeeklyPlan implements UseCase<String, AddToWeeklyPlanParams> {
   @override
   Future<Either<Failure, String>> call(AddToWeeklyPlanParams params) async {
     return await plannerRepository.addToWeeklyPlan(
-      RecipeEntity: params.recipeEntity,
+      recipeEntity: params.recipeEntity,
     );
   }
 }

@@ -167,6 +167,7 @@ class DocumentScannerService {
         _showLoadingDialog(context, 'Scanning document...');
       }
 
+      // ignore: prefer_typing_uninitialized_variables
       var result;
       if (Platform.isAndroid) {
         result = await _documentScanner.getScannedDocumentAsImages(page: 1);

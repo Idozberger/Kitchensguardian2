@@ -1,5 +1,6 @@
-import 'dart:typed_data';
+// ignore_for_file: unnecessary_underscores
 
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
@@ -67,7 +68,7 @@ class _MyPantryPageState extends State<MyPantryPage> {
       length: 3,
       child: Scaffold(
         backgroundColor: const Color(0xFFF9F9F9),
-        appBar: buildAppBar(context),
+        appBar: MyPantryAppBar(),
         body: BlocConsumer<PantryBloc, PantryState>(
           listener: (_, state) => _handlePantryStateChange(state),
           builder: (context, state) {

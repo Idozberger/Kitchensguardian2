@@ -1,6 +1,6 @@
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/services/fcm/fcm_service.dart';
@@ -355,12 +355,16 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     for (final pending in pendingNotifications) {
       if (!currentItemIds.contains(pending.id)) {
         await notificationService.cancelNotification(pending.id);
-        print("Canceled obsolete notification (ID: ${pending.id})");
+        if (kDebugMode) {
+          print("Canceled obsolete notification (ID: ${pending.id})");
+        }
       }
     }
 
     final scheduledIds = pendingNotifications.map((e) => e.id).toSet();
-    print("Pending notification IDs: $scheduledIds");
+    if (kDebugMode) {
+      print("Pending notification IDs: $scheduledIds");
+    }
     // Schedule notifications for current low stock items for the new items
     for (final item in lowStockItems) {
       final int morningId = item.itemId.hashCode & 0x7fffffff;
@@ -375,9 +379,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           dailyTime: morningTime,
           payload: 'low_stock:${item.itemId}',
         );
-        print(
-          "Scheduled morning low stock notification for ${item.name} (ID: $morningId)",
-        );
+        if (kDebugMode) {
+          print(
+            "Scheduled morning low stock notification for ${item.name} (ID: $morningId)",
+          );
+        }
       }
 
       if (!scheduledIds.contains(eveningId)) {
@@ -388,9 +394,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           dailyTime: eveningTime,
           payload: 'low_stock:${item.itemId}',
         );
-        print(
-          "Scheduled evening low stock notification for ${item.name} (ID: $eveningId)",
-        );
+        if (kDebugMode) {
+          print(
+            "Scheduled evening low stock notification for ${item.name} (ID: $eveningId)",
+          );
+        }
       }
     }
 
@@ -407,9 +415,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           dailyTime: morningTime,
           payload: 'expiring_soon:${item.itemId}',
         );
-        print(
-          "Scheduled morning expiring notification for ${item.name} (ID: $morningId)",
-        );
+        if (kDebugMode) {
+          print(
+            "Scheduled morning expiring notification for ${item.name} (ID: $morningId)",
+          );
+        }
       }
 
       if (!scheduledIds.contains(eveningId)) {
@@ -420,9 +430,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           dailyTime: eveningTime,
           payload: 'expiring_soon:${item.itemId}',
         );
-        print(
-          "Scheduled evening expiring notification for ${item.name} (ID: $eveningId)",
-        );
+        if (kDebugMode) {
+          print(
+            "Scheduled evening expiring notification for ${item.name} (ID: $eveningId)",
+          );
+        }
       }
     }
   }

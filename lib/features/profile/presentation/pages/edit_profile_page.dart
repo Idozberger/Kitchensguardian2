@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use
 
 import 'dart:convert';
+
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -79,19 +80,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
 
     String? base64Thumbnail;
-
-    if (imageBytes != null) {
+    if (imageBytes != null && imageBytes!.isNotEmpty) {
       base64Thumbnail = await compressImage(imageBytes!);
-    } else {
-      AppToast.show("Please select a profile picture", ToastType.error);
-      return;
-    }
+    } else {}
 
     profileBloc.add(
       EditProfileEvent(
         firstName: firstName,
         lastName: lastName,
-        thumbnail: base64Thumbnail,
+        thumbnail: base64Thumbnail ?? "",
       ),
     );
   }

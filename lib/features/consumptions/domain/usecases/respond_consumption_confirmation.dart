@@ -1,21 +1,21 @@
 import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/core/common/usecase/usecase.dart';
-import 'package:foodkitchen/features/dashboard/domain/repository/dashboard_repository.dart';
+import 'package:foodkitchen/features/consumptions/domain/repository/consumption_repository.dart';
 import 'package:fpdart/fpdart.dart';
 
 class RespondConsumptionConfirmationUseCase
     implements UseCase<String, RespondConsumptionConfirmationUseCaseParams> {
-  final DashboardRepository dashboardRepository;
-  const RespondConsumptionConfirmationUseCase(this.dashboardRepository);
+  final ConsumptionRepository consumptionRepository;
+  const RespondConsumptionConfirmationUseCase(this.consumptionRepository);
 
   @override
   Future<Either<Failure, String>> call(
     RespondConsumptionConfirmationUseCaseParams params,
   ) async {
-    return await dashboardRepository.respondConsumptionConfirmation(
-      confirmationId: '',
-      responseText: '',
-      actualQuantityRemaining: '',
+    return await consumptionRepository.respondConsumptionConfirmation(
+      confirmationId: params.confirmationId,
+      responseText: params.responseText,
+      actualQuantityRemaining: params.actualQuantityRemaining,
     );
   }
 }

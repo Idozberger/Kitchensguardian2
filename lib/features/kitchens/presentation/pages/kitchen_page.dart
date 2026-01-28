@@ -9,8 +9,8 @@ import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
-import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_bloc.dart';
-import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_event.dart';
+import 'package:foodkitchen/features/consumptions/presentation/bloc/consumption_bloc.dart';
+import 'package:foodkitchen/features/consumptions/presentation/bloc/consumption_event.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_bloc.dart';
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_event.dart';
@@ -294,7 +294,7 @@ class _KitchenPageState extends State<KitchenPage> {
     _kitchenBloc.add(SwitchKitchenEvent(kitchen));
 
     if (context.mounted) {
-      context.read<DashboardBloc>().add(
+      context.read<ConsumptionBloc>().add(
         GetConsumptionConfirmationPendingCountEvent(
           kitchenId: kitchen.kitchenId,
         ),

@@ -32,6 +32,8 @@ import 'package:foodkitchen/features/planner/domain/usecases/set_date_range.dart
 import 'package:foodkitchen/features/planner/domain/usecases/update_meal_plan.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dart';
+import 'package:foodkitchen/features/planner/presentation/widgets/planner_date_formatter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
   final UserCubit _userCubit;
@@ -123,6 +125,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     on<EditMealEvent>(_onEditMeal);
     on<GetDateRangeEvent>(_onGetDateRangeEvent);
     on<SetDateRangeEvent>(_onSetDateRange);
+    on<UpdateRecipeFinishedState>(_onUpdateRecipeFinishedState);
   }
   Future<void> _onSetDateRange(
     SetDateRangeEvent event,
@@ -170,14 +173,10 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
         emit(state.copyWith(errorMessage: failure.message, isLoading: false));
       },
       (dateRange) async {
-        log(
-          "Date Ranges: ${dateRange.startDate} -- End Date ${dateRange.endDate}",
-        );
         if (dateRange.endDate.isNotEmpty) {
           final existingEndDate = formatStringDateToMeetBackendDate(
             dateRange.endDate,
           );
-          log("Existing date: $existingEndDate");
           final todayOnly = DateTime(
             DateTime.now().year,
             DateTime.now().month,
@@ -200,14 +199,20 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     );
   }
 
-  void updateStartEndDate() {
+  void updateStartEndDate() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool isSubscribed = prefs.getBool("is_subscribled") ?? false;
     final today = DateTime.now();
-    final next3Dates = List.generate(3, (i) => today.add(Duration(days: i)));
+    final nextDays = List.generate(
+      isSubscribed ? 7 : 3,
+      (i) => today.add(Duration(days: i)),
+    );
 
-    final formattedStartDate = formatDateToMeetBackendDate(next3Dates.first);
-    final formattedEndDate = formatDateToMeetBackendDate(next3Dates.last);
-    log(formattedStartDate);
-    log(formattedEndDate);
+    final formattedStartDate = formatDateToMeetBackendDate(nextDays.first);
+    final formattedEndDate = formatDateToMeetBackendDate(nextDays.last);
+    log(
+      "formattedStartDate $formattedEndDate || formattedEndDate $formattedEndDate",
+    );
     add(
       SetDateRangeEvent(
         kitchenId: _userCubit.state.activeKitchenId,
@@ -252,14 +257,21 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
             loadingPlans: false,
           ),
         );
-        log("start date : ${state.startDate}");
+
         if (getAllWeeklyPlans.isNotEmpty) {
           await NotificationService().scheduleMealPlanReminders(
             mergedMealPlanEntities,
           );
         }
-        await Future.delayed(Duration(milliseconds: 500));
-        add(GetDateBasedPlans(state.startDate ?? formatDate(DateTime.now())));
+        log(
+          "plan: ${state.startDate} || ${PlannerDateFormatter.toBackendFormat(DateTime.now())}",
+        );
+        add(
+          GetDateBasedPlans(
+            state.startDate ??
+                PlannerDateFormatter.toBackendFormat(DateTime.now()),
+          ),
+        );
       },
     );
   }
@@ -333,6 +345,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
             ),
           );
         });
+
         emit(
           state.copyWith(
             errorMessage: failure.message,
@@ -351,6 +364,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
             ),
           );
         });
+        _homeBloc.add(GetAllWeeklyPlansEventForHome());
         emit(
           state.copyWith(
             successMessage: successMessage,
@@ -378,6 +392,10 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
         emit(state.copyWith(errorMessage: failure.message, isLoading: false));
       },
       (successMessage) async {
+        if (state.startDate == null || state.startDate!.isEmpty) {
+          updateStartEndDate();
+        }
+
         await Future.delayed(Duration(seconds: 4));
         add(GetAllWeeklyPlansEvent(_userCubit.state.activeKitchenId, null));
         _homeBloc.add(GetAllWeeklyPlansEventForHome());
@@ -385,6 +403,13 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
         emit(state.copyWith(successMessage: successMessage, isLoading: false));
       },
     );
+  }
+
+  Future<void> _onUpdateRecipeFinishedState(
+    UpdateRecipeFinishedState event,
+    Emitter<PlannerState> emit,
+  ) async {
+    emit(state.copyWith(isRecipeFinished: false));
   }
 
   Future<void> _onUpdateMealTypeSelectedAndDate(
@@ -490,7 +515,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     Emitter<PlannerState> emit,
   ) async {
     emit(state.copyWith(addingToWeeklyPlan: true));
-    var plan = event.RecipeEntity;
+    var plan = event.recipeEntity;
     final res = await _addToWeeklyPlan(
       AddToWeeklyPlanParams(plan.copyWith(thumbnail: null)),
     );
@@ -807,6 +832,8 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
             isRecipeFinished: true,
           ),
         );
+        emit(state.copyWith(isRecipeFinished: false));
+        _homeBloc.add(GetPantriesItemsEventForHome(kitchenId: event.kitchenId));
         AppToast.show(
           successMessage,
           ToastType.success,
@@ -825,11 +852,11 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     if (event.startRecipe) {
       emit(
         state.copyWith(
-          startedRecipe: event.RecipeEntity,
+          startedRecipe: event.recipeEntity,
           doneSteps: event.doneSteps,
         ),
       );
-      _userCubit.updateRecipeEntity(event.RecipeEntity, event.doneSteps);
+      _userCubit.updateRecipeEntity(event.recipeEntity, event.doneSteps);
     } else {
       emit(state.copyWith(startedRecipe: [], doneSteps: []));
       _userCubit.updateRecipeEntity([], []);
@@ -854,7 +881,14 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
       (failure) =>
           emit(state.copyWith(errorMessage: failure.message, isLoading: false)),
       (message) {
-        emit(state.copyWith(successMessage: message, isLoading: false));
+        if (event.isPlan) {
+          AppToast.show(message, ToastType.success);
+
+          emit(state.copyWith(isLoading: false));
+        } else {
+          emit(state.copyWith(successMessage: message, isLoading: false));
+        }
+
         _groceryBloc.add(
           RequestedGroceryEvent(kitchenId: event.pantry.kitchenId),
         );

@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:foodkitchen/core/common/cubits/app_cubit.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
@@ -33,11 +34,14 @@ class KitchenSelectionPage extends StatefulWidget {
 class _KitchenSelectionPageState extends State<KitchenSelectionPage> {
   late KitchenBloc kitchenBloc;
   late UserCubit userCubit;
+  late AppCubit appCubit;
 
   @override
   void initState() {
     kitchenBloc = context.read<KitchenBloc>();
     userCubit = context.read<UserCubit>();
+    appCubit = context.read<AppCubit>();
+    appCubit.initializeApp(userCubit);
     kitchenBloc.add(FetchKitchens());
     getNotificationPermission();
     super.initState();

@@ -7,11 +7,12 @@ import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
-import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_bloc.dart';
-import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_state.dart'
-    show DashboardLoaded, DashboardLoading, DashboardState;
+import 'package:foodkitchen/features/consumptions/presentation/bloc/consumption_bloc.dart';
+import 'package:foodkitchen/features/consumptions/presentation/bloc/consumption_state.dart';
+
 import 'package:go_router/go_router.dart';
 
+// ignore: must_be_immutable
 class ConsumptionConfirmationCard extends StatelessWidget {
   final String itemName;
   final String confirmationId;
@@ -61,13 +62,14 @@ class ConsumptionConfirmationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return UpperTile(
       widget: Column(
-        spacing: h(12),
+        spacing: h(4),
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildHeader(context),
           _buildQuantityDisplay(context),
           _buildDepletionPrediction(context),
           _buildInfoCards(),
+          SizedBox(),
           _buildActionButtons(context),
         ],
       ),
@@ -151,7 +153,7 @@ class ConsumptionConfirmationCard extends StatelessWidget {
 
   Widget _buildInfoCards() {
     return Row(
-      spacing: w(12),
+      spacing: w(4),
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         InfoCard(title: "Added", value: addedAt ?? "N/A"),
@@ -162,7 +164,7 @@ class ConsumptionConfirmationCard extends StatelessWidget {
 
   Widget _buildActionButtons(BuildContext context) {
     return Row(
-      spacing: w(12),
+      spacing: w(4),
       children: [
         _ActionButton(
           text: "Confirm",
@@ -202,7 +204,7 @@ class ConsumptionConfirmationCard extends StatelessWidget {
     return showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => BlocBuilder<DashboardBloc, DashboardState>(
+      builder: (_) => BlocBuilder<ConsumptionBloc, ConsumptionState>(
         builder: (context, state) {
           return GenericDialog(
             child: Column(
@@ -231,7 +233,7 @@ class ConsumptionConfirmationCard extends StatelessWidget {
                     ),
                     Flexible(
                       child: GenericButtonWidget(
-                        isLoading: state is DashboardLoading,
+                        isLoading: state.respondingOnConsumptionLoader,
                         color: AppColors.primaryColor,
                         onPressed: () {
                           onConfirm();

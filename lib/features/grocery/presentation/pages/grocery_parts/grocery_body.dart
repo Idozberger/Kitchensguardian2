@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
@@ -42,15 +41,41 @@ class GroceryBody extends StatefulWidget {
 }
 
 class _GroceryBodyState extends State<GroceryBody> {
-  final List<String> requestedAndAiGeneratedSelectedList = [];
-  final List<String> finalListSelectedItems = [];
+  static const Color _backgroundColor = Color(0xffF9F9F9);
+  static const Color _emptyStateTextColor = Color(0xffC3C3C3);
+  static const double _horizontalPadding = 20;
+  static const double _verticalPadding = 16;
+  static const double _contentHorizontalPadding = 16;
+  static const double _gapHeight = 16;
+  static const double _gapHeightSmall = 12;
+  static const double _gapHeightLarge = 164;
+  static const double _emptyStateImageWidth = 112;
+  static const double _tilePaddingVertical = 8;
+  static const String _finalListKey = "final_list";
+  static const String _bucketTypeFinalList = "mylist";
+  static const String _bucketTypeRequested = "requested";
+  static const List<String> _tabLabels = [
+    "Requested Items",
+    "AI Generated List",
+    "Final List",
+  ];
 
-  List<RequestedItemEntity> currentList = [];
-  int selectedIndex = 0;
-  String searchQuery = "";
-  void updateIndex(int index) {
-    selectedIndex = index;
-    setState(() {});
+  List<String> _requestedAndAiGeneratedSelectedList = [];
+  final List<String> _finalListSelectedItems = [];
+  int _selectedTabIndex = 0;
+  String _searchQuery = "";
+
+  void _updateSelectedTab(int index) {
+    setState(() {
+      _selectedTabIndex = index;
+      _searchQuery = "";
+    });
+  }
+
+  void _updateSearchQuery(String query) {
+    setState(() {
+      _searchQuery = query;
+    });
   }
 
   @override
@@ -58,185 +83,231 @@ class _GroceryBodyState extends State<GroceryBody> {
     return BlocBuilder<GroceryBloc, GroceryState>(
       builder: (_, state) {
         if (widget.state.isLoading) {
-          return Center(child: Lottie.asset(AppAssets.loader));
+          return _buildLoadingView();
         }
-        return Scaffold(
-          backgroundColor: const Color(0xffF9F9F9),
-          body: SafeArea(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: gapSymmetric(horizontal: 20, vertical: 16),
-                    child: SearchBarWidget(
-                      controller: widget.controller,
-                      onChanged: (String query) {
-                        setState(() {
-                          searchQuery = query;
-                        });
-                      },
-                    ),
-                  ),
 
-                  CategoryTabs(
-                    categories: const [
-                      "Requested Items",
-                      "AI Generated List",
-                      "Final List",
-                    ],
-                    selectedIndex: selectedIndex,
-                    onTabSelected: (index) {
-                      updateIndex(index);
-                    },
-                  ),
-                  gap(height: 16),
-                  _buildListWidget(state),
-                ],
-              ),
+        return Scaffold(
+          backgroundColor: _backgroundColor,
+          body: SafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSearchBar(),
+                _buildCategoryTabs(),
+                gap(height: _gapHeight),
+                _buildListContent(state),
+              ],
             ),
           ),
           floatingActionButtonLocation:
               FloatingActionButtonLocation.miniStartFloat,
-          floatingActionButton: selectedIndex == 2
-              ? FloatingActionButton(
-                  key: Key("final_list"),
-
-                  heroTag: "final_list",
-                  tooltip: "Add Custom Items",
-                  backgroundColor: AppColors.primaryColor,
-                  shape: const CircleBorder(),
-                  onPressed: () => context.push(Routes.addCustomItem),
-                  child: const Icon(Icons.add, color: Colors.black),
-                )
-              : null,
+          floatingActionButton: _buildFloatingActionButton(),
         );
       },
     );
   }
 
-  Widget _buildListWidget(GroceryState state) {
-    currentList = switch (selectedIndex) {
+  Widget _buildLoadingView() {
+    return Center(child: Lottie.asset(AppAssets.loader));
+  }
+
+  Widget _buildSearchBar() {
+    return Padding(
+      padding: gapSymmetric(
+        horizontal: _horizontalPadding,
+        vertical: _verticalPadding,
+      ),
+      child: SearchBarWidget(
+        controller: widget.controller,
+        onChanged: _updateSearchQuery,
+      ),
+    );
+  }
+
+  Widget _buildCategoryTabs() {
+    return CategoryTabs(
+      categories: _tabLabels,
+      selectedIndex: _selectedTabIndex,
+      onTabSelected: _updateSelectedTab,
+    );
+  }
+
+  Widget? _buildFloatingActionButton() {
+    if (_selectedTabIndex != 2) {
+      return null;
+    }
+
+    return FloatingActionButton(
+      key: const Key(_finalListKey),
+      heroTag: _finalListKey,
+      tooltip: "Add Custom Items",
+      backgroundColor: AppColors.primaryColor,
+      shape: const CircleBorder(),
+      onPressed: () => context.push(Routes.addCustomItem),
+      child: const Icon(Icons.add, color: Colors.black),
+    );
+  }
+
+  Widget _buildListContent(GroceryState state) {
+    final currentList = _getCurrentList(state);
+    final filteredList = _filterList(currentList);
+
+    return Padding(
+      padding: gapSymmetric(horizontal: _contentHorizontalPadding),
+      child: filteredList.isEmpty
+          ? _buildEmptyStateView()
+          : _buildPopulatedListView(filteredList, state),
+    );
+  }
+
+  List<RequestedItemEntity> _getCurrentList(GroceryState state) {
+    return switch (_selectedTabIndex) {
       0 => state.requestedItemsList ?? [],
       1 => state.aiGeneratedList ?? [],
       2 => state.finalListItemsList ?? [],
-
       int() => [],
     };
-    final filteredList = currentList.where((item) {
-      return item.name.toLowerCase().contains(searchQuery);
-    }).toList();
+  }
 
-    return Padding(
-      padding: gapSymmetric(horizontal: 16),
-      child: filteredList.isEmpty
-          ? Center(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  gap(height: 164),
-                  Image.asset(AppAssets.groceryEmpty, width: w(112)),
-                  gap(height: 12),
-                  Text(
-                    "Your grocery list is empty",
-                    style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                      color: Color(0xffC3C3C3),
-                    ),
-                  ),
-                ],
-              ),
-            )
-          : Column(
-              children: [
-                UpperTile(
-                  verticalPadding: 8,
-                  widget: Column(
-                    children: List.generate(filteredList.length, (index) {
-                      final item = filteredList[index];
-                      log("Grocery: ${item.unit}");
-                      return GroceryListItem(
-                        grocery: item,
-                        isChecked: _isChecked(item.itemId),
-                        isFinalList: selectedIndex == 2,
-                        onChanged: (val) => _toggle(item.itemId, state),
-                        onDelete: () => _delete(context, item.itemId),
-                        showDivider: index != filteredList.length - 1,
-                      );
-                    }),
-                  ),
-                ),
-                gap(height: 16),
-                if (selectedIndex == 2)
-                  FinalListFooter(
-                    isFinalListTabTriggered: true,
-                    groceryList: state.finalListItemsList ?? [],
-                    onRemoveCallback: () {
-                      deleteAll(context, state.finalListItemsList ?? []);
-                    },
-                    onAddToFinalListCallback: () {},
-                  )
-                else
-                  FinalListFooter(
-                    isFinalListTabTriggered: false,
-                    groceryList: state.requestedItemsList ?? [],
-                    onRemoveCallback: () {
-                      deleteAll(context, state.requestedItemsList ?? []);
-                    },
-                    onAddToFinalListCallback: () {
-                      if (requestedAndAiGeneratedSelectedList.isEmpty) {
-                        AppToast.show(
-                          "Please select at least one item",
-                          ToastType.error,
-                        );
-                        return;
-                      }
-                      widget.groceryBloc.add(
-                        UpdateBucketTypeEvent(
-                          kitchenId: widget.userCubit.state.activeKitchenId,
-                          itemIds: requestedAndAiGeneratedSelectedList,
-                          bucketType: "mylist",
-                        ),
-                      );
-                    },
-                  ),
-                SizedBox(height: h(12)),
-              ],
-            ),
+  List<RequestedItemEntity> _filterList(List<RequestedItemEntity> items) {
+    if (_searchQuery.isEmpty) {
+      return items;
+    }
+
+    return items
+        .where(
+          (item) =>
+              item.name.toLowerCase().contains(_searchQuery.toLowerCase()),
+        )
+        .toList();
+  }
+
+  Widget _buildEmptyStateView() {
+    return Center(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          gap(height: _gapHeightLarge),
+          Image.asset(AppAssets.groceryEmpty, width: w(_emptyStateImageWidth)),
+          gap(height: _gapHeightSmall),
+          Text(
+            "Your grocery list is empty",
+            style: Theme.of(
+              context,
+            ).textTheme.headlineMedium!.copyWith(color: _emptyStateTextColor),
+          ),
+        ],
+      ),
     );
   }
 
-  bool _isChecked(String itemId) {
-    debugPrint("Aigenerated list selected: $itemId");
-    return requestedAndAiGeneratedSelectedList.contains(itemId);
+  Widget _buildPopulatedListView(
+    List<RequestedItemEntity> filteredList,
+    GroceryState state,
+  ) {
+    return Column(
+      children: [
+        _buildItemsList(filteredList),
+        gap(height: _gapHeight),
+        _buildFooterWidget(state),
+        SizedBox(height: h(_gapHeightSmall)),
+      ],
+    );
   }
 
-  void _toggle(String id, GroceryState state) {
-    final list = selectedIndex == 2
-        ? finalListSelectedItems
-        : requestedAndAiGeneratedSelectedList;
-    list.contains(id) ? list.remove(id) : list.add(id);
+  final ScrollController _itemsScrollController = ScrollController();
+
+  Widget _buildItemsList(List<RequestedItemEntity> items) {
+    return UpperTile(
+      horizontalPadding: 0,
+      verticalPadding: _tilePaddingVertical,
+      widget: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: h(408)),
+        child: Scrollbar(
+          controller: _itemsScrollController,
+          thumbVisibility: true,
+          child: SingleChildScrollView(
+            controller: _itemsScrollController,
+            child: Padding(
+              padding: gapSymmetric(horizontal: 15),
+              child: Column(
+                children: List.generate(items.length, (index) {
+                  final item = items[index];
+                  log("Grocery: ${item.unit}");
+
+                  return GroceryListItem(
+                    grocery: item,
+                    isChecked: _isItemChecked(item.itemId),
+                    isFinalList: _selectedTabIndex == 2,
+                    onChanged: (_) => _toggleItemSelection(item.itemId),
+                    onDelete: () => _handleDeleteItem(item.itemId),
+                    showDivider: index != items.length - 1,
+                  );
+                }),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFooterWidget(GroceryState state) {
+    if (_selectedTabIndex == 2) {
+      return FinalListFooter(
+        isFinalListTabTriggered: true,
+        groceryList: state.finalListItemsList ?? [],
+        onRemoveCallback: () =>
+            _handleDeleteAll(state.finalListItemsList ?? []),
+        onAddToFinalListCallback: () {},
+      );
+    }
+
+    return FinalListFooter(
+      isFinalListTabTriggered: false,
+      groceryList: state.requestedItemsList ?? [],
+      onRemoveCallback: () => _handleDeleteAll(state.requestedItemsList ?? []),
+      onAddToFinalListCallback: _handleAddToFinalList,
+    );
+  }
+
+  bool _isItemChecked(String itemId) {
+    debugPrint("Item checked: $itemId");
+    return _requestedAndAiGeneratedSelectedList.contains(itemId);
+  }
+
+  void _toggleItemSelection(String itemId) {
+    final selectedList = _selectedTabIndex == 2
+        ? _finalListSelectedItems
+        : _requestedAndAiGeneratedSelectedList;
+
+    if (selectedList.contains(itemId)) {
+      selectedList.remove(itemId);
+    } else {
+      selectedList.add(itemId);
+    }
+
     setState(() {});
   }
 
-  void _delete(BuildContext context, String id) {
+  void _handleDeleteItem(String itemId) {
     showDialogForItemDeletion(
       context,
-
       callback: () {
-        if (selectedIndex != 2) {
+        if (_selectedTabIndex != 2) {
           widget.groceryBloc.add(
             DeleteKitchenItemsEvent(
               kitchenId: widget.userCubit.state.activeKitchenId,
-              itemIds: [id],
+              itemIds: [itemId],
             ),
           );
         } else {
           widget.groceryBloc.add(
             UpdateBucketTypeEvent(
               kitchenId: widget.userCubit.state.activeKitchenId,
-              itemIds: [id],
-              bucketType: "requested",
+              itemIds: [itemId],
+              bucketType: _bucketTypeRequested,
             ),
           );
         }
@@ -244,13 +315,13 @@ class _GroceryBodyState extends State<GroceryBody> {
     );
   }
 
-  void deleteAll(BuildContext context, List<RequestedItemEntity> currentList) {
+  void _handleDeleteAll(List<RequestedItemEntity> itemList) {
     showDialogForItemDeletion(
       context,
       callback: () {
-        final itemIds = currentList.map((item) => item.itemId).toList();
+        final itemIds = itemList.map((item) => item.itemId).toList();
 
-        if (selectedIndex != 2) {
+        if (_selectedTabIndex != 2) {
           widget.groceryBloc.add(
             DeleteKitchenItemsEvent(
               kitchenId: widget.userCubit.state.activeKitchenId,
@@ -262,11 +333,27 @@ class _GroceryBodyState extends State<GroceryBody> {
             UpdateBucketTypeEvent(
               kitchenId: widget.userCubit.state.activeKitchenId,
               itemIds: itemIds,
-              bucketType: "requested",
+              bucketType: _bucketTypeRequested,
             ),
           );
         }
       },
     );
+  }
+
+  void _handleAddToFinalList() {
+    if (_requestedAndAiGeneratedSelectedList.isEmpty) {
+      AppToast.show("Please select at least one item", ToastType.error);
+      return;
+    }
+
+    widget.groceryBloc.add(
+      UpdateBucketTypeEvent(
+        kitchenId: widget.userCubit.state.activeKitchenId,
+        itemIds: _requestedAndAiGeneratedSelectedList,
+        bucketType: _bucketTypeFinalList,
+      ),
+    );
+    _requestedAndAiGeneratedSelectedList = [];
   }
 }

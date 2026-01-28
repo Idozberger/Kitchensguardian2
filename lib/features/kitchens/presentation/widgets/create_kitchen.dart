@@ -7,6 +7,8 @@ import 'package:foodkitchen/features/kitchens/presentation/dialogs/create_kitche
 import 'package:foodkitchen/features/kitchens/presentation/widgets/kitchen_snippet.dart';
 
 class CreateKitchenSection extends StatelessWidget {
+  const CreateKitchenSection({super.key});
+
   @override
   Widget build(BuildContext context) {
     return UpperTile(

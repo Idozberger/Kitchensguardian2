@@ -1,8 +1,7 @@
 import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/features/dashboard/data/datasource/dashboard_remote_datasource.dart';
-import 'package:foodkitchen/features/dashboard/data/model/comsumption_confirmation_model.dart';
 import 'package:foodkitchen/features/dashboard/data/model/member_model.dart';
-import 'package:foodkitchen/features/dashboard/domain/entities/consumption_confirmation.dart';
+
 import 'package:foodkitchen/features/dashboard/domain/entities/member.dart';
 import 'package:foodkitchen/features/dashboard/domain/repository/dashboard_repository.dart';
 import 'package:fpdart/fpdart.dart';
@@ -61,64 +60,6 @@ class DashboardRepositoryImpl implements DashboardRepository {
         kitchenId: kitchenId,
         memberId: memberId,
       );
-
-      return Right(response);
-    } on Failure catch (f) {
-      return Left(f);
-    } catch (e) {
-      return Left(UnknownFailure(e.toString()));
-    }
-  }
-
-  @override
-  Future<Either<Failure, List<ConsumptionConfirmation>>>
-  getConsumptionConfirmationPending({required String kitchenId}) async {
-    try {
-      final response = await dashboardRemoteDatasource
-          .getConsumptionConfirmationPending(kitchenId: kitchenId);
-
-      final List<ConsumptionConfirmation> confirmations =
-          (response as List<dynamic>)
-              .map((json) => ConsumptionConfirmationModel.fromJson(json))
-              .toList();
-
-      return Right(confirmations);
-    } on Failure catch (f) {
-      return Left(f);
-    } catch (e) {
-      return Left(UnknownFailure(e.toString()));
-    }
-  }
-
-  @override
-  Future<Either<Failure, String>> getConsumptionConfirmationCount({
-    required String kitchenId,
-  }) async {
-    try {
-      final response = await dashboardRemoteDatasource
-          .getConsumptionConfirmationCount(kitchenId: kitchenId);
-
-      return Right(response);
-    } on Failure catch (f) {
-      return Left(f);
-    } catch (e) {
-      return Left(UnknownFailure(e.toString()));
-    }
-  }
-
-  @override
-  Future<Either<Failure, String>> respondConsumptionConfirmation({
-    required String confirmationId,
-    required String responseText,
-    required String actualQuantityRemaining,
-  }) async {
-    try {
-      final response = await dashboardRemoteDatasource
-          .respondConsumptionConfirmation(
-            confirmationId: confirmationId,
-            responseText: responseText,
-            actualQuantityRemaining: actualQuantityRemaining,
-          );
 
       return Right(response);
     } on Failure catch (f) {

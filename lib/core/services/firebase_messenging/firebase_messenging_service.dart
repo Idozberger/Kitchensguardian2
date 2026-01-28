@@ -56,7 +56,6 @@ class FirebaseMessagingService {
       );
 
       final status = result.authorizationStatus;
-      logInfo('🔐 Notification permission status: $status');
 
       if (status == AuthorizationStatus.denied) {
         logWarning('User denied notification permission');
@@ -123,7 +122,6 @@ class FirebaseMessagingService {
       }
 
       messaging.onTokenRefresh.listen((newToken) async {
-        logInfo('FCM token refreshed: $newToken');
         await _updateUserToken(userId: userId, token: newToken);
       });
     } catch (e, st) {
@@ -218,5 +216,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
         payload: jsonEncode(message.data),
       );
     }
-  } catch (e, st) {}
+    // ignore: empty_catches
+  } catch (e) {}
 }

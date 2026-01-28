@@ -4,7 +4,6 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
-import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
 
 abstract class ProfileRemoteDatasource {

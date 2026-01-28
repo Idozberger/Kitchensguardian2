@@ -14,6 +14,7 @@ final class PlannerState {
   final String? endDate;
   final bool isLoading;
   final bool loadingPlans;
+  final bool isSubscribed;
   final bool addingToWeeklyPlan;
   final bool startRecipe;
   final bool isFinishingRecipe;
@@ -31,6 +32,7 @@ final class PlannerState {
     this.editMealsPlans = const [],
     this.mealPlans = const [],
     this.isLoading = false,
+    this.isSubscribed = false,
     this.startRecipe = false,
     this.loadingPlans = true,
     this.isFinishingRecipe = false,
@@ -59,6 +61,7 @@ final class PlannerState {
     bool? startRecipe,
     bool? loadingPlans,
     bool? addingToWeeklyPlan,
+    bool? isSubscribed,
     String? errorMessage,
     bool? isRecipeFinished,
     String? successMessage,
@@ -90,6 +93,7 @@ final class PlannerState {
       endDate: endDate ?? this.endDate,
       loadingPlans: loadingPlans ?? this.loadingPlans,
       isRecipeFinished: isRecipeFinished ?? this.isRecipeFinished,
+      isSubscribed: isSubscribed ?? this.isSubscribed,
     );
   }
 }

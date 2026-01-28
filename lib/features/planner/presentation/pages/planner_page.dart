@@ -5,6 +5,7 @@ import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dart';
 import 'package:foodkitchen/features/planner/presentation/controller/planner_controller.dart';
 import 'package:foodkitchen/features/planner/presentation/widgets/planner_content.dart';
+import 'package:foodkitchen/features/planner/presentation/widgets/planner_loading_shimmer.dart';
 
 class PlannerPage extends StatefulWidget {
   const PlannerPage({super.key});

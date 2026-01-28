@@ -1,7 +1,7 @@
 import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/core/common/usecase/usecase.dart';
-import 'package:foodkitchen/features/dashboard/domain/entities/consumption_confirmation.dart';
-import 'package:foodkitchen/features/dashboard/domain/repository/dashboard_repository.dart';
+import 'package:foodkitchen/features/consumptions/domain/entities/consumption_confirmation.dart';
+import 'package:foodkitchen/features/consumptions/domain/repository/consumption_repository.dart';
 import 'package:fpdart/fpdart.dart';
 
 class GetConsumptionConfirmationPendingUsecase
@@ -10,14 +10,14 @@ class GetConsumptionConfirmationPendingUsecase
           List<ConsumptionConfirmation>,
           GetConsumptionConfirmationPendingUsecaseParams
         > {
-  final DashboardRepository dashboardRepository;
-  const GetConsumptionConfirmationPendingUsecase(this.dashboardRepository);
+  final ConsumptionRepository consumptionRepository;
+  const GetConsumptionConfirmationPendingUsecase(this.consumptionRepository);
 
   @override
   Future<Either<Failure, List<ConsumptionConfirmation>>> call(
     GetConsumptionConfirmationPendingUsecaseParams params,
   ) async {
-    return await dashboardRepository.getConsumptionConfirmationPending(
+    return await consumptionRepository.getConsumptionConfirmationPending(
       kitchenId: params.kitchenId,
     );
   }

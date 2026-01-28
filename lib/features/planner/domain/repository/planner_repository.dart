@@ -16,7 +16,7 @@ abstract interface class PlannerRepository {
     required String recipeId,
   });
   Future<Either<Failure, String>> addToWeeklyPlan({
-    required RecipeEntity RecipeEntity,
+    required RecipeEntity recipeEntity,
   });
   Future<Either<Failure, List<RecipeEntity>>> getAllWeeklyPlans();
   Future<Either<Failure, List<RecipeEntity>>> deleteMealTypeFromWeeklyPlan({

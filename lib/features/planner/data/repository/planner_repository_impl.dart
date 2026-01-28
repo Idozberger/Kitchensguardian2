@@ -1,9 +1,10 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'package:foodkitchen/core/common/data/model/recipe_model.dart';
 import 'package:foodkitchen/core/common/data/model/pantry_model.dart';
 import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
 import 'package:foodkitchen/core/error/failures.dart';
-import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/features/planner/data/datasource/planner_local_datasource.dart';
 import 'package:foodkitchen/features/planner/data/datasource/planner_remote_datasource.dart';
 import 'package:foodkitchen/features/planner/data/models/kitchen_date_range_model.dart';
@@ -95,11 +96,11 @@ class PlannerRepositoryImpl implements PlannerRepository {
 
   @override
   Future<Either<Failure, String>> addToWeeklyPlan({
-    required RecipeEntity RecipeEntity,
+    required RecipeEntity recipeEntity,
   }) async {
     try {
       final response = await plannerLocalDatasource.addToWeeklyPlan(
-        newPlan: RecipeEntity as RecipeModel,
+        newPlan: recipeEntity as RecipeModel,
       );
 
       return Right(response);
@@ -277,8 +278,6 @@ class PlannerRepositoryImpl implements PlannerRepository {
     required String kitchenId,
   }) async {
     try {
-      logInfo("Fetching meal plans for kitchenId: $kitchenId");
-
       final response = await plannerRemoteDatasource.listAllMealPlans(
         kitchenId: kitchenId,
       );
@@ -289,10 +288,8 @@ class PlannerRepositoryImpl implements PlannerRepository {
 
       return Right(generatedRecipes);
     } on Failure catch (f) {
-      logInfo("Failure: ${f.message}");
       return Left(f);
     } catch (e) {
-      logInfo("Error: ${e.toString()}");
       return Left(UnknownFailure(e.toString()));
     }
   }

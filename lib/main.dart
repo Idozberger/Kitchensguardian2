@@ -5,8 +5,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/app/app_base.dart';
 import 'package:foodkitchen/app/di.dart';
+import 'package:foodkitchen/core/common/cubits/app_cubit.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/features/auth/presentation/blocs/auth_bloc.dart';
+import 'package:foodkitchen/features/consumptions/presentation/bloc/consumption_bloc.dart';
 import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_bloc.dart';
 import 'package:foodkitchen/features/history/presentation/bloc/scan_history_cubit.dart';
@@ -47,6 +49,8 @@ Future<void> main() async {
         BlocProvider<PlannerBloc>(create: (_) => sl<PlannerBloc>()),
         BlocProvider<ScanHistoryCubit>(create: (_) => sl<ScanHistoryCubit>()),
         BlocProvider<ProfileBloc>(create: (_) => sl<ProfileBloc>()),
+        BlocProvider<ConsumptionBloc>(create: (_) => sl<ConsumptionBloc>()),
+        BlocProvider<AppCubit>(create: (_) => sl<AppCubit>()),
       ],
       child: const AppBase(),
     ),

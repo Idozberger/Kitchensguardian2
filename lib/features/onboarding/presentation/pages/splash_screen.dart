@@ -1,3 +1,5 @@
+// ignore_for_file: type_literal_in_constant_pattern
+
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

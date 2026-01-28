@@ -110,16 +110,12 @@ class GeneratedRecipeSection extends StatelessWidget {
               date: meal.formatedDateString,
             ),
           );
-          AppToast.show("Item removed", ToastType.success);
         } else {
           context.read<PlannerBloc>().add(
             DeletePlanFromRemoteDbEvent(mealPlanId: meal.mealplanId),
           );
           await Future.delayed(Duration(seconds: 6));
-          AppToast.show("Item removed", ToastType.success);
         }
-
-        Navigator.pop(context);
       },
       onSecondaryPressed: () => Navigator.pop(context),
     );
@@ -137,7 +133,7 @@ class GeneratedRecipeSection extends StatelessWidget {
   }) {
     return showDialog(
       context: context,
-      barrierDismissible: true,
+      barrierDismissible: false,
       builder: (context) {
         return GenericDialog(
           borderRadius: h(20),

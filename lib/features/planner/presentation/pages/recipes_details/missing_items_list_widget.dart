@@ -16,8 +16,13 @@ import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dar
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dart';
 
 class MissingItemsListWidget extends StatefulWidget {
+  final bool isPlanned;
   final List<IngredientEntity> ingredients;
-  const MissingItemsListWidget({super.key, required this.ingredients});
+  const MissingItemsListWidget({
+    super.key,
+    required this.ingredients,
+    required this.isPlanned,
+  });
 
   @override
   State<MissingItemsListWidget> createState() => _MissingItemsListWidgetState();
@@ -144,6 +149,8 @@ class _MissingItemsListWidgetState extends State<MissingItemsListWidget> {
       items: requestingItems,
     );
 
-    plannerBloc.add(RequestMissingItemsEvent(pantry: pantryModel));
+    plannerBloc.add(
+      RequestMissingItemsEvent(pantry: pantryModel, isPlan: widget.isPlanned),
+    );
   }
 }

@@ -12,15 +12,15 @@ import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dart';
 
 class HeaderImageWidget extends StatelessWidget {
-  final bool isFav;
-  final Uint8List? thumbnail;
-  final VoidCallback onFavoriteToggle;
+  final bool isFavorite;
+  final Uint8List? thumbnailBytes;
+  final VoidCallback onFavoritePressed;
 
   const HeaderImageWidget({
     super.key,
-    required this.isFav,
-    required this.thumbnail,
-    required this.onFavoriteToggle,
+    required this.isFavorite,
+    this.thumbnailBytes,
+    required this.onFavoritePressed,
   });
 
   @override
@@ -28,44 +28,63 @@ class HeaderImageWidget extends StatelessWidget {
     return Padding(
       padding: gapOnly(left: 20, right: 20, top: 20),
       child: BlocBuilder<PlannerBloc, PlannerState>(
-        builder: (_, state) {
+        builder: (context, state) {
           return Container(
-            padding: gapAll(15),
-            alignment: Alignment.topRight,
             height: h(154),
             width: double.infinity,
+            padding: gapAll(15),
+            alignment: Alignment.topRight,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(h(10)),
-              image: (thumbnail != null && thumbnail!.isNotEmpty)
-                  ? DecorationImage(
-                      image: MemoryImage(thumbnail!),
-                      fit: BoxFit.cover,
-                    )
-                  : DecorationImage(
-                      image: AssetImage(AppAssets.onBoardingSliderBg02),
-                      fit: BoxFit.cover,
-                    ),
+              image: _buildBackgroundImage(),
             ),
-            child: GestureDetector(
-              onTap: state.isLoading ? null : onFavoriteToggle,
-              child: CircleAvatar(
-                backgroundColor: Colors.grey.withOpacity(0.8),
-                child: state.isLoading
-                    ? Transform.scale(
-                        scale: 0.5,
-                        child: const CircularProgressIndicator(),
-                      )
-                    : SvgPicture.asset(
-                        isFav
-                            ? AppAssets.favouriteFilledSvg
-                            : AppAssets.favouriteSvg,
-                        height: h(14),
-                      ),
-              ),
-            ),
+            child: _buildFavoriteButton(state),
           );
         },
       ),
+    );
+  }
+
+  DecorationImage _buildBackgroundImage() {
+    if (thumbnailBytes != null && thumbnailBytes!.isNotEmpty) {
+      return DecorationImage(
+        image: MemoryImage(thumbnailBytes!),
+        fit: BoxFit.cover,
+      );
+    }
+
+    return DecorationImage(
+      image: AssetImage(AppAssets.onBoardingSliderBg02),
+      fit: BoxFit.cover,
+    );
+  }
+
+  Widget _buildFavoriteButton(PlannerState state) {
+    final isLoading = state.isLoading;
+
+    return GestureDetector(
+      onTap: isLoading ? null : onFavoritePressed,
+      child: CircleAvatar(
+        radius: h(18),
+        backgroundColor: Colors.grey.withOpacity(0.75),
+        child: isLoading ? _buildLoadingIndicator() : _buildFavoriteIcon(),
+      ),
+    );
+  }
+
+  Widget _buildLoadingIndicator() {
+    return Transform.scale(
+      scale: 0.5,
+      child: const CircularProgressIndicator(
+        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+      ),
+    );
+  }
+
+  Widget _buildFavoriteIcon() {
+    return SvgPicture.asset(
+      isFavorite ? AppAssets.favouriteFilledSvg : AppAssets.favouriteSvg,
+      height: h(18),
     );
   }
 }

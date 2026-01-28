@@ -1,4 +1,4 @@
-import 'package:foodkitchen/features/dashboard/domain/entities/consumption_confirmation.dart';
+import 'package:foodkitchen/features/consumptions/domain/entities/consumption_confirmation.dart';
 import 'package:foodkitchen/features/dashboard/domain/entities/member.dart';
 
 sealed class DashboardState {

@@ -7,10 +7,10 @@ import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
-import 'package:foodkitchen/core/services/firebase_messenging/firebase_messenging_service.dart';
+import 'package:foodkitchen/features/consumptions/presentation/bloc/consumption_bloc.dart';
+import 'package:foodkitchen/features/consumptions/presentation/bloc/consumption_event.dart';
+import 'package:foodkitchen/features/consumptions/presentation/bloc/consumption_state.dart';
 import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_bloc.dart';
-import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_event.dart';
-import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_state.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/drawer.dart';
 import 'package:foodkitchen/features/grocery/presentation/pages/grocery_page.dart';
@@ -49,7 +49,7 @@ class _DashboardPageState extends State<DashboardPage> {
     _userCubit = context.read<UserCubit>();
     _dashboardBloc = context.read<DashboardBloc>();
 
-    _initializeFirebaseMessaging();
+    // _initializeFirebaseMessaging();
     _fetchConsumptionData();
   }
 
@@ -112,11 +112,10 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Widget _buildConsumptionPendingButton() {
-    return BlocBuilder<DashboardBloc, DashboardState>(
+    return BlocBuilder<ConsumptionBloc, ConsumptionState>(
       builder: (context, state) {
         final String pendingCount =
-            state is DashboardLoaded &&
-                state.comsumptionConfirmationPendingCount != "0"
+            state.comsumptionConfirmationPendingCount != "0"
             ? state.comsumptionConfirmationPendingCount
             : "";
 
@@ -245,39 +244,39 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   void _fetchConsumptionData() {
-    _dashboardBloc.add(
+    context.read<ConsumptionBloc>().add(
       GetConsumptionConfirmationPendingCountEvent(
         kitchenId: _userCubit.state.activeKitchenId,
       ),
     );
   }
 
-  Future<void> _initializeFirebaseMessaging() async {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await Future.delayed(_fcmInitDelay);
+  // Future<void> _initializeFirebaseMessaging() async {
+  //   WidgetsBinding.instance.addPostFrameCallback((_) async {
+  //     await Future.delayed(_fcmInitDelay);
 
-      try {
-        final userState = _userCubit.state;
+  //     try {
+  //       final userState = _userCubit.state;
 
-        if (_canInitializeFCM(userState)) {
-          await FirebaseMessagingService.instance().init(
-            userId: userState.userId,
-            firstName: userState.firstName,
-            lastName: userState.lastName,
-            email: userState.email,
-          );
-        } else {
-          debugPrint('Skipping FCM init — missing userId or email.');
-        }
-      } catch (e, st) {
-        debugPrint('Error initializing FCM: $e\nStack trace: $st');
-      }
-    });
-  }
+  //       if (_canInitializeFCM(userState)) {
+  //         await FirebaseMessagingService.instance().init(
+  //           userId: userState.userId,
+  //           firstName: userState.firstName,
+  //           lastName: userState.lastName,
+  //           email: userState.email,
+  //         );
+  //       } else {
+  //         debugPrint('Skipping FCM init — missing userId or email.');
+  //       }
+  //     } catch (e, st) {
+  //       debugPrint('Error initializing FCM: $e\nStack trace: $st');
+  //     }
+  //   });
+  // }
 
-  bool _canInitializeFCM(dynamic userState) {
-    return userState.userId.isNotEmpty && userState.email.isNotEmpty;
-  }
+  // bool _canInitializeFCM(dynamic userState) {
+  //   return userState.userId.isNotEmpty && userState.email.isNotEmpty;
+  // }
 
   void _onItemTapped(int index) {
     if (_selectedIndex != index) {

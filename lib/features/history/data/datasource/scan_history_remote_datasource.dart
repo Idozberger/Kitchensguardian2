@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:foodkitchen/core/global/functions/const.dart';
@@ -24,17 +25,17 @@ class ScanHistoryRemoteDatasourceImpl implements ScanHistoryRemoteDatasource {
         final data = response.data is String
             ? jsonDecode(response.data)
             : response.data;
-
-        final message = data["error"];
-        throw message;
+        throw data["error"];
       }
-      final data = response.data["history"];
 
-      if (data is List) {
-        return data.map((e) => Map<String, dynamic>.from(e)).toList();
-      } else {
-        throw Exception("Invalid data");
+      final history = response.data["history"];
+
+      if (history == null || history is! List) {
+        log("history is null or not a list");
+        return [];
       }
+
+      return List<Map<String, dynamic>>.from(history);
     } on DioException catch (e) {
       throw dio.handleError(e);
     }

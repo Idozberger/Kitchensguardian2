@@ -1,7 +1,5 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
-import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/core/dialogs/logout.dart';
 import 'package:foodkitchen/core/dialogs/not_found_404.dart';
 import 'package:foodkitchen/features/auth/data/model/user_model.dart';
@@ -16,7 +14,7 @@ import 'package:foodkitchen/features/auth/presentation/pages/signup/verify_email
 import 'package:foodkitchen/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:foodkitchen/features/dashboard/presentation/pages/my_kitchen_members_page.dart';
 import 'package:foodkitchen/features/dashboard/presentation/pages/notification_page.dart';
-import 'package:foodkitchen/features/dashboard/presentation/pages/pending_consumptions_page.dart';
+import 'package:foodkitchen/features/consumptions/presentation/pages/pending_consumptions_page.dart';
 import 'package:foodkitchen/features/dashboard/presentation/pages/referral_code_page.dart';
 import 'package:foodkitchen/features/grocery/presentation/pages/add_custom_items_page.dart';
 import 'package:foodkitchen/features/history/presentation/pages/scan_history_page.dart';

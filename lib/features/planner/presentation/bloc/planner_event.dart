@@ -27,8 +27,8 @@ final class RemoveFromFavouriteRecipeEvent extends PlannerEvent {
 final class ClearAiGeneratedRecipes extends PlannerEvent {}
 
 final class AddToWeeklyPlanEvent extends PlannerEvent {
-  final RecipeModel RecipeEntity;
-  AddToWeeklyPlanEvent(this.RecipeEntity);
+  final RecipeModel recipeEntity;
+  AddToWeeklyPlanEvent(this.recipeEntity);
 }
 
 final class GetAllWeeklyPlansEvent extends PlannerEvent {
@@ -65,11 +65,11 @@ class MarkRecipeFinishedEvent extends PlannerEvent {
 
 class UpdateStartRecipeEvent extends PlannerEvent {
   final bool startRecipe;
-  final List<RecipeModel> RecipeEntity;
+  final List<RecipeModel> recipeEntity;
   final List<Map<String, dynamic>> doneSteps;
   UpdateStartRecipeEvent({
     required this.startRecipe,
-    required this.RecipeEntity,
+    required this.recipeEntity,
     required this.doneSteps,
   });
 }
@@ -89,7 +89,8 @@ final class AddMealPlanEvent extends PlannerEvent {
 
 final class RequestMissingItemsEvent extends PlannerEvent {
   final Pantry pantry;
-  RequestMissingItemsEvent({required this.pantry});
+  final bool isPlan;
+  RequestMissingItemsEvent({required this.pantry, required this.isPlan});
 }
 
 final class ResetMealPlanState extends PlannerEvent {}
@@ -155,6 +156,8 @@ final class GetDateRangeEvent extends PlannerEvent {
 
   GetDateRangeEvent({required this.kitchenId});
 }
+
+final class UpdateRecipeFinishedState extends PlannerEvent {}
 
 final class SetDateRangeEvent extends PlannerEvent {
   final String? kitchenId;

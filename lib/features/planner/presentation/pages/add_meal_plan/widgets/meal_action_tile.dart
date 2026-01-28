@@ -6,7 +6,6 @@ import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
-import 'package:foodkitchen/core/utils/date_format_to_string.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/planner/domain/entities/meal_plan_entity.dart';
@@ -17,6 +16,12 @@ import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dar
 import 'package:go_router/go_router.dart';
 
 class MealActionRow extends StatelessWidget {
+  static const String _defaultButtonText = "Add Meal";
+  static const String _cancelButtonText = "Cancel";
+  static const String _notesPlaceholder = "notes";
+  static const double _buttonGap = 12;
+  static const double _cancelButtonFontSize = 12;
+
   final int selectedIndex;
   final MergedRecipePlanEntity plan;
   final String buttonText;
@@ -27,150 +32,174 @@ class MealActionRow extends StatelessWidget {
     required this.selectedIndex,
     required this.plan,
     this.callback,
-    this.buttonText = "Add Meal",
+    this.buttonText = _defaultButtonText,
   });
 
   bool get _hasMeal {
-    if (selectedIndex == 0) return plan.breakfast != null;
-    if (selectedIndex == 1) return plan.lunch != null;
-    return plan.dinner != null;
+    switch (selectedIndex) {
+      case 0:
+        return plan.breakfast != null;
+      case 1:
+        return plan.lunch != null;
+      case 2:
+        return plan.dinner != null;
+      default:
+        return false;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!_hasMeal) return const SizedBox();
+    if (!_hasMeal) {
+      return const SizedBox();
+    }
 
     return BlocBuilder<PlannerBloc, PlannerState>(
       builder: (context, state) {
         return Row(
           children: [
-            Expanded(
-              child: OutlinedButton(
-                onPressed: callback ?? () => context.go(Routes.dashboard),
-                child: Text(
-                  "Cancel",
-                  style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                    fontSize: t(12),
-                    color: AppColors.primaryColor,
-                  ),
-                ),
-              ),
-            ),
-            gap(width: 12),
-            Expanded(
-              child: GenericButtonWidget(
-                text: buttonText,
-                isLoading: state.isLoading,
-                onPressed: state.isLoading
-                    ? () {}
-                    : () async {
-                        final plannerBloc = context.read<PlannerBloc>();
-                        final kitchenId = context
-                            .read<UserCubit>()
-                            .state
-                            .activeKitchenId;
-                        log("DATE: ${plan.date}");
-                        String formattedDate = plan.date;
-                        if (!formattedDate.contains("-")) {
-                          formattedDate = formatDateForBackend(plan.date);
-                        }
-
-                        final List<MealPlanEntity> mealPlans = [];
-
-                        if (plan.breakfast != null) {
-                          if (plan.breakfast!.mealplanId.isEmpty) {
-                            mealPlans.add(
-                              MealPlanEntity(
-                                date: formattedDate,
-                                kitchenId: kitchenId,
-                                mealType: "breakfast",
-                                notes: "notes",
-                                recipeId: plan.breakfast!.id,
-                              ),
-                            );
-                          }
-                        }
-
-                        if (plan.lunch != null) {
-                          if (plan.lunch!.mealplanId.isEmpty) {
-                            mealPlans.add(
-                              MealPlanEntity(
-                                date: formattedDate,
-                                kitchenId: kitchenId,
-                                mealType: "lunch",
-                                notes: "notes",
-                                recipeId: plan.lunch!.id,
-                              ),
-                            );
-                          }
-                        }
-
-                        if (plan.dinner != null) {
-                          if (plan.dinner!.mealplanId.isEmpty) {
-                            mealPlans.add(
-                              MealPlanEntity(
-                                date: formattedDate,
-                                kitchenId: kitchenId,
-                                mealType: "dinner",
-                                notes: "notes",
-                                recipeId: plan.dinner!.id,
-                              ),
-                            );
-                          }
-                        }
-
-                        if (mealPlans.isNotEmpty) {
-                          if (state.startDate == null ||
-                              state.startDate!.isEmpty) {
-                            log("Date Ranges: -- Setting: ${state.startDate}");
-                            updateStartEndDate(plannerBloc);
-                          }
-                          if (state.endDate != null &&
-                              state.endDate!.isNotEmpty) {
-                            final existingEndDate =
-                                formatStringDateToMeetBackendDate(
-                                  state.endDate!,
-                                );
-                            log("Enddate = $existingEndDate");
-                            if (existingEndDate.isBefore(DateTime.now())) {
-                              updateStartEndDate(plannerBloc);
-                            }
-                          }
-
-                          plannerBloc.add(
-                            CreatePlanEvent(mealPlans: mealPlans),
-                          );
-                        }
-                      },
-              ),
-            ),
+            _buildCancelButton(context),
+            gap(width: _buttonGap),
+            _buildAddMealButton(context, state),
           ],
         );
       },
     );
   }
 
-  void updateStartEndDate(PlannerBloc plannerBloc) {
-    final today = DateTime.now();
-    final next3Dates = List.generate(3, (i) => today.add(Duration(days: i)));
-
-    final formattedStartDate = formatDateToMeetBackendDate(next3Dates.first);
-    final formattedEndDate = formatDateToMeetBackendDate(next3Dates.last);
-
-    plannerBloc.add(
-      SetDateRangeEvent(
-        startDate: formattedStartDate,
-        endDate: formattedEndDate,
+  Widget _buildCancelButton(BuildContext context) {
+    return Expanded(
+      child: OutlinedButton(
+        onPressed: callback ?? () => context.go(Routes.dashboard),
+        child: Text(
+          _cancelButtonText,
+          style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+            fontSize: t(_cancelButtonFontSize),
+            color: AppColors.primaryColor,
+          ),
+        ),
       ),
+    );
+  }
+
+  Widget _buildAddMealButton(BuildContext context, PlannerState state) {
+    return Expanded(
+      child: GenericButtonWidget(
+        text: buttonText,
+        isLoading: state.isLoading,
+        onPressed: state.isLoading
+            ? () {}
+            : () async => _handleAddMealPressed(context, state),
+      ),
+    );
+  }
+
+  Future<void> _handleAddMealPressed(
+    BuildContext context,
+    PlannerState state,
+  ) async {
+    final plannerBloc = context.read<PlannerBloc>();
+    final kitchenId = context.read<UserCubit>().state.activeKitchenId;
+
+    final formattedDate = _getFormattedDate();
+    final mealPlans = _buildMealPlans(kitchenId, formattedDate);
+
+    if (mealPlans.isEmpty) {
+      return;
+    }
+
+    plannerBloc.add(CreatePlanEvent(mealPlans: mealPlans));
+  }
+
+  String _getFormattedDate() {
+    String formattedDate = plan.date;
+
+    if (!formattedDate.contains("-")) {
+      formattedDate = formatDateForBackend(formattedDate);
+    }
+
+    log("DATE: $formattedDate");
+    return formattedDate;
+  }
+
+  List<MealPlanEntity> _buildMealPlans(String kitchenId, String formattedDate) {
+    final mealPlans = <MealPlanEntity>[];
+
+    if (_shouldAddBreakfast()) {
+      mealPlans.add(
+        _createMealPlanEntity(
+          kitchenId: kitchenId,
+          date: formattedDate,
+          mealType: "breakfast",
+          recipeId: plan.breakfast!.id,
+        ),
+      );
+    }
+
+    if (_shouldAddLunch()) {
+      mealPlans.add(
+        _createMealPlanEntity(
+          kitchenId: kitchenId,
+          date: formattedDate,
+          mealType: "lunch",
+          recipeId: plan.lunch!.id,
+        ),
+      );
+    }
+
+    if (_shouldAddDinner()) {
+      mealPlans.add(
+        _createMealPlanEntity(
+          kitchenId: kitchenId,
+          date: formattedDate,
+          mealType: "dinner",
+          recipeId: plan.dinner!.id,
+        ),
+      );
+    }
+
+    return mealPlans;
+  }
+
+  bool _shouldAddBreakfast() {
+    return plan.breakfast != null && plan.breakfast!.mealplanId.isEmpty;
+  }
+
+  bool _shouldAddLunch() {
+    return plan.lunch != null && plan.lunch!.mealplanId.isEmpty;
+  }
+
+  bool _shouldAddDinner() {
+    return plan.dinner != null && plan.dinner!.mealplanId.isEmpty;
+  }
+
+  MealPlanEntity _createMealPlanEntity({
+    required String kitchenId,
+    required String date,
+    required String mealType,
+    required String recipeId,
+  }) {
+    return MealPlanEntity(
+      date: date,
+      kitchenId: kitchenId,
+      mealType: mealType,
+      notes: _notesPlaceholder,
+      recipeId: recipeId,
     );
   }
 
   String formatDateForBackend(String inputDate) {
     final parts = inputDate.split("/");
+
+    if (parts.length != 3) {
+      log("Invalid date format: $inputDate");
+      return inputDate;
+    }
+
     final day = parts[0].padLeft(2, '0');
     final month = parts[1].padLeft(2, '0');
     final year = parts[2];
-    // outputDate = "2002-12-28"
+
     return "$year-$month-$day";
   }
 }

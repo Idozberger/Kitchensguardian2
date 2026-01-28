@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:foodkitchen/core/common/cubits/app_cubit.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/data/datasource/common_remote_datasource.dart';
 import 'package:foodkitchen/core/common/data/datasource/profile_local_datasource.dart';
@@ -25,15 +26,19 @@ import 'package:foodkitchen/core/common/data/datasource/current_user_remote_data
 import 'package:foodkitchen/core/common/data/repositories/current_user_respository_impl.dart';
 import 'package:foodkitchen/core/common/domain/repository/current_user_repository.dart';
 import 'package:foodkitchen/core/common/domain/usecase/get_current_user.dart';
+import 'package:foodkitchen/features/consumptions/data/datasource/consumption_remote_datasource.dart';
+import 'package:foodkitchen/features/consumptions/data/repository/consumption_repository_impl.dart';
+import 'package:foodkitchen/features/consumptions/domain/repository/consumption_repository.dart';
+import 'package:foodkitchen/features/consumptions/presentation/bloc/consumption_bloc.dart';
 import 'package:foodkitchen/features/dashboard/data/datasource/dashboard_remote_datasource.dart';
 import 'package:foodkitchen/features/dashboard/data/repository/dashboard_repository_impl.dart';
 import 'package:foodkitchen/features/dashboard/domain/repository/dashboard_repository.dart';
-import 'package:foodkitchen/features/dashboard/domain/usecases/get_consumption_confirmation_count.dart';
-import 'package:foodkitchen/features/dashboard/domain/usecases/get_consumption_confirmation_pending.dart';
+import 'package:foodkitchen/features/consumptions/domain/usecases/get_consumption_confirmation_count.dart';
+import 'package:foodkitchen/features/consumptions/domain/usecases/get_consumption_confirmation_pending.dart';
 import 'package:foodkitchen/features/dashboard/domain/usecases/get_kitchen_members.dart';
 import 'package:foodkitchen/features/dashboard/domain/usecases/kick_member.dart';
 import 'package:foodkitchen/features/dashboard/domain/usecases/make_cohost.dart';
-import 'package:foodkitchen/features/dashboard/domain/usecases/respond_consumption_confirmation.dart';
+import 'package:foodkitchen/features/consumptions/domain/usecases/respond_consumption_confirmation.dart';
 import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:foodkitchen/features/grocery/data/datasource/grocery_remote_datasource.dart';
 import 'package:foodkitchen/features/grocery/data/repository/grocery_repository_impl.dart';
@@ -132,6 +137,7 @@ Future<void> initDependencies() async {
   _dioInjection();
   _initOnboarding();
   _initHome();
+  _initConsumption();
   _initAuth();
 
   _initDashboard();
@@ -141,6 +147,11 @@ Future<void> initDependencies() async {
   _initPlanner();
   _initHistory();
   _initProfile();
+  _initAppCubit();
+}
+
+void _initAppCubit() {
+  sl.registerLazySingleton<AppCubit>(() => AppCubit());
 }
 
 void _dioInjection() {
@@ -297,25 +308,15 @@ void _initDashboard() async {
     ..registerFactory(() => GetKitchenMembers(sl()))
     ..registerFactory(() => MakeCohost(sl()))
     ..registerFactory(() => KickMember(sl()))
-    ..registerFactory(() => GetConsumptionConfirmationPendingUsecase(sl()))
-    ..registerFactory(() => GetConsumptionConfirmationCountUseCase(sl()))
-    ..registerFactory(() => RespondConsumptionConfirmationUseCase(sl()))
     // Bloc
     ..registerLazySingleton(
       () => DashboardBloc(
         getMembers: GetKitchenMembers(sl()),
         makeCohost: MakeCohost(sl()),
         kickMember: KickMember(sl()),
-        getConsumptionConfirmationPending:
-            GetConsumptionConfirmationPendingUsecase(sl()),
+
         userCubit: sl(),
         kitchenBloc: sl(),
-        getConsumptionConfirmationCount: GetConsumptionConfirmationCountUseCase(
-          sl(),
-        ),
-        respondConsumptionConfirmation: RespondConsumptionConfirmationUseCase(
-          sl(),
-        ),
       ),
     );
 }
@@ -364,6 +365,37 @@ void _initPantry() async {
         cartItems: CartItems(sl()),
         deleteItem: DeleteItem(sl()),
         updateItem: UpdateItem(sl()),
+      ),
+    );
+}
+
+void _initConsumption() async {
+  // Datasource
+
+  sl
+    ..registerFactory<ConsumptionRemoteDatasource>(
+      () => ConsumptionRemoteDatasourceImpl(sl()),
+    )
+    // Repository
+    ..registerFactory<ConsumptionRepository>(
+      () => ConsumptionRepositoryImpl(sl()),
+    )
+    // Usecases
+    ..registerFactory(() => GetConsumptionConfirmationPendingUsecase(sl()))
+    ..registerFactory(() => GetConsumptionConfirmationCountUseCase(sl()))
+    ..registerFactory(() => RespondConsumptionConfirmationUseCase(sl()))
+    // Bloc
+    ..registerLazySingleton(
+      () => ConsumptionBloc(
+        getConsumptionConfirmationPending:
+            GetConsumptionConfirmationPendingUsecase(sl()),
+        getConsumptionConfirmationCount: GetConsumptionConfirmationCountUseCase(
+          sl(),
+        ),
+        respondConsumptionConfirmation: RespondConsumptionConfirmationUseCase(
+          sl(),
+        ),
+        homeBloc: sl(),
       ),
     );
 }

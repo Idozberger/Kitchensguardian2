@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
+import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/auth/presentation/widgets/textspan_widget.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:foodkitchen/features/subscription/presentation/widgets/plan_features_tile.dart';
 import 'package:foodkitchen/features/subscription/presentation/widgets/plan_option_tile.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SubscriptionPage extends StatefulWidget {
   const SubscriptionPage({super.key});
@@ -185,8 +187,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     );
   }
 
-  void _handleStartTrial() {
-    // TODO: Implement subscription logic
+  void _handleStartTrial() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool("is_subscribed", true);
+    AppToast.show("Subscribe successfully. ", ToastType.success);
   }
 
   AppBar _buildAppBar() {

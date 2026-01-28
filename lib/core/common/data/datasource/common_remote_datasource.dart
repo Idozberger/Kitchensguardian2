@@ -54,36 +54,39 @@ class CommonRemoteDatasourceImpl implements CommonRemoteDatasource {
             ? jsonDecode(response.data)
             : response.data;
 
-        throw data["error"];
+        throw data["error"] ?? "Unknown error occurred";
       }
 
-      final data = response.data is String
-          ? jsonDecode(response.data)
-          : response.data;
+      final data = response.data is Map<String, dynamic>
+          ? response.data
+          : (response.data is String ? jsonDecode(response.data) : {});
 
       final avatar = data["avatar"];
       Uint8List avatarBytes = Uint8List(0);
 
       if (avatar != null && avatar.toString().isNotEmpty) {
         try {
-          final base64String = avatar.toString().split(',').last;
+          final base64String = avatar.toString().contains(',')
+              ? avatar.toString().split(',').last
+              : avatar.toString();
           avatarBytes = base64Decode(base64String);
-        } catch (_) {
+        } catch (e) {
+          log("Avatar decode error: $e");
           avatarBytes = Uint8List(0);
         }
       }
 
       return {
         "avatar": avatarBytes,
-        "first_name": data["first_name"],
-        "last_name": data["last_name"],
-        "email": data["email"],
-        "user_id": data["user_id"],
-        "verified": data["verified"],
-        "created_at": data["created_at"],
+        "first_name": data["first_name"] ?? "",
+        "last_name": data["last_name"] ?? "",
+        "email": data["email"] ?? "",
+        "user_id": data["user_id"] ?? "",
+        "verified": data["verified"] ?? false,
+        "created_at": data["created_at"] ?? "",
       };
     } catch (e, s) {
-      log("getUserAvatar error: $e\n$s");
+      log("getProfileData error: $e\n$s");
       return {};
     }
   }

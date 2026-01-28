@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_final_fields
+
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -157,7 +159,7 @@ class _GenerateRecipesPageState extends State<GenerateRecipesPage> {
         _plannerBloc.add(
           UpdateStartRecipeEvent(
             startRecipe: false,
-            RecipeEntity: [],
+            recipeEntity: [],
             doneSteps: [],
           ),
         );

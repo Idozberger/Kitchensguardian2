@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
-import 'package:foodkitchen/features/dashboard/domain/entities/consumption_confirmation.dart';
-import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_bloc.dart';
-import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_event.dart';
-import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_state.dart';
+import 'package:foodkitchen/core/utils/show_toast.dart';
+import 'package:foodkitchen/features/consumptions/domain/entities/consumption_confirmation.dart';
+import 'package:foodkitchen/features/consumptions/presentation/bloc/consumption_bloc.dart';
+import 'package:foodkitchen/features/consumptions/presentation/bloc/consumption_event.dart';
+import 'package:foodkitchen/features/consumptions/presentation/bloc/consumption_state.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
-import 'package:foodkitchen/features/dashboard/presentation/widgets/consumption_confirmation_card.dart';
+import 'package:foodkitchen/features/consumptions/presentation/widgets/consumption_confirmation_card.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 
@@ -22,17 +24,17 @@ class PendingConsumptionsPage extends StatefulWidget {
 }
 
 class _PendingConsumptionsPageState extends State<PendingConsumptionsPage> {
-  late final DashboardBloc _dashboardBloc;
+  late final ConsumptionBloc _consumptionBloc;
 
   @override
   void initState() {
     super.initState();
-    _dashboardBloc = context.read<DashboardBloc>();
+    _consumptionBloc = context.read<ConsumptionBloc>();
     _fetchPendingConsumptions();
   }
 
   void _fetchPendingConsumptions() {
-    _dashboardBloc.add(
+    _consumptionBloc.add(
       GetConsumptionConfirmationPendingEvent(kitchenId: widget.kitchenId),
     );
   }
@@ -66,16 +68,26 @@ class _PendingConsumptionsPageState extends State<PendingConsumptionsPage> {
   }
 
   Widget _buildBody() {
-    return BlocBuilder<DashboardBloc, DashboardState>(
+    return BlocConsumer<ConsumptionBloc, ConsumptionState>(
+      listener: (context, state) {
+        if (state.successMessage != null && state.successMessage!.isNotEmpty) {
+          AppToast.show(state.successMessage!, ToastType.success);
+          context.pop();
+        }
+      },
       builder: (context, state) {
-        return switch (state) {
-          DashboardLoading() => const _LoadingState(),
-          DashboardLoaded() => _LoadedContent(
-            state: state,
-            kitchenId: widget.kitchenId,
-          ),
-          _ => _buildErrorState(),
-        };
+        if (state.isLoading) {
+          return const _LoadingState();
+        }
+
+        if (state.errorMessage != null) {
+          return _buildErrorState();
+        }
+
+        return _LoadedContent(
+          kitchenId: widget.kitchenId,
+          consumptions: state.comsumptionConfirmationPending,
+        );
       },
     );
   }
@@ -108,14 +120,12 @@ class _LoadingState extends StatelessWidget {
 
 class _LoadedContent extends StatelessWidget {
   final String kitchenId;
-  final DashboardLoaded state;
+  final List<ConsumptionConfirmation> consumptions;
 
-  const _LoadedContent({required this.state, required this.kitchenId});
+  const _LoadedContent({required this.kitchenId, required this.consumptions});
 
   @override
   Widget build(BuildContext context) {
-    final consumptions = (state).comsumptionConfirmationPending;
-
     if (consumptions.isEmpty) {
       return _buildEmptyState(context);
     }
@@ -127,7 +137,7 @@ class _LoadedContent extends StatelessWidget {
       itemBuilder: (context, index) {
         final item = consumptions[index];
         return ConsumptionConfirmationCard(
-          confirmationId: item.id,
+          confirmationId: item.confirmationId,
           itemName: item.itemName,
           quantity: item.quantity,
           addedAt: _formatDate(item.addedAt),
@@ -159,7 +169,7 @@ class _LoadedContent extends StatelessWidget {
   }
 
   void _handleConfirm(BuildContext context, ConsumptionConfirmation item) {
-    context.read<DashboardBloc>().add(
+    context.read<ConsumptionBloc>().add(
       RespondConsumptionConfirmationPendingEvent(
         kitchenId: kitchenId,
         confirmationId: item.confirmationId,
@@ -170,7 +180,7 @@ class _LoadedContent extends StatelessWidget {
   }
 
   void _handleDeny(BuildContext context, ConsumptionConfirmation item) {
-    context.read<DashboardBloc>().add(
+    context.read<ConsumptionBloc>().add(
       RespondConsumptionConfirmationPendingEvent(
         kitchenId: kitchenId,
         confirmationId: item.confirmationId,

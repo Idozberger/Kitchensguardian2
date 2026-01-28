@@ -50,8 +50,10 @@ class _MyKitchenMembersPageState extends State<MyKitchenMembersPage> {
         listener: (context, state) {
           if (state is DashboardFailure) {
             AppToast.show(state.message, ToastType.error);
+            getAllKitchenMembers();
           } else if (state is DashboardSuccess) {
             AppToast.show(state.successMessage, ToastType.success);
+            getAllKitchenMembers();
           }
         },
         builder: (context, state) {

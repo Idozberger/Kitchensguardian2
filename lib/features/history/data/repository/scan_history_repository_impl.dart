@@ -16,10 +16,10 @@ class ScanHistoryRepositoryImpl implements ScanHistoryRepository {
       final response = await scanHistoryRemoteDatasource.getScanHistory(
         pageNumber: pageNumber,
       );
-
-      final scanHistoryItems = (response as List)
-          .map((e) => ScanHistoryModel.fromJson(e as Map<String, dynamic>))
-          .toList();
+      List<ScanHistoryModel> scanHistoryItems = [];
+      for (var i = 0; i < response.length; i++) {
+        scanHistoryItems.add(ScanHistoryModel.fromJson(response[i]));
+      }
 
       return Right(scanHistoryItems);
     } on Failure catch (f) {

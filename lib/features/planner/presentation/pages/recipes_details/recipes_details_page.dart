@@ -1,7 +1,5 @@
 // ignore_for_file: use_build_context_synchronously, unused_local_variable, avoid_function_literals_in_foreach_calls, duplicate_ignore
 
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/data/model/recipe_model.dart';
@@ -65,6 +63,7 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
   }
 
   void initlizeSteps() {
+    plannerBloc.add(UpdateRecipeFinishedState());
     if (plannerBloc.state.startRecipe) {
       steps = plannerBloc.state.doneSteps;
     } else {
@@ -86,6 +85,15 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
           }
           if (state.isRecipeFinished) {
             context.pop();
+            plannerBloc.add(
+              UpdateStartRecipeEvent(
+                startRecipe: false,
+                recipeEntity: [],
+                doneSteps: [],
+              ),
+            );
+            // ignore: avoid_function_literals_in_foreach_calls
+            setState(() => steps.forEach((step) => step["completed"] = false));
           }
         },
         builder: (_, state) => _buildContent(context, state),
@@ -120,8 +128,8 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
 
   Widget _buildHeader() {
     return HeaderImageWidget(
-      isFav: isFav,
-      onFavoriteToggle: () {
+      isFavorite: isFav,
+      onFavoritePressed: () {
         setState(() => isFav = !isFav);
         plannerBloc.add(
           isFav
@@ -129,7 +137,7 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
               : RemoveFromFavouriteRecipeEvent(recipe.id),
         );
       },
-      thumbnail: recipe.thumbnail,
+      thumbnailBytes: recipe.thumbnail,
     );
   }
 
@@ -145,7 +153,7 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
         plannerBloc.add(
           UpdateStartRecipeEvent(
             startRecipe: true,
-            RecipeEntity: [recipe as RecipeModel],
+            recipeEntity: [recipe as RecipeModel],
             doneSteps: steps,
           ),
         );
@@ -156,7 +164,7 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
         plannerBloc.add(
           UpdateStartRecipeEvent(
             startRecipe: false,
-            RecipeEntity: [],
+            recipeEntity: [],
             doneSteps: [],
           ),
         );
@@ -188,7 +196,10 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
         IngredientsListWidget(recipe: recipe),
         gap(height: 16),
         if (recipe.missingItems)
-          MissingItemsListWidget(ingredients: recipe.ingredients),
+          MissingItemsListWidget(
+            ingredients: recipe.ingredients,
+            isPlanned: widget.isPlan,
+          ),
       ],
     );
   }
@@ -259,17 +270,13 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
       if (steps.every((step) => step["completed"])) {
         CompleteDialogWidget.show(
           context,
-          onConfirm: () {
+          onFinish: () {
             plannerBloc.add(
-              UpdateStartRecipeEvent(
-                startRecipe: false,
-                RecipeEntity: [],
-                doneSteps: [],
+              MarkRecipeFinishedEvent(
+                kitchenId: context.read<UserCubit>().state.activeKitchenId,
+                recipeId: recipe.id,
               ),
             );
-            // ignore: avoid_function_literals_in_foreach_calls
-            setState(() => steps.forEach((step) => step["completed"] = false));
-            AppToast.show("You’ve finished the recipe!", ToastType.success);
           },
         );
       }
@@ -333,7 +340,7 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
         plannerBloc.add(
           UpdateStartRecipeEvent(
             startRecipe: false,
-            RecipeEntity: [],
+            recipeEntity: [],
             doneSteps: [],
           ),
         );
