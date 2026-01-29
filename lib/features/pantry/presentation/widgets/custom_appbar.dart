@@ -163,7 +163,10 @@ class PermissionDialog extends StatelessWidget {
               gapHorizontal(6),
               Flexible(
                 child: GenericButtonWidget(
-                  onPressed: () => openAppSettings(),
+                  onPressed: () {
+                    openAppSettings();
+                    Navigator.pop(context);
+                  },
                   text: isPermanent ? 'Open Settings' : 'Allow',
                 ),
               ),

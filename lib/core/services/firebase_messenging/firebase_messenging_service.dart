@@ -5,10 +5,13 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
+import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/core/services/notifications/flutter_local_notifications_service.dart';
-import 'package:foodkitchen/core/utils/show_toast.dart';
+import 'package:foodkitchen/core/theme/app_colors.dart';
+import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class FirebaseMessagingService {
@@ -24,12 +27,14 @@ class FirebaseMessagingService {
     required String firstName,
     required String lastName,
     required String email,
+    required BuildContext context,
   }) async {
     await _requestPermission(
       userId: userId,
       firstName: firstName,
       lastName: lastName,
       email: email,
+      context: context,
     );
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
@@ -47,6 +52,7 @@ class FirebaseMessagingService {
     required String firstName,
     required String lastName,
     required String email,
+    required BuildContext context,
   }) async {
     try {
       final result = await FirebaseMessaging.instance.requestPermission(
@@ -60,12 +66,24 @@ class FirebaseMessagingService {
       if (status == AuthorizationStatus.denied) {
         logWarning('User denied notification permission');
 
-        AppToast.show(
-          "Notifications are disabled. Enable them from Settings to stay updated.",
-          ToastType.warning,
-        );
-
-        await openAppSettings();
+        // Show dialog instead of toast
+        if (context.mounted) {
+          await showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (BuildContext dialogContext) {
+              return NotificationPermissionDialog(
+                onOpenSettings: () {
+                  Navigator.of(dialogContext).pop();
+                  openAppSettings();
+                },
+                onCancel: () {
+                  Navigator.of(dialogContext).pop();
+                },
+              );
+            },
+          );
+        }
         return;
       }
 
@@ -80,7 +98,24 @@ class FirebaseMessagingService {
         );
       } else if (status == AuthorizationStatus.notDetermined) {
         logWarning('Permission not determined. Prompting again...');
-        await openAppSettings();
+
+        if (context.mounted) {
+          await showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (BuildContext dialogContext) {
+              return NotificationPermissionDialog(
+                onOpenSettings: () {
+                  Navigator.of(dialogContext).pop();
+                  openAppSettings();
+                },
+                onCancel: () {
+                  Navigator.of(dialogContext).pop();
+                },
+              );
+            },
+          );
+        }
       } else {
         logWarning('Unexpected authorization status: $status');
       }
@@ -218,4 +253,83 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     }
     // ignore: empty_catches
   } catch (e) {}
+}
+
+class NotificationPermissionDialog extends StatelessWidget {
+  final VoidCallback onOpenSettings;
+  final VoidCallback onCancel;
+
+  const NotificationPermissionDialog({
+    super.key,
+    required this.onOpenSettings,
+    required this.onCancel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return GenericDialog(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: gapAll(16),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.errorContainer.withOpacity(0.2),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.notifications_off_outlined,
+              size: 48,
+              color: AppColors.primaryColor,
+            ),
+          ),
+
+          gapVertical(20),
+
+          Text(
+            'Enable Notifications',
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+
+          gapVertical(12),
+
+          Text(
+            'Enable notifications to receive important updates about your items expiring, kitchen join, and more.',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurface.withOpacity(0.7),
+            ),
+            textAlign: TextAlign.center,
+          ),
+
+          gapVertical(24),
+
+          Row(
+            children: [
+              Expanded(
+                child: GenericButtonWidget(
+                  onPressed: onCancel,
+                  text: "Cancel",
+                  isOutlined: true,
+                ),
+              ),
+
+              gapHorizontal(12),
+
+              Expanded(
+                child: GenericButtonWidget(
+                  onPressed: onOpenSettings,
+                  text: "Open Settings",
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 }

@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,7 +14,7 @@ class AppCubit extends Cubit<AppState> {
 
   AppCubit() : super(const AppState.initial());
 
-  Future<void> initializeApp(UserCubit userCubit) async {
+  Future<void> initializeApp(UserCubit userCubit, BuildContext context) async {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await Future.delayed(_fcmInitDelay);
 
@@ -25,6 +27,7 @@ class AppCubit extends Cubit<AppState> {
             firstName: userState.firstName,
             lastName: userState.lastName,
             email: userState.email,
+            context: context,
           );
 
           emit(state.copyWith(fcmInitialized: true));

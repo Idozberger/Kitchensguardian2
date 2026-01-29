@@ -41,7 +41,7 @@ class _KitchenSelectionPageState extends State<KitchenSelectionPage> {
     kitchenBloc = context.read<KitchenBloc>();
     userCubit = context.read<UserCubit>();
     appCubit = context.read<AppCubit>();
-    appCubit.initializeApp(userCubit);
+    appCubit.initializeApp(userCubit, context);
     kitchenBloc.add(FetchKitchens());
     getNotificationPermission();
     super.initState();

@@ -178,10 +178,10 @@ class _PantryItemCardState extends State<PantryItemCard> {
                     );
                   }),
                   _circleButton(AppAssets.cartSvg, widget.onCartItem),
-                  _circleButton(
-                    AppAssets.listCheckedSvg,
-                    () => widget.onListCheckedCallback(),
-                  ),
+                  // _circleButton(
+                  //   AppAssets.listCheckedSvg,
+                  //   () => widget.onListCheckedCallback(),
+                  // ),
                   _circleButton(AppAssets.deleteSvg, () {
                     _showDeleteDialog(
                       context,

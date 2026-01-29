@@ -49,11 +49,14 @@ class ProfileHeader extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     spacing: h(5),
                     children: [
-                      Text(
-                        "${state.firstName} ${state.lastName}",
-                        maxLines: 1,
-                        style: Theme.of(context).textTheme.headlineLarge!
-                            .copyWith(overflow: TextOverflow.ellipsis),
+                      SizedBox(
+                        width: w(200),
+                        child: Text(
+                          "${state.firstName} ${state.lastName}",
+                          maxLines: 1,
+                          style: Theme.of(context).textTheme.headlineLarge!
+                              .copyWith(overflow: TextOverflow.ellipsis),
+                        ),
                       ),
                       Text(
                         state.email,
