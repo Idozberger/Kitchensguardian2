@@ -33,6 +33,7 @@ import 'package:foodkitchen/features/pantry/presentation/pages/receipt_details/c
 import 'package:foodkitchen/features/pantry/presentation/pages/receipt_details/image_preview.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CaptureDetailsPage extends StatefulWidget {
   final String imagePath;
@@ -45,6 +46,7 @@ class CaptureDetailsPage extends StatefulWidget {
 class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
   late PantryBloc _pantryBloc;
   late UserCubit _userCubit;
+  late SharedPreferences _pref;
   List<PantryItem> _items = [];
   String? _errorMessage;
 
@@ -53,7 +55,23 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
     super.initState();
     _pantryBloc = context.read<PantryBloc>();
     _userCubit = context.read<UserCubit>();
-    _pantryBloc.add(ScanReceiptEvent(filePath: widget.imagePath));
+
+    scanReceipt();
+  }
+
+  void scanReceipt() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final countryCode = prefs.getString("country") ?? "USA";
+    final currencyCode = prefs.getString("currency") ?? "USD";
+
+    _pantryBloc.add(
+      ScanReceiptEvent(
+        filePath: widget.imagePath,
+        country: countryCode,
+        currency: currencyCode,
+      ),
+    );
   }
 
   @override
@@ -310,7 +328,7 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
               text: "Retry",
               onPressed: () {
                 setState(() => _errorMessage = null);
-                _pantryBloc.add(ScanReceiptEvent(filePath: widget.imagePath));
+                scanReceipt();
               },
             ),
             SizedBox(height: h(16)),
@@ -578,7 +596,7 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
             label: "Units",
             hint: "Select Units",
             value: item.unit,
-            items: const ["Kg", "Gram", "Litre", "Piece"],
+            items: const ["Kg", "Gram", "Litre", "Piece", "Milliliters"],
             onChanged: (val) => setState(() => item.unit = val),
           ),
         ),

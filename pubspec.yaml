@@ -64,6 +64,7 @@ flutter:
   - assets/fonts/
   - assets/svgs/
   - assets/lotties/
+  - assets/json/
 
   fonts:
   - family: SFProDisplay

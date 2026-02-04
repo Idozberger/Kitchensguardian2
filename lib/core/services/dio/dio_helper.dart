@@ -85,11 +85,11 @@ class DioHelper {
     return await _dio.get(path, queryParameters: query);
   }
 
-  Future<Response> post(String path, {dynamic data}) async {
+  Future<Response> post(String path, {dynamic data, dynamic options}) async {
     return await _dio.post(
       path,
       data: data,
-      options: Options(headers: {"Content-Type": "application/json"}),
+      options: Options(contentType: Headers.jsonContentType),
     );
   }
 

@@ -89,6 +89,7 @@ class AppAssets {
   static String historySvg = "assets/svgs/history.svg";
   static String termsAndConditionSvg = "assets/svgs/terms_and_condition.svg";
   static String logoutSvg = "assets/svgs/logout.svg";
+  static String countrySvg = "assets/svgs/country.svg";
   //// Lottie Animation
   static String loader = "assets/lotties/loader.json";
 }

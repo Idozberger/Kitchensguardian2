@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -57,6 +58,7 @@ class _PantryItemCardState extends State<PantryItemCard> {
 
   @override
   Widget build(BuildContext context) {
+    log("expire date: ${widget.expiry}");
     return GestureDetector(
       onTap: () {
         setState(() => _isExpanded = !_isExpanded);
@@ -102,11 +104,11 @@ class _PantryItemCardState extends State<PantryItemCard> {
 
                     gap(width: 8),
                     SizedBox(
-                      width: _isExpanded ? null : w(54),
+                      width: _isExpanded ? w(244) : w(54),
                       child: Text(
                         widget.title,
-                        maxLines: _isExpanded ? null : 1,
-                        overflow: _isExpanded ? null : TextOverflow.ellipsis,
+                        maxLines: _isExpanded ? 2 : 1,
+                        overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.headlineLarge,
                       ),
                     ),
@@ -178,10 +180,7 @@ class _PantryItemCardState extends State<PantryItemCard> {
                     );
                   }),
                   _circleButton(AppAssets.cartSvg, widget.onCartItem),
-                  // _circleButton(
-                  //   AppAssets.listCheckedSvg,
-                  //   () => widget.onListCheckedCallback(),
-                  // ),
+
                   _circleButton(AppAssets.deleteSvg, () {
                     _showDeleteDialog(
                       context,
@@ -314,7 +313,13 @@ class _PantryItemCardState extends State<PantryItemCard> {
                           label: "Units",
                           hint: "Select Units",
                           value: unit,
-                          items: ["Kg", "Gram", "Litre", "Piece"],
+                          items: [
+                            "Kg",
+                            "Gram",
+                            "Litre",
+                            "Piece",
+                            "Milliliters",
+                          ],
                           onChanged: (val) => setState(() => unit = val!),
                         ),
                       ),

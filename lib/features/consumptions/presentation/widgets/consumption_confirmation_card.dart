@@ -1,3 +1,5 @@
+// ignore_for_file: unused_element_parameter
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
@@ -156,8 +158,8 @@ class ConsumptionConfirmationCard extends StatelessWidget {
       spacing: w(4),
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        InfoCard(title: "Added", value: addedAt ?? "N/A"),
-        InfoCard(title: "Expires", value: expiresAt ?? "N/A"),
+        _InfoCard(title: "Added", value: addedAt ?? "N/A"),
+        _InfoCard(title: "Expires", value: expiresAt ?? "N/A"),
       ],
     );
   }
@@ -322,12 +324,12 @@ class _StatusChip extends StatelessWidget {
   }
 }
 
-class InfoCard extends StatelessWidget {
+class _InfoCard extends StatelessWidget {
   final String title;
   final String value;
   final Color? backgroundColor;
 
-  const InfoCard({
+  const _InfoCard({
     super.key,
     required this.title,
     required this.value,

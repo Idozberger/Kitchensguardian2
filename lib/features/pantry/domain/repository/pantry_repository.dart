@@ -12,6 +12,8 @@ abstract interface class PantryRepository {
   });
   Future<Either<Failure, ScanReceiptEntity>> scanRecipt({
     required String filePath,
+    required String currency,
+    required String country,
   });
   Future<Either<Failure, String>> requestItems({required Pantry pantry});
   Future<Either<Failure, String>> showNotification({

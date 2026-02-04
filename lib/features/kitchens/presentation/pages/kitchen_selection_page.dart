@@ -23,6 +23,7 @@ import 'package:foodkitchen/features/kitchens/presentation/widgets/kitchen_selec
 import 'package:foodkitchen/features/kitchens/presentation/widgets/kitchen_selection_appbar.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class KitchenSelectionPage extends StatefulWidget {
   const KitchenSelectionPage({super.key});
@@ -35,7 +36,7 @@ class _KitchenSelectionPageState extends State<KitchenSelectionPage> {
   late KitchenBloc kitchenBloc;
   late UserCubit userCubit;
   late AppCubit appCubit;
-
+  late SharedPreferences perf;
   @override
   void initState() {
     kitchenBloc = context.read<KitchenBloc>();

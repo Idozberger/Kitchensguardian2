@@ -13,12 +13,22 @@ class ScanReceiptUseCase
   Future<Either<Failure, ScanReceiptEntity>> call(
     ScanReceiptUseCaseParams params,
   ) async {
-    return await pantryRepository.scanRecipt(filePath: params.filePath);
+    return await pantryRepository.scanRecipt(
+      filePath: params.filePath,
+      currency: params.currency,
+      country: params.country,
+    );
   }
 }
 
 class ScanReceiptUseCaseParams {
   final String filePath;
+  final String currency;
+  final String country;
 
-  ScanReceiptUseCaseParams({required this.filePath});
+  ScanReceiptUseCaseParams({
+    required this.filePath,
+    required this.currency,
+    required this.country,
+  });
 }

@@ -1,17 +1,15 @@
-// ignore_for_file: type_literal_in_constant_pattern
-
+// ignore_for_file: type_literal_in_constant_pattern, use_build_context_synchronously
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/app/app_base.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
-import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
-import 'package:foodkitchen/core/dialogs/no_internet.dart';
-import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/utils/date_format_to_string.dart';
 import 'package:foodkitchen/features/onboarding/presentation/bloc/user_bloc.dart';
+import 'package:foodkitchen/features/onboarding/presentation/widgets/no_internet_view.dart';
+import 'package:foodkitchen/features/onboarding/presentation/widgets/splash_content_widget.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -59,7 +57,24 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _initializeApp() async {
-    await Future.wait([_getCurrentUser(), _updatePlansStartDate()]);
+    try {
+      await Future.wait([_getCurrentUser(), _updatePlansStartDate()]);
+    } catch (e) {
+      log('Error initializing app: $e');
+    }
+  }
+
+  void navigateAuthenticatedUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    final country = prefs.getString("country");
+    final currency = prefs.getString("currency");
+    if (country == null || currency == null) {
+      if (mounted) {
+        context.goNamed(Routes.countryAndCurrencySetup, extra: false);
+      }
+    } else {
+      context.go(Routes.kitchenSelection);
+    }
   }
 
   Future<void> _getCurrentUser() async {
@@ -117,7 +132,7 @@ class _SplashScreenState extends State<SplashScreen>
         context.go(Routes.signIn);
         break;
       case UserSuccess:
-        context.go(Routes.kitchenSelection);
+        navigateAuthenticatedUser();
         break;
     }
   }
@@ -165,99 +180,19 @@ class _SplashScreenState extends State<SplashScreen>
         child: BlocBuilder<UserBloc, UserState>(
           builder: (context, state) {
             if (state is NoInternet) {
-              return _NoInternetView(
+              return NoInternetView(
                 onRetry: _getCurrentUser,
                 isLoading: state is UserLoading,
               );
             }
 
-            return _SplashContent(
+            return SplashContent(
               animationController: _animationController,
               text: _fullText,
             );
           },
         ),
       ),
-    );
-  }
-}
-
-class _NoInternetView extends StatelessWidget {
-  final VoidCallback onRetry;
-  final bool isLoading;
-
-  const _NoInternetView({required this.onRetry, required this.isLoading});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      color: Colors.white,
-      child: NoInternetDialog(callback: onRetry, loading: isLoading),
-    );
-  }
-}
-
-class _SplashContent extends StatelessWidget {
-  final AnimationController animationController;
-  final String text;
-
-  const _SplashContent({required this.animationController, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      alignment: Alignment.center,
-      width: double.infinity,
-      height: double.infinity,
-      decoration: BoxDecoration(
-        image: DecorationImage(
-          image: AssetImage(AppAssets.onBoardingBg),
-          fit: BoxFit.cover,
-        ),
-      ),
-      child: _AnimatedText(controller: animationController, text: text),
-    );
-  }
-}
-
-class _AnimatedText extends StatelessWidget {
-  final AnimationController controller;
-  final String text;
-
-  const _AnimatedText({required this.controller, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      mainAxisSize: MainAxisSize.min,
-      children: List.generate(text.length, (index) {
-        final delay = index / text.length;
-        final animation = Tween<double>(begin: 0, end: 1).animate(
-          CurvedAnimation(
-            parent: controller,
-            curve: Interval(
-              delay,
-              delay + (1 / text.length),
-              curve: Curves.easeIn,
-            ),
-          ),
-        );
-
-        return FadeTransition(
-          opacity: animation,
-          child: Text(
-            text[index],
-            style: Theme.of(context).textTheme.headlineLarge!.copyWith(
-              fontWeight: FontWeight.bold,
-              fontSize: t(28),
-              color: Colors.black87,
-            ),
-          ),
-        );
-      }),
     );
   }
 }

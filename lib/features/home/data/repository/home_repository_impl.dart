@@ -112,8 +112,6 @@ class HomeRepositoryImpl implements HomeRepository {
         response["recipe"] as Map? ?? {},
       );
 
-      print("(suggestionapi)-- Raw recipe: $recipeJson");
-
       final Map<String, dynamic> mergedJson = {
         ...recipeJson,
         "expiring_items": response["expiring_items"],
@@ -137,14 +135,8 @@ class HomeRepositoryImpl implements HomeRepository {
         }
       }
 
-      print(
-        "(suggestionapi)-- Final merged JSON with decoded thumbnail: $mergedJson",
-      );
-
-      // Now safe to parse
       final recipe = RecipeModel.fromJson(mergedJson);
 
-      print("(suggestionapi)-- Success: $recipe");
       return Right(recipe);
     } on Failure catch (f) {
       return Left(f);

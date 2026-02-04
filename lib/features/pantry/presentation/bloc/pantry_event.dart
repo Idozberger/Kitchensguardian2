@@ -19,7 +19,13 @@ final class GetPantryItemsEvent extends PantryEvent {
 
 final class ScanReceiptEvent extends PantryEvent {
   final String filePath;
-  ScanReceiptEvent({required this.filePath});
+  final String currency;
+  final String country;
+  ScanReceiptEvent({
+    required this.filePath,
+    required this.country,
+    required this.currency,
+  });
 }
 
 final class PantryRequestItemEvent extends PantryEvent {

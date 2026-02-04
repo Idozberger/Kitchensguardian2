@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/config/routes.dart';
@@ -5,6 +7,7 @@ import 'package:foodkitchen/features/auth/presentation/blocs/auth_bloc.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/features/auth/presentation/widgets/success_page_widget.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class EmailVerifiedSuccessPage extends StatelessWidget {
   const EmailVerifiedSuccessPage({super.key});
@@ -47,7 +50,14 @@ class EmailVerifiedSuccessPage extends StatelessWidget {
     AppToast.show(message, ToastType.error);
   }
 
-  void _navigateToKitchenSelection(BuildContext context) {
-    context.go(Routes.kitchenSelection);
+  void _navigateToKitchenSelection(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    final country = prefs.getString("country");
+    final currency = prefs.getString("currency");
+    if (country == null || currency == null) {
+      context.goNamed(Routes.countryAndCurrencySetup, extra: false);
+    } else {
+      context.go(Routes.kitchenSelection);
+    }
   }
 }

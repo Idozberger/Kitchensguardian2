@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/common/data/datasource/common_remote_datasource.dart';
 import 'package:foodkitchen/core/common/data/model/pantries_model.dart';
@@ -62,27 +60,30 @@ class PantryRepositoryImpl implements PantryRepository {
   @override
   Future<Either<Failure, ScanReceiptEntity>> scanRecipt({
     required String filePath,
+    required String currency,
+    required String country,
   }) async {
     try {
       final response = await pantryRemoteDatasource.scanRecipt(
         filePath: filePath,
+        currency: currency,
+        country: country,
       );
-
+      debugPrint("response result: ${response["items"]}");
       final itemsJson = response['items'] as List<dynamic>? ?? [];
 
       List<ScanReceiptItemModel> items = [];
 
       for (var e in itemsJson) {
-        log("items: ${e["recommended_storage"]}");
         final name = e['name'] as String? ?? '';
         final unit = e['unit'] as String? ?? 'Unit';
-        final amount = e['amount'].toString();
-        final group = e['recommended_storage'].toString();
+        final amount = e['quantity'].toString();
+        final group = e['storage'].toString();
         final expireDate = e['expiry_date'].toString();
         final thumbnail = e['thumbnail'];
 
         debugPrint(
-          "Item parsed - name: $name, unit: $unit, amount: $amount, expireDate: $expireDate",
+          "Item parsed - name: $name, unit: $unit, quantity: $amount, expireDate: $expireDate",
         );
 
         items.add(

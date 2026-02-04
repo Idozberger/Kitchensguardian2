@@ -12,7 +12,7 @@ import 'package:foodkitchen/features/consumptions/presentation/bloc/consumption_
 import 'package:foodkitchen/features/consumptions/presentation/bloc/consumption_state.dart';
 import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
-import 'package:foodkitchen/features/dashboard/presentation/widgets/drawer.dart';
+import 'package:foodkitchen/features/dashboard/presentation/widgets/drawer_view.dart';
 import 'package:foodkitchen/features/grocery/presentation/pages/grocery_page.dart';
 import 'package:foodkitchen/features/home/presentation/pages/home_page.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/planner_page.dart';

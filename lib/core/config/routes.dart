@@ -20,6 +20,7 @@ class Routes {
   static const String kitchen = "/kitchen";
   static const String profile = "/profile";
   static const String editProfile = "/edit_profile";
+  static const String countryAndCurrencySetup = "/country_and_currency_setup";
   static const String changePassword = "/change_password";
   static const String addMeal = "/add_meal";
   static const String editMeal = "/edit_meal";

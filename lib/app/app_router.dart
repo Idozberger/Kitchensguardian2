@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/dialogs/logout.dart';
 import 'package:foodkitchen/core/dialogs/not_found_404.dart';
+import 'package:foodkitchen/core/screens/presentation/pages/country_currency_setup_screen.dart';
 import 'package:foodkitchen/features/auth/data/model/user_model.dart';
 import 'package:foodkitchen/features/auth/presentation/pages/login/create_new_password_page.dart';
 import 'package:foodkitchen/features/auth/presentation/pages/login/forgot_password_page.dart';
@@ -120,6 +121,16 @@ final GoRouter router = GoRouter(
       pageBuilder: (context, state) =>
           buildPage(state.pageKey, NotificationPage()),
     ),
+    // In your routes.dart
+    GoRoute(
+      name: Routes.countryAndCurrencySetup,
+      path: Routes.countryAndCurrencySetup,
+      builder: (context, state) {
+        bool extra = state.extra as bool;
+        return CountryAndCurrencySetupScreen(isUpdating: extra);
+      },
+    ),
+
     GoRoute(
       path: Routes.scanHistory,
       pageBuilder: (context, state) =>

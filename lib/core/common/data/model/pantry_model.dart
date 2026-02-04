@@ -53,19 +53,20 @@ class PantryItemModel extends PantryItemEntity {
     required super.stockStatus,
     required super.itemId,
     required super.thumbnailBytes,
+    required super.addedAt,
   });
 
   factory PantryItemModel.fromJson(Map<String, dynamic> json) {
     String? thumbnailBase64 = json['thumbnail']?.toString();
     Uint8List? thumbnailBytes;
 
-    if (thumbnailBase64 != null &&
-        thumbnailBase64.startsWith('data:image/jpeg;base64,')) {
-      String base64Image = thumbnailBase64.replaceFirst(
-        'data:image/jpeg;base64,',
-        '',
-      );
-      thumbnailBytes = base64Decode(base64Image);
+    if (thumbnailBase64 != null && thumbnailBase64.contains('base64,')) {
+      try {
+        final base64Image = thumbnailBase64.split('base64,').last;
+        thumbnailBytes = base64Decode(base64Image);
+      } catch (_) {
+        thumbnailBytes = Uint8List(0);
+      }
     }
 
     return PantryItemModel(
@@ -81,6 +82,7 @@ class PantryItemModel extends PantryItemEntity {
       expiryStatus: json['expiry_status']?.toString() ?? '',
       stockStatus: json['stock_status']?.toString() ?? '',
       itemId: json['item_id']?.toString() ?? '',
+      addedAt: DateTime.parse(json['added_at']),
     );
   }
 
@@ -95,6 +97,7 @@ class PantryItemModel extends PantryItemEntity {
       "expiry_status": expiryStatus,
       "stock_status": stockStatus,
       "item_id": itemId,
+      "added_at": addedAt,
     };
   }
 
@@ -110,6 +113,7 @@ class PantryItemModel extends PantryItemEntity {
       expiryStatus: entity.expiryStatus,
       stockStatus: entity.stockStatus,
       itemId: entity.itemId,
+      addedAt: entity.addedAt,
     );
   }
 }

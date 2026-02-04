@@ -316,7 +316,7 @@ class _AddKitchenPantryPageState extends State<AddKitchenPantryPage> {
                 label: "Units",
                 hint: "Select Units",
                 value: item.unit,
-                items: ["Kg", "Gram", "Litre", "Piece"],
+                items: ["Kg", "Gram", "Litre", "Piece", "Milliliters"],
                 onChanged: (val) => setState(() => item.unit = val),
               ),
             ),

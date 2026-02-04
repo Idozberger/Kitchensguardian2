@@ -17,7 +17,11 @@ abstract interface class PantryRemoteDatasource {
   Future<List<Map<String, dynamic>>> getPantryItems({
     required String kitchenId,
   });
-  Future<Map<String, dynamic>> scanRecipt({required String filePath});
+  Future<Map<String, dynamic>> scanRecipt({
+    required String filePath,
+    required String currency,
+    required String country,
+  });
   Future<String> requestItems({required PantryModel pantryModel});
   Future<String> showNotification({
     required int id,
@@ -125,53 +129,61 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
   }
 
   @override
-  Future<Map<String, dynamic>> scanRecipt({required String filePath}) async {
+  Future<Map<String, dynamic>> scanRecipt({
+    required String filePath,
+    required String currency,
+    required String country,
+  }) async {
     try {
+      log("currency: ${currency}");
       final formData = FormData.fromMap({
         "file": await MultipartFile.fromFile(
           filePath,
           filename: filePath.split('/').last,
           contentType: DioMediaType('image', 'jpeg'),
         ),
+        "currency": currency,
+        "country": country,
+        "use_google_document": true,
       });
 
       final response = await dio.post(AppConstants.scanRecipt, data: formData);
-
       if (response.statusCode != 200 && response.statusCode != 201) {
         final data = response.data is String
             ? jsonDecode(response.data)
             : response.data;
-        final message = data["error"] ?? "Unknown error";
+        final message = data?["error"] ?? "Unknown error";
         throw message;
       }
 
-      final message = response.data["message"] ?? "Unknown response";
-      final items = response.data["res"]["items"];
+      final message = response.data?["message"] ?? "Unknown response";
 
-      final parsedItems = (items is List)
-          ? items.map<Map<String, dynamic>>((item) {
-              final map = Map<String, dynamic>.from(item);
+      final res = response.data;
 
-              if (map["thumbnail"] != null && map["thumbnail"] is String) {
-                try {
-                  final thumb = map["thumbnail"] as String;
+      final items = res?["items"] as List<dynamic>? ?? [];
 
-                  final cleanedBase64 = thumb.contains(',')
-                      ? thumb.split(',').last
-                      : thumb;
+      final parsedItems = items.map<Map<String, dynamic>>((item) {
+        final map = Map<String, dynamic>.from(item);
 
-                  map["thumbnail"] = base64Decode(cleanedBase64);
-                } catch (e) {
-                  map["thumbnail"] = Uint8List(0);
-                }
-              } else {}
+        if (map["thumbnail"] != null && map["thumbnail"] is String) {
+          try {
+            final thumb = map["thumbnail"] as String;
+            final cleanedBase64 = thumb.contains(',')
+                ? thumb.split(',').last
+                : thumb;
+            map["thumbnail"] = base64Decode(cleanedBase64);
+          } catch (_) {
+            map["thumbnail"] = Uint8List(0);
+          }
+        }
 
-              return map;
-            }).toList()
-          : [];
+        return map;
+      }).toList();
+
       log(
         "ParsedItems: ${parsedItems.map((item) => item["recommended_storage"])}",
       );
+
       return {"message": message, "items": parsedItems};
     } on DioException catch (e) {
       throw dio.handleError(e);
@@ -242,7 +254,7 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
             : response.data;
 
         final message = data["error"];
-        debugPrint('⚠️ [createPantry] Error Message: $message');
+        debugPrint('[createPantry] Error Message: $message');
         throw message;
       }
 
@@ -250,7 +262,7 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
     } on DioException catch (e) {
       throw dio.handleError(e);
     } catch (e, stacktrace) {
-      debugPrint('🧩 Stacktrace: $stacktrace');
+      debugPrint('Stacktrace: $stacktrace');
       rethrow;
     }
   }
@@ -280,7 +292,7 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
     } on DioException catch (e) {
       throw dio.handleError(e);
     } catch (e, stacktrace) {
-      debugPrint('🧩 Stacktrace: $stacktrace');
+      debugPrint('Stacktrace: $stacktrace');
       rethrow;
     }
   }

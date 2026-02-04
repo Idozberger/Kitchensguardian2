@@ -144,7 +144,6 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
         emit(PantryFailure(failure.message));
       },
       (items) async {
-        final List<PantryItemEntity> pantryItems = [];
         final List<PantryItemEntity> lowStockItems = [];
         final List<PantryItemEntity> expiringItems = [];
 
@@ -159,20 +158,11 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
 
             continue;
           }
-
-          if (item.stockStatus == "in_stock" ||
-              item.expiryStatus == "" ||
-              item.expiryStatus == "null") {
-            pantryItems.add(item);
-            continue;
-          }
-
-          pantryItems.add(item);
         }
 
         emit(
           PantryLoaded(
-            pantryItems: pantryItems,
+            pantryItems: items,
             lowStockItems: lowStockItems,
             expiringItems: expiringItems,
           ),
@@ -295,7 +285,11 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
   ) async {
     emit(PantryScanItemsLoading());
     final res = await _scanReceiptUseCase(
-      ScanReceiptUseCaseParams(filePath: event.filePath),
+      ScanReceiptUseCaseParams(
+        filePath: event.filePath,
+        country: event.country,
+        currency: event.currency,
+      ),
     );
 
     res.fold((failure) => emit(PantryFailure(failure.message)), (

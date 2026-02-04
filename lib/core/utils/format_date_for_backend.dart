@@ -1,5 +1,7 @@
 String formatExpiry(String yyyymmdd) {
   try {
+    if (yyyymmdd.isEmpty) return "";
+
     final now = DateTime.now();
     final expiryDate = DateTime.parse(yyyymmdd);
 
@@ -11,7 +13,6 @@ String formatExpiry(String yyyymmdd) {
 
     if (totalDays < 0) return "Expired";
 
-    /// Inclusive day counting: +1
     totalDays = totalDays + 1;
 
     int months = totalDays ~/ 30;

@@ -174,13 +174,13 @@ class _AddItemPageState extends State<AddItemPage> {
 
     final pantryItems = <PantryItemEntity>[];
     for (final item in _items) {
-      final compressedImage = await _compressImage(item.file!);
+      final compressedImage = await _compressImage(item.file);
       pantryItems.add(
         PantryItemEntity(
           name: item.nameController.text.trim(),
           quantity: double.tryParse(item.qtyController.text.trim()) ?? 0,
-          unit: item.unit ?? '',
-          group: item.pantry ?? '',
+          unit: item.unit ?? "",
+          group: item.pantry ?? "",
           expireDate: formatExpiry(item.expireDate.text),
           thumbnail: compressedImage,
           expiryStatus: '',
@@ -201,19 +201,18 @@ class _AddItemPageState extends State<AddItemPage> {
   String? _validateItem(PantryItem item) {
     final name = item.nameController.text.trim();
     final qty = item.qtyController.text.trim();
-    final unit = item.unit?.trim() ?? '';
-    final pantry = item.pantry?.trim() ?? '';
-    final expireDate = item.expireDate.text.trim();
 
-    if (item.file == null) return "Please add an image.";
-    if (name.isEmpty) return "Please enter the item name.";
+    if (name.isEmpty) {
+      return "Please enter the item name.";
+    }
+
     if (name.length < 3) {
       return "Item name must be at least 3 characters long.";
     }
-    if (qty.isEmpty) return "Please enter the quantity.";
-    if (unit.isEmpty) return "Please select a unit.";
-    if (pantry.isEmpty) return "Please select a pantry.";
-    if (expireDate.isEmpty) return "Please select an expiry date.";
+
+    if (qty.isEmpty) {
+      return "Please enter the quantity.";
+    }
 
     return null;
   }
@@ -257,7 +256,13 @@ class _AddItemPageState extends State<AddItemPage> {
         _buildFormLabel("Quantity"),
         SizedBox(height: h(10)),
         AppTextField(
-          textInputAction: TextInputAction.next,
+          suffixIcon: Platform.isAndroid
+              ? null
+              : IconButton(
+                  onPressed: () => FocusScope.of(context).unfocus(),
+                  icon: Icon(Icons.done, color: Colors.grey),
+                ),
+          textInputAction: TextInputAction.done,
           color: AppColors.apptextFieldStyleTextColor,
           controller: item.qtyController,
           hintText: "Enter item quantity",
@@ -276,7 +281,7 @@ class _AddItemPageState extends State<AddItemPage> {
                 label: "Units",
                 hint: "Select Units",
                 value: item.unit,
-                items: const ["Kg", "Gram", "Litre", "Piece"],
+                items: const ["Kg", "Gram", "Litre", "Piece", "Milliliters"],
                 onChanged: (val) => setState(() => item.unit = val),
               ),
             ),
@@ -487,7 +492,8 @@ class _AddItemPageState extends State<AddItemPage> {
     );
   }
 
-  Future<String> _compressImage(File imageFile) async {
+  Future<String> _compressImage(File? imageFile) async {
+    if (imageFile == null) return "";
     final result = await FlutterImageCompress.compressWithList(
       imageFile.readAsBytesSync(),
       minWidth: 800,

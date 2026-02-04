@@ -53,8 +53,13 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
   }
 
   void onResendCode() {
-    context.read<AuthBloc>().add(
-      ResendEmailVerficationCodeEvent(email: widget.userModel.email),
+    authBloc.add(
+      AuthSendUserEmailVerficationCode(
+        email: userModel.email,
+        firstName: userModel.firstName,
+        lastName: userModel.lastName,
+        password: userModel.password,
+      ),
     );
   }
 

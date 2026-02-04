@@ -39,7 +39,7 @@ class AppDrawer extends StatelessWidget {
                   const PremiumCardWidget(),
                   gap(height: 20),
                   _buildDrawerItems(context),
-                  const Spacer(),
+                  gap(height: 10),
                   _buildLogoutButton(context),
                   gap(height: 10),
                 ],
@@ -90,91 +90,106 @@ class AppDrawer extends StatelessWidget {
   Widget _buildDrawerItems(BuildContext context) {
     return BlocBuilder<UserCubit, UserState>(
       builder: (_, state) {
-        return Column(
-          children: [
-            DrawerListTile(
-              title: "Favourite",
-              iconPath: AppAssets.favouriteSvg,
-              onTap: () {
-                context.push(Routes.favouriteFood);
-              },
-            ),
-            Divider(color: Color(0xffF4F4F4)),
-            DrawerListTile(
-              title: "My Kitchen Members",
-              iconPath: AppAssets.myKitchenMember,
-              onTap: () {
-                if (state.activeKitchenId.isNotEmpty) {
-                  context.push(Routes.myKitchenMembers);
-                } else {
-                  AppToast.show(
-                    "Please join or create kitchen",
-                    ToastType.error,
-                  );
-                }
-              },
-            ),
-            Divider(color: Color(0xffF4F4F4)),
-            DrawerListTile(
-              title: "Get Kitchen Code",
-              iconPath: AppAssets.referralSvg,
-              onTap: () async {
-                if (state.activeKitchenId.isNotEmpty) {
-                  if (state.invitationCode.isNotEmpty) {
-                    context.pop();
-                    debugPrint("inivitaion code ${state.invitationCode}");
-                    _showRefferalCodeDialog(context, state.invitationCode);
-                  } else {
-                    AppToast.show(
-                      "Kitchen members cannot invite others or access the invitation code.",
-                      ToastType.error,
+        return Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                DrawerListTile(
+                  title: "Favourite",
+                  iconPath: AppAssets.favouriteSvg,
+                  onTap: () {
+                    context.push(Routes.favouriteFood);
+                  },
+                ),
+                Divider(color: Color(0xffF4F4F4)),
+                DrawerListTile(
+                  title: "My Kitchen Members",
+                  iconPath: AppAssets.myKitchenMember,
+                  onTap: () {
+                    if (state.activeKitchenId.isNotEmpty) {
+                      context.push(Routes.myKitchenMembers);
+                    } else {
+                      AppToast.show(
+                        "Please join or create kitchen",
+                        ToastType.error,
+                      );
+                    }
+                  },
+                ),
+                Divider(color: Color(0xffF4F4F4)),
+                DrawerListTile(
+                  title: "Country/Currency",
+                  iconPath: AppAssets.countrySvg,
+                  onTap: () {
+                    context.pushNamed(
+                      Routes.countryAndCurrencySetup,
+                      extra: true,
                     );
-                  }
-                } else {
-                  AppToast.show(
-                    "Please join or create kitchen",
-                    ToastType.error,
-                  );
-                }
-              },
+                  },
+                ),
+                Divider(color: Color(0xffF4F4F4)),
+                DrawerListTile(
+                  title: "Get Kitchen Code",
+                  iconPath: AppAssets.referralSvg,
+                  onTap: () async {
+                    if (state.activeKitchenId.isNotEmpty) {
+                      if (state.invitationCode.isNotEmpty) {
+                        context.pop();
+                        debugPrint("inivitaion code ${state.invitationCode}");
+                        _showRefferalCodeDialog(context, state.invitationCode);
+                      } else {
+                        AppToast.show(
+                          "Kitchen members cannot invite others or access the invitation code.",
+                          ToastType.error,
+                        );
+                      }
+                    } else {
+                      AppToast.show(
+                        "Please join or create kitchen",
+                        ToastType.error,
+                      );
+                    }
+                  },
+                ),
+                Divider(color: Color(0xffF4F4F4)),
+                DrawerListTile(
+                  title: "Scan History",
+                  iconPath: AppAssets.historySvg,
+                  onTap: () {
+                    if (state.activeKitchenId.isNotEmpty) {
+                      context.push(Routes.scanHistory);
+                    } else {
+                      AppToast.show(
+                        "Please join or create kitchen",
+                        ToastType.error,
+                      );
+                    }
+                  },
+                ),
+                Divider(color: Color(0xffF4F4F4)),
+                DrawerListTile(
+                  title: "Kitchens",
+                  iconPath: AppAssets.kitchenSvg,
+                  onTap: () => context.push(Routes.kitchen),
+                ),
+                Divider(color: Color(0xffF4F4F4)),
+                DrawerListTile(
+                  title: "Pantry",
+                  iconPath: AppAssets.pantrySvg,
+                  color: Colors.black,
+                  onTap: () => context.push(Routes.allStorageArea),
+                ),
+                Divider(color: Color(0xffF4F4F4)),
+                DrawerListTile(
+                  title: "Terms & Conditions",
+                  iconPath: AppAssets.termsAndConditionSvg,
+                  onTap: () {
+                    AppToast.show("Coming Soon!", ToastType.success);
+                  },
+                ),
+              ],
             ),
-            Divider(color: Color(0xffF4F4F4)),
-            DrawerListTile(
-              title: "Scan History",
-              iconPath: AppAssets.historySvg,
-              onTap: () {
-                if (state.activeKitchenId.isNotEmpty) {
-                  context.push(Routes.scanHistory);
-                } else {
-                  AppToast.show(
-                    "Please join or create kitchen",
-                    ToastType.error,
-                  );
-                }
-              },
-            ),
-            Divider(color: Color(0xffF4F4F4)),
-            DrawerListTile(
-              title: "Kitchens",
-              iconPath: AppAssets.kitchenSvg,
-              onTap: () => context.push(Routes.kitchen),
-            ),
-            Divider(color: Color(0xffF4F4F4)),
-            DrawerListTile(
-              title: "Pantry",
-              iconPath: AppAssets.pantrySvg,
-              color: Colors.black,
-              onTap: () => context.push(Routes.allStorageArea),
-            ),
-            Divider(color: Color(0xffF4F4F4)),
-            DrawerListTile(
-              title: "Terms & Conditions",
-              iconPath: AppAssets.termsAndConditionSvg,
-              onTap: () {
-                AppToast.show("Coming Soon!", ToastType.success);
-              },
-            ),
-          ],
+          ),
         );
       },
     );

@@ -16,20 +16,20 @@ class ScanReceiptItemModel extends ScanReceiptItemEntity {
     return ScanReceiptItemModel(
       name: json?['name'] as String? ?? '',
       unit: json?['unit'] as String? ?? 'Unit',
-      amount: json?['amount'] as String? ?? '0',
+      amount: json?['quantity'] as String? ?? '0',
       expireDate: json?['expiry_date'] as String? ?? '0',
       thumbnail: json?['thumbnail'] as Uint8List? ?? Uint8List(0),
-      group: json?['group'] as String? ?? 'Refrigerator',
+      group: json?['storage'] as String? ?? 'Refrigerator',
     );
   }
   Map<String, dynamic> toJson() {
     return {
       'name': name,
       'unit': unit,
-      'amount': amount,
+      'quantity': amount,
       'expiry_date': expireDate,
       'thumbnail': thumbnail,
-      'group': group,
+      'storage': group,
     };
   }
 

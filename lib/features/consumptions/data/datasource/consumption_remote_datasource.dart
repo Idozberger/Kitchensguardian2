@@ -59,7 +59,7 @@ class ConsumptionRemoteDatasourceImpl implements ConsumptionRemoteDatasource {
         AppConstants.consumptionConfirmationRespond,
         data: {"confirmation_id": confirmationId, "response": responseText},
       );
-      log("dio error: ${response.toString()}");
+      log("dio error: ${response.toString()} ${response.statusCode}");
       if (response.statusCode != 200 && response.statusCode != 201) {
         final data = response.data is String
             ? jsonDecode(response.data)

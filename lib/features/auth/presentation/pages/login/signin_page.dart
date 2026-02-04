@@ -17,6 +17,7 @@ import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/features/auth/presentation/pages/signup/signup_page.dart';
 import 'package:foodkitchen/features/auth/presentation/widgets/textspan_widget.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -28,7 +29,7 @@ class SignInPage extends StatefulWidget {
 class _SignInPageState extends State<SignInPage> {
   late UserCubit _userCubit;
   final _formKey = GlobalKey<FormState>();
-
+  late SharedPreferences prefs;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isObscure = true;
@@ -43,7 +44,12 @@ class _SignInPageState extends State<SignInPage> {
   void initState() {
     super.initState();
     _userCubit = context.read<UserCubit>();
+    _initSharedPreferencs();
     _userCubit.setGoogleSignUpUserModel(firstName: "", lastName: "", email: "");
+  }
+
+  void _initSharedPreferencs() async {
+    prefs = await SharedPreferences.getInstance();
   }
 
   void _handleLogin(AuthState state) {
@@ -99,6 +105,17 @@ class _SignInPageState extends State<SignInPage> {
     }
   }
 
+  void _handleSuccessState(AuthSuccess state) {
+    AppToast.show(state.successMessage, ToastType.success);
+    final country = prefs.getString("country");
+    final currency = prefs.getString("currency");
+    if (country == null || currency == null) {
+      context.goNamed(Routes.countryAndCurrencySetup, extra: false);
+    } else {
+      context.go(Routes.kitchenSelection);
+    }
+  }
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -111,8 +128,7 @@ class _SignInPageState extends State<SignInPage> {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (BuildContext context, AuthState state) {
         if (state is AuthSuccess) {
-          AppToast.show(state.successMessage, ToastType.success);
-          context.go(Routes.kitchenSelection);
+          _handleSuccessState(state);
         }
         if (state is AuthFailure) {
           AppToast.show(state.message, ToastType.error);

@@ -11,6 +11,7 @@ class PantryItemEntity {
   final String expiryStatus;
   final String stockStatus;
   final String itemId;
+  final DateTime? addedAt;
 
   PantryItemEntity({
     required this.name,
@@ -23,5 +24,6 @@ class PantryItemEntity {
     required this.stockStatus,
     this.thumbnailBytes,
     required this.itemId,
+    this.addedAt,
   });
 }
