@@ -8,6 +8,7 @@ import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
+import 'package:foodkitchen/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:foodkitchen/features/planner/domain/entities/meal_plan_entity.dart';
 import 'package:foodkitchen/features/planner/domain/entities/merged_meal_type_entity.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
@@ -70,7 +71,15 @@ class MealActionRow extends StatelessWidget {
   Widget _buildCancelButton(BuildContext context) {
     return Expanded(
       child: OutlinedButton(
-        onPressed: callback ?? () => context.go(Routes.dashboard),
+        onPressed:
+            callback ??
+            () => context.goNamed(
+              Routes.dashboard,
+              extra: {
+                'fromNotification': false,
+                'entryType': DashboardEntryType.normal,
+              },
+            ),
         child: Text(
           _cancelButtonText,
           style: Theme.of(context).textTheme.headlineMedium!.copyWith(

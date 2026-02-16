@@ -126,6 +126,10 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                         ),
                         SizedBox(height: h(10)),
                         OtpField(
+                          onChanged: (pin) {
+                            updatePin(pin);
+                            debugPrint("Entered OTP: $pin");
+                          },
                           onCompleted: (code) {
                             updatePin(code);
                             debugPrint("Entered OTP: $code");
@@ -139,6 +143,14 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                     padding: gapOnly(top: 20, bottom: 25),
                     child: GenericButtonWidget(
                       onPressed: () {
+                        if (verificationCode.length != 5) {
+                          AppToast.show(
+                            "Verification code must be 5 digits",
+                            ToastType.error,
+                          );
+                          return;
+                        }
+
                         if (_formKey.currentState!.validate()) {
                           authBloc.add(
                             AuthVerifyEmail(

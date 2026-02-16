@@ -37,7 +37,7 @@ class FCMService {
       return accessToken;
     } catch (e) {
       debugPrint(
-        '❌ Error reading service account or generating access token: $e',
+        'Error reading service account or generating access token: $e',
       );
       rethrow;
     }
@@ -47,6 +47,10 @@ class FCMService {
     String deviceToken,
     String title,
     String body,
+    String invitationCode,
+    String kitchenName,
+    String role,
+    String activeKitchenId,
   ) async {
     try {
       final token = await _getAccessToken();
@@ -60,6 +64,13 @@ class FCMService {
         'message': {
           'token': deviceToken,
           'notification': {'title': title, 'body': body},
+          'data': {
+            'type': 'kitchens_notification',
+            'invitationCode': invitationCode,
+            'kitchenName': kitchenName,
+            'role': role,
+            'kitchenId': activeKitchenId,
+          },
           'android': {
             'priority': 'high',
             'notification': {
@@ -72,6 +83,16 @@ class FCMService {
           },
           'apns': {
             'headers': {'apns-priority': '10'},
+            'payload': {
+              'aps': {
+                'sound': 'default',
+                'badge': 1,
+                'content-available': 1,
+                'mutable-content': 1,
+                'category': 'KITCHEN_ALERT',
+                'thread-id': 'kitchen_notifications',
+              },
+            },
           },
         },
       };
@@ -83,12 +104,12 @@ class FCMService {
       );
 
       if (response.statusCode == 200) {
-        debugPrint('✅ FCM notification sent successfully!');
+        debugPrint('FCM notification sent successfully!');
       } else {
-        debugPrint('❌ Failed to send notification: ${response.data}');
+        debugPrint('Failed to send notification: ${response.data}');
       }
     } catch (e) {
-      debugPrint('⚠️ Error sending notification: $e');
+      debugPrint('Error sending notification: $e');
     }
   }
 }

@@ -20,4 +20,17 @@ class PantriesItemsEntity {
     required this.stockStatus,
     required this.itemId,
   });
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'quantity': quantity,
+      'unit': unit,
+      'group': group,
+      'expireDate': expireDate,
+      'thumbnail': thumbnail,
+      'expiryStatus': expiryStatus,
+      'stockStatus': stockStatus,
+      'itemId': itemId,
+    };
+  }
 }

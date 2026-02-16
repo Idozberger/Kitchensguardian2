@@ -20,7 +20,7 @@ import 'package:foodkitchen/features/auth/domain/usecase/user_sign_in_usecase.da
 import 'package:foodkitchen/features/auth/domain/usecase/user_sign_up_usecase.dart';
 import 'package:foodkitchen/features/auth/domain/usecase/verify_user_email_usecase.dart';
 import 'package:foodkitchen/features/auth/presentation/blocs/auth_bloc.dart';
-import 'package:foodkitchen/core/global/functions/const.dart';
+import 'package:foodkitchen/core/global/functions/api_endpoints.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
 import 'package:foodkitchen/core/common/data/datasource/current_user_remote_datasource.dart';
 import 'package:foodkitchen/core/common/data/repositories/current_user_respository_impl.dart';
@@ -35,6 +35,7 @@ import 'package:foodkitchen/features/dashboard/data/repository/dashboard_reposit
 import 'package:foodkitchen/features/dashboard/domain/repository/dashboard_repository.dart';
 import 'package:foodkitchen/features/consumptions/domain/usecases/get_consumption_confirmation_count.dart';
 import 'package:foodkitchen/features/consumptions/domain/usecases/get_consumption_confirmation_pending.dart';
+import 'package:foodkitchen/features/dashboard/domain/usecases/demote_cohost.dart';
 import 'package:foodkitchen/features/dashboard/domain/usecases/get_kitchen_members.dart';
 import 'package:foodkitchen/features/dashboard/domain/usecases/kick_member.dart';
 import 'package:foodkitchen/features/dashboard/domain/usecases/make_cohost.dart';
@@ -160,8 +161,9 @@ void _dioInjection() {
       BaseOptions(
         validateStatus: (status) => true,
         baseUrl: AppConstants.baseUrl,
-        connectTimeout: const Duration(seconds: 180),
-        receiveTimeout: const Duration(seconds: 180),
+        connectTimeout: const Duration(seconds: 30), // max wait to connect
+        receiveTimeout: const Duration(seconds: 60), // max wait for response
+        sendTimeout: const Duration(seconds: 30), // max wait to send request
       ),
     ),
   );
@@ -308,6 +310,7 @@ void _initDashboard() async {
     ..registerFactory(() => GetKitchenMembers(sl()))
     ..registerFactory(() => MakeCohost(sl()))
     ..registerFactory(() => KickMember(sl()))
+    ..registerFactory(() => DemoteCohost(sl()))
     // Bloc
     ..registerLazySingleton(
       () => DashboardBloc(
@@ -317,6 +320,7 @@ void _initDashboard() async {
 
         userCubit: sl(),
         kitchenBloc: sl(),
+        demoteCohost: DemoteCohost(sl()),
       ),
     );
 }

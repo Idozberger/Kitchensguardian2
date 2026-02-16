@@ -20,6 +20,7 @@ import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_dropdown_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
+import 'package:foodkitchen/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';
@@ -102,7 +103,13 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
         "Items added to your kitchen successfully!",
         ToastType.success,
       );
-      context.go(Routes.dashboard);
+      context.goNamed(
+        Routes.dashboard,
+        extra: {
+          'fromNotification': false,
+          'entryType': DashboardEntryType.normal,
+        },
+      );
     } else if (state is ScanReceiptLoaded) {
       _initializeItems(state.scanReceipt);
     }
@@ -284,7 +291,7 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
             ),
             SizedBox(height: h(16)),
             TextButton(
-              onPressed: () => context.push(Routes.addItem),
+              onPressed: () => context.pushNamed(Routes.addItem),
               child: Text(
                 "Add Items Manually",
                 style: TextStyle(

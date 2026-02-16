@@ -22,7 +22,7 @@ class YourKitchensSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final owned = kitchens
-        .where((k) => k.role.toLowerCase() != "member")
+        .where((k) => k.role.toLowerCase() == "host")
         .toList();
 
     return owned.isEmpty

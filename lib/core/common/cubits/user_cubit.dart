@@ -60,12 +60,14 @@ class UserCubit extends Cubit<UserState> {
 
   void updateActiveKitchenIdInvitationCodeAndRole({
     required String activeKitchenId,
+    required String kitchenName,
     required String invitationCode,
     required String role,
     Uint8List? avatarBytes,
   }) {
     emit(
       state.copyWith(
+        kitchenName: kitchenName,
         activeKitchenId: activeKitchenId,
         invitationCode: invitationCode,
         role: role,

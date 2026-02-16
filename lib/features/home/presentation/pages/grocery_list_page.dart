@@ -11,6 +11,7 @@ import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
+import 'package:foodkitchen/features/planner/domain/entities/ingredient_entity.dart';
 import 'package:share_plus/share_plus.dart';
 
 class SmartCartPage extends StatefulWidget {
@@ -23,13 +24,14 @@ class SmartCartPage extends StatefulWidget {
 class _SmartCartPageState extends State<SmartCartPage> {
   late List<int> quantities;
   late HomeBloc homeBloc;
+
   @override
   void initState() {
     super.initState();
     homeBloc = context.read<HomeBloc>();
     quantities = [];
     for (int i = 0; i < homeBloc.state.groceryList.length; i++) {
-      quantities.add(1);
+      quantities.add(int.parse(homeBloc.state.groceryList[i].amount));
     }
   }
 
@@ -84,14 +86,14 @@ class _SmartCartPageState extends State<SmartCartPage> {
     );
   }
 
-  Widget _buildGroceryList(List<String> items) {
+  Widget _buildGroceryList(List<IngredientEntity> items) {
     return Padding(
       padding: gapSymmetric(horizontal: 20, vertical: 10),
       child: ListView.separated(
         itemCount: items.length,
         separatorBuilder: (_, __) => gap(height: 12),
         itemBuilder: (context, index) {
-          final itemName = items[index];
+          final ingredient = items[index];
           final qty = quantities[index];
 
           return UpperTile(
@@ -99,7 +101,7 @@ class _SmartCartPageState extends State<SmartCartPage> {
               children: [
                 Expanded(
                   child: Text(
-                    itemName,
+                    '${ingredient.amount} ${ingredient.unit} ${ingredient.name}',
                     style: Theme.of(context).textTheme.headlineLarge,
                   ),
                 ),
@@ -141,7 +143,10 @@ class _SmartCartPageState extends State<SmartCartPage> {
     );
   }
 
-  Widget _buildBottomActions(BuildContext context, List<String> items) {
+  Widget _buildBottomActions(
+    BuildContext context,
+    List<IngredientEntity> items,
+  ) {
     return BottomAppBar(
       color: Colors.white,
       elevation: 10,
@@ -165,17 +170,19 @@ class _SmartCartPageState extends State<SmartCartPage> {
     );
   }
 
-  void _copyList(List<String> items) {
+  void _copyList(List<IngredientEntity> items) {
     String result = "My Grocery List\n\n";
 
     for (int i = 0; i < items.length; i++) {
-      String item = items[i];
+      final ingredient = items[i];
       int qty = quantities[i];
 
       if (qty > 1) {
-        result += "• $qty × $item\n";
+        result +=
+            "• $qty × ${ingredient.amount} ${ingredient.unit} ${ingredient.name}\n";
       } else {
-        result += "• $item\n";
+        result +=
+            "• ${ingredient.amount} ${ingredient.unit} ${ingredient.name}\n";
       }
     }
 
@@ -185,17 +192,19 @@ class _SmartCartPageState extends State<SmartCartPage> {
     ).showSnackBar(const SnackBar(content: Text("List copied!")));
   }
 
-  void _shareList(List<String> items) {
+  void _shareList(List<IngredientEntity> items) {
     String result = "My Grocery List\n\n";
 
     for (int i = 0; i < items.length; i++) {
-      String item = items[i];
+      final ingredient = items[i];
       int qty = quantities[i];
 
       if (qty > 1) {
-        result += "• $qty × $item\n";
+        result +=
+            "• $qty × ${ingredient.amount} ${ingredient.unit} ${ingredient.name}\n";
       } else {
-        result += "• $item\n";
+        result +=
+            "• ${ingredient.amount} ${ingredient.unit} ${ingredient.name}\n";
       }
     }
 

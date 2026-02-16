@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -13,6 +12,7 @@ import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
 import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
+import 'package:foodkitchen/core/services/date_picker/date_picker_service.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_dropdown_widget.dart';
@@ -58,10 +58,10 @@ class _PantryItemCardState extends State<PantryItemCard> {
 
   @override
   Widget build(BuildContext context) {
-    log("expire date: ${widget.expiry}");
     return GestureDetector(
       onTap: () {
         setState(() => _isExpanded = !_isExpanded);
+        FocusScope.of(context).unfocus();
       },
       child: Container(
         margin: gapSymmetric(vertical: 0),
@@ -74,6 +74,45 @@ class _PantryItemCardState extends State<PantryItemCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            SizedBox(height: h(1)),
+            if (widget.pantryItemEntity.expiryStatus == "expiring_soon")
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  SizedBox(height: h(1), width: double.maxFinite),
+                  Positioned(
+                    top: -h(22),
+                    right: w(62),
+
+                    child: Badge(
+                      label: Padding(
+                        padding: gapAll(2),
+                        child: Text("Expiring soon"),
+                      ),
+                      child: Container(),
+                    ),
+                  ),
+                ],
+              ),
+            if (widget.pantryItemEntity.stockStatus == "low_stock")
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  SizedBox(height: h(1), width: double.maxFinite),
+                  Positioned(
+                    top: -h(22),
+                    right: w(54),
+
+                    child: Badge(
+                      label: Padding(
+                        padding: gapAll(2),
+                        child: Text("Running low"),
+                      ),
+                      child: Container(),
+                    ),
+                  ),
+                ],
+              ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -339,12 +378,12 @@ class _PantryItemCardState extends State<PantryItemCard> {
                       ),
                     ],
                   ),
-
+                  SizedBox(height: h(15)),
+                  _buildDatePicker(expireDate),
                   SizedBox(height: h(20)),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      /// SAVE BUTTON
                       Flexible(
                         child: SizedBox(
                           height: h(40),
@@ -389,7 +428,6 @@ class _PantryItemCardState extends State<PantryItemCard> {
 
                       SizedBox(width: h(10)),
 
-                      /// CANCEL BUTTON
                       Flexible(
                         child: GenericButtonWidget(
                           onPressed: () => context.pop(),
@@ -404,6 +442,32 @@ class _PantryItemCardState extends State<PantryItemCard> {
           },
         );
       },
+    );
+  }
+
+  Widget _buildDatePicker(TextEditingController expireDate) {
+    return GestureDetector(
+      onTap: () async {
+        final pickedDate = await DatePickerService.updateExpireDate(
+          context: context,
+          selectedDateString: expireDate.text,
+        );
+        if (pickedDate != null) {
+          setState(() => expireDate.text = pickedDate);
+        }
+      },
+      child: AppTextField(
+        textInputAction: TextInputAction.next,
+        enabled: false,
+        color: AppColors.apptextFieldStyleTextColor,
+        controller: expireDate,
+        hintText: "Expiring date",
+        fillColor: const Color(0xFFF9F9F9),
+        isFilled: true,
+        isLabled: false,
+        keyboardType: TextInputType.text,
+        label: '',
+      ),
     );
   }
 

@@ -7,7 +7,7 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
-import 'package:foodkitchen/core/global/functions/const.dart';
+import 'package:foodkitchen/core/global/functions/api_endpoints.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
 import 'package:foodkitchen/core/common/data/model/pantry_model.dart';
 import 'package:foodkitchen/core/services/notifications/flutter_local_notifications_service.dart';
@@ -120,7 +120,7 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
         throw Exception("Invalid data");
       }
     } on DioException catch (e) {
-      final error = dio.handleError(e);
+      final error = await dio.handleError(e);
 
       throw error;
     } catch (e) {
@@ -135,7 +135,6 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
     required String country,
   }) async {
     try {
-      log("currency: ${currency}");
       final formData = FormData.fromMap({
         "file": await MultipartFile.fromFile(
           filePath,
@@ -186,7 +185,7 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
 
       return {"message": message, "items": parsedItems};
     } on DioException catch (e) {
-      throw dio.handleError(e);
+      throw await dio.handleError(e);
     } catch (e) {
       rethrow;
     }
@@ -194,22 +193,46 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
 
   @override
   Future<String> requestItems({required PantryModel pantryModel}) async {
+    log("${pantryModel.toJson()}");
     try {
       final response = await dio.post(
         AppConstants.requestItems,
         data: pantryModel.toJson(),
       );
+
       if (response.statusCode != 200 && response.statusCode != 201) {
         final data = response.data is String
             ? jsonDecode(response.data)
             : response.data;
 
-        final message = data["error"];
+        final message = data["error"] ?? "Unknown error";
+
+        // 🔴 LOG API ERROR RESPONSE
+        debugPrint("❌ API Error");
+        debugPrint("Status Code: ${response.statusCode}");
+        debugPrint("Response Data: $data");
+
         throw message;
       }
+
       return response.data["message"];
     } on DioException catch (e) {
-      throw dio.handleError(e);
+      // 🔴 LOG DIO ERROR DETAILS
+      debugPrint("❌ DioException");
+      debugPrint("Message: ${e.message}");
+      debugPrint("Type: ${e.type}");
+      debugPrint("Path: ${e.requestOptions.path}");
+
+      if (e.response != null) {
+        debugPrint("Status Code: ${e.response?.statusCode}");
+        debugPrint("Response Data: ${e.response?.data}");
+      }
+
+      throw await dio.handleError(e);
+    } catch (e) {
+      // 🔴 LOG ANY OTHER ERROR
+      debugPrint("❌ Unexpected Error: $e");
+      rethrow;
     }
   }
 

@@ -13,6 +13,7 @@ final class PlannerState {
   final String? startDate;
   final String? endDate;
   final bool isLoading;
+  final bool addingToInventory;
   final bool loadingPlans;
   final bool isSubscribed;
   final bool addingToWeeklyPlan;
@@ -33,6 +34,7 @@ final class PlannerState {
     this.mealPlans = const [],
     this.isLoading = false,
     this.isSubscribed = false,
+    this.addingToInventory = false,
     this.startRecipe = false,
     this.loadingPlans = true,
     this.isFinishingRecipe = false,
@@ -58,6 +60,7 @@ final class PlannerState {
     List<MergedRecipePlanEntity>? editMealsPlans,
     bool? isLoading,
     bool? isFinishingRecipe,
+    bool? addingToInventory,
     bool? startRecipe,
     bool? loadingPlans,
     bool? addingToWeeklyPlan,
@@ -94,6 +97,7 @@ final class PlannerState {
       loadingPlans: loadingPlans ?? this.loadingPlans,
       isRecipeFinished: isRecipeFinished ?? this.isRecipeFinished,
       isSubscribed: isSubscribed ?? this.isSubscribed,
+      addingToInventory: addingToInventory ?? this.addingToInventory,
     );
   }
 }

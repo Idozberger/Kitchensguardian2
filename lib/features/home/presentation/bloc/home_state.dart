@@ -1,6 +1,7 @@
 import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/features/home/domain/entities/pantry_data.dart';
 import 'package:foodkitchen/features/home/domain/entities/pantry_items.dart';
+import 'package:foodkitchen/features/planner/domain/entities/ingredient_entity.dart';
 
 class HomeState {
   final bool isLoading;
@@ -9,7 +10,7 @@ class HomeState {
   final bool loadingWeeklyPlans;
   final String? errorMessage;
   final String? successMessage;
-  final List<String> groceryList;
+  final List<IngredientEntity> groceryList;
   final List<PantriesDataEntity> pantryItems;
   final List<RecipeEntity> dateBasedPlan;
   final List<RecipeEntity> suggestedRecipe;
@@ -41,7 +42,7 @@ class HomeState {
     List<PantriesDataEntity>? pantryItems,
     List<RecipeEntity>? dateBasedPlan,
     String? successMessage,
-    List<String>? groceryList,
+    List<IngredientEntity>? groceryList,
     List<RecipeEntity>? suggestedRecipe,
     List<PantriesItemsEntity>? lowStockItems,
     List<PantriesItemsEntity>? expiringItems,

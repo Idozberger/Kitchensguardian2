@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/services/fcm/fcm_service.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
+import 'package:foodkitchen/features/dashboard/domain/usecases/demote_cohost.dart';
 
 import 'package:foodkitchen/features/dashboard/domain/usecases/get_kitchen_members.dart';
 import 'package:foodkitchen/features/dashboard/domain/usecases/kick_member.dart';
@@ -18,6 +19,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   final GetKitchenMembers _getKitchenMembers;
   final MakeCohost _makeCohost;
   final KickMember _kickMember;
+  final DemoteCohost _demoteCohost;
 
   final KitchenBloc _kitchenBloc;
   final UserCubit _userCubit;
@@ -26,12 +28,14 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     required MakeCohost makeCohost,
     required KickMember kickMember,
     required KitchenBloc kitchenBloc,
+    required DemoteCohost demoteCohost,
     required UserCubit userCubit,
 
     respondConsumptionConfirmation,
   }) : _getKitchenMembers = getMembers,
        _makeCohost = makeCohost,
        _kickMember = kickMember,
+       _demoteCohost = demoteCohost,
        _kitchenBloc = kitchenBloc,
        _userCubit = userCubit,
 
@@ -39,6 +43,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     on<GetKitchenMembersEvent>(_onGetDashboardMembers);
     on<MakeCohostEvent>(_onMakeCohostEvent);
     on<KickMemberEvent>(_onKickMemberEvent);
+    on<DemoteCohostEvent>(_onDemoteCohostEvent);
     on<ApproveRequestEvent>(_onApproveRequestEvent);
     on<DeclineRequestEvent>(_onDeclineRequestEvent);
   }
@@ -71,6 +76,23 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     emit(DashboardLoading());
     final res = await _makeCohost(
       MakeCohostParams(
+        kitchenId: event.activeKitchenId,
+        memberId: event.memberId,
+      ),
+    );
+
+    res.fold((failure) => emit(DashboardFailure(failure.message)), (message) {
+      emit(DashboardSuccess(message));
+    });
+  }
+
+  Future<void> _onDemoteCohostEvent(
+    DemoteCohostEvent event,
+    Emitter<DashboardState> emit,
+  ) async {
+    emit(DashboardLoading());
+    final res = await _demoteCohost(
+      DemoteCohostParams(
         kitchenId: event.activeKitchenId,
         memberId: event.memberId,
       ),
@@ -162,6 +184,10 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       userDeviceToken,
       "You have been added to the kitchen",
       "Your request to join the kitchen \"$kitchenName\" has been approved by the host. You are now added to the kitchen. You can access it anytime using this invitation code: $inviteCode",
+      _userCubit.state.invitationCode,
+      _userCubit.state.kitchenName,
+      _userCubit.state.role,
+      _userCubit.state.activeKitchenId,
     );
 
     _kitchenBloc.add(MemberApprovedEvent(inviteCode, userId));
@@ -232,6 +258,10 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       userDeviceToken,
       "Your request to join the kitchen was declined",
       "Your request to join the kitchen \"$kitchenName\" has been declined by the host. You can try again later or contact the host for more details.",
+      _userCubit.state.invitationCode,
+      _userCubit.state.kitchenName,
+      _userCubit.state.role,
+      _userCubit.state.activeKitchenId,
     );
 
     await FirebaseFirestore.instance

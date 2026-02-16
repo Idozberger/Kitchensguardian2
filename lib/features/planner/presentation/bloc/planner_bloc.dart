@@ -259,9 +259,13 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
         );
 
         if (getAllWeeklyPlans.isNotEmpty) {
-          await NotificationService().scheduleMealPlanReminders(
-            mergedMealPlanEntities,
-          );
+          await NotificationService()
+              .scheduleMealPlanReminders(mergedMealPlanEntities, {
+                "kitchenId": event.kitchenId,
+                "invitationCode": _userCubit.state.invitationCode,
+                "kitchenName": _userCubit.state.kitchenName,
+                "role": _userCubit.state.role,
+              });
         }
         log(
           "plan: ${state.startDate} || ${PlannerDateFormatter.toBackendFormat(DateTime.now())}",

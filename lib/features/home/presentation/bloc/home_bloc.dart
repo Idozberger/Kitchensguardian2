@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
@@ -15,6 +16,7 @@ import 'package:foodkitchen/features/home/domain/usecases/get_recipe_suggestion_
 import 'package:foodkitchen/features/home/domain/usecases/join_kitchen_usecase.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_event.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_state.dart';
+import 'package:foodkitchen/features/planner/domain/entities/ingredient_entity.dart';
 import 'package:intl/intl.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
@@ -92,7 +94,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
     final allWeeklyPlans = state.dateBasedPlan;
 
-    final List<String> missingIngredientNames = [];
+    final List<IngredientEntity> missingIngredientNames = [];
 
     final dateFormatter = DateFormat('yyyy-MM-dd');
 
@@ -105,14 +107,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         }
 
         for (var ingredient in plan.ingredients) {
-          final ingredientName = ingredient.name.trim();
-
-          if (!missingIngredientNames.contains(ingredientName)) {
-            missingIngredientNames.add(ingredientName);
-          }
-
+          missingIngredientNames.add(ingredient);
           debugPrint(
-            'Grocery: $ingredientName → ${DateFormat('EEE, MMM d').format(planDate)}',
+            'Grocery: ${ingredient.amount} → ${DateFormat('EEE, MMM d').format(planDate)}',
           );
         }
       } on FormatException catch (e) {
@@ -121,7 +118,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     }
 
     missingIngredientNames.sort(
-      (a, b) => a.toLowerCase().compareTo(b.toLowerCase()),
+      (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
     );
 
     emit(state.copyWith(groceryList: missingIngredientNames));
@@ -143,6 +140,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       },
       (kitchen) async {
         _userCubit.updateActiveKitchenIdInvitationCodeAndRole(
+          kitchenName: event.kitchenName,
           activeKitchenId: kitchen.kitchenId,
           invitationCode: kitchen.invitationCode,
           role: "host",
@@ -225,6 +223,10 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         userDeviceToken,
         "Request to join your kitchen",
         "User ${_userCubit.state.firstName} wants to join your kitchen: $kitchenName.",
+        _userCubit.state.invitationCode,
+        _userCubit.state.kitchenName,
+        _userCubit.state.role,
+        _userCubit.state.activeKitchenId,
       );
       final random = Random();
       final notificationId = random.nextInt(999999);
@@ -377,7 +379,14 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           body:
               'You are running low on ${item.name} (${item.quantity} ${item.unit}).',
           dailyTime: morningTime,
-          payload: 'low_stock:${item.itemId}',
+          payload: jsonEncode({
+            'type': 'low_stock',
+            "invitationCode": _userCubit.state.invitationCode,
+            "kitchenName": _userCubit.state.kitchenName,
+            "role": _userCubit.state.role,
+            'kitchenId': _userCubit.state.activeKitchenId,
+            'item': item.toMap(),
+          }),
         );
         if (kDebugMode) {
           print(
@@ -392,7 +401,14 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           title: 'Low stock: ${item.name}',
           body: 'Remember to restock ${item.name}.',
           dailyTime: eveningTime,
-          payload: 'low_stock:${item.itemId}',
+          payload: jsonEncode({
+            'type': 'low_stock',
+            "invitationCode": _userCubit.state.invitationCode,
+            "kitchenName": _userCubit.state.kitchenName,
+            "role": _userCubit.state.role,
+            'kitchenId': _userCubit.state.activeKitchenId,
+            'item': item.toMap(),
+          }),
         );
         if (kDebugMode) {
           print(
@@ -413,7 +429,14 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           title: 'Expiring soon: ${item.name}',
           body: '${item.name} is expiring soon (${item.expireDate}).',
           dailyTime: morningTime,
-          payload: 'expiring_soon:${item.itemId}',
+          payload: jsonEncode({
+            'type': 'expiring_soon',
+            "invitationCode": _userCubit.state.invitationCode,
+            "kitchenName": _userCubit.state.kitchenName,
+            "role": _userCubit.state.role,
+            'kitchenId': _userCubit.state.activeKitchenId,
+            'item': item.toMap(),
+          }),
         );
         if (kDebugMode) {
           print(
@@ -428,7 +451,14 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           title: 'Expiring soon: ${item.name}',
           body: 'Use ${item.name} before it expires.',
           dailyTime: eveningTime,
-          payload: 'expiring_soon:${item.itemId}',
+          payload: jsonEncode({
+            'type': 'expiring_soon',
+            "invitationCode": _userCubit.state.invitationCode,
+            "kitchenName": _userCubit.state.kitchenName,
+            "role": _userCubit.state.role,
+            'kitchenId': _userCubit.state.activeKitchenId,
+            'item': item.toMap(),
+          }),
         );
         if (kDebugMode) {
           print(

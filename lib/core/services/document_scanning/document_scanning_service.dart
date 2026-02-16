@@ -5,6 +5,7 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:flutter_doc_scanner/flutter_doc_scanner.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
@@ -140,7 +141,7 @@ class DocumentScannerService {
   }
 
   void _showErrorSnackBar(BuildContext context, String message) {
-    AppToast.show(message, ToastType.error);
+    AppToast.show(message, ToastType.error, gravity: ToastGravity.TOP);
   }
 
   void _closeLoadingDialog(BuildContext context) {

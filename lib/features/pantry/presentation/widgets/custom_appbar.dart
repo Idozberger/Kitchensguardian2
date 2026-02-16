@@ -1,7 +1,10 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
@@ -9,6 +12,7 @@ import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/services/document_scanning/document_scanning_service.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
+import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:go_router/go_router.dart';
@@ -18,7 +22,7 @@ class MyPantryAppBar extends StatelessWidget implements PreferredSizeWidget {
   const MyPantryAppBar({super.key});
 
   @override
-  Size get preferredSize => Size.fromHeight(kToolbarHeight + h(70));
+  Size get preferredSize => Size.fromHeight(kToolbarHeight + h(54));
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +58,7 @@ class MyPantryAppBar extends StatelessWidget implements PreferredSizeWidget {
         SizedBox(width: w(16)),
         CircularIconButton(
           iconAsset: AppAssets.backArrowiOS,
-          onTap: () => Navigator.pop(context),
+          onTap: () => context.pushNamed(Routes.dashboard),
         ),
       ],
     );
@@ -82,7 +86,7 @@ class MyPantryAppBar extends StatelessWidget implements PreferredSizeWidget {
     return SizedBox(
       height: h(40),
       child: ElevatedButton.icon(
-        onPressed: () => context.push(Routes.addItem),
+        onPressed: () => context.pushNamed(Routes.addItem),
         icon: SvgPicture.asset(AppAssets.addSvg, height: h(18), width: w(18)),
         label: Text(
           "Add Item",
@@ -97,11 +101,27 @@ class MyPantryAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   void _scanDocument(BuildContext context) async {
+    final state = context.read<UserCubit>().state;
+
+    if (state.role == "member") {
+      AppToast.show(
+        "Only the host or co-host can scan receipts.",
+        ToastType.error,
+        gravity: ToastGravity.TOP,
+      );
+      return;
+    }
+
     final status = await Permission.camera.request();
 
     if (status.isGranted) {
-      await DocumentScannerService().scanDocument(context, replacement: true);
+      await DocumentScannerService().scanDocument(context);
     } else if (status.isDenied) {
+      AppToast.show(
+        "Camera permission is required to scan receipts.",
+        ToastType.error,
+        gravity: ToastGravity.TOP,
+      );
     } else if (status.isPermanentlyDenied) {
       _showPermissionDialog(context, isPermanent: true);
     }

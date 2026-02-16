@@ -30,7 +30,8 @@ import 'package:foodkitchen/features/pantry/presentation/models/pantry_items.dar
 import 'package:go_router/go_router.dart';
 
 class AddItemPage extends StatefulWidget {
-  const AddItemPage({super.key});
+  final List<PantryItem> pantryItems;
+  const AddItemPage({super.key, this.pantryItems = const []});
 
   @override
   State<AddItemPage> createState() => _AddItemPageState();
@@ -51,14 +52,18 @@ class _AddItemPageState extends State<AddItemPage> {
 
   void _addNewItem() {
     setState(() {
-      _items.add(
-        PantryItem(
-          nameController: TextEditingController(),
-          qtyController: TextEditingController(),
-          expireDate: TextEditingController(),
-          manuFacturingDate: TextEditingController(),
-        ),
-      );
+      if (widget.pantryItems.isNotEmpty) {
+        _items = widget.pantryItems;
+      } else {
+        _items.add(
+          PantryItem(
+            nameController: TextEditingController(),
+            qtyController: TextEditingController(),
+            expireDate: TextEditingController(),
+            manuFacturingDate: TextEditingController(),
+          ),
+        );
+      }
     });
   }
 

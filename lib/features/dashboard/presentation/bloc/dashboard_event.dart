@@ -11,6 +11,12 @@ final class MakeCohostEvent extends DashboardEvent {
   MakeCohostEvent({required this.activeKitchenId, required this.memberId});
 }
 
+final class DemoteCohostEvent extends DashboardEvent {
+  final String activeKitchenId;
+  final String memberId;
+  DemoteCohostEvent({required this.activeKitchenId, required this.memberId});
+}
+
 final class KickMemberEvent extends DashboardEvent {
   final String activeKitchenId;
   final String memberId;

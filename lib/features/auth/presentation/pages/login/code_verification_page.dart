@@ -90,6 +90,10 @@ class _ResetPasswordVerificationPageState
                     child: Column(
                       children: [
                         OtpField(
+                          onChanged: (pin) {
+                            updatePin(pin);
+                            debugPrint("Entered OTP: $pin");
+                          },
                           onCompleted: (code) {
                             updatePin(code);
                             debugPrint("Entered OTP: $code");

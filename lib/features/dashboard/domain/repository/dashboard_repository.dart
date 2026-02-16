@@ -14,4 +14,8 @@ abstract interface class DashboardRepository {
     required String kitchenId,
     required String memberId,
   });
+  Future<Either<Failure, String>> demoteCohost({
+    required String kitchenId,
+    required String memberId,
+  });
 }

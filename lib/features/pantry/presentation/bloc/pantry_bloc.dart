@@ -1,5 +1,7 @@
 // ignore_for_file: avoid_print
 
+import 'dart:convert';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';
@@ -225,7 +227,14 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
           body:
               'You are running low on ${item.name} (${item.quantity} ${item.unit}).',
           dailyTime: morningTime,
-          payload: 'low_stock:${item.itemId}',
+          payload: jsonEncode({
+            'type': 'low_stock',
+            "invitationCode": _userCubit.state.invitationCode,
+            "kitchenName": _userCubit.state.kitchenName,
+            "role": _userCubit.state.role,
+            'kitchenId': _userCubit.state.activeKitchenId,
+            'item': item.toMap(),
+          }),
         );
         print(
           "Scheduled morning low stock notification for ${item.name} (ID: $morningId)",
@@ -238,7 +247,14 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
           title: 'Low stock: ${item.name}',
           body: 'Remember to restock ${item.name}.',
           dailyTime: eveningTime,
-          payload: 'low_stock:${item.itemId}',
+          payload: jsonEncode({
+            'type': 'low_stock',
+            "invitationCode": _userCubit.state.invitationCode,
+            "kitchenName": _userCubit.state.kitchenName,
+            "role": _userCubit.state.role,
+            'kitchenId': _userCubit.state.activeKitchenId,
+            'item': item.toMap(),
+          }),
         );
         print(
           "Scheduled evening low stock notification for ${item.name} (ID: $eveningId)",
@@ -257,7 +273,14 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
           title: 'Expiring soon: ${item.name}',
           body: '${item.name} is expiring soon (${item.expireDate}).',
           dailyTime: morningTime,
-          payload: 'expiring_soon:${item.itemId}',
+          payload: jsonEncode({
+            'type': 'expiring_soon',
+            "invitationCode": _userCubit.state.invitationCode,
+            "kitchenName": _userCubit.state.kitchenName,
+            "role": _userCubit.state.role,
+            'kitchenId': _userCubit.state.activeKitchenId,
+            'item': item.toMap(),
+          }),
         );
         print(
           "Scheduled morning expiring notification for ${item.name} (ID: $morningId)",
@@ -270,7 +293,14 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
           title: 'Expiring soon: ${item.name}',
           body: 'Use ${item.name} before it expires.',
           dailyTime: eveningTime,
-          payload: 'expiring_soon:${item.itemId}',
+          payload: jsonEncode({
+            'type': 'expiring_soon',
+            "invitationCode": _userCubit.state.invitationCode,
+            "kitchenName": _userCubit.state.kitchenName,
+            "role": _userCubit.state.role,
+            'kitchenId': _userCubit.state.activeKitchenId,
+            'item': item.toMap(),
+          }),
         );
         print(
           "Scheduled evening expiring notification for ${item.name} (ID: $eveningId)",
@@ -427,7 +457,7 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
 
     res.fold(
       (failure) {
-        AppToast.show(failure.message, ToastType.error);
+        add(GetUserStorageAreaForPantryViewEvent(event.kitchenId));
       },
       (successMessage) {
         emit(PantrySuccess(successMessage));

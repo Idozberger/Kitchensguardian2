@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,6 +9,7 @@ import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
+
 import 'package:foodkitchen/features/consumptions/presentation/bloc/consumption_bloc.dart';
 import 'package:foodkitchen/features/consumptions/presentation/bloc/consumption_event.dart';
 import 'package:foodkitchen/features/consumptions/presentation/bloc/consumption_state.dart';
@@ -19,8 +22,17 @@ import 'package:foodkitchen/features/planner/presentation/pages/planner_page.dar
 import 'package:foodkitchen/features/profile/presentation/pages/profile_page.dart';
 import 'package:go_router/go_router.dart';
 
+enum DashboardEntryType { normal, notification, planner }
+
 class DashboardPage extends StatefulWidget {
-  const DashboardPage({super.key});
+  final bool isFromNotification;
+  final DashboardEntryType entryType;
+
+  const DashboardPage({
+    super.key,
+    required this.isFromNotification,
+    required this.entryType,
+  });
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();
@@ -34,7 +46,6 @@ class _DashboardPageState extends State<DashboardPage> {
     ProfilePage(),
   ];
 
-  static const _fcmInitDelay = Duration(seconds: 3);
   static const _backPressWindow = Duration(seconds: 2);
 
   int _selectedIndex = 0;
@@ -42,15 +53,29 @@ class _DashboardPageState extends State<DashboardPage> {
 
   late final UserCubit _userCubit;
   late final DashboardBloc _dashboardBloc;
-
   @override
   void initState() {
     super.initState();
+
     _userCubit = context.read<UserCubit>();
     _dashboardBloc = context.read<DashboardBloc>();
 
-    // _initializeFirebaseMessaging();
     _fetchConsumptionData();
+    log(
+      "check notification tapped: ${widget.isFromNotification} ${widget.entryType}",
+    );
+    if (widget.isFromNotification) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _handleNotificationEntry();
+      });
+    }
+  }
+
+  void _handleNotificationEntry() {
+    if (widget.entryType == DashboardEntryType.planner) {
+      _selectedIndex = 1;
+      setState(() {});
+    }
   }
 
   @override
@@ -84,7 +109,35 @@ class _DashboardPageState extends State<DashboardPage> {
         _buildConsumptionPendingButton(),
         SizedBox(width: w(6)),
         _buildNotificationButton(),
-        SizedBox(width: w(20)),
+
+        IconButton(
+          onPressed: () async {
+            // await FCMService().sendNotification(
+            //   "dAZmZpQ9l7_FWKqJo-r5oy:APA91bFiqOhV9Uh9kGLZ-YNxQP3HKfDf_UBaxEvzTyjDQQdfm-qNaH4xIx3rsVYCDH5HE6be7jNj6g45wqZdEQhJ1ueYCI8IT8voqjhKX70jbNPxg7M32fE",
+            //   "You have been added to the kitchen",
+            //   "Your request to join the kitchen \"${_userCubit.state.kitchenName}\" has been approved by the host. You are now added to the kitchen. You can access it anytime using this invitation code: ${_userCubit.state.invitationCode}",
+            //   _userCubit.state.invitationCode,
+            //   _userCubit.state.kitchenName,
+            //   _userCubit.state.role,
+            //   _userCubit.state.activeKitchenId,
+            // );
+            // NotificationService().showNotification(
+            //   id: 1,
+            //   title: "sdaf",
+            //   body: "sdfa",
+            //   payload: jsonEncode({
+            //     "item": {"itemId": "1fda2bb52bcb453abecb0c184744094c"},
+
+            //     'type': 'meal_plan_reminder',
+            //     "invitationCode": _userCubit.state.invitationCode,
+            //     "kitchenName": _userCubit.state.kitchenName,
+            //     "role": _userCubit.state.role,
+            //     'kitchenId': _userCubit.state.activeKitchenId,
+            //   }),
+            // );
+          },
+          icon: Icon(Icons.abc),
+        ),
       ],
     );
   }
@@ -215,9 +268,39 @@ class _DashboardPageState extends State<DashboardPage> {
 
   void _showExitSnackBar() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Press back again to exit"),
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(
+              Icons.exit_to_app_rounded,
+              color: Color(0xFF2D3142),
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                "Press back again to exit",
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.2,
+                  color: Color(0xFF2D3142),
+                ),
+              ),
+            ),
+          ],
+        ),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: Colors.grey.shade200, width: 1),
+        ),
+        margin: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         duration: _backPressWindow,
+        elevation: 2,
+        dismissDirection: DismissDirection.horizontal,
       ),
     );
   }
@@ -250,33 +333,6 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
     );
   }
-
-  // Future<void> _initializeFirebaseMessaging() async {
-  //   WidgetsBinding.instance.addPostFrameCallback((_) async {
-  //     await Future.delayed(_fcmInitDelay);
-
-  //     try {
-  //       final userState = _userCubit.state;
-
-  //       if (_canInitializeFCM(userState)) {
-  //         await FirebaseMessagingService.instance().init(
-  //           userId: userState.userId,
-  //           firstName: userState.firstName,
-  //           lastName: userState.lastName,
-  //           email: userState.email,
-  //         );
-  //       } else {
-  //         debugPrint('Skipping FCM init — missing userId or email.');
-  //       }
-  //     } catch (e, st) {
-  //       debugPrint('Error initializing FCM: $e\nStack trace: $st');
-  //     }
-  //   });
-  // }
-
-  // bool _canInitializeFCM(dynamic userState) {
-  //   return userState.userId.isNotEmpty && userState.email.isNotEmpty;
-  // }
 
   void _onItemTapped(int index) {
     if (_selectedIndex != index) {

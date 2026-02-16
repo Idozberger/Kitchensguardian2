@@ -8,6 +8,9 @@ import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
+import 'package:foodkitchen/core/utils/email_domain_formatter.dart';
+import 'package:foodkitchen/core/utils/name_formatter.dart';
+import 'package:foodkitchen/core/utils/password_formatter.dart';
 import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
 import 'package:foodkitchen/features/auth/data/model/user_model.dart';
 import 'package:foodkitchen/features/auth/presentation/blocs/auth_bloc.dart';
@@ -127,6 +130,9 @@ class _SignUpPageState extends State<SignUpPage> {
                                 label: "First name",
                                 textInputAction: TextInputAction.next,
                                 hintText: "First name",
+                                inputFormatters: [
+                                  OnlyLettersFormatter(maxLength: 20),
+                                ],
                               ),
                             ),
                             SizedBox(width: w(12)),
@@ -136,6 +142,9 @@ class _SignUpPageState extends State<SignUpPage> {
                                 label: "Last name",
                                 textInputAction: TextInputAction.next,
                                 hintText: "Last name",
+                                inputFormatters: [
+                                  OnlyLettersFormatter(maxLength: 20),
+                                ],
                               ),
                             ),
                           ],
@@ -148,6 +157,9 @@ class _SignUpPageState extends State<SignUpPage> {
                           keyboardType: TextInputType.emailAddress,
                           textInputAction: TextInputAction.next,
                           hintText: "your.email@example.com",
+                          inputFormatters: [
+                            SingleAtSingleDotAfterAtFormatter(),
+                          ],
                         ),
                         SizedBox(height: h(20)),
 
@@ -157,6 +169,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           textInputAction: TextInputAction.next,
                           hintText: "At least 6 characters",
                           obscureText: _isObscure,
+                          inputFormatters: [NoSpacePasswordFormatter()],
                           suffixIcon: GestureDetector(
                             onTap: () => updateObscure(),
                             child: Padding(
@@ -182,6 +195,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           textInputAction: TextInputAction.done,
                           hintText: "Re-enter your password",
                           obscureText: _isConfirmPasswordObscure,
+                          inputFormatters: [NoSpacePasswordFormatter()],
                           suffixIcon: GestureDetector(
                             onTap: () => updateIsConfirmPasswordObscure(),
                             child: Padding(
@@ -310,6 +324,14 @@ class _SignUpPageState extends State<SignUpPage> {
     }
     if (!RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$").hasMatch(email)) {
       AppToast.show("Please enter a valid email address", ToastType.error);
+      return;
+    }
+    if (!validateEmailLength(
+      email: email,
+      onError: (message) {
+        AppToast.show(message, ToastType.error);
+      },
+    )) {
       return;
     }
 

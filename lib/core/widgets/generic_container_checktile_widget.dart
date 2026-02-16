@@ -72,7 +72,7 @@ class GenericCircleCheckboxTile extends StatelessWidget {
                           textStyle ??
                           Theme.of(context).textTheme.headlineMedium!.copyWith(
                             decoration: isFinalList
-                                ? TextDecoration.lineThrough
+                                ? null // remove linethrough
                                 : null,
                             fontWeight: isFinalList ? null : FontWeight.bold,
                           ),

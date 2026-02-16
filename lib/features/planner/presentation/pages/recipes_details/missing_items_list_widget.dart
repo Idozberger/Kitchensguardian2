@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';
+import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
@@ -10,10 +11,12 @@ import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_checktile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
+import 'package:foodkitchen/features/pantry/presentation/models/pantry_items.dart';
 import 'package:foodkitchen/features/planner/domain/entities/ingredient_entity.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dart';
+import 'package:go_router/go_router.dart';
 
 class MissingItemsListWidget extends StatefulWidget {
   final bool isPlanned;
@@ -114,16 +117,52 @@ class _MissingItemsListWidgetState extends State<MissingItemsListWidget> {
                 }),
               ),
               SizedBox(height: h(20)),
-              GenericButtonWidget(
-                isLoading: state.isLoading,
-                onPressed: () => onAddInList(),
-                text: "Add in List",
+              Row(
+                spacing: w(6),
+                children: [
+                  Flexible(
+                    child: GenericButtonWidget(
+                      isOutlined: true,
+                      isLoading: state.isLoading,
+                      onPressed: () => onAddInList(),
+                      text: "Add in List",
+                    ),
+                  ),
+                  Flexible(
+                    child: GenericButtonWidget(
+                      isLoading: state.addingToInventory,
+                      onPressed: () => onAddInInventory(),
+                      text: "Add to Inventory",
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
         );
       },
     );
+  }
+
+  Future<void> onAddInInventory() async {
+    List<PantryItem> pantryItems = [];
+
+    for (var ingredient in selectedIngredients) {
+      pantryItems.add(
+        PantryItem(
+          nameController: TextEditingController(text: ingredient.name),
+          qtyController: TextEditingController(text: ingredient.amount),
+          manuFacturingDate: TextEditingController(text: ""),
+          expireDate: TextEditingController(text: ""),
+          unit: null,
+          pantry: null,
+          file: null,
+          fileBytes: null,
+        ),
+      );
+    }
+
+    context.pushNamed(Routes.addItem, extra: pantryItems);
   }
 
   Future<void> onAddInList() async {

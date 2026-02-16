@@ -15,6 +15,7 @@ import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dart';
 import 'package:foodkitchen/features/planner/presentation/widgets/recipe_tile_item.dart';
+import 'package:go_router/go_router.dart';
 
 class GeneratedRecipeSection extends StatelessWidget {
   final MergedRecipePlanEntity mealPlan;
@@ -109,6 +110,7 @@ class GeneratedRecipeSection extends StatelessWidget {
               date: meal.formatedDateString,
             ),
           );
+          context.pop();
         } else {
           context.read<PlannerBloc>().add(
             DeletePlanFromRemoteDbEvent(mealPlanId: meal.mealplanId),

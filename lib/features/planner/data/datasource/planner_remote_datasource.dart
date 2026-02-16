@@ -4,7 +4,7 @@ import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:foodkitchen/core/common/data/model/pantry_model.dart';
-import 'package:foodkitchen/core/global/functions/const.dart';
+import 'package:foodkitchen/core/global/functions/api_endpoints.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
 import 'package:foodkitchen/features/planner/domain/entities/meal_plan_entity.dart';
 
@@ -100,7 +100,7 @@ class PlannerRemoteDatasourceImpl implements PlannerRemoteDatasource {
         throw Exception("Invalid data format for favourite_recipes");
       }
     } on DioException catch (e) {
-      throw dio.handleError(e);
+      throw await dio.handleError(e);
     }
   }
 
@@ -187,7 +187,7 @@ class PlannerRemoteDatasourceImpl implements PlannerRemoteDatasource {
       }
       return response.data["message"];
     } on DioException catch (e) {
-      throw dio.handleError(e);
+      throw await dio.handleError(e);
     }
   }
 
@@ -211,7 +211,7 @@ class PlannerRemoteDatasourceImpl implements PlannerRemoteDatasource {
       }
       return response.data["message"];
     } on DioException catch (e) {
-      throw dio.handleError(e);
+      throw await dio.handleError(e);
     }
   }
 
@@ -266,7 +266,7 @@ class PlannerRemoteDatasourceImpl implements PlannerRemoteDatasource {
 
       return responses.join(", ");
     } on DioException catch (e) {
-      throw dio.handleError(e);
+      throw await dio.handleError(e);
     }
   }
 

@@ -43,8 +43,17 @@ class MemberTile extends StatelessWidget {
         member.userId,
         style: Theme.of(context).textTheme.bodySmall,
       ),
-      trailing: userState.role != "member" && userState.userId != member.userId
+      trailing:
+          userState.role != "member" &&
+              userState.userId != member.userId &&
+              member.type != "host"
           ? MemberPopupMenu(
+              onDemoteCoHost: () => dashboardBloc.add(
+                DemoteCohostEvent(
+                  activeKitchenId: userState.activeKitchenId,
+                  memberId: member.userId,
+                ),
+              ),
               onMakeCoHost: () => dashboardBloc.add(
                 MakeCohostEvent(
                   activeKitchenId: userState.activeKitchenId,

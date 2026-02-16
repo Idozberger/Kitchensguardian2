@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/common/data/model/recipe_model.dart';
-import 'package:foodkitchen/core/global/functions/const.dart';
+import 'package:foodkitchen/core/global/functions/api_endpoints.dart';
 import 'package:foodkitchen/core/utils/date_format_to_string.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

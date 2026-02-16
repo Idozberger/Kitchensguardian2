@@ -5,7 +5,7 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
-import 'package:foodkitchen/core/global/functions/const.dart';
+import 'package:foodkitchen/core/global/functions/api_endpoints.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -77,15 +77,7 @@ class KitchenRemoteDataSourceImpl implements KitchenRemoteDatasource {
 
       await createPantry(
         kitchenId: kitchenId.toString(),
-        pantries: const [
-          "Shelves",
-          "Counter",
-          "Cabinet",
-          "Refrigerator",
-          "Freezer",
-          "Drawer",
-          "Countertop",
-        ],
+        pantries: const ["Fridge", "Freezer", "Pantry", "Spices"],
       );
 
       return data["message"];

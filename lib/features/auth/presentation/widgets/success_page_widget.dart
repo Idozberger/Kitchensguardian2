@@ -70,18 +70,16 @@ class SuccessScreen extends StatelessWidget {
             ),
           ),
         ),
-        bottomNavigationBar: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: gapSymmetric(horizontal: 20, vertical: 33),
-              child: GenericButtonWidget(
-                onPressed: onButtonPressed,
-                isLoading: isLoading,
-                text: buttonText,
-              ),
+        bottomNavigationBar: SafeArea(
+          top: false,
+          child: Padding(
+            padding: gapSymmetric(horizontal: 20, vertical: 12),
+            child: GenericButtonWidget(
+              onPressed: onButtonPressed,
+              isLoading: isLoading,
+              text: buttonText,
             ),
-          ],
+          ),
         ),
       ),
     );

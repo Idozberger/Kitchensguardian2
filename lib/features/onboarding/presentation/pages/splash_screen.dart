@@ -42,7 +42,6 @@ class _SplashScreenState extends State<SplashScreen>
     )..forward();
 
     _configureSystemUI();
-
     _initializeApp();
   }
 
@@ -80,6 +79,7 @@ class _SplashScreenState extends State<SplashScreen>
   Future<void> _getCurrentUser() async {
     _userBloc.add(GetCurrentUser());
     _userCubit.updateActiveKitchenIdInvitationCodeAndRole(
+      kitchenName: "",
       activeKitchenId: "",
       invitationCode: "",
       role: "",

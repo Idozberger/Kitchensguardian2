@@ -185,6 +185,10 @@ class KitchenBloc extends Bloc<KitchenEvent, KitchenState> {
         userDeviceToken,
         "Request to join your kitchen",
         "User ${_userCubit.state.firstName} wants to join your kitchen: $kitchenName.",
+        _userCubit.state.invitationCode,
+        _userCubit.state.kitchenName,
+        _userCubit.state.role,
+        _userCubit.state.activeKitchenId,
       );
 
       await FirebaseFirestore.instance

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
+import 'package:foodkitchen/core/utils/email_domain_formatter.dart';
 import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
 import 'package:foodkitchen/features/auth/presentation/blocs/auth_bloc.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
@@ -63,9 +64,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                     key: _formKey,
                     child: AppTextField(
                       controller: _emailController,
+                      inputFormatters: [SingleAtSingleDotAfterAtFormatter()],
                       label: "Email address",
                       keyboardType: TextInputType.emailAddress,
-                      // validator: emailValidator,
+
                       hintText: "Enter your email",
                     ),
                   ),

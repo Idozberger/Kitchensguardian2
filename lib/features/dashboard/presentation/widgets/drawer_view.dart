@@ -132,9 +132,9 @@ class AppDrawer extends StatelessWidget {
                   title: "Get Kitchen Code",
                   iconPath: AppAssets.referralSvg,
                   onTap: () async {
+                    Navigator.pop(context);
                     if (state.activeKitchenId.isNotEmpty) {
                       if (state.invitationCode.isNotEmpty) {
-                        context.pop();
                         debugPrint("inivitaion code ${state.invitationCode}");
                         _showRefferalCodeDialog(context, state.invitationCode);
                       } else {
@@ -174,7 +174,7 @@ class AppDrawer extends StatelessWidget {
                 ),
                 Divider(color: Color(0xffF4F4F4)),
                 DrawerListTile(
-                  title: "Pantry",
+                  title: "Location",
                   iconPath: AppAssets.pantrySvg,
                   color: Colors.black,
                   onTap: () => context.push(Routes.allStorageArea),
@@ -242,6 +242,7 @@ class AppDrawer extends StatelessWidget {
               ),
               gap(height: h(16)),
               OtpField(
+                onChanged: (p0) {},
                 enabled: false,
                 initialString: invitationCode,
                 isJoining: true,

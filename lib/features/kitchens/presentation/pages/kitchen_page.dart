@@ -126,6 +126,7 @@ class _KitchenPageState extends State<KitchenPage> {
               physics: const NeverScrollableScrollPhysics(),
               itemCount: joinedKitchens.length,
               itemBuilder: (context, index) => _buildKitchenTile(
+                kitchenName: joinedKitchens[index].kitchenName,
                 context: context,
                 kitchen: joinedKitchens[index],
                 isOwned: false,
@@ -175,7 +176,7 @@ class _KitchenPageState extends State<KitchenPage> {
     KitchensLoaded state,
   ) {
     final ownedKitchens = state.kitchens
-        .where((kitchen) => kitchen.role.toLowerCase() != "member")
+        .where((kitchen) => kitchen.role.toLowerCase() == "host")
         .toList();
 
     return UpperTile(
@@ -202,6 +203,7 @@ class _KitchenPageState extends State<KitchenPage> {
               physics: const NeverScrollableScrollPhysics(),
               itemCount: ownedKitchens.length,
               itemBuilder: (context, index) => _buildKitchenTile(
+                kitchenName: ownedKitchens[index].kitchenName,
                 context: context,
                 kitchen: ownedKitchens[index],
                 isOwned: true,
@@ -215,6 +217,7 @@ class _KitchenPageState extends State<KitchenPage> {
   Widget _buildKitchenTile({
     required BuildContext context,
     required dynamic kitchen,
+    required String kitchenName,
     required bool isOwned,
   }) {
     final isActive = _userCubit.state.activeKitchenId == kitchen.kitchenId;
@@ -228,7 +231,7 @@ class _KitchenPageState extends State<KitchenPage> {
             _handleSecondaryAction(context, kitchen, isOwned),
         onButtonPressed: isActive
             ? null
-            : () => _handleKitchenSwitch(context, kitchen),
+            : () => _handleKitchenSwitch(context, kitchen, kitchenName),
         imagePath: AppAssets.avatar,
         title: kitchen.kitchenName,
         email: kitchen.invitationCode,
@@ -269,6 +272,7 @@ class _KitchenPageState extends State<KitchenPage> {
   Future<void> _handleKitchenSwitch(
     BuildContext context,
     dynamic kitchen,
+    String kitchenName,
   ) async {
     if (kitchen.kitchenId.isEmpty) {
       AppToast.show("Invalid kitchen ID", ToastType.error);
@@ -281,6 +285,7 @@ class _KitchenPageState extends State<KitchenPage> {
     await prefs.setString("invitation_code", kitchen.invitationCode);
 
     _userCubit.updateActiveKitchenIdInvitationCodeAndRole(
+      kitchenName: kitchenName,
       activeKitchenId: kitchen.kitchenId,
       invitationCode: kitchen.invitationCode,
       role: kitchen.role,

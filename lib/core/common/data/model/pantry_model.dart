@@ -18,7 +18,7 @@ class PantryModel extends Pantry {
 
   Map<String, dynamic> toJson() {
     return {
-      'kitchen_id': kitchenId,
+      'kitchen_id': kitchenId.toString(),
       'items': items.map((item) {
         if (item is PantryItemModel) {
           return item.toJson();
@@ -88,16 +88,16 @@ class PantryItemModel extends PantryItemEntity {
 
   Map<String, dynamic> toJson() {
     return {
-      'name': name,
+      'name': name.toString(),
       'quantity': quantity,
-      'unit': unit,
-      'group': group,
-      "expiry_date": expireDate,
+      'unit': unit.toString(),
+      'group': group.toString(),
+      "expiry_date": expireDate.toString(),
       "thumbnail": thumbnail,
-      "expiry_status": expiryStatus,
-      "stock_status": stockStatus,
-      "item_id": itemId,
-      "added_at": addedAt,
+      "expiry_status": expiryStatus.toString(),
+      "stock_status": stockStatus.toString(),
+      "item_id": itemId.toString(),
+      "added_at": addedAt.toString(),
     };
   }
 

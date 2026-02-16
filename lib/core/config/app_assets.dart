@@ -21,6 +21,7 @@ class AppAssets {
 
   /////[ICONS]
   static String tickSvg = "assets/svgs/tick.svg";
+  static String demoteCohost = "assets/svgs/demote_cohost.svg";
   static String success = "assets/svgs/success.svg";
   static String downArrow = "assets/svgs/down_arrow.svg";
   static String shareSvg = "assets/svgs/share.svg";

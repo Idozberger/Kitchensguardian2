@@ -46,13 +46,15 @@ class GenericButtonWidget extends StatelessWidget {
   Widget _buildOutlinedButton(BuildContext context) {
     return OutlinedButton(
       onPressed: isDisabled ? null : onPressed,
-      child: Text(
-        text,
-        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-          fontSize: t(12),
-          color: AppColors.primaryColor,
-        ),
-      ),
+      child: isLoading
+          ? _buildLoadingIndicator(color: AppColors.primaryColor)
+          : Text(
+              text,
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontSize: t(12),
+                color: AppColors.primaryColor,
+              ),
+            ),
     );
   }
 
@@ -74,10 +76,10 @@ class GenericButtonWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildLoadingIndicator() {
+  Widget _buildLoadingIndicator({Color? color}) {
     return Transform.scale(
       scale: 0.7,
-      child: const CircularProgressIndicator(),
+      child: CircularProgressIndicator(color: color),
     );
   }
 

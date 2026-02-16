@@ -108,6 +108,10 @@ class _CreateNewPasswordPageState extends State<CreateNewPasswordPage> {
                         ),
                         SizedBox(height: h(15)),
                         OtpField(
+                          onChanged: (pin) {
+                            updatePin(pin);
+                            debugPrint("Entered OTP: $pin");
+                          },
                           onCompleted: (code) {
                             updatePin(code);
                             debugPrint("Entered OTP: $code");

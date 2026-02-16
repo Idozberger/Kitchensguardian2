@@ -68,4 +68,23 @@ class DashboardRepositoryImpl implements DashboardRepository {
       return Left(UnknownFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, String>> demoteCohost({
+    required String kitchenId,
+    required String memberId,
+  }) async {
+    try {
+      final response = await dashboardRemoteDatasource.demoteCohost(
+        kitchenId: kitchenId,
+        memberId: memberId,
+      );
+
+      return Right(response);
+    } on Failure catch (f) {
+      return Left(f);
+    } catch (e) {
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
 }

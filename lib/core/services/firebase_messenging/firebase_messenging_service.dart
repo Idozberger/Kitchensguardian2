@@ -220,6 +220,11 @@ class FirebaseMessagingService {
     if (notification != null) {
       log("Message Received: ${notification.title}");
       log("Message Received: ${notification.body}");
+      if (message.data.isNotEmpty) {
+        log('Payload data: ${message.data}');
+        log('Type: ${message.data['type']}');
+        log('Kitchen ID: ${message.data['kitchenId']}');
+      }
       NotificationService().showNotification(
         id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
         title: notification.title ?? 'New Notification',

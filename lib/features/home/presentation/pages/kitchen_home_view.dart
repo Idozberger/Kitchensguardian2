@@ -3,11 +3,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/services/document_scanning/document_scanning_service.dart';
+import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
@@ -91,11 +94,27 @@ class _KitchenHomeViewState extends State<KitchenHomeView> {
   }
 
   void scanDocument(BuildContext context) async {
+    final state = context.read<UserCubit>().state;
+
+    if (state.role == "member") {
+      AppToast.show(
+        "Only the host or co-host can scan receipts.",
+        ToastType.error,
+        gravity: ToastGravity.TOP,
+      );
+      return;
+    }
+
     final status = await Permission.camera.request();
 
     if (status.isGranted) {
       await DocumentScannerService().scanDocument(context);
     } else if (status.isDenied) {
+      AppToast.show(
+        "Camera permission is required to scan receipts.",
+        ToastType.error,
+        gravity: ToastGravity.TOP,
+      );
     } else if (status.isPermanentlyDenied) {
       _showPermissionDialog(context, isPermanent: true);
     }
@@ -148,7 +167,10 @@ class _KitchenHomeViewState extends State<KitchenHomeView> {
                     ? "+${state.groceryList.length - 3} tap to see more"
                     : null,
                 isGenerated: true,
-                previewItems: state.groceryList.take(3).toList(),
+                previewItems: state.groceryList
+                    .take(3)
+                    .map((item) => item.name)
+                    .toList(),
                 onGenerate: widget.onGeneratePressed,
               ),
       ),

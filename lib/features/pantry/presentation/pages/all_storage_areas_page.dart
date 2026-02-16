@@ -61,6 +61,11 @@ class _AllPantryStoragePageState extends State<AllPantryStoragePage> {
                 }
                 if (state is PantryFailure) {
                   AppToast.show(state.errorMessage, ToastType.error);
+                  pantryBloc.add(
+                    GetUserStorageAreaForPantryViewEvent(
+                      userCubit.state.activeKitchenId,
+                    ),
+                  );
                 }
               },
               builder: (_, state) {

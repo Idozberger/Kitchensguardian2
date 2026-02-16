@@ -94,7 +94,7 @@ class _PantrySectionState extends State<PantrySection> {
             child: ElevatedButton.icon(
               onPressed: userState.userStorageAreas.isEmpty
                   ? null
-                  : () => context.push(Routes.addItem),
+                  : () => context.pushNamed(Routes.addItem),
               icon: SvgPicture.asset(AppAssets.addSvg),
               label: Text(
                 "Add Item",

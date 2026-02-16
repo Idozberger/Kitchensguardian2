@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:foodkitchen/core/extensions/theme_extension.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
@@ -13,6 +14,7 @@ class AppTextField extends StatelessWidget {
   final void Function(String)? onFieldSubmitted;
   final String? errorText;
   final bool obscureText;
+  final List<TextInputFormatter>? inputFormatters;
   final TextInputType keyboardType;
   final Widget? suffixIcon;
   final String? Function(String?)? validator;
@@ -32,6 +34,7 @@ class AppTextField extends StatelessWidget {
     required this.controller,
     this.contentPadding,
     this.errorText,
+    this.inputFormatters,
     this.obscureText = false,
     this.keyboardType = TextInputType.text,
     this.suffixIcon,
@@ -61,6 +64,7 @@ class AppTextField extends StatelessWidget {
         ],
 
         TextFormField(
+          inputFormatters: inputFormatters,
           onTap: onTap,
           enabled: enabled,
           obscuringCharacter: "*",

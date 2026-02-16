@@ -14,6 +14,7 @@ import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_event.dart';
 import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_state.dart';
+import 'package:foodkitchen/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:foodkitchen/features/dashboard/presentation/pages/user_information_page.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:go_router/go_router.dart';
@@ -267,7 +268,13 @@ class _NotificationPageState extends State<NotificationPage> {
 
   void _handleBackNavigation() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.go(Routes.dashboard);
+      context.goNamed(
+        Routes.dashboard,
+        extra: {
+          'fromNotification': false,
+          'entryType': DashboardEntryType.normal,
+        },
+      );
     });
   }
 }

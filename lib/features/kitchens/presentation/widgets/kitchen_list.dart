@@ -97,6 +97,7 @@ class KitchenList extends StatelessWidget {
     await prefs.setString("invitation_code", kitchen.invitationCode);
 
     userCubit.updateActiveKitchenIdInvitationCodeAndRole(
+      kitchenName: kitchen.kitchenName,
       activeKitchenId: kitchen.kitchenId,
       invitationCode: kitchen.invitationCode,
       role: kitchen.role,

@@ -18,6 +18,7 @@ class AppConstants {
   static const String leaveKitchen = "/api/kitchen/leave";
   static const String getMembers = "/api/kitchen/get_members";
   static const String makeCohost = "/api/kitchen/make_cohost";
+  static const String demoteCohost = "/api/kitchen/demote_cohost";
   static const String kickMember = "/api/kitchen/kick_member";
 
   static const String removeKitchen = "/api/kitchen/remove";

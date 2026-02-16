@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/services/connection/connection_checker.dart';
 import 'package:foodkitchen/features/auth/data/model/user_model.dart';
-import 'package:foodkitchen/core/global/functions/const.dart';
+import 'package:foodkitchen/core/global/functions/api_endpoints.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -42,8 +42,11 @@ abstract interface class AuthRemoteDataSource {
     required String email,
   });
   Future<String> signInWithGoogle();
+
   Future<String> signUpWithGoogle();
+
   Future<String> signInWithApple();
+
   Future<String> signUpWithApple();
 }
 
@@ -289,7 +292,6 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource {
 
       if (googleUser == null) {
         log("No cached session → showing Google picker", name: "Auth");
-        googleUser = await googleSignIn.signIn();
 
         if (googleUser == null) {
           log("User cancelled Google Sign-In", name: "Auth");

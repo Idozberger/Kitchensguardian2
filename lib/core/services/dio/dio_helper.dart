@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:foodkitchen/app/app_router.dart';
 import 'package:foodkitchen/core/config/routes.dart';
@@ -95,7 +96,10 @@ class DioHelper {
 
   Future<Failure> handleError(DioException e) async {
     String message = "Unexpected error occurred";
-
+    if (e.type == DioExceptionType.connectionError ||
+        e.error is SocketException) {
+      return NetworkFailure("No internet connection available");
+    }
     if (e.response != null && e.response?.data != null) {
       final data = e.response?.data;
 

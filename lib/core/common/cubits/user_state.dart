@@ -10,6 +10,7 @@ class UserState {
   final String email;
   final bool isLoading;
   final String activeKitchenId;
+  final String kitchenName;
   final String role;
   final Uint8List? profilePictureFilePath;
   final String invitationCode;
@@ -19,6 +20,7 @@ class UserState {
   final List<PantriesCommonEntity> userStorageAreas;
   final UserModel? userModel;
   const UserState({
+    this.kitchenName = "",
     this.firstName = '',
     this.lastName = '',
     this.role = 'member',
@@ -37,6 +39,7 @@ class UserState {
 
   UserState copyWith({
     String? firstName,
+    String? kitchenName,
     bool? entitlementIsActive,
     String? lastName,
     String? userId,
@@ -56,6 +59,7 @@ class UserState {
       entitlementIsActive: entitlementIsActive ?? this.entitlementIsActive,
       role: role ?? this.role,
       lastName: lastName ?? this.lastName,
+      kitchenName: kitchenName ?? this.kitchenName,
       email: email ?? this.email,
       isLoading: isLoading ?? this.isLoading,
       activeKitchenId: activeKitchenId ?? this.activeKitchenId,

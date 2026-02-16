@@ -10,6 +10,7 @@ import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/utils/date_format_to_string.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
+import 'package:foodkitchen/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:foodkitchen/features/planner/domain/entities/merged_meal_type_entity.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
@@ -104,12 +105,24 @@ class _EditMealPageState extends State<EditMealPage>
         subtitle:
             "If you go back, the meal data you just added will be removed. Continue?",
         onConfirm: () => WidgetsBinding.instance.addPostFrameCallback((_) {
-          context.go(Routes.dashboard);
+          context.goNamed(
+            Routes.dashboard,
+            extra: {
+              'fromNotification': false,
+              'entryType': DashboardEntryType.normal,
+            },
+          );
         }),
       );
     } else {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.go(Routes.dashboard);
+        context.goNamed(
+          Routes.dashboard,
+          extra: {
+            'fromNotification': false,
+            'entryType': DashboardEntryType.normal,
+          },
+        );
       });
     }
   }
@@ -123,7 +136,13 @@ class _EditMealPageState extends State<EditMealPage>
           AppToast.show(state.successMessage, ToastType.success);
           plannerBloc.add(UpdateTypeSelectedAndDateEvent(index: 0));
           context.read<PlannerBloc>().add(ResetMealPlanState());
-          context.go(Routes.dashboard);
+          context.goNamed(
+            Routes.dashboard,
+            extra: {
+              'fromNotification': false,
+              'entryType': DashboardEntryType.normal,
+            },
+          );
         }
         if (state.errorMessage != null && state.errorMessage!.isNotEmpty) {
           AppToast.show(state.errorMessage!, ToastType.error);

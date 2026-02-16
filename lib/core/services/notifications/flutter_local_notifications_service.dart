@@ -1,13 +1,26 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:foodkitchen/app/app_router.dart';
+import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/utils/date_format_to_string.dart';
+import 'package:foodkitchen/features/consumptions/presentation/bloc/consumption_bloc.dart';
+import 'package:foodkitchen/features/consumptions/presentation/bloc/consumption_event.dart';
+import 'package:foodkitchen/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:foodkitchen/features/kitchens/domain/entities/kitchen.dart';
+import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_bloc.dart';
+import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_event.dart';
 import 'package:foodkitchen/features/planner/domain/entities/merged_meal_type_entity.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -30,7 +43,10 @@ class NotificationService {
             .getNotificationAppLaunchDetails();
 
     if (launchDetails?.didNotificationLaunchApp ?? false) {
-      final payload = launchDetails!.notificationResponse?.payload;
+      log(
+        "firebase push notification: payload, ${launchDetails!.notificationResponse?.payload}",
+      );
+      final payload = launchDetails.notificationResponse?.payload;
       if (payload != null) {
         _handleNotificationPayload(payload);
       }
@@ -51,14 +67,11 @@ class NotificationService {
     );
   }
 
-  void _handleNotificationPayload(String payload) {
+  void _handleNotificationPayload(String payload) async {
     try {
       log('Navigating to Recipe Details with payload: $payload');
-      final context = rootNavigatorKey.currentContext;
 
-      if (context != null) {
-        context.go(Routes.notification);
-      } else {}
+      _handleNotificationTap(payload);
     } catch (e, st) {
       log('$st');
     }
@@ -225,17 +238,25 @@ class NotificationService {
     String? payload,
   }) async {
     final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
-    tz.TZDateTime scheduledDate = tz.TZDateTime(
-      tz.local,
-      now.year,
-      now.month,
-      now.day,
-      dailyTime.hour,
-      dailyTime.minute,
-      dailyTime.second,
-    );
-    if (scheduledDate.isBefore(now)) {
-      scheduledDate = scheduledDate.add(const Duration(days: 1));
+
+    tz.TZDateTime scheduledDate;
+
+    if (kDebugMode) {
+      scheduledDate = now.add(const Duration(seconds: 24));
+    } else {
+      scheduledDate = tz.TZDateTime(
+        tz.local,
+        now.year,
+        now.month,
+        now.day,
+        dailyTime.hour,
+        dailyTime.minute,
+        dailyTime.second,
+      );
+
+      if (scheduledDate.isBefore(now)) {
+        scheduledDate = scheduledDate.add(const Duration(days: 1));
+      }
     }
 
     await scheduleNotification(
@@ -249,7 +270,12 @@ class NotificationService {
 
   Future<void> scheduleMealPlanReminders(
     List<MergedRecipePlanEntity> plans,
+    Map<String, dynamic> data,
   ) async {
+    final String kitchenId = data['kitchenId'];
+    final String invitationCode = data['invitationCode'];
+    final String kitchenName = data['kitchenName'];
+    final String role = data['role'];
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final tomorrow = today.add(const Duration(days: 1));
@@ -301,7 +327,14 @@ class NotificationService {
         title: morningTitle,
         body: morningBody,
         scheduledDateTime: morningTime,
-        payload: "meal_plan_reminder",
+        payload: jsonEncode({
+          'type': 'meal_plan_reminder',
+          "invitationCode": invitationCode,
+          "kitchenName": kitchenName,
+          "role": role,
+          'kitchenId': kitchenId,
+          'item': {},
+        }),
       );
 
       // ────────────── Shopping Reminder (Only if missing ingredients exist) ──────────────
@@ -326,7 +359,14 @@ class NotificationService {
                 : "Don't Forget! You Need These for Today's Meals",
             body: _missingItemsText(plan),
             scheduledDateTime: shoppingTime,
-            payload: "shopping_reminder",
+            payload: jsonEncode({
+              'type': 'meal_plan_reminder',
+              "invitationCode": invitationCode,
+              "kitchenName": kitchenName,
+              "role": role,
+              'kitchenId': kitchenId,
+              'item': {},
+            }),
           );
 
           log(
@@ -390,11 +430,82 @@ void notificationTapBackground(NotificationResponse response) {
   _handleNotificationTap(response.payload);
 }
 
-void _handleNotificationTap(String? payload) {
-  final context = rootNavigatorKey.currentContext;
-  if (context != null) {
-    context.go(Routes.notification);
-  } else {}
+void _handleNotificationTap(String? payload) async {
+  log("firebase push notification: payload, $payload");
+  if (payload == null) return;
+
+  final data = jsonDecode(payload);
+
+  final String kitchenId = data['kitchenId'];
+  final String invitationCode = data['invitationCode'];
+  final String kitchenName = data['kitchenName'];
+  final String role = data['role'];
+
+  WidgetsBinding.instance.addPostFrameCallback((_) async {
+    final context = rootNavigatorKey.currentContext;
+    if (context == null) return;
+
+    await _handlePostNavigationLogic(
+      context,
+      kitchenId,
+      invitationCode,
+      kitchenName,
+      role,
+    );
+    if (data["type"] == "low_stock" || data["type"] == "expiring_soon") {
+      context.goNamed(
+        Routes.myPantry,
+        extra: {"type": data["type"], "item_id": data["item"]["itemId"]},
+      );
+    } else if (data["type"] == "meal_plan_reminder") {
+      context.goNamed(
+        Routes.dashboard,
+        extra: {
+          'fromNotification': true,
+          'entryType': DashboardEntryType.planner,
+        },
+      );
+    } else if (data["type"] == "kitchens_notification") {
+      context.go(Routes.notification);
+    }
+  });
+}
+
+Future<void> _handlePostNavigationLogic(
+  BuildContext context,
+  String kitchenId,
+  String invitationCode,
+  String kitchenName,
+  String role,
+) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setString("kitchen_id", kitchenId);
+  await prefs.setString("role", role);
+  await prefs.setString("invitation_code", invitationCode);
+
+  context.read<UserCubit>().updateActiveKitchenIdInvitationCodeAndRole(
+    kitchenName: kitchenName,
+    activeKitchenId: kitchenId,
+    invitationCode: invitationCode,
+    role: role,
+  );
+
+  context.read<ConsumptionBloc>().add(
+    GetConsumptionConfirmationPendingCountEvent(kitchenId: kitchenId),
+  );
+
+  await context.read<UserCubit>().getUserStorageArea(kitchenId: kitchenId);
+
+  context.read<KitchenBloc>().add(
+    SwitchKitchenEvent(
+      Kitchen(
+        invitationCode: invitationCode,
+        kitchenId: kitchenId,
+        kitchenName: kitchenName,
+        role: role,
+      ),
+    ),
+  );
 }
 
 bool pendingNavigation = true;

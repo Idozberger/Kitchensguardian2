@@ -52,6 +52,10 @@ Future<dynamic> showJoinKitchenDialog(BuildContext context) {
                 ),
                 SizedBox(height: h(10)),
                 OtpField(
+                  onChanged: (pin) {
+                    invitaionCode = pin;
+                    debugPrint("Entered OTP: $pin");
+                  },
                   isJoining: true,
                   preFilledStar: true,
                   onCompleted: (invitationCodeInput) {

@@ -12,6 +12,7 @@ class JoinKitchenEventForHome extends HomeEvent {
 
 final class GetPantriesItemsEventForHome extends HomeEvent {
   final String kitchenId;
+
   GetPantriesItemsEventForHome({required this.kitchenId});
 }
 

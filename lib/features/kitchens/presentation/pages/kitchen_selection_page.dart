@@ -13,6 +13,7 @@ import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/services/notifications/flutter_local_notifications_service.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
+import 'package:foodkitchen/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_bloc.dart';
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_event.dart';
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_state.dart';
@@ -86,7 +87,13 @@ class _KitchenSelectionPageState extends State<KitchenSelectionPage> {
           }
           if (state is OpenKitchen) {
             kitchenBloc.add(FetchKitchens());
-            context.go(Routes.dashboard);
+            context.goNamed(
+              Routes.dashboard,
+              extra: {
+                'fromNotification': false,
+                'entryType': DashboardEntryType.normal,
+              },
+            );
           } else if (state is KitchenFailure) {
             AppToast.show(state.errorMessage, ToastType.error);
             kitchenBloc.add(FetchKitchens());

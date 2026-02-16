@@ -3,7 +3,7 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
-import 'package:foodkitchen/core/global/functions/const.dart';
+import 'package:foodkitchen/core/global/functions/api_endpoints.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
 
 abstract interface class DashboardRemoteDatasource {
@@ -15,6 +15,10 @@ abstract interface class DashboardRemoteDatasource {
     required String memberId,
   });
   Future<String> kickMember({
+    required String kitchenId,
+    required String memberId,
+  });
+  Future<String> demoteCohost({
     required String kitchenId,
     required String memberId,
   });
@@ -93,6 +97,30 @@ class DashboardRemoteDatasourceImpl implements DashboardRemoteDatasource {
     try {
       final response = await dio.post(
         AppConstants.makeCohost,
+        data: {"kitchen_id": kitchenId, "member_id": memberId},
+      );
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+
+        final message = data["error"];
+        throw message;
+      }
+      return response.data["message"];
+    } on DioException catch (e) {
+      throw dio.handleError(e);
+    }
+  }
+
+  @override
+  Future<String> demoteCohost({
+    required String kitchenId,
+    required String memberId,
+  }) async {
+    try {
+      final response = await dio.post(
+        AppConstants.demoteCohost,
         data: {"kitchen_id": kitchenId, "member_id": memberId},
       );
       if (response.statusCode != 200 && response.statusCode != 201) {

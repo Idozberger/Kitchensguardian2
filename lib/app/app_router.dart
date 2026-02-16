@@ -26,6 +26,7 @@ import 'package:foodkitchen/features/kitchens/presentation/pages/kitchen_page.da
 import 'package:foodkitchen/features/onboarding/presentation/pages/intro_page.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/features/onboarding/presentation/pages/splash_screen.dart';
+import 'package:foodkitchen/features/pantry/presentation/models/pantry_items.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/add_item_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/add_pantry_storage_type_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/all_storage_areas_page.dart';
@@ -112,10 +113,21 @@ final GoRouter router = GoRouter(
           buildPage(state.pageKey, EmailVerifiedSuccessPage()),
     ),
     GoRoute(
+      name: Routes.dashboard,
       path: Routes.dashboard,
-      pageBuilder: (context, state) =>
-          buildPage(state.pageKey, DashboardPage()),
+      pageBuilder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>?;
+
+        return buildPage(
+          state.pageKey,
+          DashboardPage(
+            isFromNotification: extra?['fromNotification'] ?? false,
+            entryType: extra?['entryType'] ?? DashboardEntryType.normal,
+          ),
+        );
+      },
     ),
+
     GoRoute(
       path: Routes.notification,
       pageBuilder: (context, state) =>
@@ -137,13 +149,33 @@ final GoRouter router = GoRouter(
           buildPage(state.pageKey, ScanHistoryPage()),
     ),
     GoRoute(
+      name: Routes.addItem,
       path: Routes.addItem,
-      pageBuilder: (context, state) => buildPage(state.pageKey, AddItemPage()),
+      pageBuilder: (context, state) {
+        final pantryItems = state.extra as List<PantryItem>?;
+
+        return buildPage(
+          state.pageKey,
+          AddItemPage(pantryItems: pantryItems ?? []),
+        );
+      },
     ),
     GoRoute(
       path: Routes.myPantry,
-      pageBuilder: (context, state) => buildPage(state.pageKey, MyPantryPage()),
+      name: Routes.myPantry,
+      pageBuilder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>?;
+
+        return buildPage(
+          state.pageKey,
+          MyPantryPage(
+            type: extra?['type'] ?? "",
+            itemId: extra?['item_id'].toString() ?? "",
+          ),
+        );
+      },
     ),
+
     GoRoute(
       path: Routes.scanMeal,
       pageBuilder: (context, state) => buildPage(state.pageKey, ScanMealPage()),

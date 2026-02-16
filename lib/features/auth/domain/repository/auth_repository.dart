@@ -31,7 +31,10 @@ abstract interface class AuthRepository {
     required String email,
   });
   Future<Either<Failure, String>> signInWithGoogle();
+
   Future<Either<Failure, String>> signUpWithGoogle();
+
   Future<Either<Failure, String>> signInWithApple();
+
   Future<Either<Failure, String>> signUpWithApple();
 }

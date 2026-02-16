@@ -9,6 +9,8 @@ import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
+import 'package:foodkitchen/core/utils/email_domain_formatter.dart';
+import 'package:foodkitchen/core/utils/password_formatter.dart';
 import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
 import 'package:foodkitchen/features/auth/data/model/user_model.dart';
 import 'package:foodkitchen/features/auth/presentation/blocs/auth_bloc.dart';
@@ -64,6 +66,15 @@ class _SignInPageState extends State<SignInPage> {
       AppToast.show("Please enter a valid email address", ToastType.error);
       return;
     }
+    if (!validateEmailLength(
+      email: email,
+      onError: (message) {
+        AppToast.show(message, ToastType.error);
+      },
+    )) {
+      return;
+    }
+
     if (password.isEmpty) {
       AppToast.show("Password is required", ToastType.error);
       return;
@@ -189,6 +200,9 @@ class _SignInPageState extends State<SignInPage> {
                                   label: "Email address",
                                   keyboardType: TextInputType.emailAddress,
                                   hintText: "your.email@example.com",
+                                  inputFormatters: [
+                                    SingleAtSingleDotAfterAtFormatter(),
+                                  ],
                                 ),
                                 SizedBox(height: h(20)),
                                 AppTextField(
@@ -213,6 +227,7 @@ class _SignInPageState extends State<SignInPage> {
                                       ),
                                     ),
                                   ),
+                                  inputFormatters: [NoSpacePasswordFormatter()],
                                 ),
                               ],
                             ),

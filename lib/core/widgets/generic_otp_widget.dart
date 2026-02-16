@@ -9,7 +9,7 @@ class OtpField extends StatefulWidget {
   final String initialString;
   final bool enabled;
   final void Function(String)? onCompleted;
-
+  final void Function(String)? onChanged;
   const OtpField({
     super.key,
     this.onCompleted,
@@ -17,6 +17,7 @@ class OtpField extends StatefulWidget {
     this.initialString = "",
     this.isJoining = false,
     this.enabled = true,
+    required this.onChanged,
   });
 
   @override
@@ -67,6 +68,7 @@ class _OtpFieldState extends State<OtpField> {
     );
 
     return Pinput(
+      onChanged: widget.onChanged,
       enabled: widget.enabled,
       key: ValueKey(widget.isJoining),
       length: widget.isJoining ? 6 : 5,
