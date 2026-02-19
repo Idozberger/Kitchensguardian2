@@ -10,6 +10,7 @@ import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/services/document_scanning/document_scanning_service.dart';
+import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
@@ -75,12 +76,33 @@ class _KitchenHomeViewState extends State<KitchenHomeView> {
   }
 
   Widget _buildScanReceiptButton(BuildContext context) {
+    final state = context.watch<UserCubit>().state;
+    final bool isMember = state.role == "member";
+
     return UpperTile(
       widget: SizedBox(
         height: h(40),
         child: ElevatedButton.icon(
           icon: SvgPicture.asset(AppAssets.scanSvg, color: Colors.black),
-          onPressed: () => scanDocument(context),
+          onPressed: () {
+            if (isMember) {
+              AppToast.show(
+                "Only the host or co-host can scan receipts.",
+                ToastType.error,
+                gravity: ToastGravity.TOP,
+              );
+              return;
+            }
+
+            scanDocument(context);
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: isMember
+                ? Colors.grey.shade300
+                : AppColors.primaryColor,
+            foregroundColor: Colors.black,
+            elevation: isMember ? 0 : 2,
+          ),
           label: Text(
             "Scan Receipt",
             style: Theme.of(context).textTheme.headlineMedium!.copyWith(

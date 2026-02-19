@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/cubits/user_state.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
@@ -10,6 +11,7 @@ import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
+import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
@@ -86,15 +88,34 @@ class _PantrySectionState extends State<PantrySection> {
     bool hasItems,
     UserState userState,
   ) {
+    final state = context.watch<UserCubit>().state;
+    final bool isMember = state.role == "member";
     return Row(
       children: [
         Expanded(
           child: SizedBox(
             height: h(40),
             child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isMember
+                    ? Colors.grey.shade300
+                    : AppColors.primaryColor,
+                foregroundColor: Colors.black,
+                elevation: isMember ? 0 : 2,
+              ),
               onPressed: userState.userStorageAreas.isEmpty
                   ? null
-                  : () => context.pushNamed(Routes.addItem),
+                  : () {
+                      if (isMember) {
+                        AppToast.show(
+                          "Only the host or co-host can scan receipts.",
+                          ToastType.error,
+                          gravity: ToastGravity.TOP,
+                        );
+                        return;
+                      }
+                      context.pushNamed(Routes.addItem);
+                    },
               icon: SvgPicture.asset(AppAssets.addSvg),
               label: Text(
                 "Add Item",

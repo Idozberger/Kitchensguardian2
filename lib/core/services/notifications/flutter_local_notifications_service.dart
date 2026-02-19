@@ -241,22 +241,18 @@ class NotificationService {
 
     tz.TZDateTime scheduledDate;
 
-    if (kDebugMode) {
-      scheduledDate = now.add(const Duration(seconds: 24));
-    } else {
-      scheduledDate = tz.TZDateTime(
-        tz.local,
-        now.year,
-        now.month,
-        now.day,
-        dailyTime.hour,
-        dailyTime.minute,
-        dailyTime.second,
-      );
+    scheduledDate = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      dailyTime.hour,
+      dailyTime.minute,
+      dailyTime.second,
+    );
 
-      if (scheduledDate.isBefore(now)) {
-        scheduledDate = scheduledDate.add(const Duration(days: 1));
-      }
+    if (scheduledDate.isBefore(now)) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
     }
 
     await scheduleNotification(
