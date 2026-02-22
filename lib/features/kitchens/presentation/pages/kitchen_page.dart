@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
+import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
@@ -17,6 +18,7 @@ import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_event.da
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_state.dart';
 import 'package:foodkitchen/features/kitchens/presentation/dialogs/create_kitchen.dart';
 import 'package:foodkitchen/features/kitchens/presentation/dialogs/join_kitchen.dart';
+import 'package:foodkitchen/features/kitchens/presentation/pages/kitchen_joining_status.dart';
 import 'package:foodkitchen/features/kitchens/presentation/widgets/kitchen_tile.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
@@ -83,6 +85,9 @@ class _KitchenPageState extends State<KitchenPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                KitchenJoiningStatus(
+                  userId: context.read<UserCubit>().state.userId,
+                ),
                 _buildJoinedKitchensSection(context, kitchenState),
                 SizedBox(height: h(20)),
                 _buildCreateKitchenSection(context),
@@ -279,6 +284,9 @@ class _KitchenPageState extends State<KitchenPage> {
       return;
     }
 
+    final router = GoRouter.of(context);
+    final consumptionBloc = context.read<ConsumptionBloc>();
+
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString("kitchen_id", kitchen.kitchenId);
     await prefs.setString("role", kitchen.role);
@@ -298,15 +306,15 @@ class _KitchenPageState extends State<KitchenPage> {
 
     _kitchenBloc.add(SwitchKitchenEvent(kitchen));
 
-    if (context.mounted) {
-      context.read<ConsumptionBloc>().add(
-        GetConsumptionConfirmationPendingCountEvent(
-          kitchenId: kitchen.kitchenId,
-        ),
-      );
-    }
+    consumptionBloc.add(
+      GetConsumptionConfirmationPendingCountEvent(kitchenId: kitchen.kitchenId),
+    );
 
     await _userCubit.getUserStorageArea(kitchenId: kitchen.kitchenId);
+
+    if (_userCubit.state.userStorageAreas.isEmpty) {
+      router.goNamed(Routes.smartKitchenSetup, extra: false);
+    }
   }
 
   AppBar _buildAppBar() {

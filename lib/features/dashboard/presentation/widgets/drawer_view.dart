@@ -168,6 +168,14 @@ class AppDrawer extends StatelessWidget {
                 ),
                 Divider(color: Color(0xffF4F4F4)),
                 DrawerListTile(
+                  title: "Rescan Kitchen",
+                  iconPath: AppAssets.reScanSvg,
+                  onTap: () {
+                    context.pushNamed(Routes.smartKitchenSetup, extra: true);
+                  },
+                ),
+                Divider(color: Color(0xffF4F4F4)),
+                DrawerListTile(
                   title: "Kitchens",
                   iconPath: AppAssets.kitchenSvg,
                   onTap: () => context.push(Routes.kitchen),

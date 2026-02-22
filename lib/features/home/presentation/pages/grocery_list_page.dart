@@ -1,5 +1,7 @@
 // ignore_for_file: unnecessary_underscores
 
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -31,7 +33,10 @@ class _SmartCartPageState extends State<SmartCartPage> {
     homeBloc = context.read<HomeBloc>();
     quantities = [];
     for (int i = 0; i < homeBloc.state.groceryList.length; i++) {
-      quantities.add(int.parse(homeBloc.state.groceryList[i].amount));
+      log("Amount: ${homeBloc.state.groceryList[i].amount}");
+      quantities.add(
+        double.tryParse(homeBloc.state.groceryList[i].amount)?.toInt() ?? 1,
+      );
     }
   }
 
@@ -100,9 +105,18 @@ class _SmartCartPageState extends State<SmartCartPage> {
             widget: Row(
               children: [
                 Expanded(
-                  child: Text(
-                    '${ingredient.amount} ${ingredient.unit} ${ingredient.name}',
-                    style: Theme.of(context).textTheme.headlineLarge,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        ingredient.name,
+                        style: Theme.of(context).textTheme.headlineLarge,
+                      ),
+                      Text(
+                        ingredient.unit,
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                    ],
                   ),
                 ),
                 Row(
@@ -175,7 +189,7 @@ class _SmartCartPageState extends State<SmartCartPage> {
 
     for (int i = 0; i < items.length; i++) {
       final ingredient = items[i];
-      int qty = quantities[i];
+      int qty = quantities[i].toInt();
 
       if (qty > 1) {
         result +=
@@ -197,7 +211,7 @@ class _SmartCartPageState extends State<SmartCartPage> {
 
     for (int i = 0; i < items.length; i++) {
       final ingredient = items[i];
-      int qty = quantities[i];
+      int qty = quantities[i].toInt();
 
       if (qty > 1) {
         result +=

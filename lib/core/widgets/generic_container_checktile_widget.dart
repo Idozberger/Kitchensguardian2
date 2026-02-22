@@ -7,6 +7,8 @@ import 'package:foodkitchen/core/theme/app_colors.dart';
 
 class GenericCircleCheckboxTile extends StatelessWidget {
   final String title;
+  final String quantity;
+  final String unit;
   final bool isChecked;
   final ValueChanged<bool> onChanged;
   final VoidCallback? deleteCallback;
@@ -19,7 +21,9 @@ class GenericCircleCheckboxTile extends StatelessWidget {
     super.key,
     required this.title,
     required this.isChecked,
+    required this.unit,
     required this.onChanged,
+    required this.quantity,
     this.deleteCallback,
     required this.activeColor,
     this.checkColor = Colors.white,
@@ -43,24 +47,21 @@ class GenericCircleCheckboxTile extends StatelessWidget {
           Flexible(
             child: Row(
               children: [
-                if (isFinalList)
-                  SizedBox()
-                else
-                  GestureDetector(
-                    onTap: () => onChanged(!isChecked),
-                    child: Container(
-                      padding: gapAll(1),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: AppColors.primaryColor,
-                          width: 2,
-                        ),
-                        color: isChecked ? activeColor : Colors.transparent,
+                InkWell(
+                  onTap: () => onChanged(!isChecked),
+                  child: Container(
+                    padding: gapAll(1),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: AppColors.primaryColor,
+                        width: 2,
                       ),
-                      child: Icon(Icons.check, size: t(12), color: checkColor),
+                      color: isChecked ? activeColor : Colors.transparent,
                     ),
+                    child: Icon(Icons.check, size: t(12), color: checkColor),
                   ),
+                ),
                 SizedBox(width: w(14)),
 
                 Expanded(
@@ -71,28 +72,44 @@ class GenericCircleCheckboxTile extends StatelessWidget {
                       style:
                           textStyle ??
                           Theme.of(context).textTheme.headlineMedium!.copyWith(
-                            decoration: isFinalList
-                                ? null // remove linethrough
+                            decoration: isFinalList && isChecked
+                                ? TextDecoration.lineThrough
                                 : null,
                             fontWeight: isFinalList ? null : FontWeight.bold,
                           ),
                     ),
                   ),
                 ),
+                Text(
+                  "$quantity $unit",
+                  style:
+                      textStyle ??
+                      Theme.of(context).textTheme.headlineSmall!.copyWith(
+                        decoration: isFinalList && isChecked
+                            ? TextDecoration.lineThrough
+                            : null,
+                        fontWeight: isFinalList && isChecked
+                            ? FontWeight.w400
+                            : FontWeight.w500,
+                      ),
+                ),
               ],
             ),
           ),
           if (deleteCallback != null)
-            GestureDetector(
-              onTap: deleteCallback,
-              child: Container(
-                padding: gapAll(6),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Color(0xffD4D2D2)),
-                  shape: BoxShape.circle,
-                ),
+            Padding(
+              padding: gapOnly(left: 8),
+              child: GestureDetector(
+                onTap: deleteCallback,
+                child: Container(
+                  padding: gapAll(6),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Color(0xffD4D2D2)),
+                    shape: BoxShape.circle,
+                  ),
 
-                child: SvgPicture.asset(AppAssets.deleteSvg),
+                  child: SvgPicture.asset(AppAssets.deleteSvg),
+                ),
               ),
             ),
         ],

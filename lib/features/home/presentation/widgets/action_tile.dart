@@ -27,7 +27,7 @@ class ActionTile extends StatelessWidget {
           Text(title, style: Theme.of(context).textTheme.headlineLarge),
           gap(height: 15),
           SizedBox(
-            height: h(40),
+            height: h(41),
             child: ElevatedButton.icon(
               onPressed: onTap,
               // ignore: deprecated_member_use

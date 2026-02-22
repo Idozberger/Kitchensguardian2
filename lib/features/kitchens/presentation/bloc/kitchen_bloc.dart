@@ -156,7 +156,22 @@ class KitchenBloc extends Bloc<KitchenEvent, KitchenState> {
 
         return;
       }
+      final pendingRequest = await FirebaseFirestore.instance
+          .collection('notifications')
+          .where('sender_user_id', isEqualTo: _userCubit.state.userId)
+          .where('kitchen_id', isEqualTo: kitchenData['kitchen_id'])
+          .where('kitchen_joining_status', isEqualTo: 'Pending')
+          .limit(1)
+          .get();
 
+      if (pendingRequest.docs.isNotEmpty) {
+        AppToast.show(
+          "Your request to join \"$kitchenName\" is already pending",
+          ToastType.error,
+        );
+        add(FetchKitchens());
+        return;
+      }
       final userData = userDoc.data();
       final userDeviceToken = userData?['user_device_token'];
 
@@ -167,7 +182,7 @@ class KitchenBloc extends Bloc<KitchenEvent, KitchenState> {
       }
       final random = Random();
       final notificationId = random.nextInt(999999);
-      final notificationData = {
+      final notificationDataForHost = {
         "status": false,
         "id": notificationId,
         'title': "Request to join your kitchen",
@@ -180,7 +195,10 @@ class KitchenBloc extends Bloc<KitchenEvent, KitchenState> {
         'kitchen_id': kitchenData['kitchen_id'],
         'date': DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
         'read': false,
+        "kitchen_joining_status": "Pending",
+        'approved_by': "",
       };
+
       await FCMService().sendNotification(
         userDeviceToken,
         "Request to join your kitchen",
@@ -193,7 +211,8 @@ class KitchenBloc extends Bloc<KitchenEvent, KitchenState> {
 
       await FirebaseFirestore.instance
           .collection('notifications')
-          .add(notificationData);
+          .add(notificationDataForHost);
+
       AppToast.show("Kitchen join request sent", ToastType.success);
       add(FetchKitchens());
     } catch (e, st) {
@@ -254,7 +273,7 @@ class KitchenBloc extends Bloc<KitchenEvent, KitchenState> {
     _homeBloc.add(GenerateGroceryList());
 
     _groceryBloc.add(RequestedGroceryEvent(kitchenId: kitchenId));
-
+    await _userCubit.getUserStorageArea(kitchenId: kitchenId);
     emit(OpenKitchen());
   }
 

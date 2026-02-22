@@ -7,9 +7,7 @@ import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
-import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
-import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_event.dart';
@@ -27,241 +25,38 @@ class NotificationPage extends StatefulWidget {
 }
 
 class _NotificationPageState extends State<NotificationPage> {
-  late UserCubit userCubit;
+  late final UserCubit _userCubit;
 
   @override
   void initState() {
-    userCubit = context.read<UserCubit>();
-    log("User id ${userCubit.state.userId}");
     super.initState();
+    _userCubit = context.read<UserCubit>();
+    log("User id ${_userCubit.state.userId}");
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<DashboardBloc, DashboardState>(
-      builder: (_, state) {
-        return PopScope(
-          canPop: false,
-          onPopInvoked: (didPop) async {
-            if (!didPop) {
-              await Future.delayed(Duration.zero);
-              _handleBackNavigation();
-            }
-          },
-          child: Scaffold(
-            backgroundColor: Color(0xffF9F9F9),
-            appBar: _buildAppBar(context),
-            body: SingleChildScrollView(
-              child: SafeArea(
-                child: Padding(
-                  padding: gapSymmetric(horizontal: 20, vertical: 20),
-                  child: StreamBuilder<QuerySnapshot>(
-                    stream: FirebaseFirestore.instance
-                        .collection('notifications')
-                        .where(
-                          'host_user_id',
-                          isEqualTo: userCubit.state.userId,
-                        )
-                        .orderBy('date', descending: true)
-                        .snapshots(),
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                        return Center(
-                          child: Text(
-                            "No notifications yet",
-                            style: Theme.of(context).textTheme.headlineMedium,
-                          ),
-                        );
-                      }
+  Stream<QuerySnapshot> get _notificationsStream => FirebaseFirestore.instance
+      .collection('notifications')
+      .where('host_user_id', isEqualTo: _userCubit.state.userId)
+      .orderBy('date', descending: true)
+      .snapshots();
 
-                      final allNotifications = snapshot.data!.docs;
-
-                      final notifications = allNotifications.where((doc) {
-                        final data = doc.data() as Map<String, dynamic>;
-                        final status = data['status'] ?? false;
-                        final kitchenId = data['kitchen_id'];
-
-                        if (status == true) return true;
-                        return kitchenId == userCubit.state.activeKitchenId;
-                      }).toList();
-
-                      if (notifications.isEmpty) {
-                        return Center(
-                          child: Text(
-                            "No notifications yet",
-                            style: Theme.of(context).textTheme.headlineMedium,
-                          ),
-                        );
-                      }
-
-                      return ListView.separated(
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        itemCount: notifications.length,
-                        separatorBuilder: (_, _) =>
-                            Divider(color: Color(0xffF4F4F4)),
-                        padding: EdgeInsets.zero,
-                        itemBuilder: (context, index) {
-                          final notification =
-                              notifications[index].data()
-                                  as Map<String, dynamic>;
-                          final id = notification['id'];
-                          final kitchenId = notification['kitchen_id'];
-                          final title = notification['title'];
-                          final senderName = notification['sender_name'];
-                          final senderUserId = notification['sender_user_id'];
-                          final body = notification['body'];
-                          final date = notification['date'];
-                          final status = notification['status'] ?? false;
-
-                          return UpperTile(
-                            widget: InkWell(
-                              onTap: () =>
-                                  navigateUserDetails(senderUserId, kitchenId),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                spacing: h(8),
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      SizedBox(
-                                        width: w(144),
-                                        child: Text(
-                                          senderName,
-                                          maxLines: 1,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .headlineLarge!
-                                              .copyWith(
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                        ),
-                                      ),
-                                      Text(
-                                        date,
-                                        style: Theme.of(
-                                          context,
-                                        ).textTheme.headlineSmall,
-                                      ),
-                                    ],
-                                  ),
-                                  Text(
-                                    "$title - $body",
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.headlineSmall,
-                                  ),
-                                  if (!status) ...[
-                                    gap(height: 8),
-                                    Row(
-                                      spacing: w(12),
-                                      children: [
-                                        Flexible(
-                                          child: SizedBox(
-                                            height: h(40),
-                                            child: OutlinedButton(
-                                              onPressed: () {
-                                                context
-                                                    .read<DashboardBloc>()
-                                                    .add(
-                                                      DeclineRequestEvent(
-                                                        id: id,
-                                                        kitchenId: kitchenId,
-                                                        memberId: senderUserId,
-                                                      ),
-                                                    );
-                                              },
-                                              child: state is DeclineLoading
-                                                  ? Transform.scale(
-                                                      scale: 0.7,
-                                                      child:
-                                                          CircularProgressIndicator(
-                                                            color: AppColors
-                                                                .primaryColor,
-                                                          ),
-                                                    )
-                                                  : Text(
-                                                      "Decline",
-                                                      style: Theme.of(context)
-                                                          .textTheme
-                                                          .headlineMedium!
-                                                          .copyWith(
-                                                            fontSize: t(12),
-                                                            color: AppColors
-                                                                .primaryColor,
-                                                          ),
-                                                    ),
-                                            ),
-                                          ),
-                                        ),
-                                        Flexible(
-                                          child: SizedBox(
-                                            height: h(40),
-                                            child: GenericButtonWidget(
-                                              isLoading:
-                                                  state is ApproveLoading,
-                                              onPressed: () {
-                                                context
-                                                    .read<DashboardBloc>()
-                                                    .add(
-                                                      ApproveRequestEvent(
-                                                        id: id,
-                                                        kitchenId: kitchenId,
-                                                        memberId: senderUserId,
-                                                      ),
-                                                    );
-                                              },
-                                              text: "Approve",
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
+  List<QueryDocumentSnapshot> _filterNotifications(
+    List<QueryDocumentSnapshot> docs,
+  ) {
+    return docs.where((doc) {
+      final data = doc.data() as Map<String, dynamic>;
+      final status = data['status'] ?? false;
+      final kitchenId = data['kitchen_id'];
+      if (status == true) return true;
+      return kitchenId == _userCubit.state.activeKitchenId;
+    }).toList();
   }
 
-  Future<void> navigateUserDetails(String senderId, String kitchenId) async {
+  void _navigateUserDetails(String senderId, String kitchenId) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => UserPage(senderUserId: senderId, kitchenId: kitchenId),
-      ),
-    );
-  }
-
-  AppBar _buildAppBar(BuildContext context) {
-    return AppBar(
-      automaticallyImplyLeading: false,
-      leadingWidth: w(55),
-      leading: Row(
-        children: [
-          SizedBox(width: w(16)),
-          CircularIconButton(
-            iconAsset: AppAssets.backArrowiOS,
-            onTap: () => _handleBackNavigation(),
-          ),
-        ],
-      ),
-      title: Text(
-        "Notifications",
-        style: Theme.of(context).textTheme.headlineLarge,
       ),
     );
   }
@@ -276,5 +71,334 @@ class _NotificationPageState extends State<NotificationPage> {
         },
       );
     });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<DashboardBloc, DashboardState>(
+      builder: (context, state) {
+        return PopScope(
+          canPop: false,
+          onPopInvoked: (didPop) async {
+            if (!didPop) {
+              await Future.delayed(Duration.zero);
+              _handleBackNavigation();
+            }
+          },
+          child: Scaffold(
+            backgroundColor: const Color(0xffF9F9F9),
+            appBar: _buildAppBar(context),
+            body: StreamBuilder<QuerySnapshot>(
+              stream: _notificationsStream,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                final filtered = snapshot.hasData
+                    ? _filterNotifications(snapshot.data!.docs)
+                    : <QueryDocumentSnapshot>[];
+
+                if (filtered.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.notifications_off_outlined,
+                          size: 48,
+                          color: Colors.grey.shade400,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          "No notifications yet",
+                          style: Theme.of(context).textTheme.headlineMedium
+                              ?.copyWith(color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                return ListView.separated(
+                  padding: gapSymmetric(horizontal: 12, vertical: 12),
+                  itemCount: filtered.length,
+                  separatorBuilder: (_, _) => const SizedBox(height: 8),
+                  itemBuilder: (context, index) {
+                    final data = filtered[index].data() as Map<String, dynamic>;
+                    return _NotificationCard(
+                      id: data['id'],
+                      kitchenId: data['kitchen_id'] ?? '',
+                      title: data['title'] ?? '',
+                      senderName: data['sender_name'] ?? '',
+                      senderUserId: data['sender_user_id'] ?? '',
+                      body: data['body'] ?? '',
+                      date: data['date'] ?? '',
+                      joiningStatus:
+                          data['kitchen_joining_status'] ?? 'Pending',
+                      isActioned: data['status'] ?? false,
+                      state: state,
+                      onTap: () => _navigateUserDetails(
+                        data['sender_user_id'] ?? '',
+                        data['kitchen_id'] ?? '',
+                      ),
+                      onApprove: () => context.read<DashboardBloc>().add(
+                        ApproveRequestEvent(
+                          id: data['id'],
+                          kitchenId: data['kitchen_id'],
+                          memberId: data['sender_user_id'],
+                        ),
+                      ),
+                      onDecline: () => context.read<DashboardBloc>().add(
+                        DeclineRequestEvent(
+                          id: data['id'],
+                          kitchenId: data['kitchen_id'],
+                          memberId: data['sender_user_id'],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  AppBar _buildAppBar(BuildContext context) {
+    return AppBar(
+      automaticallyImplyLeading: false,
+      leadingWidth: w(55),
+      leading: Row(
+        children: [
+          SizedBox(width: w(16)),
+          CircularIconButton(
+            iconAsset: AppAssets.backArrowiOS,
+            onTap: _handleBackNavigation,
+          ),
+        ],
+      ),
+      title: Text(
+        "Notifications",
+        style: Theme.of(context).textTheme.headlineLarge,
+      ),
+    );
+  }
+}
+
+class _NotificationCard extends StatelessWidget {
+  final dynamic id;
+  final String kitchenId;
+  final String title;
+  final String senderName;
+  final String senderUserId;
+  final String body;
+  final String date;
+  final String joiningStatus;
+  final bool isActioned;
+  final DashboardState state;
+  final VoidCallback onTap;
+  final VoidCallback onApprove;
+  final VoidCallback onDecline;
+
+  const _NotificationCard({
+    required this.id,
+    required this.kitchenId,
+    required this.title,
+    required this.senderName,
+    required this.senderUserId,
+    required this.body,
+    required this.date,
+    required this.joiningStatus,
+    required this.isActioned,
+    required this.state,
+    required this.onTap,
+    required this.onApprove,
+    required this.onDecline,
+  });
+
+  ({Color color, Color bg, Color border, IconData icon}) get _statusStyle =>
+      switch (joiningStatus) {
+        'Approved' => (
+          color: Colors.grey.shade800,
+          bg: Colors.grey.shade100,
+          border: Colors.grey.shade100,
+          icon: Icons.check_circle_rounded,
+        ),
+        'Declined' => (
+          color: Colors.grey.shade800,
+          bg: Colors.grey.shade100,
+          border: Colors.grey.shade100,
+          icon: Icons.cancel_rounded,
+        ),
+        _ => (
+          color: Colors.grey.shade800,
+          bg: Colors.grey.shade100,
+          border: Colors.grey.shade100,
+          icon: Icons.check_circle_rounded,
+        ),
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    final s = _statusStyle;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xffF0F0F0)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 22,
+                  backgroundColor: s.bg,
+                  child: Text(
+                    senderName.isNotEmpty ? senderName[0].toUpperCase() : '?',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: s.color,
+                      fontWeight: FontWeight.w800,
+                      fontSize: t(18),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        senderName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.headlineLarge
+                            ?.copyWith(
+                              fontSize: t(14),
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF1A1A2E),
+                            ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        date,
+                        style: Theme.of(context).textTheme.headlineLarge
+                            ?.copyWith(fontSize: 11, color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: s.bg,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: s.border),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(s.icon, color: s.color, size: 12),
+                      const SizedBox(width: 4),
+                      Text(
+                        joiningStatus,
+                        style: Theme.of(context).textTheme.headlineLarge
+                            ?.copyWith(
+                              color: s.color,
+                              fontSize: t(12),
+                              fontWeight: FontWeight.w700,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 12),
+
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF9F9F9),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                      fontSize: t(13),
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF1A1A2E),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    body,
+                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                      fontSize: t(12),
+                      color: Colors.grey,
+                      height: 1.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            if (!isActioned) ...[
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Flexible(
+                    child: SizedBox(
+                      height: 40,
+                      child: GenericButtonWidget(
+                        isOutlined: true,
+                        onPressed: onDecline,
+                        text: "Decline",
+                        isLoading: state is DeclineLoading,
+                      ),
+                    ),
+                  ),
+                  gap(width: 12),
+                  Flexible(
+                    child: SizedBox(
+                      height: 40,
+                      child: GenericButtonWidget(
+                        onPressed: onApprove,
+                        text: "Approve",
+                        isLoading: state is ApproveLoading,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
   }
 }

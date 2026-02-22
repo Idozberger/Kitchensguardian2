@@ -27,7 +27,7 @@ Future<dynamic> showDialogForItemDeletion(
             ),
             SizedBox(height: h(10)),
             Text(
-              "Are you sure you want to delete this item?",
+              "Are you sure you want to delete all items?",
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.headlineLarge!.copyWith(
                 fontWeight: FontWeight.w600,

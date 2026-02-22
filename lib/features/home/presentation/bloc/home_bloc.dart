@@ -93,6 +93,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     final today = DateTime(now.year, now.month, now.day);
 
     final allWeeklyPlans = state.dateBasedPlan;
+    final lowStockItems = state.lowStockItems;
 
     final List<IngredientEntity> missingIngredientNames = [];
 
@@ -116,7 +117,15 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         debugPrint('Invalid date format in plan: ${plan.date}, error: $e');
       }
     }
-
+    for (var i = 0; i < lowStockItems.length; i++) {
+      missingIngredientNames.add(
+        IngredientEntity(
+          amount: lowStockItems[i].quantity.toString(),
+          name: lowStockItems[i].name,
+          unit: lowStockItems[i].unit,
+        ),
+      );
+    }
     missingIngredientNames.sort(
       (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
     );
@@ -243,6 +252,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         'sender_name':
             "${_userCubit.state.firstName} ${_userCubit.state.lastName}",
         'read': false,
+        'kitchen_joining_status': "Pending",
       };
       debugPrint('📦 Sending notification data: $notificationData');
 

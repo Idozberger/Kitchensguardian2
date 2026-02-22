@@ -100,8 +100,6 @@ class _KitchenHomeViewState extends State<KitchenHomeView> {
             backgroundColor: isMember
                 ? Colors.grey.shade300
                 : AppColors.primaryColor,
-            foregroundColor: Colors.black,
-            elevation: isMember ? 0 : 2,
           ),
           label: Text(
             "Scan Receipt",
@@ -120,7 +118,7 @@ class _KitchenHomeViewState extends State<KitchenHomeView> {
 
     if (state.role == "member") {
       AppToast.show(
-        "Only the host or co-host can scan receipts.",
+        "Only host and co-host can scan or add items.",
         ToastType.error,
         gravity: ToastGravity.TOP,
       );

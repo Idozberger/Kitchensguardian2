@@ -150,6 +150,49 @@ class DocumentScannerService {
     }
   }
 
+  Future<String?> scanAndGetPath() async {
+    try {
+      final hasPermission = await _requestCameraPermission();
+      if (!hasPermission) {
+        developer.log('Camera permission denied', name: 'DocumentScanner');
+        return null;
+      }
+
+      dynamic result;
+      if (Platform.isAndroid) {
+        result = await _documentScanner.getScannedDocumentAsImages(page: 1);
+      } else {
+        result = await _documentScanner.getScanDocuments(page: 1);
+      }
+
+      if (result == null || (result is List && result.isEmpty)) {
+        developer.log('No document scanned', name: 'DocumentScanner');
+        return null;
+      }
+
+      String? path;
+      if (Platform.isAndroid) {
+        path = await _extractImagePath(result);
+      } else if (result is List) {
+        path = await _compressImage(result.first);
+      } else if (result is String) {
+        path = await _compressImage(result);
+      } else if (result is Map && result['pdfUri'] != null) {
+        path = result['pdfUri'].toString();
+      }
+
+      return path;
+    } catch (e, st) {
+      developer.log(
+        'Document scan error: $e',
+        name: 'DocumentScanner',
+        error: e,
+      );
+      developer.log('Stack trace: $st', name: 'DocumentScanner');
+      return null;
+    }
+  }
+
   Future<void> scanDocument(
     BuildContext context, {
     bool replacement = false,

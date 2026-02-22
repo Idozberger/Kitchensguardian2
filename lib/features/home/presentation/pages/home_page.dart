@@ -81,6 +81,7 @@ class _HomePageState extends State<HomePage> {
 
   void _handleGeneratePressed() {
     if (_hasGroceryList()) {
+      _generateGroceryList();
       _navigateToSmartCart();
     } else {
       _generateGroceryList();

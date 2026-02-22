@@ -65,16 +65,30 @@ class MyPantryAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   Widget _buildScanButton(BuildContext context) {
+    final state = context.read<UserCubit>().state;
+
+    bool isMember = state.role == "member";
     return SizedBox(
       height: h(40),
       child: OutlinedButton.icon(
+        style: OutlinedButton.styleFrom(
+          side: BorderSide(
+            color: isMember ? Colors.grey.shade300 : AppColors.primaryColor,
+            width: 1.5,
+          ),
+        ),
         onPressed: () => _scanDocument(context),
-        icon: SvgPicture.asset(AppAssets.scanSvg, height: h(18), width: w(18)),
+        icon: SvgPicture.asset(
+          AppAssets.scanSvg,
+          height: h(18),
+          width: w(18),
+          color: isMember ? Colors.black : AppColors.primaryColor,
+        ),
         label: Text(
           "Scan",
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
             fontSize: t(12),
-            color: AppColors.primaryColor,
+            color: isMember ? Colors.black : AppColors.primaryColor,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -83,10 +97,29 @@ class MyPantryAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   Widget _buildAddItemButton(BuildContext context) {
+    final state = context.watch<UserCubit>().state;
+    final bool isMember = state.role == "member";
     return SizedBox(
       height: h(40),
       child: ElevatedButton.icon(
-        onPressed: () => context.pushNamed(Routes.addItem),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: isMember
+              ? Colors.grey.shade300
+              : AppColors.primaryColor,
+          foregroundColor: Colors.black,
+          elevation: 0,
+        ),
+        onPressed: () {
+          if (isMember) {
+            AppToast.show(
+              "Only host and co-host can scan or add items.",
+              ToastType.error,
+              gravity: ToastGravity.TOP,
+            );
+            return;
+          }
+          context.pushNamed(Routes.addItem);
+        },
         icon: SvgPicture.asset(AppAssets.addSvg, height: h(18), width: w(18)),
         label: Text(
           "Add Item",
@@ -105,7 +138,7 @@ class MyPantryAppBar extends StatelessWidget implements PreferredSizeWidget {
 
     if (state.role == "member") {
       AppToast.show(
-        "Only the host or co-host can scan receipts.",
+        "Only host and co-host can scan or add items.",
         ToastType.error,
         gravity: ToastGravity.TOP,
       );

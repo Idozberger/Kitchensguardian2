@@ -101,14 +101,14 @@ class _PantrySectionState extends State<PantrySection> {
                     ? Colors.grey.shade300
                     : AppColors.primaryColor,
                 foregroundColor: Colors.black,
-                elevation: isMember ? 0 : 2,
+                elevation: 0,
               ),
               onPressed: userState.userStorageAreas.isEmpty
                   ? null
                   : () {
                       if (isMember) {
                         AppToast.show(
-                          "Only the host or co-host can scan receipts.",
+                          "Only host and co-host can scan or add items.",
                           ToastType.error,
                           gravity: ToastGravity.TOP,
                         );

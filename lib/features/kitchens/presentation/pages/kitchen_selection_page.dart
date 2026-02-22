@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -17,6 +18,7 @@ import 'package:foodkitchen/features/dashboard/presentation/pages/dashboard_page
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_bloc.dart';
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_event.dart';
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_state.dart';
+import 'package:foodkitchen/features/kitchens/presentation/pages/kitchen_joining_status.dart';
 import 'package:foodkitchen/features/kitchens/presentation/pages/kitchen_page.dart';
 import 'package:foodkitchen/features/kitchens/presentation/widgets/create_kitchen.dart';
 import 'package:foodkitchen/features/kitchens/presentation/widgets/joined_kitchen_selection.dart';
@@ -87,13 +89,18 @@ class _KitchenSelectionPageState extends State<KitchenSelectionPage> {
           }
           if (state is OpenKitchen) {
             kitchenBloc.add(FetchKitchens());
-            context.goNamed(
-              Routes.dashboard,
-              extra: {
-                'fromNotification': false,
-                'entryType': DashboardEntryType.normal,
-              },
-            );
+            log("Storage area: ${userCubit.state.userStorageAreas}");
+            if (userCubit.state.userStorageAreas.isNotEmpty) {
+              context.goNamed(
+                Routes.dashboard,
+                extra: {
+                  'fromNotification': false,
+                  'entryType': DashboardEntryType.normal,
+                },
+              );
+            } else {
+              context.goNamed(Routes.smartKitchenSetup, extra: false);
+            }
           } else if (state is KitchenFailure) {
             AppToast.show(state.errorMessage, ToastType.error);
             kitchenBloc.add(FetchKitchens());
@@ -111,6 +118,9 @@ class _KitchenSelectionPageState extends State<KitchenSelectionPage> {
                 child: Column(
                   spacing: h(10),
                   children: [
+                    KitchenJoiningStatus(
+                      userId: context.read<UserCubit>().state.userId,
+                    ),
                     JoinedKitchensSection(
                       kitchens: state.kitchens,
                       userCubit: userCubit,

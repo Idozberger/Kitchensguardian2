@@ -93,4 +93,12 @@ class AppAssets {
   static String countrySvg = "assets/svgs/country.svg";
   //// Lottie Animation
   static String loader = "assets/lotties/loader.json";
+  static String bulbSvg = "assets/svgs/bulb.svg";
+  static String fridge = "assets/svgs/fridge.svg";
+  static String freezer = "assets/svgs/freezer.svg";
+  static String spices = "assets/svgs/spices.svg";
+  static String pantryDryStorage = "assets/svgs/pantry_dry_storage.svg";
+  static String miscellaneous = "assets/svgs/miscellaneous.svg";
+  static String others = "assets/svgs/others.svg";
+  static String reScanSvg = "assets/svgs/rescan_kitchen.svg";
 }

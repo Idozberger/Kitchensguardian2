@@ -105,6 +105,8 @@ class _MissingItemsListWidgetState extends State<MissingItemsListWidget> {
                   return Padding(
                     padding: gapOnly(top: 12),
                     child: GenericCircleCheckboxTile(
+                      unit: item.unit,
+                      quantity: item.amount,
                       title: item.name,
                       isChecked: selectedIngredients.contains(item),
                       isFinalList: false,
@@ -171,7 +173,7 @@ class _MissingItemsListWidgetState extends State<MissingItemsListWidget> {
       requestingItems.add(
         PantryItemEntity(
           name: selectedIngredients[i].name,
-          quantity: double.parse(selectedIngredients[i].amount),
+          quantity: double.tryParse(selectedIngredients[i].amount) ?? 1,
           unit: selectedIngredients[i].unit,
           group: "group",
           expireDate: "",

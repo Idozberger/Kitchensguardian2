@@ -18,6 +18,7 @@ import 'package:foodkitchen/features/onboarding/presentation/bloc/user_bloc.dart
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_bloc.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
 import 'package:foodkitchen/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:foodkitchen/features/smart_kitcheb_setup/presentation/bloc/smart_kitchen_setup_bloc.dart';
 import 'package:foodkitchen/firebase_options.dart';
 
 List<CameraDescription> cameras = [];
@@ -51,6 +52,9 @@ Future<void> main() async {
         BlocProvider<ProfileBloc>(create: (_) => sl<ProfileBloc>()),
         BlocProvider<ConsumptionBloc>(create: (_) => sl<ConsumptionBloc>()),
         BlocProvider<AppCubit>(create: (_) => sl<AppCubit>()),
+        BlocProvider<SmartKitchenSetupBloc>(
+          create: (_) => sl<SmartKitchenSetupBloc>(),
+        ),
       ],
       child: const AppBase(),
     ),

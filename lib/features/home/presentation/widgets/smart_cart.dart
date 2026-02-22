@@ -35,7 +35,10 @@ class SmartCartTile extends StatelessWidget {
           else
             _buildEmptyState(context),
 
-          GenericButtonWidget(text: "See More", onPressed: onGenerate),
+          GenericButtonWidget(
+            text: "Generate Ai Grocery List",
+            onPressed: onGenerate,
+          ),
         ],
       ),
     );

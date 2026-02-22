@@ -75,11 +75,6 @@ class KitchenRemoteDataSourceImpl implements KitchenRemoteDatasource {
       await prefs.setString('invitation_code', invitationCode.toString());
       await prefs.setString('role', role.toString());
 
-      await createPantry(
-        kitchenId: kitchenId.toString(),
-        pantries: const ["Fridge", "Freezer", "Pantry", "Spices"],
-      );
-
       return data["message"];
     } on DioException catch (e) {
       throw dio.handleError(e);

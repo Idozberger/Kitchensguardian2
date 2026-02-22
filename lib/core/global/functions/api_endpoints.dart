@@ -1,7 +1,6 @@
 class AppConstants {
   static const bool entitlementIsActive = false;
-  //   static const String baseUrl =
-  //       'https://uncensorious-regan-ostensibly.ngrok-free.dev/';
+
   static const String baseUrl = 'https://web-production-c7f89.up.railway.app';
 
   static const String login = '/api/login';
@@ -72,4 +71,5 @@ class AppConstants {
       "/api/consumption/confirmations/respond";
   static const String consumptionConfirmationCount =
       "/api/consumption/confirmations/count";
+  static const String kitchenSetupScan = "/api/kitchen/setup/scan";
 }

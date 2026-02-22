@@ -109,35 +109,7 @@ class _DashboardPageState extends State<DashboardPage> {
         _buildConsumptionPendingButton(),
         SizedBox(width: w(6)),
         _buildNotificationButton(),
-
-        IconButton(
-          onPressed: () async {
-            // await FCMService().sendNotification(
-            //   "dAZmZpQ9l7_FWKqJo-r5oy:APA91bFiqOhV9Uh9kGLZ-YNxQP3HKfDf_UBaxEvzTyjDQQdfm-qNaH4xIx3rsVYCDH5HE6be7jNj6g45wqZdEQhJ1ueYCI8IT8voqjhKX70jbNPxg7M32fE",
-            //   "You have been added to the kitchen",
-            //   "Your request to join the kitchen \"${_userCubit.state.kitchenName}\" has been approved by the host. You are now added to the kitchen. You can access it anytime using this invitation code: ${_userCubit.state.invitationCode}",
-            //   _userCubit.state.invitationCode,
-            //   _userCubit.state.kitchenName,
-            //   _userCubit.state.role,
-            //   _userCubit.state.activeKitchenId,
-            // );
-            // NotificationService().showNotification(
-            //   id: 1,
-            //   title: "sdaf",
-            //   body: "sdfa",
-            //   payload: jsonEncode({
-            //     "item": {"itemId": "1fda2bb52bcb453abecb0c184744094c"},
-
-            //     'type': 'meal_plan_reminder',
-            //     "invitationCode": _userCubit.state.invitationCode,
-            //     "kitchenName": _userCubit.state.kitchenName,
-            //     "role": _userCubit.state.role,
-            //     'kitchenId': _userCubit.state.activeKitchenId,
-            //   }),
-            // );
-          },
-          icon: Icon(Icons.abc),
-        ),
+        SizedBox(width: w(16)),
       ],
     );
   }

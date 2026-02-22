@@ -44,6 +44,8 @@ import 'package:foodkitchen/features/planner/presentation/pages/view_plan_detail
 import 'package:foodkitchen/features/profile/presentation/pages/change_password_page.dart';
 import 'package:foodkitchen/features/profile/presentation/pages/edit_profile_page.dart';
 import 'package:foodkitchen/features/profile/presentation/pages/profile_page.dart';
+import 'package:foodkitchen/features/smart_kitcheb_setup/presentation/pages/kitchen_analysis_page.dart';
+import 'package:foodkitchen/features/smart_kitcheb_setup/presentation/pages/smart_kitchen_setup_page.dart';
 import 'package:foodkitchen/features/subscription/presentation/pages/subscription_page.dart';
 import 'package:go_router/go_router.dart';
 
@@ -336,6 +338,22 @@ final GoRouter router = GoRouter(
       path: Routes.kitchenSelection,
       pageBuilder: (context, state) =>
           buildPage(state.pageKey, KitchenSelectionPage()),
+    ),
+    GoRoute(
+      path: Routes.kitchenAnalysisPage,
+      pageBuilder: (context, state) =>
+          buildPage(state.pageKey, KitchenAnalysisPage()),
+    ),
+    GoRoute(
+      name: Routes.smartKitchenSetup,
+      path: Routes.smartKitchenSetup,
+      pageBuilder: (context, state) {
+        final bool isRescanning = state.extra as bool;
+        return buildPage(
+          state.pageKey,
+          SmartKitchenSetupPage(isRescanning: isRescanning),
+        );
+      },
     ),
   ],
 );

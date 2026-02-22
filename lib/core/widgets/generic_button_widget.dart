@@ -45,15 +45,24 @@ class GenericButtonWidget extends StatelessWidget {
 
   Widget _buildOutlinedButton(BuildContext context) {
     return OutlinedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        shape: borderRadius != null
+            ? RoundedRectangleBorder(borderRadius: borderRadius!)
+            : null,
+        disabledBackgroundColor: AppColors.disabledPrimaryColor,
+      ),
       onPressed: isDisabled ? null : onPressed,
       child: isLoading
           ? _buildLoadingIndicator(color: AppColors.primaryColor)
           : Text(
               text,
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontSize: t(12),
-                color: AppColors.primaryColor,
-              ),
+              style:
+                  textStyle ??
+                  Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontSize: t(12),
+                    color: AppColors.primaryColor,
+                  ),
             ),
     );
   }

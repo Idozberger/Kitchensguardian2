@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:foodkitchen/core/common/domain/entities/requested_item.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/widgets/generic_container_checktile_widget.dart';
 
 class GroceryListItem extends StatelessWidget {
-  final dynamic grocery;
+  final RequestedItemEntity grocery;
   final bool isChecked;
   final bool isFinalList;
   final void Function(Object?) onChanged;
@@ -26,6 +27,8 @@ class GroceryListItem extends StatelessWidget {
     return Column(
       children: [
         GenericCircleCheckboxTile(
+          unit: grocery.unit,
+          quantity: grocery.quantity,
           title: grocery.name,
           isChecked: isChecked,
           isFinalList: isFinalList,

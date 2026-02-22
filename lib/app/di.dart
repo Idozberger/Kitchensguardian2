@@ -121,6 +121,12 @@ import 'package:foodkitchen/features/profile/domain/usecases/edit_profile.dart';
 import 'package:foodkitchen/features/profile/domain/usecases/get_profile_picture.dart';
 import 'package:foodkitchen/features/profile/domain/usecases/set_profile_picture.dart';
 import 'package:foodkitchen/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:foodkitchen/features/smart_kitcheb_setup/data/datasource/smart_kitchen_setup_datasource.dart';
+import 'package:foodkitchen/features/smart_kitcheb_setup/data/repository/smart_kitchen_setup_repo_impl.dart';
+import 'package:foodkitchen/features/smart_kitcheb_setup/domain/repository/smart_kitchen_setup_repository.dart';
+import 'package:foodkitchen/features/smart_kitcheb_setup/domain/usecases/scan_kitchen_images.dart';
+import 'package:foodkitchen/features/smart_kitcheb_setup/domain/usecases/skip_kitchen_setup.dart';
+import 'package:foodkitchen/features/smart_kitcheb_setup/presentation/bloc/smart_kitchen_setup_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -142,6 +148,7 @@ Future<void> initDependencies() async {
   _initAuth();
 
   _initDashboard();
+  _initSmartKitchenSetup();
   _initKitchen();
   _initPantry();
   _initGrocery();
@@ -149,6 +156,33 @@ Future<void> initDependencies() async {
   _initHistory();
   _initProfile();
   _initAppCubit();
+}
+
+void _initSmartKitchenSetup() {
+  // Datasource
+  sl.registerLazySingleton<SmartKitchenSetupDatasource>(
+    () => SmartKitchenSetupDatasourceImpl(dio: sl<DioHelper>()),
+  );
+
+  // Repository
+  sl.registerLazySingleton<SmartKitchenSetupRepository>(
+    () => SmartKitchenSetupRepositoryImpl(
+      smartKitchenSetupDatasource: sl<SmartKitchenSetupDatasource>(),
+    ),
+  );
+
+  // Use Case
+  sl.registerFactory(() => ScanKitchenImagesUseCase(sl()));
+  sl.registerFactory(() => SkipKitchenSetup(sl()));
+
+  // Bloc
+  sl.registerFactory<SmartKitchenSetupBloc>(
+    () => SmartKitchenSetupBloc(
+      scanKitchenImagesUseCase: sl(),
+      skipKitchenSetup: sl(),
+      userCubit: sl(),
+    ),
+  );
 }
 
 void _initAppCubit() {

@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_final_fields
+
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -61,7 +63,7 @@ class _GroceryBodyState extends State<GroceryBody> {
   ];
 
   List<String> _requestedAndAiGeneratedSelectedList = [];
-  final List<String> _finalListSelectedItems = [];
+  List<String> _finalListSelectedItems = [];
   int _selectedTabIndex = 0;
   String _searchQuery = "";
 
@@ -267,13 +269,15 @@ class _GroceryBodyState extends State<GroceryBody> {
     return FinalListFooter(
       isFinalListTabTriggered: false,
       groceryList: state.requestedItemsList ?? [],
-      onRemoveCallback: () => _handleDeleteAll(state.requestedItemsList ?? []),
+      onRemoveCallback: () {
+        _handleDeleteAll(state.requestedItemsList ?? []);
+      },
       onAddToFinalListCallback: _handleAddToFinalList,
     );
   }
 
   bool _isItemChecked(String itemId) {
-    debugPrint("Item checked: $itemId");
+    if (_selectedTabIndex == 2) return _finalListSelectedItems.contains(itemId);
     return _requestedAndAiGeneratedSelectedList.contains(itemId);
   }
 

@@ -178,6 +178,8 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       'invitation_code': inviteCode,
       'date': DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
       'read': false,
+      'kitchen_joining_status': "Approved",
+      'approved_by': _userCubit.state.userId,
     };
 
     await FCMService().sendNotification(
@@ -194,6 +196,19 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     await FirebaseFirestore.instance
         .collection('notifications')
         .add(notificationData);
+    final notificationQuery = await FirebaseFirestore.instance
+        .collection('notifications')
+        .where('kitchen_id', isEqualTo: event.kitchenId)
+        .where('sender_user_id', isEqualTo: userId)
+        .get();
+
+    if (notificationQuery.docs.isNotEmpty) {
+      await notificationQuery.docs.first.reference.update({
+        'kitchen_joining_status': 'Approved',
+        'status': true,
+        'read': false,
+      });
+    }
     updateNotificationStatus(event.id);
     AppToast.show("Kitchen approval notification sent", ToastType.success);
     emit(DashboardSuccess("Approved"));
@@ -252,6 +267,8 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       'invitation_code': inviteCode,
       'date': DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
       'read': false,
+      'kitchen_joining_status': "Declined",
+      'approved_by': _userCubit.state.userId,
     };
 
     await FCMService().sendNotification(
@@ -267,6 +284,19 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     await FirebaseFirestore.instance
         .collection('notifications')
         .add(notificationData);
+    final notificationQuery = await FirebaseFirestore.instance
+        .collection('notifications')
+        .where('kitchen_id', isEqualTo: event.kitchenId)
+        .where('sender_user_id', isEqualTo: userId)
+        .get();
+
+    if (notificationQuery.docs.isNotEmpty) {
+      await notificationQuery.docs.first.reference.update({
+        'kitchen_joining_status': 'Declined',
+        'status': true,
+        'read': false,
+      });
+    }
     updateNotificationStatus(event.id);
     AppToast.show("Request Declined Successfully", ToastType.success);
     emit(DashboardSuccess("Declined"));

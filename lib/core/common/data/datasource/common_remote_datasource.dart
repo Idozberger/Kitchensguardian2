@@ -50,6 +50,7 @@ class CommonRemoteDatasourceImpl implements CommonRemoteDatasource {
       final response = await dio.get(AppConstants.getUserProfile);
 
       if (response.statusCode != 200 && response.statusCode != 201) {
+        log(response.data);
         final data = response.data is String
             ? jsonDecode(response.data)
             : response.data;

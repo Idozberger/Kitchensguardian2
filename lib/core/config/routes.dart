@@ -45,4 +45,6 @@ class Routes {
   static const String kitchenSelection = "/kitchen_selection";
   static const String pendingconsumptionconfirmation =
       "/pendingconsumptionconfirmation";
+  static const String smartKitchenSetup = "/smart_kitchen_setup";
+  static const String kitchenAnalysisPage = "/kitchen_analysis_page";
 }
