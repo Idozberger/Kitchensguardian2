@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:foodkitchen/core/config/routes.dart';
 
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
@@ -33,8 +36,11 @@ import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_event.dart'
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_state.dart';
 import 'package:foodkitchen/features/smart_kitcheb_setup/domain/entities/scanned_item.dart';
 import 'package:foodkitchen/features/smart_kitcheb_setup/presentation/bloc/smart_kitchen_setup_bloc.dart';
+import 'package:foodkitchen/features/smart_kitcheb_setup/presentation/bloc/smart_kitchen_setup_event.dart';
 import 'package:foodkitchen/features/smart_kitcheb_setup/presentation/bloc/smart_kitchen_setup_state.dart';
+import 'package:foodkitchen/features/smart_kitcheb_setup/presentation/widgets/ai_analyzing_loader.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 
 class KitchenAnalysisPage extends StatefulWidget {
   final List<PantryItem> pantryItems;
@@ -47,6 +53,7 @@ class KitchenAnalysisPage extends StatefulWidget {
 class _KitchenAnalysisPageState extends State<KitchenAnalysisPage> {
   late PantryBloc _pantryBloc;
   late UserCubit _userCubit;
+  late SmartKitchenSetupBloc smartKitchenSetupBloc;
   List<PantryItem> _items = [];
 
   @override
@@ -54,6 +61,7 @@ class _KitchenAnalysisPageState extends State<KitchenAnalysisPage> {
     super.initState();
     _pantryBloc = context.read<PantryBloc>();
     _userCubit = context.read<UserCubit>();
+    smartKitchenSetupBloc = context.read<SmartKitchenSetupBloc>();
   }
 
   void getScannedItems(SmartKitchenSetupState state) {
@@ -126,16 +134,13 @@ class _KitchenAnalysisPageState extends State<KitchenAnalysisPage> {
                   _resetState();
                 } else if (state is PantrySuccess) {
                   AppToast.show(state.successMessage, ToastType.success);
+                  context.go(Routes.dashboard);
                   _resetState();
                 }
               },
               builder: (context, state) {
                 return smartKitchenSetupState.isLoading
-                    ? Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.primaryColor,
-                        ),
-                      )
+                    ? AiAnalyzingLoader()
                     : SafeArea(
                         child: Padding(
                           padding: gapSymmetric(horizontal: 20, vertical: 0),
@@ -145,6 +150,38 @@ class _KitchenAnalysisPageState extends State<KitchenAnalysisPage> {
                               Expanded(
                                 child: BlocBuilder<UserCubit, UserState>(
                                   builder: (context, userState) {
+                                    if (_items.isEmpty) {
+                                      return const Center(
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              Icons.inventory_2_outlined,
+                                              size: 48,
+                                              color: Colors.grey,
+                                            ),
+                                            SizedBox(height: 12),
+                                            Text(
+                                              'No items found',
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w600,
+                                                color: Colors.black87,
+                                              ),
+                                            ),
+                                            SizedBox(height: 6),
+                                            Text(
+                                              'Scanned items will appear here',
+                                              style: TextStyle(
+                                                fontSize: 13,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    }
+
                                     return ListView.builder(
                                       padding: gapZero,
                                       shrinkWrap: true,
@@ -180,28 +217,40 @@ class _KitchenAnalysisPageState extends State<KitchenAnalysisPage> {
   }
 
   Widget _buildBottomNavBar() {
-    return BlocBuilder<PantryBloc, PantryState>(
-      builder: (context, state) {
-        return SafeArea(
-          child: Container(
-            width: double.infinity,
-            decoration: const BoxDecoration(color: Color(0xFFF9F9F9)),
-            padding: gapOnly(left: 20, right: 20, bottom: 14, top: 14),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildAddMoreButton(),
-                SizedBox(height: h(22)),
-                GenericButtonWidget(
-                  isLoading: state is SubmittingItemLoading,
-                  text: "Add Item",
-                  onPressed: state is SubmittingItemLoading
-                      ? () {}
-                      : () => _handleSubmitItems(),
-                ),
-              ],
-            ),
-          ),
+    return BlocBuilder<SmartKitchenSetupBloc, SmartKitchenSetupState>(
+      builder: (context, smartKitchenState) {
+        return BlocBuilder<PantryBloc, PantryState>(
+          builder: (context, state) {
+            return smartKitchenState.scannedItems.isEmpty ||
+                    smartKitchenState.isLoading
+                ? SizedBox()
+                : SafeArea(
+                    child: Container(
+                      width: double.infinity,
+                      decoration: const BoxDecoration(color: Color(0xFFF9F9F9)),
+                      padding: gapOnly(
+                        left: 20,
+                        right: 20,
+                        bottom: 14,
+                        top: 14,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _buildAddMoreButton(),
+                          SizedBox(height: h(22)),
+                          GenericButtonWidget(
+                            isLoading: state is SubmittingItemLoading,
+                            text: "Add Item",
+                            onPressed: state is SubmittingItemLoading
+                                ? () {}
+                                : () => _handleSubmitItems(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+          },
         );
       },
     );
@@ -239,8 +288,11 @@ class _KitchenAnalysisPageState extends State<KitchenAnalysisPage> {
       kitchenId: _userCubit.state.activeKitchenId,
       items: pantryItems,
     );
-
+    log("pantrymodel: ${pantryModel.items.map((item) => item.expireDate)}");
     _pantryBloc.add(PantryAddItemEvent(pantry: pantryModel));
+    smartKitchenSetupBloc.add(
+      AddDefaultStoragesEvent(kitchenId: _userCubit.state.activeKitchenId),
+    );
   }
 
   String? _validateItem(PantryItem item) {

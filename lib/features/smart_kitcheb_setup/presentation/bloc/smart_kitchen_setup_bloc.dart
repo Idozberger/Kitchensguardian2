@@ -33,6 +33,25 @@ class SmartKitchenSetupBloc
     on<SmartKitchenSetupConfirmed>(_onConfirmed);
     on<SmartKitchenSetupApiCalled>(_onApiCalled);
     on<SkipKitchenSetupEvent>(_onSkipKitchenSetupEvent);
+    on<AddDefaultStoragesEvent>(_onAddDefaultStoragesEvent);
+  }
+
+  void _onAddDefaultStoragesEvent(
+    AddDefaultStoragesEvent event,
+    Emitter<SmartKitchenSetupState> emit,
+  ) async {
+    final result = await _skipKitchenSetup(
+      SkipKitchenSetupParams(kitchenId: event.kitchenId),
+    );
+
+    await result.fold(
+      (failure) {
+        emit(state.copyWith(errorMessage: failure.message, isSkipping: false));
+      },
+      (successMessage) async {
+        await _userCubit.getUserStorageArea(kitchenId: event.kitchenId);
+      },
+    );
   }
 
   void _onSkipKitchenSetupEvent(

@@ -30,3 +30,9 @@ final class SkipKitchenSetupEvent extends SmartKitchenSetupEvent {
 
   SkipKitchenSetupEvent({required this.kitchenId});
 }
+
+final class AddDefaultStoragesEvent extends SmartKitchenSetupEvent {
+  final String kitchenId;
+
+  AddDefaultStoragesEvent({required this.kitchenId});
+}

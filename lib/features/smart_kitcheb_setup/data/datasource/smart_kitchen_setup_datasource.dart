@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/global/functions/api_endpoints.dart';
@@ -40,7 +41,7 @@ class SmartKitchenSetupDatasourceImpl implements SmartKitchenSetupDatasource {
       await _addImageField(fields, 'image_miscellaneous', miscFilePath);
 
       final formData = FormData.fromMap(fields);
-
+      log("formData: ${formData.files}");
       final response = await dio.post(
         AppConstants.kitchenSetupScan,
         data: formData,
@@ -58,11 +59,15 @@ class SmartKitchenSetupDatasourceImpl implements SmartKitchenSetupDatasource {
           ? jsonDecode(response.data)
           : response.data;
 
-      if (decoded["auto_confirmed"] is List) {
-        return List<Map<String, dynamic>>.from(decoded["auto_confirmed"]);
-      }
+      final autoConfirmed = decoded["auto_confirmed"] is List
+          ? List<Map<String, dynamic>>.from(decoded["auto_confirmed"])
+          : <Map<String, dynamic>>[];
 
-      throw 'Unexpected response format — check logs for actual shape';
+      final userReview = decoded["user_review"] is List
+          ? List<Map<String, dynamic>>.from(decoded["user_review"])
+          : <Map<String, dynamic>>[];
+
+      return [...autoConfirmed, ...userReview];
     } on DioException catch (e) {
       throw dio.handleError(e);
     } catch (e, stacktrace) {

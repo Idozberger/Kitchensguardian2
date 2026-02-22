@@ -26,6 +26,6 @@ String formatExpiry(String yyyymmdd) {
       return "$days day${days > 1 ? 's' : ''}";
     }
   } catch (e) {
-    return "Invalid date format";
+    return yyyymmdd;
   }
 }

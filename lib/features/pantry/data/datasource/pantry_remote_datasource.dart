@@ -94,6 +94,7 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
     required String kitchenId,
   }) async {
     try {
+      log("Get pantry items");
       final url = "${AppConstants.getPantryItems}?kitchen_id=$kitchenId";
 
       final response = await dio.get(url);
@@ -207,8 +208,8 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
 
         final message = data["error"] ?? "Unknown error";
 
-        // 🔴 LOG API ERROR RESPONSE
-        debugPrint("❌ API Error");
+        //  LOG API ERROR RESPONSE
+        debugPrint(" API Error");
         debugPrint("Status Code: ${response.statusCode}");
         debugPrint("Response Data: $data");
 
@@ -217,8 +218,8 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
 
       return response.data["message"];
     } on DioException catch (e) {
-      // 🔴 LOG DIO ERROR DETAILS
-      debugPrint("❌ DioException");
+      //  LOG DIO ERROR DETAILS
+      debugPrint(" DioException");
       debugPrint("Message: ${e.message}");
       debugPrint("Type: ${e.type}");
       debugPrint("Path: ${e.requestOptions.path}");
@@ -230,8 +231,8 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
 
       throw await dio.handleError(e);
     } catch (e) {
-      // 🔴 LOG ANY OTHER ERROR
-      debugPrint("❌ Unexpected Error: $e");
+      // LOG ANY OTHER ERROR
+      debugPrint(" Unexpected Error: $e");
       rethrow;
     }
   }
@@ -283,7 +284,7 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
 
       return response.data["message"];
     } on DioException catch (e) {
-      throw dio.handleError(e);
+      throw await dio.handleError(e);
     } catch (e, stacktrace) {
       debugPrint('Stacktrace: $stacktrace');
       rethrow;
