@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -31,7 +32,12 @@ import 'package:go_router/go_router.dart';
 
 class AddItemPage extends StatefulWidget {
   final List<PantryItem> pantryItems;
-  const AddItemPage({super.key, this.pantryItems = const []});
+  final bool addToInventory;
+  const AddItemPage({
+    super.key,
+    this.pantryItems = const [],
+    this.addToInventory = false,
+  });
 
   @override
   State<AddItemPage> createState() => _AddItemPageState();
@@ -70,7 +76,18 @@ class _AddItemPageState extends State<AddItemPage> {
   void _resetState() {
     setState(() {
       _items = [];
-      _addNewItem();
+      if (widget.addToInventory) {
+        _items.add(
+          PantryItem(
+            nameController: TextEditingController(),
+            qtyController: TextEditingController(),
+            expireDate: TextEditingController(),
+            manuFacturingDate: TextEditingController(),
+          ),
+        );
+      } else {
+        _addNewItem();
+      }
     });
   }
 

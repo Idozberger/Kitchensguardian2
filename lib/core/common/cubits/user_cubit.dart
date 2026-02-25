@@ -40,7 +40,7 @@ class UserCubit extends Cubit<UserState> {
     );
   }
 
-  void setUser() async {
+  Future<void> setUser() async {
     final response = await fetchUserProfile();
 
     final Uint8List? avatarBytes = response["avatar"] is Uint8List

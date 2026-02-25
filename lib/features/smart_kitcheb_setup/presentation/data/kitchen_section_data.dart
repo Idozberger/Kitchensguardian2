@@ -47,15 +47,4 @@ Please make sure labels are visible so we can identify everything correctly.""",
     icon: AppAssets.miscellaneous,
     accent: AppColors.primaryColor,
   ),
-  KitchenSection(
-    id: 'other',
-    title: 'Other Items',
-    subtitle: 'Anything not covered above',
-    hint:
-        'Take one clear photo of any kitchen items that don’t fit into the other sections.',
-    tip: '''Why add other items?
-This helps us capture everything in your kitchen, even items that don’t belong to a specific category.''',
-    icon: AppAssets.others,
-    accent: AppColors.primaryColor,
-  ),
 ];

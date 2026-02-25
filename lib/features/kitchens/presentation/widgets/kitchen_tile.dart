@@ -56,7 +56,7 @@ class KitchenTile extends StatelessWidget {
             Image.asset(imagePath, width: w(40), height: h(38)),
             SizedBox(width: w(5)),
             SizedBox(
-              width: w(162),
+              width: w(158),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,

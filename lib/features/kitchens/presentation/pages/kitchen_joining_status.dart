@@ -36,6 +36,7 @@ class KitchenJoiningStatus extends StatelessWidget {
         .collection('notifications')
         .where('sender_user_id', isEqualTo: userId)
         .where('approved_by', isNotEqualTo: userId)
+        .where('kitchen_joining_status', isEqualTo: 'Pending')
         .orderBy('approved_by')
         .orderBy('date', descending: true)
         .snapshots()

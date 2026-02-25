@@ -432,16 +432,26 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     GetFavouriteRecipesEvent event,
     Emitter<PlannerState> emit,
   ) async {
-    emit(state.copyWith(isLoading: true));
+    emit(state.copyWith(isFavLoading: true));
     final res = await _favouriteRecipes(NoParams());
 
     res.fold(
       (failure) {
-        emit(state.copyWith(errorMessage: failure.message, isLoading: false));
+        emit(
+          state.copyWith(
+            errorMessage: failure.message,
+            isLoading: false,
+            isFavLoading: false,
+          ),
+        );
       },
       (favouriteRecipes) {
         emit(
-          state.copyWith(favouriteRecipes: favouriteRecipes, isLoading: false),
+          state.copyWith(
+            favouriteRecipes: favouriteRecipes,
+            isLoading: false,
+            isFavLoading: false,
+          ),
         );
       },
     );
@@ -473,14 +483,16 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     AddToFavouriteRecipeEvent event,
     Emitter<PlannerState> emit,
   ) async {
-    emit(state.copyWith(isLoading: true));
+    emit(state.copyWith(isFavLoading: true));
     final res = await _addToFavouriteRecipe(
       AddToFavouriteRecipeParams(recipeId: event.recipeId),
     );
 
     res.fold(
       (failure) {
-        emit(state.copyWith(errorMessage: failure.message, isLoading: false));
+        emit(
+          state.copyWith(errorMessage: failure.message, isFavLoading: false),
+        );
       },
       (recipes) {
         add(GetFavouriteRecipesEvent());
@@ -492,14 +504,16 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     RemoveFromFavouriteRecipeEvent event,
     Emitter<PlannerState> emit,
   ) async {
-    emit(state.copyWith(isLoading: true));
+    emit(state.copyWith(isFavLoading: true));
     final res = await _removeFromFavouriteRecipe(
       RemoveFromFavouriteRecipeParams(recipeId: event.recipeId),
     );
 
     res.fold(
       (failure) {
-        emit(state.copyWith(errorMessage: failure.message, isLoading: false));
+        emit(
+          state.copyWith(errorMessage: failure.message, isFavLoading: false),
+        );
       },
       (recipes) {
         add(GetFavouriteRecipesEvent());

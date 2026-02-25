@@ -144,7 +144,7 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
         ),
         "currency": currency,
         "country": country,
-        "use_google_document": true,
+        "use_google_document": false,
       });
 
       final response = await dio.post(AppConstants.scanRecipt, data: formData);

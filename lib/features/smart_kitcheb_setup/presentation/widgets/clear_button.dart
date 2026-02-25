@@ -22,8 +22,8 @@ class ClearButton extends StatelessWidget {
         child: Center(
           child: SvgPicture.asset(
             AppAssets.deleteSvg,
-            width: w(20),
-            height: h(20),
+            width: w(18),
+            height: h(18),
             fit: BoxFit.contain,
             colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
           ),

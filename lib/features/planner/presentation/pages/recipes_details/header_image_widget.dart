@@ -60,7 +60,7 @@ class HeaderImageWidget extends StatelessWidget {
   }
 
   Widget _buildFavoriteButton(PlannerState state) {
-    final isLoading = state.isLoading;
+    final isLoading = state.isFavLoading;
 
     return GestureDetector(
       onTap: isLoading ? null : onFavoritePressed,

@@ -26,7 +26,6 @@ import 'package:foodkitchen/features/kitchens/presentation/pages/kitchen_page.da
 import 'package:foodkitchen/features/onboarding/presentation/pages/intro_page.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/features/onboarding/presentation/pages/splash_screen.dart';
-import 'package:foodkitchen/features/pantry/presentation/models/pantry_items.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/add_item_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/add_pantry_storage_type_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/all_storage_areas_page.dart';
@@ -154,11 +153,14 @@ final GoRouter router = GoRouter(
       name: Routes.addItem,
       path: Routes.addItem,
       pageBuilder: (context, state) {
-        final pantryItems = state.extra as List<PantryItem>?;
+        final extra = state.extra as Map<String, dynamic>?;
 
         return buildPage(
           state.pageKey,
-          AddItemPage(pantryItems: pantryItems ?? []),
+          AddItemPage(
+            pantryItems: extra?["pantryItems"] ?? [],
+            addToInventory: extra?["addToInventory"] ?? false,
+          ),
         );
       },
     ),

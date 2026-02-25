@@ -6,13 +6,30 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/logs.dart';
 import 'package:foodkitchen/core/services/notifications/flutter_local_notifications_service.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
+import 'package:foodkitchen/features/consumptions/presentation/bloc/consumption_bloc.dart';
+import 'package:foodkitchen/features/consumptions/presentation/bloc/consumption_event.dart';
+import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_bloc.dart';
+import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_event.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+// ignore_for_file: use_build_context_synchronously
+
+import 'package:foodkitchen/app/app_router.dart';
+
+import 'package:foodkitchen/core/config/routes.dart';
+
+import 'package:foodkitchen/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:foodkitchen/features/kitchens/domain/entities/kitchen.dart';
+
+import 'package:go_router/go_router.dart';
 
 class FirebaseMessagingService {
   FirebaseMessagingService._internal();
@@ -241,23 +258,115 @@ class FirebaseMessagingService {
     }
   }
 
-  void _onMessageOpenedApp(RemoteMessage message) {}
+  void _onMessageOpenedApp(RemoteMessage message) {
+    _handleNotificationTap(message.data);
+  }
+}
+
+void _handleNotificationTap(Map<String, dynamic>? data) async {
+  if (data == null) return;
+
+  log("notification deep link: $data");
+  final String kitchenId = data['kitchenId'];
+  final String invitationCode = data['invitationCode'];
+  final String kitchenName = data['kitchenName'];
+  final String role = data['role'];
+
+  WidgetsBinding.instance.addPostFrameCallback((_) async {
+    final context = rootNavigatorKey.currentContext;
+    if (context == null) return;
+    bool isLoggedIn = await _isUserLoggedIn();
+    if (isLoggedIn == false) {
+      context.go(Routes.signIn);
+      return;
+    }
+    await _handlePostNavigationLogic(
+      context,
+      kitchenId,
+      invitationCode,
+      kitchenName,
+      role,
+    );
+
+    if (data["type"] == "low_stock" || data["type"] == "expiring_soon") {
+      context.goNamed(
+        Routes.myPantry,
+        extra: {"type": data["type"], "item_id": data["item"]["itemId"]},
+      );
+    } else if (data["type"] == "meal_plan_reminder") {
+      context.goNamed(
+        Routes.dashboard,
+        extra: {
+          'fromNotification': true,
+          'entryType': DashboardEntryType.planner,
+        },
+      );
+    } else if (data["type"] == "kitchens_notification") {
+      context.go(Routes.notification);
+    }
+  });
+}
+
+Future<bool> _isUserLoggedIn() async {
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('access-token');
+  return token != null && token.isNotEmpty;
+}
+
+Future<void> _handlePostNavigationLogic(
+  BuildContext context,
+  String kitchenId,
+  String invitationCode,
+  String kitchenName,
+  String role,
+) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setString("kitchen_id", kitchenId);
+  await prefs.setString("role", role);
+  await prefs.setString("invitation_code", invitationCode);
+
+  context.read<UserCubit>().updateActiveKitchenIdInvitationCodeAndRole(
+    kitchenName: kitchenName,
+    activeKitchenId: kitchenId,
+    invitationCode: invitationCode,
+    role: role,
+  );
+  await context.read<UserCubit>().setUser();
+
+  context.read<ConsumptionBloc>().add(
+    GetConsumptionConfirmationPendingCountEvent(kitchenId: kitchenId),
+  );
+
+  await context.read<UserCubit>().getUserStorageArea(kitchenId: kitchenId);
+
+  context.read<KitchenBloc>().add(
+    SwitchKitchenEvent(
+      Kitchen(
+        invitationCode: invitationCode,
+        kitchenId: kitchenId,
+        kitchenName: kitchenName,
+        role: role,
+      ),
+    ),
+  );
 }
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  try {
-    final notification = message.notification;
-    if (notification != null) {
-      await NotificationService().showNotification(
-        id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
-        title: notification.title ?? 'Background Notification',
-        body: notification.body ?? '',
-        payload: jsonEncode(message.data),
-      );
-    }
-    // ignore: empty_catches
-  } catch (e) {}
+  // log("FIREBASE NOTIFICATION ${message.data}");
+  // try {
+  //   final notification = message.notification;
+  //   if (notification != null) {
+  //     await NotificationService().showNotification(
+  //       id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+  //       title: notification.title ?? 'Background Notification',
+  //       body: notification.body ?? '',
+  //       payload: jsonEncode(message.data),
+  //     );
+  //   }
+
+  // ignore: empty_catches
+  // } catch (e) {}
 }
 
 class NotificationPermissionDialog extends StatelessWidget {

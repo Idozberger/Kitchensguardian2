@@ -65,10 +65,13 @@ class FCMService {
           'token': deviceToken,
           'notification': {'title': title, 'body': body},
           'data': {
+            'title': title,
+            'body': body,
             'type': 'kitchens_notification',
             'invitationCode': invitationCode,
             'kitchenName': kitchenName,
             'role': role,
+
             'kitchenId': activeKitchenId,
           },
           'android': {

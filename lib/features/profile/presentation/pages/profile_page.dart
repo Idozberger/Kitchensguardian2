@@ -109,6 +109,35 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                         ),
                         gap(height: 20),
+                        UpperTile(
+                          widget: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Smart Kitchen Management",
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.headlineLarge,
+                              ),
+                              gap(height: 10),
+                              _buildListTile(
+                                context,
+                                assetPath: AppAssets.reScanSvg,
+                                title: "Rescan Kitchen",
+                                subTitle:
+                                    "Update your kitchen inventory with new photos",
+                                callback: () {
+                                  context.pushNamed(
+                                    Routes.smartKitchenSetup,
+                                    extra: true,
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        gap(height: 20),
 
                         UpperTile(
                           widget: Column(

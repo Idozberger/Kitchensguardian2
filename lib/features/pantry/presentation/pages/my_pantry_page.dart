@@ -8,6 +8,7 @@ import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
+import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/services/notifications/flutter_local_notifications_service.dart';
@@ -21,6 +22,7 @@ import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_event.dart'
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_state.dart';
 import 'package:foodkitchen/features/pantry/presentation/widgets/custom_appbar.dart';
 import 'package:foodkitchen/features/pantry/presentation/widgets/pantry_item_card.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
 
 enum PantryFilter { all, expiring, lowStock }
@@ -157,21 +159,27 @@ class _MyPantryPageState extends State<MyPantryPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF9F9F9),
-      appBar: MyPantryAppBar(),
-      body: BlocConsumer<PantryBloc, PantryState>(
-        listener: (_, state) => _handlePantryStateChange(state),
-        builder: (context, state) {
-          return SafeArea(
-            child: Column(
-              children: [
-                _buildSearchBar(),
-                Expanded(child: _buildContent(state)),
-              ],
-            ),
-          );
-        },
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        context.pushNamed(Routes.dashboard);
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF9F9F9),
+        appBar: MyPantryAppBar(),
+        body: BlocConsumer<PantryBloc, PantryState>(
+          listener: (_, state) => _handlePantryStateChange(state),
+          builder: (context, state) {
+            return SafeArea(
+              child: Column(
+                children: [
+                  _buildSearchBar(),
+                  Expanded(child: _buildContent(state)),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }

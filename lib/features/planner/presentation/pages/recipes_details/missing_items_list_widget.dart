@@ -164,7 +164,10 @@ class _MissingItemsListWidgetState extends State<MissingItemsListWidget> {
       );
     }
 
-    context.pushNamed(Routes.addItem, extra: pantryItems);
+    context.pushNamed(
+      Routes.addItem,
+      extra: {"pantryItems": pantryItems, "addToInventory": true},
+    );
   }
 
   Future<void> onAddInList() async {

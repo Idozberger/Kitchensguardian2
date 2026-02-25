@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -13,6 +14,7 @@ import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/services/date_picker/date_picker_service.dart';
+import 'package:foodkitchen/core/services/notifications/flutter_local_notifications_service.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_dropdown_widget.dart';
@@ -219,6 +221,31 @@ class _PantryItemCardState extends State<PantryItemCard> {
                     );
                   }),
                   _circleButton(AppAssets.cartSvg, widget.onCartItem),
+                  _circleButton(AppAssets.notificationSvg, () {
+                    NotificationService().showNotification(
+                      id: Random().nextInt(100000),
+                      title: "morningTitle",
+                      body: "morningBody",
+
+                      payload: jsonEncode({
+                        'type': 'low_stock',
+                        "invitationCode": context
+                            .read<UserCubit>()
+                            .state
+                            .invitationCode,
+                        "kitchenName": context
+                            .read<UserCubit>()
+                            .state
+                            .kitchenName,
+                        "role": context.read<UserCubit>().state.role,
+                        'kitchenId': context
+                            .read<UserCubit>()
+                            .state
+                            .activeKitchenId,
+                        'item': widget.pantryItemEntity.toMap(),
+                      }),
+                    );
+                  }),
 
                   _circleButton(AppAssets.deleteSvg, () {
                     _showDeleteDialog(

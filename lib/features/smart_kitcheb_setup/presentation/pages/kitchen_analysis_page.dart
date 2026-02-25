@@ -40,7 +40,6 @@ import 'package:foodkitchen/features/smart_kitcheb_setup/presentation/bloc/smart
 import 'package:foodkitchen/features/smart_kitcheb_setup/presentation/bloc/smart_kitchen_setup_state.dart';
 import 'package:foodkitchen/features/smart_kitcheb_setup/presentation/widgets/ai_analyzing_loader.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lottie/lottie.dart';
 
 class KitchenAnalysisPage extends StatefulWidget {
   final List<PantryItem> pantryItems;

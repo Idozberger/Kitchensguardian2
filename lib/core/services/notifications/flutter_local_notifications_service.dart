@@ -123,6 +123,47 @@ class NotificationService {
     }
   }
 
+  Future<void> showTestNotification({
+    required int id,
+    required String title,
+    required String body,
+    String? payload,
+  }) async {
+    try {
+      const AndroidNotificationDetails androidDetails =
+          AndroidNotificationDetails(
+            'main_channel_id',
+            'Main Channel',
+            channelDescription: 'General notifications',
+            importance: Importance.max,
+            priority: Priority.high,
+            playSound: true,
+            ongoing: true,
+          );
+
+      const NotificationDetails platformDetails = NotificationDetails(
+        android: androidDetails,
+        iOS: DarwinNotificationDetails(
+          presentSound: true,
+          presentAlert: true,
+          presentBadge: true,
+        ),
+      );
+
+      await _flutterLocalNotificationsPlugin.show(
+        id,
+        title,
+        body,
+        platformDetails,
+        payload: payload,
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error showing notification: $e');
+      }
+    }
+  }
+
   Future<void> showNotification({
     required int id,
     required String title,
@@ -431,7 +472,7 @@ void _handleNotificationTap(String? payload) async {
   if (payload == null) return;
 
   final data = jsonDecode(payload);
-
+  log("notification deep link: $data");
   final String kitchenId = data['kitchenId'];
   final String invitationCode = data['invitationCode'];
   final String kitchenName = data['kitchenName'];
@@ -440,7 +481,11 @@ void _handleNotificationTap(String? payload) async {
   WidgetsBinding.instance.addPostFrameCallback((_) async {
     final context = rootNavigatorKey.currentContext;
     if (context == null) return;
-
+    bool isLoggedIn = await _isUserLoggedIn();
+    if (isLoggedIn == false) {
+      context.go(Routes.signIn);
+      return;
+    }
     await _handlePostNavigationLogic(
       context,
       kitchenId,
@@ -448,6 +493,7 @@ void _handleNotificationTap(String? payload) async {
       kitchenName,
       role,
     );
+
     if (data["type"] == "low_stock" || data["type"] == "expiring_soon") {
       context.goNamed(
         Routes.myPantry,
@@ -465,6 +511,12 @@ void _handleNotificationTap(String? payload) async {
       context.go(Routes.notification);
     }
   });
+}
+
+Future<bool> _isUserLoggedIn() async {
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('access-token');
+  return token != null && token.isNotEmpty;
 }
 
 Future<void> _handlePostNavigationLogic(
@@ -485,6 +537,7 @@ Future<void> _handlePostNavigationLogic(
     invitationCode: invitationCode,
     role: role,
   );
+  await context.read<UserCubit>().setUser();
 
   context.read<ConsumptionBloc>().add(
     GetConsumptionConfirmationPendingCountEvent(kitchenId: kitchenId),
