@@ -221,31 +221,6 @@ class _PantryItemCardState extends State<PantryItemCard> {
                     );
                   }),
                   _circleButton(AppAssets.cartSvg, widget.onCartItem),
-                  _circleButton(AppAssets.notificationSvg, () {
-                    NotificationService().showNotification(
-                      id: Random().nextInt(100000),
-                      title: "morningTitle",
-                      body: "morningBody",
-
-                      payload: jsonEncode({
-                        'type': 'low_stock',
-                        "invitationCode": context
-                            .read<UserCubit>()
-                            .state
-                            .invitationCode,
-                        "kitchenName": context
-                            .read<UserCubit>()
-                            .state
-                            .kitchenName,
-                        "role": context.read<UserCubit>().state.role,
-                        'kitchenId': context
-                            .read<UserCubit>()
-                            .state
-                            .activeKitchenId,
-                        'item': widget.pantryItemEntity.toMap(),
-                      }),
-                    );
-                  }),
 
                   _circleButton(AppAssets.deleteSvg, () {
                     _showDeleteDialog(

@@ -236,6 +236,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         _userCubit.state.kitchenName,
         _userCubit.state.role,
         _userCubit.state.activeKitchenId,
+        "Pending",
       );
       final random = Random();
       final notificationId = random.nextInt(999999);

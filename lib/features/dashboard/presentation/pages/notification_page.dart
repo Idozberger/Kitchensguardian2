@@ -126,8 +126,11 @@ class _NotificationPageState extends State<NotificationPage> {
                   separatorBuilder: (_, _) => const SizedBox(height: 8),
                   itemBuilder: (context, index) {
                     final data = filtered[index].data() as Map<String, dynamic>;
+                    final notifId = data['id'];
+                    final date = data['date'];
+
                     return _NotificationCard(
-                      id: data['id'],
+                      id: notifId,
                       kitchenId: data['kitchen_id'] ?? '',
                       title: data['title'] ?? '',
                       senderName: data['sender_name'] ?? '',
@@ -137,21 +140,28 @@ class _NotificationPageState extends State<NotificationPage> {
                       joiningStatus:
                           data['kitchen_joining_status'] ?? 'Pending',
                       isActioned: data['status'] ?? false,
-                      state: state,
+                      isApproveLoading:
+                          state is ApproveLoading &&
+                          (state).id == date.toString(),
+                      isDeclineLoading:
+                          state is DeclineLoading &&
+                          (state).id == date.toString(),
                       onTap: () => _navigateUserDetails(
                         data['sender_user_id'] ?? '',
                         data['kitchen_id'] ?? '',
                       ),
                       onApprove: () => context.read<DashboardBloc>().add(
                         ApproveRequestEvent(
-                          id: data['id'],
+                          date: date,
+                          id: notifId,
                           kitchenId: data['kitchen_id'],
                           memberId: data['sender_user_id'],
                         ),
                       ),
                       onDecline: () => context.read<DashboardBloc>().add(
                         DeclineRequestEvent(
-                          id: data['id'],
+                          date: date,
+                          id: notifId,
                           kitchenId: data['kitchen_id'],
                           memberId: data['sender_user_id'],
                         ),
@@ -198,7 +208,8 @@ class _NotificationCard extends StatelessWidget {
   final String date;
   final String joiningStatus;
   final bool isActioned;
-  final DashboardState state;
+  final bool isApproveLoading;
+  final bool isDeclineLoading;
   final VoidCallback onTap;
   final VoidCallback onApprove;
   final VoidCallback onDecline;
@@ -213,7 +224,8 @@ class _NotificationCard extends StatelessWidget {
     required this.date,
     required this.joiningStatus,
     required this.isActioned,
-    required this.state,
+    required this.isApproveLoading,
+    required this.isDeclineLoading,
     required this.onTap,
     required this.onApprove,
     required this.onDecline,
@@ -292,7 +304,7 @@ class _NotificationCard extends StatelessWidget {
                             ?.copyWith(
                               fontSize: t(14),
                               fontWeight: FontWeight.w700,
-                              color: Color(0xFF1A1A2E),
+                              color: const Color(0xFF1A1A2E),
                             ),
                       ),
                       const SizedBox(height: 2),
@@ -351,7 +363,7 @@ class _NotificationCard extends StatelessWidget {
                     style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                       fontSize: t(13),
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF1A1A2E),
+                      color: const Color(0xFF1A1A2E),
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -376,9 +388,9 @@ class _NotificationCard extends StatelessWidget {
                       height: 40,
                       child: GenericButtonWidget(
                         isOutlined: true,
-                        onPressed: onDecline,
+                        onPressed: isDeclineLoading ? () {} : onDecline,
                         text: "Decline",
-                        isLoading: state is DeclineLoading,
+                        isLoading: isDeclineLoading,
                       ),
                     ),
                   ),
@@ -387,9 +399,9 @@ class _NotificationCard extends StatelessWidget {
                     child: SizedBox(
                       height: 40,
                       child: GenericButtonWidget(
-                        onPressed: onApprove,
+                        onPressed: isApproveLoading ? () {} : onApprove,
                         text: "Approve",
-                        isLoading: state is ApproveLoading,
+                        isLoading: isApproveLoading,
                       ),
                     ),
                   ),

@@ -125,7 +125,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     Emitter<DashboardState> emit,
   ) async {
     log("[approve]");
-    emit(ApproveLoading());
+    emit(ApproveLoading(event.date.toString()));
     final userId = event.memberId;
     log("[approve] $userId");
     final userDoc = await FirebaseFirestore.instance
@@ -190,6 +190,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       _userCubit.state.kitchenName,
       _userCubit.state.role,
       _userCubit.state.activeKitchenId,
+      "Approved",
     );
 
     _kitchenBloc.add(MemberApprovedEvent(inviteCode, userId));
@@ -218,7 +219,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     DeclineRequestEvent event,
     Emitter<DashboardState> emit,
   ) async {
-    emit(DeclineLoading());
+    emit(DeclineLoading(event.date.toString()));
     final userId = event.memberId;
 
     final userDoc = await FirebaseFirestore.instance
@@ -279,6 +280,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       _userCubit.state.kitchenName,
       _userCubit.state.role,
       _userCubit.state.activeKitchenId,
+      "Declined",
     );
 
     await FirebaseFirestore.instance
@@ -299,6 +301,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     }
     updateNotificationStatus(event.id);
     AppToast.show("Request Declined Successfully", ToastType.success);
+
     emit(DashboardSuccess("Declined"));
   }
 

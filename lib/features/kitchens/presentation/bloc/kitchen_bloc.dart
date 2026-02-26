@@ -207,6 +207,7 @@ class KitchenBloc extends Bloc<KitchenEvent, KitchenState> {
         kitchenData["kitchen_name"],
         kitchenData["role"],
         kitchenData["kitchen_id"],
+        "Pending",
       );
 
       await FirebaseFirestore.instance

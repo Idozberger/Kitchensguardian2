@@ -477,6 +477,7 @@ void _handleNotificationTap(String? payload) async {
   final String invitationCode = data['invitationCode'];
   final String kitchenName = data['kitchenName'];
   final String role = data['role'];
+  final String status = data['status'];
 
   WidgetsBinding.instance.addPostFrameCallback((_) async {
     final context = rootNavigatorKey.currentContext;
@@ -492,6 +493,7 @@ void _handleNotificationTap(String? payload) async {
       invitationCode,
       kitchenName,
       role,
+      status,
     );
 
     if (data["type"] == "low_stock" || data["type"] == "expiring_soon") {
@@ -507,8 +509,12 @@ void _handleNotificationTap(String? payload) async {
           'entryType': DashboardEntryType.planner,
         },
       );
-    } else if (data["type"] == "kitchens_notification") {
+    } else if (data["type"] == "kitchens_notification" &&
+        status != "Declined") {
       context.go(Routes.notification);
+    } else if (data["type"] == "kitchens_notification" &&
+        status != "Declined") {
+      context.go(Routes.splash);
     }
   });
 }
@@ -525,6 +531,7 @@ Future<void> _handlePostNavigationLogic(
   String invitationCode,
   String kitchenName,
   String role,
+  String status,
 ) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.setString("kitchen_id", kitchenId);

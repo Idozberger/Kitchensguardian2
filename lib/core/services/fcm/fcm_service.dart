@@ -51,6 +51,7 @@ class FCMService {
     String kitchenName,
     String role,
     String activeKitchenId,
+    String status,
   ) async {
     try {
       final token = await _getAccessToken();
@@ -70,6 +71,7 @@ class FCMService {
             'type': 'kitchens_notification',
             'invitationCode': invitationCode,
             'kitchenName': kitchenName,
+            'status': status,
             'role': role,
 
             'kitchenId': activeKitchenId,

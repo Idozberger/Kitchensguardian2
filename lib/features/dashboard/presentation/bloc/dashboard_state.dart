@@ -51,6 +51,12 @@ final class DashboardFailure extends DashboardState {
   const DashboardFailure(this.message);
 }
 
-final class ApproveLoading extends DashboardState {}
+class ApproveLoading extends DashboardState {
+  final String id;
+  const ApproveLoading(this.id);
+}
 
-final class DeclineLoading extends DashboardState {}
+class DeclineLoading extends DashboardState {
+  final String id;
+  const DeclineLoading(this.id);
+}

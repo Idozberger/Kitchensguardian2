@@ -27,11 +27,13 @@ final class ApproveRequestEvent extends DashboardEvent {
   final String kitchenId;
   final String memberId;
   final int id;
+  final String date;
 
   ApproveRequestEvent({
     required this.memberId,
     required this.id,
     required this.kitchenId,
+    required this.date,
   });
 }
 
@@ -39,10 +41,11 @@ final class DeclineRequestEvent extends DashboardEvent {
   final String kitchenId;
   final String memberId;
   final int id;
-
+  final String date;
   DeclineRequestEvent({
     required this.memberId,
     required this.id,
     required this.kitchenId,
+    required this.date,
   });
 }
