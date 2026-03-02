@@ -288,7 +288,7 @@ class _KitchenAnalysisPageState extends State<KitchenAnalysisPage> {
       items: pantryItems,
     );
     log("pantrymodel: ${pantryModel.items.map((item) => item.expireDate)}");
-    _pantryBloc.add(PantryAddItemEvent(pantry: pantryModel));
+    _pantryBloc.add(PantryAddItemEvent(pantry: pantryModel, isMember: false));
     smartKitchenSetupBloc.add(
       AddDefaultStoragesEvent(kitchenId: _userCubit.state.activeKitchenId),
     );

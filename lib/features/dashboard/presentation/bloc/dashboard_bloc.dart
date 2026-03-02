@@ -7,6 +7,7 @@ import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/features/dashboard/domain/usecases/demote_cohost.dart';
 
 import 'package:foodkitchen/features/dashboard/domain/usecases/get_kitchen_members.dart';
+import 'package:foodkitchen/features/dashboard/domain/usecases/get_recipe_details.dart';
 import 'package:foodkitchen/features/dashboard/domain/usecases/kick_member.dart';
 import 'package:foodkitchen/features/dashboard/domain/usecases/make_cohost.dart';
 import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_event.dart';
@@ -23,6 +24,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
 
   final KitchenBloc _kitchenBloc;
   final UserCubit _userCubit;
+  final GetRecipeDetails _getRecipeDetails;
   DashboardBloc({
     required GetKitchenMembers getMembers,
     required MakeCohost makeCohost,
@@ -30,6 +32,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     required KitchenBloc kitchenBloc,
     required DemoteCohost demoteCohost,
     required UserCubit userCubit,
+    required GetRecipeDetails getRecipeDetails,
 
     respondConsumptionConfirmation,
   }) : _getKitchenMembers = getMembers,
@@ -37,6 +40,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
        _kickMember = kickMember,
        _demoteCohost = demoteCohost,
        _kitchenBloc = kitchenBloc,
+       _getRecipeDetails = getRecipeDetails,
        _userCubit = userCubit,
 
        super(DashboardInitial()) {
@@ -46,6 +50,29 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     on<DemoteCohostEvent>(_onDemoteCohostEvent);
     on<ApproveRequestEvent>(_onApproveRequestEvent);
     on<DeclineRequestEvent>(_onDeclineRequestEvent);
+    on<GetRecipeDetailsEvent>(_onGetRecipeDetailsEvent);
+  }
+
+  Future<void> _onGetRecipeDetailsEvent(
+    GetRecipeDetailsEvent event,
+    Emitter<DashboardState> emit,
+  ) async {
+    emit(DashboardLoading());
+    final res = await _getRecipeDetails(
+      GetRecipeDetailsParams(
+        recipeId: event.recipeId,
+        kitchenId: event.kitchenId,
+      ),
+    );
+
+    res.fold(
+      (failure) {
+        emit(DashboardFailure(failure.message));
+      },
+      (recipes) {
+        emit(RecipeDetailsLoaded(recipes));
+      },
+    );
   }
 
   Future<void> _onGetDashboardMembers(

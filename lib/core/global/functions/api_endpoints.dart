@@ -21,16 +21,21 @@ class AppConstants {
   static const String kickMember = "/api/kitchen/kick_member";
 
   static const String removeKitchen = "/api/kitchen/remove";
+  static const String repondToItemRequest =
+      "/api/kitchen/respond_to_item_request";
 
   static const String refreshKitchenInvitationCode =
       "/api/kitchen/refresh_invitation_code";
   static const String addPantryItem = "/api/kitchen/add_items";
+  static const String addPantryRequestItems = "/api/kitchen/request_add_items";
   static const String getPantryItems = "/api/kitchen/list_items";
+  static const String getAllItemsRequest = "/api/kitchen/items_requests";
   static const String scanRecipt = "/api/scan_recipt";
   static const String getRequestedItems =
       "/api/kitchen/get_user_requested_items";
 
   static const String generateRecipes = "/api/generate_recipes";
+  static const String recipeById = "/api/recipe/";
   static const String favouriteRecipes = "/api/recipe/list_fav";
   static const String removeFromFavourite = "/api/recipe/remove_from_fav";
   static const String addToFavourite = "/api/recipe/add_to_fav";

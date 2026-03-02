@@ -1,6 +1,8 @@
 // ignore_for_file: avoid_print
 
 import 'dart:convert';
+import 'package:foodkitchen/features/home/presentation/bloc/home_event.dart'
+    as homeEvent;
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
@@ -15,6 +17,7 @@ import 'package:foodkitchen/features/pantry/data/model/scan_receipt_item_model.d
 import 'package:foodkitchen/features/pantry/domain/entities/scan_receipt.dart';
 import 'package:foodkitchen/features/pantry/domain/entities/scan_receipt_item.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/add_pantry_item.dart';
+import 'package:foodkitchen/features/pantry/domain/usecases/add_pantry_request_item.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/cart_items.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/create_pantry_usecase.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/delete_item.dart';
@@ -32,6 +35,8 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
   final UserCubit _userCubit;
   final GroceryBloc _groceryBloc;
   final AddPantryItem _addPantryItem;
+  final AddPantryRequestItem _addPantryRequestItem;
+
   final GetPantryItems _getPantryItems;
   final ScanReceiptUseCase _scanReceiptUseCase;
   final RequestItems _requestItems;
@@ -56,6 +61,7 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
     required DeletePantry deletePantry,
     required DeleteItem deleteItem,
     required UpdateItem updateItem,
+    required AddPantryRequestItem addPantryRequestItem,
   }) : _addPantryItem = addPantryItem,
        _getPantryItems = getPantryItems,
        _scanReceiptUseCase = scanReceipt,
@@ -69,10 +75,12 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
        _cartItems = cartItems,
        _deleteItem = deleteItem,
        _updateItem = updateItem,
+       _addPantryRequestItem = addPantryRequestItem,
 
        super(PantryInitial()) {
     on<PantryAddItemEvent>(_onAddPantryItem);
     on<GetPantryItemsEvent>(_onGetPantryItems);
+
     on<ScanReceiptEvent>(_onScanReceipt);
     on<PantryRequestItemEvent>(_onRequestItems);
     on<IncrementItemEvent>(_onIncrementItem);
@@ -116,7 +124,11 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
   ) async {
     emit(SubmittingItemLoading());
 
-    final res = await _addPantryItem(AddPantryItemParams(pantry: event.pantry));
+    final res = event.isMember
+        ? await _addPantryRequestItem(
+            AddPantryRequestItemParams(pantry: event.pantry),
+          )
+        : await _addPantryItem(AddPantryItemParams(pantry: event.pantry));
 
     res.fold((failure) => emit(PantryFailure(failure.message)), (
       message,
@@ -126,6 +138,9 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
       );
 
       add(GetPantryItemsEvent(kitchenId: event.pantry.kitchenId));
+      _homeBloc.add(
+        homeEvent.GetAllRequestedItemsEvent(kitchenId: event.pantry.kitchenId),
+      );
 
       emit(PantrySuccess(message));
     });

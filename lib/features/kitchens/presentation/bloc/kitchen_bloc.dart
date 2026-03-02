@@ -272,6 +272,7 @@ class KitchenBloc extends Bloc<KitchenEvent, KitchenState> {
     _homeBloc.add(GetRecipeSuggestionEvent(kitchenId));
     _homeBloc.add(GetPantriesItemsEventForHome(kitchenId: kitchenId));
     _homeBloc.add(GenerateGroceryList());
+    _homeBloc.add(GetAllRequestedItemsEvent(kitchenId: kitchenId));
 
     _groceryBloc.add(RequestedGroceryEvent(kitchenId: kitchenId));
     await _userCubit.getUserStorageArea(kitchenId: kitchenId);

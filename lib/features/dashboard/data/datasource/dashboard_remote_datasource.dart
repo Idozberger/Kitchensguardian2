@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
@@ -7,6 +8,10 @@ import 'package:foodkitchen/core/global/functions/api_endpoints.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
 
 abstract interface class DashboardRemoteDatasource {
+  Future<List<Map<String, dynamic>>> getRecipeDetails({
+    required String kitchenId,
+    required String recipeId,
+  });
   Future<List<Map<String, dynamic>>> getKitchenMembers({
     required String kitchenId,
   });
@@ -215,6 +220,46 @@ class DashboardRemoteDatasourceImpl implements DashboardRemoteDatasource {
       return response.data["pending_count"].toString();
     } on DioException catch (e) {
       throw dio.handleError(e);
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getRecipeDetails({
+    required String recipeId,
+    required String kitchenId,
+  }) async {
+    try {
+      final response = await dio.get("${AppConstants.recipeById}$recipeId");
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+        throw data["error"] ?? "Something went wrong";
+      }
+
+      if (response.data is Map<String, dynamic>) {
+        final recipe = Map<String, dynamic>.from(response.data);
+
+        final thumbnailBase64 = recipe["thumbnail"];
+        if (thumbnailBase64 is String && thumbnailBase64.isNotEmpty) {
+          try {
+            recipe["thumbnail"] = base64Decode(
+              thumbnailBase64.contains(",")
+                  ? thumbnailBase64.split(",").last.trim()
+                  : thumbnailBase64.trim(),
+            );
+          } catch (_) {
+            recipe["thumbnail"] = Uint8List(0);
+          }
+        }
+
+        return [recipe];
+      }
+
+      throw Exception("Invalid data format for recipe details");
+    } on DioException catch (e) {
+      throw await dio.handleError(e);
     }
   }
 }

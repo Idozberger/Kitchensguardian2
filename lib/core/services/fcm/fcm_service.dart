@@ -51,8 +51,9 @@ class FCMService {
     String kitchenName,
     String role,
     String activeKitchenId,
-    String status,
-  ) async {
+    String status, [
+    String recipeId = "",
+  ]) async {
     try {
       final token = await _getAccessToken();
 
@@ -73,7 +74,7 @@ class FCMService {
             'kitchenName': kitchenName,
             'status': status,
             'role': role,
-
+            'recipeId': recipeId,
             'kitchenId': activeKitchenId,
           },
           'android': {

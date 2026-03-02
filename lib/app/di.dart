@@ -37,6 +37,7 @@ import 'package:foodkitchen/features/consumptions/domain/usecases/get_consumptio
 import 'package:foodkitchen/features/consumptions/domain/usecases/get_consumption_confirmation_pending.dart';
 import 'package:foodkitchen/features/dashboard/domain/usecases/demote_cohost.dart';
 import 'package:foodkitchen/features/dashboard/domain/usecases/get_kitchen_members.dart';
+import 'package:foodkitchen/features/dashboard/domain/usecases/get_recipe_details.dart';
 import 'package:foodkitchen/features/dashboard/domain/usecases/kick_member.dart';
 import 'package:foodkitchen/features/dashboard/domain/usecases/make_cohost.dart';
 import 'package:foodkitchen/features/consumptions/domain/usecases/respond_consumption_confirmation.dart';
@@ -60,7 +61,10 @@ import 'package:foodkitchen/features/home/data/datasource/home_remote_datasource
 import 'package:foodkitchen/features/home/data/repository/home_repository_impl.dart';
 import 'package:foodkitchen/features/home/domain/repository/home_repository.dart';
 import 'package:foodkitchen/features/home/domain/usecases/create_kitchen_usecase.dart';
+import 'package:foodkitchen/features/home/domain/usecases/get_all_requested_items.dart';
 import 'package:foodkitchen/features/home/domain/usecases/get_recipe_suggestion_usecase.dart';
+import 'package:foodkitchen/features/home/domain/usecases/respond_to_item_request.dart';
+import 'package:foodkitchen/features/pantry/domain/usecases/add_pantry_request_item.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/cart_items.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/create_pantry_usecase.dart';
 import 'package:foodkitchen/features/home/domain/usecases/get_all_weekly_plans_usecase.dart';
@@ -286,6 +290,7 @@ void _initHome() async {
     ..registerFactory(() => GetPantriesForHome(sl()))
     ..registerFactory(() => GetAllWeeklyPlansForHome(sl()))
     ..registerFactory(() => GetRecipeSuggestionUsecase(sl()))
+    ..registerFactory(() => RespondToItemRequest(sl()))
     // Bloc
     ..registerLazySingleton(
       () => HomeBloc(
@@ -295,6 +300,8 @@ void _initHome() async {
         getPantriesForHome: GetPantriesForHome(sl()),
         getAllWeeklyPlansForHome: GetAllWeeklyPlansForHome(sl()),
         getRecipeSuggestionUsecase: GetRecipeSuggestionUsecase(sl()),
+        getAllRequestedItems: GetAllRequestedItems(sl()),
+        respondToItemRequest: RespondToItemRequest(sl()),
       ),
     );
 }
@@ -345,6 +352,7 @@ void _initDashboard() async {
     ..registerFactory(() => MakeCohost(sl()))
     ..registerFactory(() => KickMember(sl()))
     ..registerFactory(() => DemoteCohost(sl()))
+    ..registerFactory(() => GetRecipeDetails(sl()))
     // Bloc
     ..registerLazySingleton(
       () => DashboardBloc(
@@ -355,6 +363,7 @@ void _initDashboard() async {
         userCubit: sl(),
         kitchenBloc: sl(),
         demoteCohost: DemoteCohost(sl()),
+        getRecipeDetails: GetRecipeDetails(sl()),
       ),
     );
 }
@@ -377,6 +386,7 @@ void _initPantry() async {
     )
     // Usecases
     ..registerFactory(() => AddPantryItem(sl()))
+    ..registerFactory(() => AddPantryRequestItem(sl()))
     ..registerFactory(() => GetPantryItems(sl()))
     ..registerFactory(() => ScanReceiptUseCase(sl()))
     ..registerFactory(() => RequestItems(sl()))
@@ -391,6 +401,7 @@ void _initPantry() async {
     ..registerLazySingleton(
       () => PantryBloc(
         addPantryItem: AddPantryItem(sl()),
+        addPantryRequestItem: AddPantryRequestItem(sl()),
         showNotification: ShowNotification(sl()),
         getPantryItems: GetPantryItems(sl()),
         scanReceipt: ScanReceiptUseCase(sl()),

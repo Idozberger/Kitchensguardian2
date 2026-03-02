@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/cubits/user_state.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
@@ -11,7 +10,6 @@ import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
-import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
@@ -97,28 +95,21 @@ class _PantrySectionState extends State<PantrySection> {
             height: h(40),
             child: ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: isMember
-                    ? Colors.grey.shade300
-                    : AppColors.primaryColor,
+                backgroundColor: AppColors.primaryColor,
                 foregroundColor: Colors.black,
                 elevation: 0,
               ),
               onPressed: userState.userStorageAreas.isEmpty
                   ? null
                   : () {
-                      if (isMember) {
-                        AppToast.show(
-                          "Only host and co-host can scan or add items.",
-                          ToastType.error,
-                          gravity: ToastGravity.TOP,
-                        );
-                        return;
-                      }
-                      context.pushNamed(Routes.addItem);
+                      context.pushNamed(
+                        Routes.addItem,
+                        extra: {"isMember": true},
+                      );
                     },
               icon: SvgPicture.asset(AppAssets.addSvg),
               label: Text(
-                "Add Item",
+                isMember ? "Request Item" : "Add Item",
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontSize: t(12),
                   color: Colors.black,

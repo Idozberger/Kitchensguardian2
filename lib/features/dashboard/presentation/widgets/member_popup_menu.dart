@@ -3,11 +3,16 @@ import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 
 class MemberPopupMenu extends StatelessWidget {
+  final bool canMakeCoHost;
+  final bool canDemoteCoHost;
   final VoidCallback onMakeCoHost;
   final VoidCallback onKick;
   final VoidCallback onDemoteCoHost;
+
   const MemberPopupMenu({
     super.key,
+    required this.canMakeCoHost,
+    required this.canDemoteCoHost,
     required this.onMakeCoHost,
     required this.onKick,
     required this.onDemoteCoHost,
@@ -28,18 +33,20 @@ class MemberPopupMenu extends StatelessWidget {
         if (value == 2) onKick();
       },
       itemBuilder: (context) => [
-        _menuItem(
-          context,
-          value: 0,
-          icon: AppAssets.tickSvg,
-          label: "Make Co-Host",
-        ),
-        _menuItem(
-          context,
-          value: 1,
-          icon: AppAssets.demoteCohost,
-          label: "Demote Cohost",
-        ),
+        if (canMakeCoHost)
+          _menuItem(
+            context,
+            value: 0,
+            icon: AppAssets.tickSvg,
+            label: "Make Co-Host",
+          ),
+        if (canDemoteCoHost)
+          _menuItem(
+            context,
+            value: 1,
+            icon: AppAssets.demoteCohost,
+            label: "Demote Cohost",
+          ),
         _menuItem(
           context,
           value: 2,
@@ -64,7 +71,7 @@ class MemberPopupMenu extends StatelessWidget {
           SvgPicture.asset(
             icon,
             height: label == "Demote Cohost" ? 18 : 12,
-            color: Color(0xff787878),
+            color: const Color(0xff787878),
           ),
           const SizedBox(width: 8),
           Text(

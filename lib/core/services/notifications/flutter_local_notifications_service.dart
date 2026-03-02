@@ -477,7 +477,12 @@ void _handleNotificationTap(String? payload) async {
   final String invitationCode = data['invitationCode'];
   final String kitchenName = data['kitchenName'];
   final String role = data['role'];
-  final String status = data['status'];
+  final String status = data.containsKey('status')
+      ? data['status'] as String
+      : "";
+  final String recipeId = data.containsKey('recipeId')
+      ? data['recipeId'] as String
+      : "";
 
   WidgetsBinding.instance.addPostFrameCallback((_) async {
     final context = rootNavigatorKey.currentContext;
@@ -485,6 +490,10 @@ void _handleNotificationTap(String? payload) async {
     bool isLoggedIn = await _isUserLoggedIn();
     if (isLoggedIn == false) {
       context.go(Routes.signIn);
+      return;
+    }
+    if (status == "Declined") {
+      context.go(Routes.splash);
       return;
     }
     await _handlePostNavigationLogic(
@@ -509,11 +518,20 @@ void _handleNotificationTap(String? payload) async {
           'entryType': DashboardEntryType.planner,
         },
       );
+    } else if (status == "start_recipe_request") {
+      context.goNamed(
+        Routes.recipeRequestsDetail,
+        extra: {
+          "recipeId": recipeId,
+          "kitchenId": kitchenId,
+          "backPageAvailable": false,
+        },
+      );
     } else if (data["type"] == "kitchens_notification" &&
         status != "Declined") {
       context.go(Routes.notification);
     } else if (data["type"] == "kitchens_notification" &&
-        status != "Declined") {
+        status == "Declined") {
       context.go(Routes.splash);
     }
   });

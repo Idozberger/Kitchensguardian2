@@ -1,5 +1,6 @@
 import 'package:foodkitchen/core/common/data/model/recipe_model.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
+import 'package:foodkitchen/features/planner/domain/entities/ingredient_entity.dart';
 import 'package:foodkitchen/features/planner/domain/entities/meal_plan_entity.dart';
 import 'package:foodkitchen/features/planner/domain/entities/merged_meal_type_entity.dart';
 
@@ -90,7 +91,14 @@ final class AddMealPlanEvent extends PlannerEvent {
 final class RequestMissingItemsEvent extends PlannerEvent {
   final Pantry pantry;
   final bool isPlan;
-  RequestMissingItemsEvent({required this.pantry, required this.isPlan});
+  final List<IngredientEntity> selectedIngredients;
+  final String recipeId;
+  RequestMissingItemsEvent({
+    required this.selectedIngredients,
+    required this.recipeId,
+    required this.pantry,
+    required this.isPlan,
+  });
 }
 
 final class ResetMealPlanState extends PlannerEvent {}
@@ -168,5 +176,25 @@ final class SetDateRangeEvent extends PlannerEvent {
     this.kitchenId,
     required this.endDate,
     required this.startDate,
+  });
+}
+
+class RemoveMissingIngredientEvent extends PlannerEvent {
+  final List<IngredientEntity> selectedIngredients;
+  final String recipeId;
+  RemoveMissingIngredientEvent({
+    required this.selectedIngredients,
+    required this.recipeId,
+  });
+}
+
+class RequestStartRecipeEvent extends PlannerEvent {
+  final String recipeId;
+  final String kitchenId;
+  final String recipeName;
+  RequestStartRecipeEvent({
+    required this.recipeId,
+    required this.kitchenId,
+    required this.recipeName,
   });
 }

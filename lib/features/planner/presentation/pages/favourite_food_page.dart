@@ -91,7 +91,8 @@ class _FavouriteFoodPageState extends State<FavouriteFoodPage> {
                                     uint8list: recipe.thumbnail,
                                     trailingIcon:
                                         AppAssets.arrowForwardAndroidSvg,
-                                    errorText: recipe.missingItems
+                                    errorText:
+                                        recipe.missingIngredients.isNotEmpty
                                         ? "Some items are missing*"
                                         : "",
 

@@ -49,3 +49,10 @@ final class DeclineRequestEvent extends DashboardEvent {
     required this.date,
   });
 }
+
+final class GetRecipeDetailsEvent extends DashboardEvent {
+  final String kitchenId;
+  final String recipeId;
+
+  GetRecipeDetailsEvent({required this.kitchenId, required this.recipeId});
+}

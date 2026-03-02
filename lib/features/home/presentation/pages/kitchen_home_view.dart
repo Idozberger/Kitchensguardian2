@@ -19,6 +19,7 @@ import 'package:foodkitchen/features/home/presentation/bloc/home_event.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_state.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/action_tile.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/create_or_join_tile.dart';
+import 'package:foodkitchen/features/home/presentation/widgets/items_request_section.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/no_kitchen_found.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/pantry_section.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/smart_cart.dart';
@@ -58,8 +59,13 @@ class _KitchenHomeViewState extends State<KitchenHomeView> {
           children: [
             gap(height: 14),
             _buildScanReceiptButton(context),
+            if (state.itemsRequest.isNotEmpty) ...[
+              gap(height: 12),
+              ItemRequestSection(state: state),
+            ],
             gap(height: 12),
             PantrySection(state: state),
+
             gap(height: 12),
             _buildFindRecipesButton(context),
             gap(height: 12),

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
@@ -127,10 +128,18 @@ class _ProfilePageState extends State<ProfilePage> {
                                 subTitle:
                                     "Update your kitchen inventory with new photos",
                                 callback: () {
-                                  context.pushNamed(
-                                    Routes.smartKitchenSetup,
-                                    extra: true,
-                                  );
+                                  if (context.read<UserCubit>().state.role !=
+                                      "member") {
+                                    context.pushNamed(
+                                      Routes.smartKitchenSetup,
+                                      extra: true,
+                                    );
+                                  } else {
+                                    AppToast.show(
+                                      "Only the host or cohost can rescan the kitchen.",
+                                      ToastType.warning,
+                                    );
+                                  }
                                 },
                               ),
                             ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 
 import 'package:foodkitchen/core/global/functions/gaps.dart';
@@ -67,18 +68,23 @@ class PrimaryActionsWidget extends StatelessWidget {
                       ],
                     )
                   : GenericButtonWidget(
+                      isLoading: state.requestingStartRecipe,
                       isDisabled: recipe.missingItems,
                       onPressed: () {
                         if (recipe.missingItems == false) {
                           onStartRecipe();
                         } else {
                           AppToast.show(
-                            "Some ingredients are missing, so the recipe can't be started.",
+                            "Missing ingredients! Please restock before starting this recipe.",
                             ToastType.error,
                           );
                         }
                       },
-                      text: "Start Recipe",
+                      text: recipe.missingItems == true
+                          ? "Missing Ingredients"
+                          : context.read<UserCubit>().state.role == "member"
+                          ? "Request to Start Recipe"
+                          : "Start Recipe",
                     ),
               if (isPlan) ...[
                 gap(height: 20),

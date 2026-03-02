@@ -1,9 +1,12 @@
 import 'dart:developer';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
+import 'package:foodkitchen/core/common/data/model/recipe_model.dart';
 import 'package:foodkitchen/core/common/domain/usecase/get_current_user.dart';
 import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
+import 'package:foodkitchen/core/services/fcm/fcm_service.dart';
 import 'package:foodkitchen/core/services/notifications/flutter_local_notifications_service.dart';
 import 'package:foodkitchen/core/utils/date_format_to_string.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
@@ -12,6 +15,7 @@ import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_event.dar
 import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_event.dart';
 import 'package:foodkitchen/features/planner/data/models/merged_meal_plan_model.dart';
+import 'package:foodkitchen/features/planner/domain/entities/ingredient_entity.dart';
 import 'package:foodkitchen/features/planner/domain/entities/merged_meal_type_entity.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/add_to_favourite_recipe.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/add_to_weekly_plan.dart';
@@ -33,6 +37,7 @@ import 'package:foodkitchen/features/planner/domain/usecases/update_meal_plan.da
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dart';
 import 'package:foodkitchen/features/planner/presentation/widgets/planner_date_formatter.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
@@ -115,6 +120,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     on<ResetPlannerStateEvent>(_onResetPlanner);
     on<AddMealPlanEvent>(_onAddMealPlan);
     on<RequestMissingItemsEvent>(_onRequestMissingItems);
+    on<RemoveMissingIngredientEvent>(_onRemoveMissingIngredient);
     on<ResetMealPlanState>(_onResetMealPlanState);
     on<DeleteMealPlanEvent>(_onDeleteMealPlan);
     on<UpdateTypeSelectedAndDateEvent>(_onUpdateMealTypeSelectedAndDate);
@@ -126,6 +132,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     on<GetDateRangeEvent>(_onGetDateRangeEvent);
     on<SetDateRangeEvent>(_onSetDateRange);
     on<UpdateRecipeFinishedState>(_onUpdateRecipeFinishedState);
+    on<RequestStartRecipeEvent>(_onRequestStartRecipe);
   }
   Future<void> _onSetDateRange(
     SetDateRangeEvent event,
@@ -213,6 +220,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     log(
       "formattedStartDate $formattedEndDate || formattedEndDate $formattedEndDate",
     );
+
     add(
       SetDateRangeEvent(
         kitchenId: _userCubit.state.activeKitchenId,
@@ -906,11 +914,192 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
         } else {
           emit(state.copyWith(successMessage: message, isLoading: false));
         }
-
+        add(
+          RemoveMissingIngredientEvent(
+            recipeId: event.recipeId,
+            selectedIngredients: event.selectedIngredients,
+          ),
+        );
         _groceryBloc.add(
           RequestedGroceryEvent(kitchenId: event.pantry.kitchenId),
         );
       },
     );
+  }
+
+  Future<void> _onRemoveMissingIngredient(
+    RemoveMissingIngredientEvent event,
+    Emitter<PlannerState> emit,
+  ) async {
+    final updatedRecipes = List<RecipeModel>.from(state.recipes ?? []);
+    final updatedFavRecipes = List<RecipeModel>.from(
+      state.favouriteRecipes ?? [],
+    );
+
+    int recipeIndex = -1;
+    for (var i = 0; i < updatedRecipes.length; i++) {
+      if (updatedRecipes[i].id == event.recipeId) {
+        recipeIndex = i;
+        break;
+      }
+    }
+
+    int favRecipeIndex = -1;
+    for (var i = 0; i < updatedFavRecipes.length; i++) {
+      if (updatedFavRecipes[i].id == event.recipeId) {
+        favRecipeIndex = i;
+        break;
+      }
+    }
+
+    if (recipeIndex == -1 && favRecipeIndex == -1) {
+      log("Recipe not found: ${event.recipeId}");
+      return;
+    }
+
+    final sourceList = favRecipeIndex != -1
+        ? updatedFavRecipes
+        : updatedRecipes;
+    final sourceIndex = favRecipeIndex != -1 ? favRecipeIndex : recipeIndex;
+
+    final updatedIngredients = List<IngredientEntity>.from(
+      sourceList[sourceIndex].missingIngredients,
+    );
+
+    for (var item in event.selectedIngredients) {
+      for (var i = 0; i < updatedIngredients.length; i++) {
+        if (updatedIngredients[i].name == item.name) {
+          updatedIngredients.removeAt(i);
+          break;
+        }
+      }
+
+      final r = sourceList[sourceIndex];
+      sourceList[sourceIndex] = RecipeModel(
+        id: r.id,
+        mealplanId: r.mealplanId,
+        title: r.title,
+        calories: r.calories,
+        cookingTime: r.cookingTime,
+        recipeShortSummary: r.recipeShortSummary,
+        cookingSteps: r.cookingSteps,
+        missingItems: r.missingItems,
+        available: r.available,
+        mealType: r.mealType,
+        formatedDateString: r.formatedDateString,
+        thumbnail: r.thumbnail,
+        missingIngredients: List.from(updatedIngredients),
+        recipeId: r.recipeId,
+        kitchenId: r.kitchenId,
+        date: r.date,
+        createdAt: r.createdAt,
+        updatedAt: r.updatedAt,
+        createdBy: r.createdBy,
+        isCompleted: r.isCompleted,
+        notes: r.notes,
+        ingredients: r.ingredients,
+        expiringItems: [],
+        expiringItemsCount: r.expiringItemsCount,
+        expiringItemsUsed: r.expiringItemsUsed,
+      );
+
+      if (favRecipeIndex != -1) {
+        emit(state.copyWith(favouriteRecipes: List.from(updatedFavRecipes)));
+      } else {
+        emit(state.copyWith(recipes: List.from(updatedRecipes)));
+      }
+    }
+  }
+
+  Future<void> _onRequestStartRecipe(
+    RequestStartRecipeEvent event,
+    Emitter<PlannerState> emit,
+  ) async {
+    emit(state.copyWith(requestingStartRecipe: true));
+
+    final hostQuery = await FirebaseFirestore.instance
+        .collection('kitchens')
+        .where("kitchen_id", isEqualTo: event.kitchenId)
+        .get();
+
+    if (hostQuery.docs.isEmpty) {
+      emit(
+        state.copyWith(
+          errorMessage: "Kitchen not found",
+          requestingStartRecipe: false,
+        ),
+      );
+      return;
+    }
+
+    final kitchenData = hostQuery.docs.first.data();
+    log("kitchenId: ${kitchenData.toString()}");
+    final hostUserId = kitchenData['user_id'].toString();
+    final kitchenName = kitchenData['kitchen_name'] ?? '';
+    final invitationCode = kitchenData['invitation_code'] ?? '';
+
+    final hostDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(hostUserId)
+        .get();
+
+    if (!hostDoc.exists) {
+      emit(
+        state.copyWith(
+          errorMessage: "Host not found",
+          requestingStartRecipe: false,
+        ),
+      );
+      return;
+    }
+
+    final hostDeviceToken = hostDoc.data()?['user_device_token'];
+
+    if (hostDeviceToken == null || hostDeviceToken.isEmpty) {
+      emit(
+        state.copyWith(
+          errorMessage: "Host device token not found",
+          requestingStartRecipe: false,
+        ),
+      );
+      return;
+    }
+
+    final memberName =
+        "${_userCubit.state.firstName} ${_userCubit.state.lastName}";
+
+    final notificationData = {
+      'status': false,
+      'title': "Recipe Start Request",
+      'body':
+          "$memberName is requesting to start the recipe \"${event.recipeName}\" in the kitchen \"$kitchenName\".",
+      'host_user_id': hostUserId,
+      'sender_user_id': _userCubit.state.userId,
+      'sender_name': memberName,
+      'kitchen_id': event.kitchenId,
+      'recipe_id': event.recipeId,
+      'date': DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
+      'read': false,
+      'notification_type': 'start_recipe_request',
+    };
+
+    await FCMService().sendNotification(
+      hostDeviceToken,
+      "Recipe Start Request",
+      "$memberName is requesting to start the recipe \"${event.recipeName}\" in the kitchen \"$kitchenName\".",
+      invitationCode,
+      kitchenName,
+      "host",
+      event.kitchenId,
+      "start_recipe_request",
+      event.recipeId,
+    );
+
+    await FirebaseFirestore.instance
+        .collection('recipe_start_requests')
+        .add(notificationData);
+
+    AppToast.show("Request sent to host", ToastType.success);
+    emit(state.copyWith(requestingStartRecipe: false));
   }
 }

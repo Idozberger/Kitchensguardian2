@@ -256,4 +256,21 @@ class PantryRepositoryImpl implements PantryRepository {
       return Left(UnknownFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, String>> addPantryRequestItem({
+    required Pantry pantry,
+  }) async {
+    try {
+      String response = await pantryRemoteDatasource.addRequestItem(
+        pantryModel: PantryModel.fromEntity(pantry),
+      );
+
+      return Right(response);
+    } on Failure catch (f) {
+      return Left(f);
+    } catch (e) {
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
 }

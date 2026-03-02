@@ -1,3 +1,5 @@
+import 'package:foodkitchen/core/common/data/model/recipe_model.dart';
+import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/features/dashboard/data/datasource/dashboard_remote_datasource.dart';
 import 'package:foodkitchen/features/dashboard/data/model/member_model.dart';
@@ -81,6 +83,28 @@ class DashboardRepositoryImpl implements DashboardRepository {
       );
 
       return Right(response);
+    } on Failure catch (f) {
+      return Left(f);
+    } catch (e) {
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, RecipeEntity>> getRecipeDetails({
+    required String recipeId,
+    required String kitchenId,
+  }) async {
+    try {
+      final response = await dashboardRemoteDatasource.getRecipeDetails(
+        recipeId: recipeId,
+        kitchenId: kitchenId,
+      );
+      final generatedRecipes = (response as List)
+          .map((e) => RecipeModel.fromJson(e as Map<String, dynamic>))
+          .toList();
+
+      return Right(generatedRecipes[0]);
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {

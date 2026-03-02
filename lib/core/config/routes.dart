@@ -15,6 +15,9 @@ class Routes {
   static const String notification = "/notification";
   static const String scanHistory = "/scan_history";
   static const String addItem = "/add_item";
+  static const String recipeStartRequests = "/recipe_start_requests";
+  static const String recipeRequestsDetail = "/recipe_request_details";
+  static const String itemRequestsDetails = "/item_requests_details";
   static const String myPantry = "/my_pantry";
   static const String scanMeal = "/scan_meal";
   static const String kitchen = "/kitchen";

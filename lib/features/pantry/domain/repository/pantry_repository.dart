@@ -7,9 +7,13 @@ import 'package:fpdart/fpdart.dart';
 
 abstract interface class PantryRepository {
   Future<Either<Failure, String>> addItem({required Pantry pantry});
+  Future<Either<Failure, String>> addPantryRequestItem({
+    required Pantry pantry,
+  });
   Future<Either<Failure, List<PantryItemEntity>>> getItems({
     required String kitchenId,
   });
+
   Future<Either<Failure, ScanReceiptEntity>> scanRecipt({
     required String filePath,
     required String currency,

@@ -11,6 +11,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 abstract interface class HomeRemoteDataSource {
   Future<Map<String, dynamic>> createKitchen({required String kitchenName});
   Future<String> joinKitchen({required String invitationCode});
+  Future<String> respondToItemRequest({
+    required String action,
+    required String rejectReason,
+    required String requestId,
+  });
   Future<Map<String, List<Map<String, dynamic>>>> getPantriesItems({
     required String kitchenId,
   });
@@ -18,6 +23,9 @@ abstract interface class HomeRemoteDataSource {
     required String kitchenId,
   });
   Future<Map<String, dynamic>> getRecipeSuggestion({required String kitchenId});
+  Future<List<Map<String, dynamic>>> getAllRequestedItems({
+    required String kitchenId,
+  });
 }
 
 class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
@@ -188,6 +196,90 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
         throw "Server error, please try again";
       }
       return response.data;
+    } on DioException catch (e) {
+      throw dio.handleError(e);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getAllRequestedItems({
+    required String kitchenId,
+  }) async {
+    try {
+      final url =
+          "https://web-production-c7f89.up.railway.app/api/kitchen/item_requests?kitchen_id=$kitchenId&status=all";
+      log("[API] Fetching all requested items from URL: $url");
+
+      final response = await dio.get(url);
+      log("[API] Response received with status code: ${response.statusCode}");
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+
+        final message = data?["error"] ?? "Unknown error";
+        log("[API] Error fetching requested items: $message");
+        throw message;
+      }
+
+      final data = response.data?["requests"];
+
+      if (data is List) {
+        final parsedList = data.map((e) {
+          final map = Map<String, dynamic>.from(e);
+
+          return map;
+        }).toList();
+
+        log("[API] Total requested items parsed: ${parsedList.length}");
+        return parsedList;
+      } else {
+        log(
+          "[API] Invalid data format, expected List, got: ${data.runtimeType}",
+        );
+        throw Exception("Invalid data");
+      }
+    } on DioException catch (e) {
+      log("[API] DioException occurred: ${e.message}");
+      final error = await dio.handleError(e);
+      log("[API] Processed Dio error: $error");
+      throw error;
+    } catch (e, stackTrace) {
+      log("[API] Unexpected exception: $e");
+      log("[API] Stack trace: $stackTrace");
+      rethrow;
+    }
+  }
+
+  @override
+  Future<String> respondToItemRequest({
+    required String action,
+    required String rejectReason,
+    required String requestId,
+  }) async {
+    try {
+      final response = await dio.post(
+        AppConstants.repondToItemRequest,
+        data: {
+          "action": action,
+          "reject_reason": rejectReason,
+          "request_id": requestId,
+        },
+      );
+      log("respond request: $response");
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+
+        final message = data["error"];
+        debugPrint("Suggested Recipe: $message");
+        throw "Server error, please try again";
+      }
+      return response.data["message"];
     } on DioException catch (e) {
       throw dio.handleError(e);
     } catch (e) {

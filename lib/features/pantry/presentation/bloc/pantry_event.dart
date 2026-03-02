@@ -4,7 +4,8 @@ sealed class PantryEvent {}
 
 final class PantryAddItemEvent extends PantryEvent {
   final Pantry pantry;
-  PantryAddItemEvent({required this.pantry});
+  final bool isMember;
+  PantryAddItemEvent({required this.pantry, required this.isMember});
 }
 
 final class PantryAddScannedItemEvent extends PantryEvent {
@@ -15,6 +16,11 @@ final class PantryAddScannedItemEvent extends PantryEvent {
 final class GetPantryItemsEvent extends PantryEvent {
   final String kitchenId;
   GetPantryItemsEvent({required this.kitchenId});
+}
+
+final class GetAllRequestedItemsEvent extends PantryEvent {
+  final String kitchenId;
+  GetAllRequestedItemsEvent({required this.kitchenId});
 }
 
 final class ScanReceiptEvent extends PantryEvent {

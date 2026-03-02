@@ -1,3 +1,4 @@
+import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/features/consumptions/domain/entities/consumption_confirmation.dart';
 import 'package:foodkitchen/features/dashboard/domain/entities/member.dart';
 
@@ -59,4 +60,9 @@ class ApproveLoading extends DashboardState {
 class DeclineLoading extends DashboardState {
   final String id;
   const DeclineLoading(this.id);
+}
+
+class RecipeDetailsLoaded extends DashboardState {
+  final RecipeEntity recipeEntity;
+  const RecipeDetailsLoaded(this.recipeEntity);
 }

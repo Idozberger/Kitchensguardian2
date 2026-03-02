@@ -14,9 +14,11 @@ import 'package:foodkitchen/core/services/notifications/flutter_local_notificati
 
 abstract interface class PantryRemoteDatasource {
   Future<String> addPantryItem({required PantryModel pantryModel});
+  Future<String> addRequestItem({required PantryModel pantryModel});
   Future<List<Map<String, dynamic>>> getPantryItems({
     required String kitchenId,
   });
+
   Future<Map<String, dynamic>> scanRecipt({
     required String filePath,
     required String currency,
@@ -377,6 +379,28 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
       throw handledError;
     } catch (e) {
       rethrow;
+    }
+  }
+
+  @override
+  Future<String> addRequestItem({required PantryModel pantryModel}) async {
+    try {
+      final response = await dio.post(
+        AppConstants.addPantryRequestItems,
+        data: pantryModel.toJson(),
+      );
+      log("add pantry status: $response");
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+
+        final message = data["error"];
+        throw message;
+      }
+      return response.data["message"];
+    } on DioException catch (e) {
+      throw dio.handleError(e);
     }
   }
 }

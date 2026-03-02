@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
+import 'package:foodkitchen/core/common/data/model/recipe_model.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
-import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_checktile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
@@ -20,11 +20,11 @@ import 'package:go_router/go_router.dart';
 
 class MissingItemsListWidget extends StatefulWidget {
   final bool isPlanned;
-  final List<IngredientEntity> ingredients;
+  final String recipeId;
   const MissingItemsListWidget({
     super.key,
-    required this.ingredients,
     required this.isPlanned,
+    required this.recipeId,
   });
 
   @override
@@ -40,8 +40,22 @@ class _MissingItemsListWidgetState extends State<MissingItemsListWidget> {
   void initState() {
     plannerBloc = context.read<PlannerBloc>();
     userCubit = context.read<UserCubit>();
-    selectAllIngredients();
     super.initState();
+  }
+
+  List<IngredientEntity> getIngredients(PlannerState state) {
+    final allRecipes = [
+      ...List<RecipeModel>.from(state.recipes ?? []),
+      ...List<RecipeModel>.from(state.favouriteRecipes ?? []),
+    ];
+
+    for (var i = 0; i < allRecipes.length; i++) {
+      if (allRecipes[i].id == widget.recipeId) {
+        return allRecipes[i].missingIngredients;
+      }
+    }
+
+    return [];
   }
 
   void updateSelectedIngredients(IngredientEntity ingredient) {
@@ -53,11 +67,8 @@ class _MissingItemsListWidgetState extends State<MissingItemsListWidget> {
     setState(() {});
   }
 
-  void selectAllIngredients() {
-    selectedIngredients = [];
-    for (var i = 0; i < widget.ingredients.length; i++) {
-      selectedIngredients.add(widget.ingredients[i]);
-    }
+  void selectAllIngredients(List<IngredientEntity> ingredients) {
+    selectedIngredients = List.from(ingredients);
     setState(() {});
   }
 
@@ -65,6 +76,7 @@ class _MissingItemsListWidgetState extends State<MissingItemsListWidget> {
   Widget build(BuildContext context) {
     return BlocBuilder<PlannerBloc, PlannerState>(
       builder: (_, state) {
+        final ingredients = getIngredients(state);
         return UpperTile(
           widget: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -76,69 +88,89 @@ class _MissingItemsListWidgetState extends State<MissingItemsListWidget> {
                     "Missing Items",
                     style: Theme.of(context).textTheme.headlineLarge,
                   ),
-                  TextButton(
-                    onPressed: () {
-                      if (selectedIngredients.length ==
-                          widget.ingredients.length) {
-                        AppToast.show(
-                          "All items are already selected",
-                          ToastType.success,
-                        );
-                      } else {
-                        selectAllIngredients();
-                      }
-                    },
-                    child: Text(
-                      "Select All",
-                      style: Theme.of(context).textTheme.headlineLarge!
-                          .copyWith(
-                            color: AppColors.primaryColor,
-                            fontSize: t(14),
+                  ingredients.isEmpty
+                      ? SizedBox()
+                      : TextButton(
+                          onPressed: () {
+                            if (selectedIngredients.length ==
+                                ingredients.length) {
+                              setState(() => selectedIngredients = []);
+                            } else {
+                              selectAllIngredients(ingredients);
+                            }
+                          },
+                          child: Text(
+                            selectedIngredients.length == ingredients.length
+                                ? "Deselect All"
+                                : "Select All",
+                            style: Theme.of(context).textTheme.headlineLarge!
+                                .copyWith(
+                                  color: AppColors.primaryColor,
+                                  fontSize: t(14),
+                                ),
                           ),
-                    ),
-                  ),
+                        ),
                 ],
               ),
-              Column(
-                children: List.generate(widget.ingredients.length, (int index) {
-                  var item = widget.ingredients[index];
-                  return Padding(
-                    padding: gapOnly(top: 12),
-                    child: GenericCircleCheckboxTile(
-                      unit: item.unit,
-                      quantity: item.amount,
-                      title: item.name,
-                      isChecked: selectedIngredients.contains(item),
-                      isFinalList: false,
-                      activeColor: AppColors.primaryColor,
-                      onChanged: (Object? value) {
-                        updateSelectedIngredients(item);
-                      },
+              ingredients.isEmpty
+                  ? Padding(
+                      padding: gapOnly(top: 8),
+                      child: Text(
+                        "No ingredients are available",
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                    )
+                  : Column(
+                      children: List.generate(ingredients.length, (int index) {
+                        var item = ingredients[index];
+                        return Padding(
+                          padding: gapOnly(top: 8),
+                          child: GenericCircleCheckboxTile(
+                            unit: item.unit,
+                            quantity: item.amount,
+                            title: item.name,
+                            isChecked: selectedIngredients.contains(item),
+                            isFinalList: false,
+                            activeColor: AppColors.primaryColor,
+                            onChanged: (Object? value) {
+                              updateSelectedIngredients(item);
+                            },
+                          ),
+                        );
+                      }),
                     ),
-                  );
-                }),
-              ),
-              SizedBox(height: h(20)),
-              Row(
-                spacing: w(6),
-                children: [
-                  Flexible(
-                    child: GenericButtonWidget(
-                      isOutlined: true,
-                      isLoading: state.isLoading,
-                      onPressed: () => onAddInList(),
-                      text: "Add in List",
+              ingredients.isEmpty
+                  ? const SizedBox.shrink()
+                  : SizedBox(height: h(20)),
+              ingredients.isEmpty
+                  ? const SizedBox.shrink()
+                  : Row(
+                      spacing: w(6),
+                      children: [
+                        Flexible(
+                          child: GenericButtonWidget(
+                            isOutlined: true,
+                            isLoading: state.isLoading,
+                            onPressed: () => onAddInList(),
+                            text: "Add in List",
+                          ),
+                        ),
+
+                        Flexible(
+                          child: GenericButtonWidget(
+                            isLoading: state.addingToInventory,
+                            onPressed: () => onAddInInventory(
+                              context.read<UserCubit>().state.role == "member",
+                            ),
+                            text:
+                                (context.read<UserCubit>().state.role ==
+                                    "member")
+                                ? "Request Items"
+                                : "Add to Inventory",
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  Flexible(
-                    child: GenericButtonWidget(
-                      isLoading: state.addingToInventory,
-                      onPressed: () => onAddInInventory(),
-                      text: "Add to Inventory",
-                    ),
-                  ),
-                ],
-              ),
             ],
           ),
         );
@@ -146,7 +178,7 @@ class _MissingItemsListWidgetState extends State<MissingItemsListWidget> {
     );
   }
 
-  Future<void> onAddInInventory() async {
+  Future<void> onAddInInventory(bool isMember) async {
     List<PantryItem> pantryItems = [];
 
     for (var ingredient in selectedIngredients) {
@@ -166,7 +198,13 @@ class _MissingItemsListWidgetState extends State<MissingItemsListWidget> {
 
     context.pushNamed(
       Routes.addItem,
-      extra: {"pantryItems": pantryItems, "addToInventory": true},
+      extra: {
+        "pantryItems": pantryItems,
+        "addToInventory": true,
+        "isMember": isMember,
+        "recipeId": widget.recipeId,
+        "selectedIngredients": selectedIngredients,
+      },
     );
   }
 
@@ -194,7 +232,14 @@ class _MissingItemsListWidgetState extends State<MissingItemsListWidget> {
     );
 
     plannerBloc.add(
-      RequestMissingItemsEvent(pantry: pantryModel, isPlan: widget.isPlanned),
+      RequestMissingItemsEvent(
+        pantry: pantryModel,
+        isPlan: widget.isPlanned,
+        recipeId: widget.recipeId,
+        selectedIngredients: selectedIngredients,
+      ),
     );
+    await Future.delayed(Duration(seconds: 1));
+    setState(() => selectedIngredients = []);
   }
 }

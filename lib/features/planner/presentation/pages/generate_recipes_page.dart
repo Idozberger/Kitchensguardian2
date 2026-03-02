@@ -138,7 +138,7 @@ class _GenerateRecipesPageState extends State<GenerateRecipesPage> {
             if (state.startedRecipe.isNotEmpty)
               _buildRecipeInProgressNotification(state),
             _buildSearchBar(),
-            if (state.isLoading)
+            if (state.isLoading || state.isFavLoading)
               _buildLoadingState()
             else ...[
               if (state.recipes != null && state.recipes!.isNotEmpty)

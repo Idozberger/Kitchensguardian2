@@ -18,6 +18,7 @@ class AppAssets {
   static String plannerPng = "assets/images/planner.png";
   static String scanMealPng = "assets/images/scan_meal.png";
   static String alertsPng = "assets/images/alerts.png";
+  static String requestsRecipes = "assets/svgs/requests_recipe.svg";
 
   /////[ICONS]
   static String tickSvg = "assets/svgs/tick.svg";

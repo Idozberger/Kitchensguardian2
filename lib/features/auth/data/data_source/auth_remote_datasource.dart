@@ -534,14 +534,24 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource {
         ],
       );
 
-      final String applePermanentId = credential.userIdentifier ?? "";
-      final String email = credential.email ?? "";
-      final String firstName = credential.givenName ?? "";
-      final String lastName = credential.familyName ?? "";
-
-      if (applePermanentId.isEmpty) {
-        throw "Sign up failed";
+      if (credential.userIdentifier == null) {
+        log("Apple Sign-Up cancelled or failed", name: "Auth");
+        throw "Sign up cancelled by user";
       }
+
+      final String applePermanentId = credential.userIdentifier!;
+
+      final String email = credential.email ?? "";
+      final String displayName =
+          "${credential.givenName ?? ""} ${credential.familyName ?? ""}".trim();
+
+      final List<String> nameParts = displayName.split(RegExp(r'\s+'));
+      final String firstName = nameParts.isNotEmpty ? nameParts.first : "User";
+      final String lastName = nameParts.length > 1
+          ? nameParts.sublist(1).join(" ")
+          : "";
+
+      log("Apple Sign-Up → $firstName $lastName | $email", name: "Auth");
 
       final UserModel userModel = UserModel(
         firstName: firstName,
@@ -549,12 +559,14 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource {
         email: email,
         password: applePermanentId,
       );
-
+      log("Apple sign up, ${userModel.toJson()}");
       userCubit.setGoogleSignUpUserModel(
         firstName: firstName,
         lastName: lastName,
         email: email,
       );
+
+      log("Sending user data to server: ${userModel.toJson()}", name: "Auth");
 
       final response = await dio.post(
         AppConstants.createAccount,
@@ -565,16 +577,35 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource {
         final data = response.data is String
             ? jsonDecode(response.data)
             : response.data;
-        throw data["error"] ?? data["message"] ?? "Sign up failed";
+        final errorMsg = data?["error"] ?? data?["message"] ?? "Sign up failed";
+        log("Apple Sign-Up failed: $errorMsg", name: "Auth");
+        throw errorMsg;
       }
 
-      return response.data["message"] ?? "Account created successfully!";
+      final String message =
+          response.data["message"] ?? "Account created successfully!";
+      log("Apple Sign-Up successful: $message", name: "Auth");
+      return message;
     } on DioException catch (e) {
-      final data = e.response?.data is String
-          ? jsonDecode(e.response!.data)
-          : e.response?.data;
-      throw data?["error"] ?? data?["message"] ?? "Sign up failed";
+      String errorMsg = "Sign up failed";
+      if (e.response != null) {
+        final data = e.response!.data is String
+            ? jsonDecode(e.response!.data)
+            : e.response!.data;
+        errorMsg = data?["error"] ?? data?["message"] ?? "Sign up failed";
+      } else {
+        errorMsg = "No internet connection";
+      }
+      log("Apple Sign-Up error: $errorMsg", name: "Auth", error: e);
+      throw errorMsg;
+    } on SignInWithAppleAuthorizationException catch (e) {
+      log("Apple Sign-In authorization error", name: "Auth", error: e);
+      if (e.code == AuthorizationErrorCode.canceled) {
+        throw "Sign up cancelled by user";
+      }
+      throw "Sign up failed. Please try again.";
     } catch (e) {
+      log("Unexpected error in Apple Sign-Up", name: "Auth", error: e);
       throw e.toString();
     }
   }

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -14,7 +13,6 @@ import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/services/date_picker/date_picker_service.dart';
-import 'package:foodkitchen/core/services/notifications/flutter_local_notifications_service.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_dropdown_widget.dart';
@@ -77,38 +75,38 @@ class _PantryItemCardState extends State<PantryItemCard> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: h(1)),
-            if (widget.pantryItemEntity.expiryStatus == "expiring_soon")
+            if (widget.pantryItemEntity.expiryStatus == "expiring_soon" ||
+                widget.pantryItemEntity.stockStatus == "low_stock")
               Stack(
                 clipBehavior: Clip.none,
                 children: [
                   SizedBox(height: h(1), width: double.maxFinite),
                   Positioned(
                     top: -h(22),
-                    right: w(62),
-
+                    right:
+                        widget.pantryItemEntity.expiryStatus ==
+                                "expiring_soon" &&
+                            widget.pantryItemEntity.stockStatus == "low_stock"
+                        ? w(134)
+                        : widget.pantryItemEntity.stockStatus == "low_stock" &&
+                              widget.pantryItemEntity.expiryStatus !=
+                                  "expiring_soon"
+                        ? w(54)
+                        : w(62),
                     child: Badge(
                       label: Padding(
                         padding: gapAll(2),
-                        child: Text("Expiring soon"),
-                      ),
-                      child: Container(),
-                    ),
-                  ),
-                ],
-              ),
-            if (widget.pantryItemEntity.stockStatus == "low_stock")
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  SizedBox(height: h(1), width: double.maxFinite),
-                  Positioned(
-                    top: -h(22),
-                    right: w(54),
-
-                    child: Badge(
-                      label: Padding(
-                        padding: gapAll(2),
-                        child: Text("Running low"),
+                        child: Text(
+                          widget.pantryItemEntity.expiryStatus ==
+                                      "expiring_soon" &&
+                                  widget.pantryItemEntity.stockStatus ==
+                                      "low_stock"
+                              ? "Expiring soon and low-stock"
+                              : widget.pantryItemEntity.expiryStatus ==
+                                    "expiring_soon"
+                              ? "Expiring soon"
+                              : "Running low",
+                        ),
                       ),
                       child: Container(),
                     ),

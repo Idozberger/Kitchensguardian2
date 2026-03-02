@@ -10,6 +10,6 @@ class AppleSignUpUsecase implements UseCase<String, NoParams> {
 
   @override
   Future<Either<Failure, String>> call(NoParams params) async {
-    return await authRepository.signUpWithGoogle();
+    return await authRepository.signUpWithApple();
   }
 }

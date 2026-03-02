@@ -10,10 +10,12 @@ import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/features/home/domain/entities/kitchen.dart';
 import 'package:foodkitchen/features/home/domain/entities/pantry_items.dart';
 import 'package:foodkitchen/features/home/domain/usecases/create_kitchen_usecase.dart';
+import 'package:foodkitchen/features/home/domain/usecases/get_all_requested_items.dart';
 import 'package:foodkitchen/features/home/domain/usecases/get_all_weekly_plans_usecase.dart';
 import 'package:foodkitchen/features/home/domain/usecases/get_pantries_usecase.dart';
 import 'package:foodkitchen/features/home/domain/usecases/get_recipe_suggestion_usecase.dart';
 import 'package:foodkitchen/features/home/domain/usecases/join_kitchen_usecase.dart';
+import 'package:foodkitchen/features/home/domain/usecases/respond_to_item_request.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_event.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_state.dart';
 import 'package:foodkitchen/features/planner/domain/entities/ingredient_entity.dart';
@@ -22,25 +24,30 @@ import 'package:intl/intl.dart';
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final UserCubit _userCubit;
   final CreateKitchen _createKitchen;
+  final RespondToItemRequest _respondToItemRequest;
   // ignore: unused_field
   final JoinKitchen _joinKitchen;
   final GetPantriesForHome _getPantriesForHome;
   final GetAllWeeklyPlansForHome _getAllWeeklyPlansForHome;
   final GetRecipeSuggestionUsecase _getRecipeSuggestionUsecase;
-
+  final GetAllRequestedItems _getAllRequestedItems;
   HomeBloc({
     required UserCubit userCubit,
+    required RespondToItemRequest respondToItemRequest,
     required CreateKitchen createKitchen,
     required JoinKitchen joinKitchen,
     required GetPantriesForHome getPantriesForHome,
     required GetAllWeeklyPlansForHome getAllWeeklyPlansForHome,
     required GetRecipeSuggestionUsecase getRecipeSuggestionUsecase,
+    required GetAllRequestedItems getAllRequestedItems,
   }) : _userCubit = userCubit,
        _createKitchen = createKitchen,
        _joinKitchen = joinKitchen,
        _getAllWeeklyPlansForHome = getAllWeeklyPlansForHome,
        _getPantriesForHome = getPantriesForHome,
        _getRecipeSuggestionUsecase = getRecipeSuggestionUsecase,
+       _getAllRequestedItems = getAllRequestedItems,
+       _respondToItemRequest = respondToItemRequest,
 
        super(const HomeState()) {
     on<CreateKitchenEventForHome>(_onCreateKitchenEvent);
@@ -51,7 +58,102 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<GetUserStorageAreaEvent>(_onGetUserStorageArea);
     on<GenerateGroceryList>(_onGetGenerateGroceryList);
     on<GetRecipeSuggestionEvent>(_onGetRecipeSuggestion);
+    on<GetAllRequestedItemsEvent>(_onGetAllRequestedItems);
+    on<RespondToItemRequestEvent>(_onRespondToItemRequestEvent);
+    on<RespondToItemRejectRequestEvent>(_onRespondToItemRejectRequestEvent);
   }
+  Future<void> _onRespondToItemRejectRequestEvent(
+    RespondToItemRejectRequestEvent event,
+    Emitter<HomeState> emit,
+  ) async {
+    emit(state.copyWith(requestRejecting: true));
+
+    final res = await _respondToItemRequest(
+      RespondToItemRequestParams(
+        action: event.action,
+        requestId: event.requestId,
+        rejectReason: event.rejectReason,
+      ),
+    );
+
+    await res.fold<Future<void>>(
+      (failure) async {
+        emit(
+          state.copyWith(
+            requestRejecting: false,
+            approveRejectError: failure.message,
+            approveRejectSuccess: null,
+          ),
+        );
+      },
+      (message) async {
+        emit(
+          state.copyWith(
+            requestRejecting: false,
+            approveRejectSuccess: message,
+            approveRejectError: null,
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _onRespondToItemRequestEvent(
+    RespondToItemRequestEvent event,
+    Emitter<HomeState> emit,
+  ) async {
+    emit(state.copyWith(requestApproving: true));
+
+    final res = await _respondToItemRequest(
+      RespondToItemRequestParams(
+        action: event.action,
+        requestId: event.requestId,
+        rejectReason: event.rejectReason,
+      ),
+    );
+
+    await res.fold<Future<void>>(
+      (failure) async {
+        emit(
+          state.copyWith(
+            requestApproving: false,
+            approveRejectError: failure.message,
+            approveRejectSuccess: null,
+          ),
+        );
+      },
+      (message) async {
+        emit(
+          state.copyWith(
+            requestApproving: false,
+            approveRejectSuccess: message,
+            approveRejectError: null,
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _onGetAllRequestedItems(
+    GetAllRequestedItemsEvent event,
+    Emitter<HomeState> emit,
+  ) async {
+    emit(state.copyWith(itemsRequestLoading: true));
+
+    final res = await _getAllRequestedItems(
+      GetAllRequestedItemsParams(kitchenId: event.kitchenId),
+    );
+
+    await res.fold<Future<void>>(
+      (failure) async {
+        emit(state.copyWith(itemsRequestLoading: false));
+      },
+      (items) async {
+        emit(state.copyWith(itemsRequest: items, itemsRequestLoading: false));
+      },
+    );
+  }
+
   Future<void> _onGetRecipeSuggestion(
     GetRecipeSuggestionEvent event,
     Emitter<HomeState> emit,

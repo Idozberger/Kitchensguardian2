@@ -14,9 +14,37 @@ class MemberTile extends StatelessWidget {
   final UserState userState;
   const MemberTile({super.key, required this.member, required this.userState});
 
+  bool _canShowMenu() {
+    final myRole = userState.role;
+    final myId = userState.userId;
+    final targetRole = member.type;
+    final targetId = member.userId;
+
+    if (myId == targetId) return false;
+    if (targetRole == 'host') return false;
+
+    if (myRole == 'host') return true;
+
+    if (myRole == 'co-host') {
+      if (targetRole == 'co-host') return false;
+      return targetRole == 'member';
+    }
+
+    return false;
+  }
+
+  bool _canPromoteToCoHost() {
+    return userState.role == 'host' && member.type == 'member';
+  }
+
+  bool _canDemoteCoHost() {
+    return userState.role == 'host' && member.type == 'co-host';
+  }
+
   @override
   Widget build(BuildContext context) {
     final dashboardBloc = context.read<DashboardBloc>();
+    final showMenu = _canShowMenu();
 
     return ListTile(
       dense: true,
@@ -43,11 +71,10 @@ class MemberTile extends StatelessWidget {
         member.userId,
         style: Theme.of(context).textTheme.bodySmall,
       ),
-      trailing:
-          userState.role != "member" &&
-              userState.userId != member.userId &&
-              member.type != "host"
+      trailing: showMenu
           ? MemberPopupMenu(
+              canMakeCoHost: _canPromoteToCoHost(),
+              canDemoteCoHost: _canDemoteCoHost(),
               onDemoteCoHost: () => dashboardBloc.add(
                 DemoteCohostEvent(
                   activeKitchenId: userState.activeKitchenId,

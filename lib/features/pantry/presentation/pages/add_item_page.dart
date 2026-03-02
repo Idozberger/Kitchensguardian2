@@ -28,15 +28,24 @@ import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_bloc.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_event.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_state.dart';
 import 'package:foodkitchen/features/pantry/presentation/models/pantry_items.dart';
+import 'package:foodkitchen/features/planner/domain/entities/ingredient_entity.dart';
+import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
+import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dart';
 import 'package:go_router/go_router.dart';
 
 class AddItemPage extends StatefulWidget {
   final List<PantryItem> pantryItems;
   final bool addToInventory;
+  final bool isMember;
+  final String recipeId;
+  final List<IngredientEntity> selectedIngredients;
   const AddItemPage({
     super.key,
     this.pantryItems = const [],
     this.addToInventory = false,
+    this.isMember = false,
+    this.recipeId = "",
+    this.selectedIngredients = const [],
   });
 
   @override
@@ -77,6 +86,12 @@ class _AddItemPageState extends State<AddItemPage> {
     setState(() {
       _items = [];
       if (widget.addToInventory) {
+        context.read<PlannerBloc>().add(
+          RemoveMissingIngredientEvent(
+            selectedIngredients: widget.selectedIngredients,
+            recipeId: widget.recipeId,
+          ),
+        );
         _items.add(
           PantryItem(
             nameController: TextEditingController(),
@@ -93,6 +108,7 @@ class _AddItemPageState extends State<AddItemPage> {
 
   @override
   Widget build(BuildContext context) {
+    log("isMember-- ${widget.isMember}");
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) async {
@@ -171,7 +187,7 @@ class _AddItemPageState extends State<AddItemPage> {
                 SizedBox(height: h(22)),
                 GenericButtonWidget(
                   isLoading: state is SubmittingItemLoading,
-                  text: "Add Item",
+                  text: widget.isMember ? "Request Item" : "Add Item",
                   onPressed: state is SubmittingItemLoading
                       ? () {}
                       : () => _handleSubmitItems(),
@@ -217,7 +233,9 @@ class _AddItemPageState extends State<AddItemPage> {
       items: pantryItems,
     );
 
-    _pantryBloc.add(PantryAddItemEvent(pantry: pantryModel));
+    _pantryBloc.add(
+      PantryAddItemEvent(pantry: pantryModel, isMember: widget.isMember),
+    );
   }
 
   String? _validateItem(PantryItem item) {
@@ -454,7 +472,10 @@ class _AddItemPageState extends State<AddItemPage> {
           ),
         ],
       ),
-      title: Text("Add Item", style: Theme.of(context).textTheme.headlineLarge),
+      title: Text(
+        widget.isMember ? "Request Item" : "Add Item",
+        style: Theme.of(context).textTheme.headlineLarge,
+      ),
     );
   }
 

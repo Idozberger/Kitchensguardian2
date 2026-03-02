@@ -16,10 +16,13 @@ import 'package:foodkitchen/features/dashboard/presentation/pages/dashboard_page
 import 'package:foodkitchen/features/dashboard/presentation/pages/my_kitchen_members_page.dart';
 import 'package:foodkitchen/features/dashboard/presentation/pages/notification_page.dart';
 import 'package:foodkitchen/features/consumptions/presentation/pages/pending_consumptions_page.dart';
+import 'package:foodkitchen/features/dashboard/presentation/pages/recipes_request_details_page.dart';
+import 'package:foodkitchen/features/dashboard/presentation/pages/recipes_start_request_page.dart';
 import 'package:foodkitchen/features/dashboard/presentation/pages/referral_code_page.dart';
 import 'package:foodkitchen/features/grocery/presentation/pages/add_custom_items_page.dart';
 import 'package:foodkitchen/features/history/presentation/pages/scan_history_page.dart';
 import 'package:foodkitchen/features/home/presentation/pages/grocery_list_page.dart';
+import 'package:foodkitchen/features/home/presentation/pages/item_requests_details/pages/item_requests_detail_page.dart';
 import 'package:foodkitchen/features/kitchens/presentation/pages/kitchen_selection_page.dart';
 import 'package:foodkitchen/features/kitchens/presentation/pages/invite_member_page.dart';
 import 'package:foodkitchen/features/kitchens/presentation/pages/kitchen_page.dart';
@@ -150,6 +153,28 @@ final GoRouter router = GoRouter(
           buildPage(state.pageKey, ScanHistoryPage()),
     ),
     GoRoute(
+      path: Routes.itemRequestsDetails,
+      pageBuilder: (context, state) =>
+          buildPage(state.pageKey, ItemRequestsDetailPage()),
+    ),
+    GoRoute(
+      path: Routes.recipeStartRequests,
+      pageBuilder: (context, state) =>
+          buildPage(state.pageKey, RecipesStartRequestPage()),
+    ),
+    GoRoute(
+      name: Routes.recipeRequestsDetail,
+      path: Routes.recipeRequestsDetail,
+      builder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>;
+        return RecipesRequestDetailsPage(
+          recipeId: extra['recipeId'] ?? '',
+          kitchenId: extra['kitchenId'] ?? '',
+          backPageAvailable: extra['backPageAvailable'] ?? true,
+        );
+      },
+    ),
+    GoRoute(
       name: Routes.addItem,
       path: Routes.addItem,
       pageBuilder: (context, state) {
@@ -160,6 +185,9 @@ final GoRouter router = GoRouter(
           AddItemPage(
             pantryItems: extra?["pantryItems"] ?? [],
             addToInventory: extra?["addToInventory"] ?? false,
+            isMember: extra?["isMember"] ?? false,
+            recipeId: extra?["recipeId"] ?? "",
+            selectedIngredients: extra?["selectedIngredients"] ?? [],
           ),
         );
       },
@@ -364,16 +392,14 @@ CustomTransitionPage buildPage(LocalKey key, Widget child) {
   return CustomTransitionPage(
     key: key,
     child: child,
-    transitionDuration: const Duration(milliseconds: 300),
+    transitionDuration: const Duration(milliseconds: 200),
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      final slide = Tween<Offset>(
-        begin: const Offset(1.0, 0.0),
-        end: Offset.zero,
-      ).animate(animation);
-      final fade = Tween<double>(begin: 0.0, end: 1.0).animate(animation);
-      return FadeTransition(
-        opacity: fade,
-        child: SlideTransition(position: slide, child: child),
+      return SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(1.0, 0.0),
+          end: Offset.zero,
+        ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOut)),
+        child: child,
       );
     },
   );

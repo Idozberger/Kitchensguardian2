@@ -77,7 +77,7 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xffF9F9F9),
-      appBar: AppBarWidget(),
+      appBar: AppBarWidget(onNavigatorback: () => context.pop()),
       body: BlocConsumer<PlannerBloc, PlannerState>(
         listener: (_, state) {
           if (state.successMessage.isNotEmpty) {
@@ -150,15 +150,24 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
       isFinishing: state.isFinishingRecipe,
       addToWeeklyPlanCallback: () => _handleAddToWeeklyPlan(context, state),
       onStartRecipe: () async {
-        plannerBloc.add(
-          UpdateStartRecipeEvent(
-            startRecipe: true,
-            recipeEntity: [recipe as RecipeModel],
-            doneSteps: steps,
-          ),
-        );
-
-        setState(() => selectedTab = 1);
+        if (context.read<UserCubit>().state.role == "member") {
+          plannerBloc.add(
+            RequestStartRecipeEvent(
+              recipeId: widget.recipeEntity.id,
+              kitchenId: context.read<UserCubit>().state.activeKitchenId,
+              recipeName: widget.recipeEntity.title,
+            ),
+          );
+        } else {
+          plannerBloc.add(
+            UpdateStartRecipeEvent(
+              startRecipe: true,
+              recipeEntity: [recipe as RecipeModel],
+              doneSteps: steps,
+            ),
+          );
+          setState(() => selectedTab = 1);
+        }
       },
       onCancel: () {
         plannerBloc.add(
@@ -196,10 +205,7 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
         IngredientsListWidget(recipe: recipe),
         gap(height: 16),
         if (recipe.missingItems)
-          MissingItemsListWidget(
-            ingredients: recipe.ingredients,
-            isPlanned: widget.isPlan,
-          ),
+          MissingItemsListWidget(recipeId: recipe.id, isPlanned: widget.isPlan),
       ],
     );
   }

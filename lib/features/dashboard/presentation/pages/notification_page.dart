@@ -18,7 +18,8 @@ import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_ico
 import 'package:go_router/go_router.dart';
 
 class NotificationPage extends StatefulWidget {
-  const NotificationPage({super.key});
+  final bool showAppbar;
+  const NotificationPage({super.key, this.showAppbar = true});
 
   @override
   State<NotificationPage> createState() => _NotificationPageState();
@@ -87,7 +88,7 @@ class _NotificationPageState extends State<NotificationPage> {
           },
           child: Scaffold(
             backgroundColor: const Color(0xffF9F9F9),
-            appBar: _buildAppBar(context),
+            appBar: widget.showAppbar ? _buildAppBar(context) : null,
             body: StreamBuilder<QuerySnapshot>(
               stream: _notificationsStream,
               builder: (context, snapshot) {
@@ -99,7 +100,7 @@ class _NotificationPageState extends State<NotificationPage> {
                     ? _filterNotifications(snapshot.data!.docs)
                     : <QueryDocumentSnapshot>[];
 
-                if (filtered.isEmpty) {
+                if (filtered.isEmpty && widget.showAppbar) {
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,

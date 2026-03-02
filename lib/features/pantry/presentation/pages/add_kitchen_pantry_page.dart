@@ -249,7 +249,10 @@ class _AddKitchenPantryPageState extends State<AddKitchenPantryPage> {
                           );
 
                           pantryBloc.add(
-                            PantryAddItemEvent(pantry: pantryModel),
+                            PantryAddItemEvent(
+                              pantry: pantryModel,
+                              isMember: false,
+                            ),
                           );
                         },
                 ),

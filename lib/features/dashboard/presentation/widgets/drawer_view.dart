@@ -171,9 +171,26 @@ class AppDrawer extends StatelessWidget {
                   title: "Rescan Kitchen",
                   iconPath: AppAssets.reScanSvg,
                   onTap: () {
-                    context.pushNamed(Routes.smartKitchenSetup, extra: true);
+                    if (context.read<UserCubit>().state.role != "member") {
+                      context.pushNamed(Routes.smartKitchenSetup, extra: true);
+                    } else {
+                      AppToast.show(
+                        "Only the host or cohost can rescan the kitchen.",
+                        ToastType.warning,
+                      );
+                    }
                   },
                 ),
+                if (context.read<UserCubit>().state.role != "member") ...[
+                  Divider(color: Color(0xffF4F4F4)),
+                  DrawerListTile(
+                    title: "Recipe Start Requests",
+                    iconPath: AppAssets.requestsRecipes,
+                    onTap: () {
+                      context.push(Routes.recipeStartRequests);
+                    },
+                  ),
+                ],
                 Divider(color: Color(0xffF4F4F4)),
                 DrawerListTile(
                   title: "Kitchens",

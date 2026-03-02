@@ -16,6 +16,7 @@ final class PlannerState {
   final bool isFavLoading;
   final bool addingToInventory;
   final bool loadingPlans;
+  final bool requestingStartRecipe;
   final bool isSubscribed;
   final bool addingToWeeklyPlan;
   final bool startRecipe;
@@ -40,6 +41,7 @@ final class PlannerState {
     this.startRecipe = false,
     this.loadingPlans = true,
     this.isFinishingRecipe = false,
+    this.requestingStartRecipe = false,
     this.addingToWeeklyPlan = false,
     this.isRecipeFinished = false,
     this.errorMessage,
@@ -70,6 +72,7 @@ final class PlannerState {
     bool? isSubscribed,
     String? errorMessage,
     bool? isRecipeFinished,
+    bool? requestingStartRecipe,
     String? successMessage,
     List<Map<String, dynamic>>? doneSteps,
     int? mealTypeSelectedIndex,
@@ -102,6 +105,8 @@ final class PlannerState {
       isSubscribed: isSubscribed ?? this.isSubscribed,
       addingToInventory: addingToInventory ?? this.addingToInventory,
       isFavLoading: isFavLoading ?? this.isFavLoading,
+      requestingStartRecipe:
+          requestingStartRecipe ?? this.requestingStartRecipe,
     );
   }
 }
