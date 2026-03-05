@@ -7,6 +7,7 @@ import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
+import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:go_router/go_router.dart';
@@ -32,7 +33,7 @@ class _RecipesStartRequestPageState extends State<RecipesStartRequestPage> {
 
   Stream<QuerySnapshot> get _requestsStream => FirebaseFirestore.instance
       .collection('recipe_start_requests')
-      .where('host_user_id', isEqualTo: _userCubit.state.userId)
+      .where('kitchen_id', isEqualTo: _userCubit.state.activeKitchenId)
       .orderBy('date', descending: true)
       .snapshots();
 
@@ -61,11 +62,13 @@ class _RecipesStartRequestPageState extends State<RecipesStartRequestPage> {
   }
 
   void _onCardTap(Map<String, dynamic> data) {
+    log("RecipeId: ${data["recipe_id"]}");
     context.pushNamed(
       Routes.recipeRequestsDetail,
       extra: {
         'recipeId': data['recipe_id'] ?? '',
         'kitchenId': data['kitchen_id'] ?? '',
+        'completed': data['recipe_status'] ?? 'pending',
       },
     );
   }
@@ -127,7 +130,7 @@ class _RecipesStartRequestPageState extends State<RecipesStartRequestPage> {
                   title: data['title'] ?? '',
                   body: data['body'] ?? '',
                   date: data['date']?.toString() ?? '',
-                  status: data['kitchen_joining_status'] ?? 'Pending',
+                  status: data['recipe_status'],
                   onTap: () => _onCardTap(data),
                 );
               },
@@ -178,11 +181,11 @@ class _RecipeRequestCard extends StatelessWidget {
 
   ({Color color, Color bg, IconData icon, String label}) get _statusStyle =>
       switch (status) {
-        'Approved' => (
+        'Completed' => (
           color: const Color(0xFF2E7D32),
           bg: const Color(0xFFE8F5E9),
           icon: Icons.check_circle_rounded,
-          label: 'Approved',
+          label: 'Completed',
         ),
         'Declined' => (
           color: const Color(0xFFC62828),
@@ -223,13 +226,11 @@ class _RecipeRequestCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Header row ──────────────────────────────────────────────
             Row(
               children: [
-                // Avatar
                 CircleAvatar(
                   radius: 22,
-                  backgroundColor: s.bg,
+                  backgroundColor: AppColors.primaryColor.withOpacity(0.1),
                   child: Text(
                     initials,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -241,7 +242,6 @@ class _RecipeRequestCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 10),
 
-                // Name + date
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -301,7 +301,6 @@ class _RecipeRequestCard extends StatelessWidget {
 
             const SizedBox(height: 12),
 
-            // ── Recipe info box ──────────────────────────────────────────
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(12),

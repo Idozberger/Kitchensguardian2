@@ -1,3 +1,5 @@
+// ignore_for_file: unused_local_variable
+
 import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -133,6 +135,9 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     on<SetDateRangeEvent>(_onSetDateRange);
     on<UpdateRecipeFinishedState>(_onUpdateRecipeFinishedState);
     on<RequestStartRecipeEvent>(_onRequestStartRecipe);
+    on<RemoveMissingIngredientFromPlanEvent>(
+      _onRemoveMissingIngredientFromPlanEvent,
+    );
   }
   Future<void> _onSetDateRange(
     SetDateRangeEvent event,
@@ -920,6 +925,12 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
             selectedIngredients: event.selectedIngredients,
           ),
         );
+        add(
+          RemoveMissingIngredientFromPlanEvent(
+            recipeId: event.recipeId,
+            selectedIngredients: event.selectedIngredients,
+          ),
+        );
         _groceryBloc.add(
           RequestedGroceryEvent(kitchenId: event.pantry.kitchenId),
         );
@@ -931,6 +942,12 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     RemoveMissingIngredientEvent event,
     Emitter<PlannerState> emit,
   ) async {
+    _homeBloc.add(
+      RemoveMissingIngredientFromSuggestedEvent(
+        recipeId: event.recipeId,
+        selectedIngredients: event.selectedIngredients,
+      ),
+    );
     final updatedRecipes = List<RecipeModel>.from(state.recipes ?? []);
     final updatedFavRecipes = List<RecipeModel>.from(
       state.favouriteRecipes ?? [],
@@ -951,8 +968,35 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
         break;
       }
     }
+    int weeklyPlanIndex = -1;
+    String? mealType;
 
-    if (recipeIndex == -1 && favRecipeIndex == -1) {
+    for (int i = 0; i < state.getAllWeeklyPlans.length; i++) {
+      final weeklyPlan = state.getAllWeeklyPlans[i];
+
+      final breakfast = weeklyPlan.breakfast;
+      if (breakfast != null && breakfast.id == event.recipeId) {
+        weeklyPlanIndex = i;
+        mealType = 'breakfast';
+        break;
+      }
+
+      final lunch = weeklyPlan.lunch;
+      if (lunch != null && lunch.id == event.recipeId) {
+        weeklyPlanIndex = i;
+        mealType = 'lunch';
+        break;
+      }
+
+      final dinner = weeklyPlan.dinner;
+      if (dinner != null && dinner.id == event.recipeId) {
+        weeklyPlanIndex = i;
+        mealType = 'dinner';
+        break;
+      }
+    }
+
+    if (recipeIndex == -1 && favRecipeIndex == -1 && weeklyPlanIndex == -1) {
       log("Recipe not found: ${event.recipeId}");
       return;
     }
@@ -1009,6 +1053,80 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
         emit(state.copyWith(recipes: List.from(updatedRecipes)));
       }
     }
+  }
+
+  Future<void> _onRemoveMissingIngredientFromPlanEvent(
+    RemoveMissingIngredientFromPlanEvent event,
+    Emitter<PlannerState> emit,
+  ) async {
+    final updatedWeeklyPlans = state.getAllWeeklyPlans
+        .map(
+          (plan) => MergedRecipePlanEntity(
+            date: plan.date,
+            breakfast: _updateRecipe(
+              plan.breakfast as RecipeModel?,
+              event.selectedIngredients,
+              event.recipeId,
+            ),
+            lunch: _updateRecipe(
+              plan.lunch as RecipeModel?,
+              event.selectedIngredients,
+              event.recipeId,
+            ),
+            dinner: _updateRecipe(
+              plan.dinner as RecipeModel?,
+              event.selectedIngredients,
+              event.recipeId,
+            ),
+          ),
+        )
+        .toList();
+
+    emit(state.copyWith(getAllWeeklyPlans: updatedWeeklyPlans));
+  }
+
+  RecipeEntity? _updateRecipe(
+    RecipeModel? recipe,
+    List<IngredientEntity> selectedIngredients,
+    String recipeId,
+  ) {
+    if (recipe == null || recipe.id != recipeId) return recipe;
+
+    final updatedMissingIngredients = List<IngredientEntity>.from(
+      recipe.missingIngredients,
+    );
+
+    for (var ingredient in selectedIngredients) {
+      updatedMissingIngredients.removeWhere((i) => i.name == ingredient.name);
+    }
+
+    return RecipeModel(
+      id: recipe.id,
+      title: recipe.title,
+      calories: recipe.calories,
+      cookingTime: recipe.cookingTime,
+      recipeShortSummary: recipe.recipeShortSummary,
+      cookingSteps: recipe.cookingSteps,
+      missingIngredients: updatedMissingIngredients,
+      available: recipe.available,
+      mealType: recipe.mealType,
+      thumbnail: recipe.thumbnail,
+      recipeId: recipe.recipeId,
+      kitchenId: recipe.kitchenId,
+      date: recipe.date,
+      createdAt: recipe.createdAt,
+      updatedAt: recipe.updatedAt,
+      createdBy: recipe.createdBy,
+      isCompleted: recipe.isCompleted,
+      notes: recipe.notes,
+      ingredients: recipe.ingredients,
+      mealplanId: recipe.mealplanId,
+      missingItems: recipe.missingItems,
+      formatedDateString: recipe.formatedDateString,
+      expiringItems: recipe.expiringItems,
+      expiringItemsCount: recipe.expiringItemsCount,
+      expiringItemsUsed: recipe.expiringItemsUsed,
+    );
   }
 
   Future<void> _onRequestStartRecipe(
@@ -1070,6 +1188,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
 
     final notificationData = {
       'status': false,
+      'recipe_status': "Pending",
       'title': "Recipe Start Request",
       'body':
           "$memberName is requesting to start the recipe \"${event.recipeName}\" in the kitchen \"$kitchenName\".",
@@ -1080,6 +1199,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
       'recipe_id': event.recipeId,
       'date': DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
       'read': false,
+
       'notification_type': 'start_recipe_request',
     };
 

@@ -171,6 +171,7 @@ final GoRouter router = GoRouter(
           recipeId: extra['recipeId'] ?? '',
           kitchenId: extra['kitchenId'] ?? '',
           backPageAvailable: extra['backPageAvailable'] ?? true,
+          isCompleted: extra['completed'] ?? "pending",
         );
       },
     ),
@@ -275,6 +276,7 @@ final GoRouter router = GoRouter(
         return buildPage(
           state.pageKey,
           RecipesDetailsPage(
+            isRequestToStartRecipe: data["is_request_to_start_recipe"] ?? false,
             recipeEntity: data["meal_type_entity"],
             isPlan: data["is_plan"],
             isEdit: data["is_edit"],

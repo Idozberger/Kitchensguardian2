@@ -17,7 +17,10 @@ class PrimaryActionsWidget extends StatelessWidget {
   final bool addPlanDummyLoading;
   final bool isFinishing;
   final bool isPlan;
+  final bool isRequestedRecipe;
   final bool startRecipe;
+  final bool completed;
+  final bool canRequestToStartRecipe;
   final VoidCallback onStartRecipe;
   final VoidCallback onFinish;
   final VoidCallback onCancel;
@@ -30,10 +33,13 @@ class PrimaryActionsWidget extends StatelessWidget {
     required this.isPlan,
     required this.isFinishing,
     required this.startRecipe,
+    this.completed = false,
+    this.isRequestedRecipe = false,
     required this.onStartRecipe,
     required this.addToWeeklyPlanCallback,
     required this.onFinish,
     required this.onCancel,
+    required this.canRequestToStartRecipe,
   });
 
   @override
@@ -69,10 +75,34 @@ class PrimaryActionsWidget extends StatelessWidget {
                     )
                   : GenericButtonWidget(
                       isLoading: state.requestingStartRecipe,
-                      isDisabled: recipe.missingItems,
+                      isDisabled: isRequestedRecipe
+                          ? false
+                          : recipe.missingItems ||
+                                (context.read<UserCubit>().state.role ==
+                                        "member" &&
+                                    canRequestToStartRecipe == false) ||
+                                completed,
                       onPressed: () {
-                        if (recipe.missingItems == false) {
+                        if (isRequestedRecipe) {
                           onStartRecipe();
+                          return;
+                        }
+                        if (recipe.missingItems == false) {
+                          if (context.read<UserCubit>().state.role ==
+                                  "member" &&
+                              canRequestToStartRecipe == false) {
+                            AppToast.show(
+                              "Member Can Not Start Recipe",
+                              ToastType.error,
+                            );
+                          } else if (context.read<UserCubit>().state.role ==
+                                  "member" &&
+                              canRequestToStartRecipe) {
+                            onStartRecipe();
+                          } else if (context.read<UserCubit>().state.role !=
+                              "member") {
+                            onStartRecipe();
+                          }
                         } else {
                           AppToast.show(
                             "Missing ingredients! Please restock before starting this recipe.",
@@ -80,10 +110,16 @@ class PrimaryActionsWidget extends StatelessWidget {
                           );
                         }
                       },
-                      text: recipe.missingItems == true
+                      text: isRequestedRecipe
+                          ? "Start Recipe"
+                          : recipe.missingItems == true
                           ? "Missing Ingredients"
+                          : completed
+                          ? "Recipe Completed"
                           : context.read<UserCubit>().state.role == "member"
-                          ? "Request to Start Recipe"
+                          ? canRequestToStartRecipe
+                                ? "Request to Start Recipe"
+                                : "Member Can Not Start Recipe"
                           : "Start Recipe",
                     ),
               if (isPlan) ...[

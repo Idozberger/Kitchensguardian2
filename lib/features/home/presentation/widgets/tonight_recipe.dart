@@ -65,7 +65,12 @@ class _TonightRecipeWidgetState extends State<TonightRecipeWidget> {
   void _navigateToRecipeDetails(dynamic recipe) {
     context.pushNamed(
       Routes.generateRecipesDetails,
-      extra: {"meal_type_entity": recipe, "is_plan": false, "is_edit": false},
+      extra: {
+        "meal_type_entity": recipe,
+        "is_plan": false,
+        "is_edit": false,
+        "is_request_to_start_recipe": true,
+      },
     );
   }
 

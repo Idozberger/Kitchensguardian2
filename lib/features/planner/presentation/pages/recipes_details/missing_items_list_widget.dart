@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
-import 'package:foodkitchen/core/common/data/model/recipe_model.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
+import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_checktile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
+import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
 import 'package:foodkitchen/features/pantry/presentation/models/pantry_items.dart';
 import 'package:foodkitchen/features/planner/domain/entities/ingredient_entity.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
@@ -21,6 +22,7 @@ import 'package:go_router/go_router.dart';
 class MissingItemsListWidget extends StatefulWidget {
   final bool isPlanned;
   final String recipeId;
+
   const MissingItemsListWidget({
     super.key,
     required this.isPlanned,
@@ -33,6 +35,7 @@ class MissingItemsListWidget extends StatefulWidget {
 
 class _MissingItemsListWidgetState extends State<MissingItemsListWidget> {
   late PlannerBloc plannerBloc;
+  late HomeBloc homeBloc;
   late UserCubit userCubit;
   List<IngredientEntity> selectedIngredients = [];
 
@@ -40,18 +43,41 @@ class _MissingItemsListWidgetState extends State<MissingItemsListWidget> {
   void initState() {
     plannerBloc = context.read<PlannerBloc>();
     userCubit = context.read<UserCubit>();
+    homeBloc = context.read<HomeBloc>();
     super.initState();
   }
 
   List<IngredientEntity> getIngredients(PlannerState state) {
     final allRecipes = [
-      ...List<RecipeModel>.from(state.recipes ?? []),
-      ...List<RecipeModel>.from(state.favouriteRecipes ?? []),
+      ...state.recipes ?? [],
+      ...state.favouriteRecipes ?? [],
     ];
 
-    for (var i = 0; i < allRecipes.length; i++) {
-      if (allRecipes[i].id == widget.recipeId) {
-        return allRecipes[i].missingIngredients;
+    for (final recipe in allRecipes) {
+      if (recipe.id == widget.recipeId) {
+        return recipe.missingIngredients;
+      }
+    }
+
+    for (final weeklyPlan in state.getAllWeeklyPlans) {
+      final breakfast = weeklyPlan.breakfast;
+      if (breakfast != null && breakfast.id == widget.recipeId) {
+        return breakfast.missingIngredients;
+      }
+
+      final lunch = weeklyPlan.lunch;
+      if (lunch != null && lunch.id == widget.recipeId) {
+        return lunch.missingIngredients;
+      }
+
+      final dinner = weeklyPlan.dinner;
+      if (dinner != null && dinner.id == widget.recipeId) {
+        return dinner.missingIngredients;
+      }
+    }
+    for (final recipe in homeBloc.state.suggestedRecipe) {
+      if (recipe.id == widget.recipeId) {
+        return recipe.missingIngredients;
       }
     }
 
@@ -179,6 +205,11 @@ class _MissingItemsListWidgetState extends State<MissingItemsListWidget> {
   }
 
   Future<void> onAddInInventory(bool isMember) async {
+    if (selectedIngredients.isEmpty) {
+      AppToast.show("Please select at least one item", ToastType.warning);
+      return;
+    }
+
     List<PantryItem> pantryItems = [];
 
     for (var ingredient in selectedIngredients) {
@@ -209,6 +240,11 @@ class _MissingItemsListWidgetState extends State<MissingItemsListWidget> {
   }
 
   Future<void> onAddInList() async {
+    if (selectedIngredients.isEmpty) {
+      AppToast.show("Please select at least one item", ToastType.warning);
+      return;
+    }
+
     List<PantryItemEntity> requestingItems = [];
     for (var i = 0; i < selectedIngredients.length; i++) {
       requestingItems.add(
@@ -239,7 +275,10 @@ class _MissingItemsListWidgetState extends State<MissingItemsListWidget> {
         selectedIngredients: selectedIngredients,
       ),
     );
+
     await Future.delayed(Duration(seconds: 1));
-    setState(() => selectedIngredients = []);
+    setState(() {
+      selectedIngredients = [];
+    });
   }
 }

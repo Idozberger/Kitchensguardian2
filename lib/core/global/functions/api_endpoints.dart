@@ -31,8 +31,7 @@ class AppConstants {
   static const String getPantryItems = "/api/kitchen/list_items";
   static const String getAllItemsRequest = "/api/kitchen/items_requests";
   static const String scanRecipt = "/api/scan_recipt";
-  static const String getRequestedItems =
-      "/api/kitchen/get_user_requested_items";
+  static const String getRequestedItems = "/api/kitchen/get_all_mylist_items";
 
   static const String generateRecipes = "/api/generate_recipes";
   static const String recipeById = "/api/recipe/";

@@ -32,13 +32,11 @@ class FilterAppBarButton extends StatelessWidget {
 
 class FilterBottomSheet extends StatefulWidget {
   final ItemRequestFilter selectedFilter;
-  final Function(ItemRequestFilter) onFilterChanged;
-  final VoidCallback onApplyFilter;
+  final Function(ItemRequestFilter) onApplyFilter;
 
   const FilterBottomSheet({
     super.key,
     required this.selectedFilter,
-    required this.onFilterChanged,
     required this.onApplyFilter,
   });
 
@@ -75,6 +73,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             ),
           ),
           gap(height: 20),
+
+          /// FILTER OPTIONS
           ...ItemRequestFilter.values.map(
             (filter) => Padding(
               padding: EdgeInsets.only(bottom: h(12)),
@@ -84,17 +84,25 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 icon: filter.icon,
                 isSelected: _tempFilter == filter,
                 onTap: () {
-                  setState(() => _tempFilter = filter);
-                  widget.onFilterChanged(filter);
+                  setState(() {
+                    _tempFilter = filter;
+                  });
                 },
               ),
             ),
           ),
-          gap(height: 8),
+
+          gap(height: 12),
+
+          /// APPLY BUTTON (✅ FIXED)
           GenericButtonWidget(
-            onPressed: widget.onApplyFilter,
             text: "Apply Filter",
+            onPressed: () {
+              widget.onApplyFilter(_tempFilter);
+              Navigator.pop(context);
+            },
           ),
+
           gap(height: 8),
         ],
       ),

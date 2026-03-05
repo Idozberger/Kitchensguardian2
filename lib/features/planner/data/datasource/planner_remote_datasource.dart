@@ -197,10 +197,12 @@ class PlannerRemoteDatasourceImpl implements PlannerRemoteDatasource {
     required String recipeId,
   }) async {
     try {
+      log("recipeId: $recipeId kitchenId: $kitchenId");
       final response = await dio.post(
         AppConstants.markRecipeFinished,
         data: {"recipe_id": recipeId, "kitchen_id": kitchenId},
       );
+      log("recipeId: response ${response.data}");
       if (response.statusCode != 200 && response.statusCode != 201) {
         final data = response.data is String
             ? jsonDecode(response.data)

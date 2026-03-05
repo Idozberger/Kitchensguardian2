@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
+import 'package:foodkitchen/core/utils/date_format_to_string.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
+import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dart';
 import 'package:foodkitchen/features/planner/presentation/controller/planner_controller.dart';
 import 'package:foodkitchen/features/planner/presentation/widgets/planner_content.dart';
@@ -39,23 +41,33 @@ class _PlannerPageState extends State<PlannerPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<PlannerBloc, PlannerState>(
-      listener: _controller.handleStateChanges,
-      builder: (context, state) {
-        if (state.loadingPlans) {
-          return const PlannerLoadingView();
-        }
-
-        return Scaffold(
-          backgroundColor: const Color(0xffF9F9F9),
-          body: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: PlannerContent(state: state, controller: _controller),
-            ),
+    return RefreshIndicator(
+      onRefresh: () async {
+        _plannerBloc.add(
+          GetAllWeeklyPlansEvent(
+            _userCubit.state.activeKitchenId,
+            formatDate(DateTime.now()),
           ),
         );
       },
+      child: BlocConsumer<PlannerBloc, PlannerState>(
+        listener: _controller.handleStateChanges,
+        builder: (context, state) {
+          if (state.loadingPlans) {
+            return const PlannerLoadingView();
+          }
+
+          return Scaffold(
+            backgroundColor: const Color(0xffF9F9F9),
+            body: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: PlannerContent(state: state, controller: _controller),
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }

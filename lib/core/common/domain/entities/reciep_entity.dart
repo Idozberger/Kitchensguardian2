@@ -20,7 +20,6 @@ class RecipeEntity {
   final bool missingItems;
   final bool available;
 
-  /// PLanner-specific fields
   final String recipeId;
   final String kitchenId;
   final String date;
@@ -30,7 +29,6 @@ class RecipeEntity {
   final bool isCompleted;
   final String notes;
 
-  // Suggestion-specific fields
   final int expiringItemsCount;
   final List<ExpiringItemEntity> expiringItems;
   final List<String> expiringItemsUsed;

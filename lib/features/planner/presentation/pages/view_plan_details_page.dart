@@ -46,6 +46,7 @@ class ViewPlanDetailsPage extends StatelessWidget {
                           gap(height: 12),
                           UpperTile(
                             widget: RecipeTileItem(
+                              canRequestToStartRecipe: true,
                               isEdit: false,
                               recipe:
                                   mergedRecipePlanEntity.breakfast
@@ -66,6 +67,7 @@ class ViewPlanDetailsPage extends StatelessWidget {
                           UpperTile(
                             widget: RecipeTileItem(
                               isEdit: false,
+                              canRequestToStartRecipe: true,
                               recipe:
                                   mergedRecipePlanEntity.lunch as RecipeModel,
                               selectedDate: mergedRecipePlanEntity.date,
@@ -83,6 +85,7 @@ class ViewPlanDetailsPage extends StatelessWidget {
                           gap(height: 12),
                           UpperTile(
                             widget: RecipeTileItem(
+                              canRequestToStartRecipe: true,
                               isEdit: false,
                               recipe:
                                   mergedRecipePlanEntity.dinner as RecipeModel,

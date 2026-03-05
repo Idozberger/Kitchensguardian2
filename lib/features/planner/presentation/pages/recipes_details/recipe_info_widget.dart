@@ -8,9 +8,14 @@ import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 
 class RecipeInfoWidget extends StatelessWidget {
+  final bool isRequestedRecipe;
   final RecipeEntity recipe;
 
-  const RecipeInfoWidget({super.key, required this.recipe});
+  const RecipeInfoWidget({
+    super.key,
+    required this.recipe,
+    this.isRequestedRecipe = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +25,7 @@ class RecipeInfoWidget extends StatelessWidget {
         widget: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (recipe.missingItems)
+            if (recipe.missingItems && isRequestedRecipe == false)
               Align(
                 alignment: Alignment.topRight,
                 child: Text(

@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
+import 'package:foodkitchen/core/common/data/model/recipe_model.dart';
 import 'package:foodkitchen/core/services/fcm/fcm_service.dart';
 import 'package:foodkitchen/core/services/notifications/flutter_local_notifications_service.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
@@ -61,7 +62,42 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<GetAllRequestedItemsEvent>(_onGetAllRequestedItems);
     on<RespondToItemRequestEvent>(_onRespondToItemRequestEvent);
     on<RespondToItemRejectRequestEvent>(_onRespondToItemRejectRequestEvent);
+    on<RemoveMissingIngredientFromSuggestedEvent>(
+      _onRemoveMissingIngredientFromSuggested,
+    );
   }
+  Future<void> _onRemoveMissingIngredientFromSuggested(
+    RemoveMissingIngredientFromSuggestedEvent event,
+    Emitter<HomeState> emit,
+  ) async {
+    final updatedSuggestedRecipes = List<RecipeModel>.from(
+      state.suggestedRecipe,
+    );
+
+    bool updated = false;
+
+    for (var i = 0; i < updatedSuggestedRecipes.length; i++) {
+      final recipe = updatedSuggestedRecipes[i];
+      if (recipe.id == event.recipeId) {
+        final updatedIngredients =
+            List<IngredientEntity>.from(recipe.missingIngredients)..removeWhere(
+              (ing) => event.selectedIngredients.any((e) => e.name == ing.name),
+            );
+
+        updatedSuggestedRecipes[i] = recipe.copyWith(
+          missingIngredients: updatedIngredients,
+        );
+
+        updated = true;
+        break;
+      }
+    }
+
+    if (updated) {
+      emit(state.copyWith(suggestedRecipe: updatedSuggestedRecipes));
+    }
+  }
+
   Future<void> _onRespondToItemRejectRequestEvent(
     RespondToItemRejectRequestEvent event,
     Emitter<HomeState> emit,

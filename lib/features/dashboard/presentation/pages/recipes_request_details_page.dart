@@ -2,6 +2,7 @@
 
 import 'dart:developer';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
@@ -37,6 +38,7 @@ import 'package:lottie/lottie.dart';
 class RecipesRequestDetailsPage extends StatefulWidget {
   final String recipeId;
   final String kitchenId;
+  final String isCompleted;
   final bool backPageAvailable;
 
   const RecipesRequestDetailsPage({
@@ -44,6 +46,7 @@ class RecipesRequestDetailsPage extends StatefulWidget {
     required this.recipeId,
     required this.kitchenId,
     this.backPageAvailable = true,
+    this.isCompleted = "pending",
   });
 
   @override
@@ -92,6 +95,27 @@ class _RecipesRequestDetailsPageState extends State<RecipesRequestDetailsPage> {
     }
   }
 
+  Future<void> updateRecipeStatus() async {
+    log("calling recipe start requst");
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('recipe_start_requests')
+        .where(
+          'host_user_id',
+          isEqualTo: context.read<UserCubit>().state.userId,
+        )
+        .where('recipe_id', isEqualTo: widget.recipeId)
+        .limit(1)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      await querySnapshot.docs.first.reference.update({
+        'recipe_status': 'Completed',
+
+        'updated_at': FieldValue.serverTimestamp(),
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -114,6 +138,7 @@ class _RecipesRequestDetailsPageState extends State<RecipesRequestDetailsPage> {
               AppToast.show(state.successMessage, ToastType.success);
             }
             if (state.isRecipeFinished) {
+              updateRecipeStatus();
               context.pop();
               _plannerBloc.add(
                 UpdateStartRecipeEvent(
@@ -156,8 +181,6 @@ class _RecipesRequestDetailsPageState extends State<RecipesRequestDetailsPage> {
       ),
     );
   }
-
-  // ─── Loading state ────────────────────────────────────────────────────────
 
   Widget _buildLoading() {
     return BlocBuilder<DashboardBloc, DashboardState>(
@@ -207,8 +230,10 @@ class _RecipesRequestDetailsPageState extends State<RecipesRequestDetailsPage> {
           spacing: h(14),
           children: [
             _buildHeader(recipe),
-            RecipeInfoWidget(recipe: recipe),
-            _buildPrimaryActions(context, state, recipe),
+            RecipeInfoWidget(recipe: recipe, isRequestedRecipe: true),
+            (context.read<UserCubit>().state.role == "member")
+                ? SizedBox()
+                : _buildPrimaryActions(context, state, recipe, true),
             _buildTabs(),
             _buildTabContent(state, recipe),
             gap(height: 18),
@@ -237,8 +262,12 @@ class _RecipesRequestDetailsPageState extends State<RecipesRequestDetailsPage> {
     BuildContext context,
     PlannerState state,
     RecipeEntity recipe,
+    bool isRequestedRecipe,
   ) {
     return PrimaryActionsWidget(
+      isRequestedRecipe: isRequestedRecipe,
+      completed: widget.isCompleted == "Completed",
+      canRequestToStartRecipe: false,
       addPlanDummyLoading: false,
       recipe: recipe,
       isPlan: false,
@@ -247,9 +276,10 @@ class _RecipesRequestDetailsPageState extends State<RecipesRequestDetailsPage> {
       addToWeeklyPlanCallback: () {},
       onStartRecipe: () async {
         if (context.read<UserCubit>().state.role == "member") {
+          log("recipe-recipeId: ${recipe.recipeId} - recipe-id: ${recipe.id}");
           _plannerBloc.add(
             RequestStartRecipeEvent(
-              recipeId: recipe.id,
+              recipeId: recipe.recipeId,
               kitchenId: context.read<UserCubit>().state.activeKitchenId,
               recipeName: recipe.title,
             ),
@@ -320,8 +350,6 @@ class _RecipesRequestDetailsPageState extends State<RecipesRequestDetailsPage> {
       ],
     );
   }
-
-  // ─── Step toggle ──────────────────────────────────────────────────────────
 
   Future<void> _handleStepToggle(int index, bool isCompleted) async {
     if (!_plannerBloc.state.startRecipe) {

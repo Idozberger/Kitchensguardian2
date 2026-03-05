@@ -181,16 +181,16 @@ class AppDrawer extends StatelessWidget {
                     }
                   },
                 ),
-                if (context.read<UserCubit>().state.role != "member") ...[
-                  Divider(color: Color(0xffF4F4F4)),
-                  DrawerListTile(
-                    title: "Recipe Start Requests",
-                    iconPath: AppAssets.requestsRecipes,
-                    onTap: () {
-                      context.push(Routes.recipeStartRequests);
-                    },
-                  ),
-                ],
+
+                Divider(color: Color(0xffF4F4F4)),
+                DrawerListTile(
+                  title: "Recipe Start Requests",
+                  iconPath: AppAssets.requestsRecipes,
+                  onTap: () {
+                    context.push(Routes.recipeStartRequests);
+                  },
+                ),
+
                 Divider(color: Color(0xffF4F4F4)),
                 DrawerListTile(
                   title: "Kitchens",

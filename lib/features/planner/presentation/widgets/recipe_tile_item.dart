@@ -14,6 +14,7 @@ class RecipeTileItem extends StatelessWidget {
   final String selectedDate;
   final String? selectedMealType;
   final bool isPlan;
+  final bool canRequestToStartRecipe;
   final bool isEdit;
   final bool isDeletedIcon;
   final String svgAsset;
@@ -24,6 +25,7 @@ class RecipeTileItem extends StatelessWidget {
     required this.recipe,
     required this.selectedDate,
     this.selectedMealType,
+    this.canRequestToStartRecipe = false,
     required this.isPlan,
     this.svgAsset = "",
     this.isDeletedIcon = false,
@@ -45,6 +47,7 @@ class RecipeTileItem extends StatelessWidget {
           "meal_type_entity": updatedRecipe,
           "is_plan": isPlan,
           "is_edit": isEdit,
+          "is_request_to_start_recipe": canRequestToStartRecipe,
         },
       );
     } else {

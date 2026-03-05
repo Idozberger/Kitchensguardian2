@@ -44,10 +44,14 @@ class _ItemRequestsDetailPageState extends State<ItemRequestsDetailPage> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       isScrollControlled: true,
-      builder: (ctx) => FilterBottomSheet(
-        selectedFilter: _selectedFilter,
-        onFilterChanged: (filter) => setState(() => _selectedFilter = filter),
-        onApplyFilter: () => Navigator.pop(ctx),
+      builder: (ctx) => SafeArea(
+        child: FilterBottomSheet(
+          selectedFilter: _selectedFilter,
+
+          onApplyFilter: (filter) {
+            setState(() => _selectedFilter = filter);
+          },
+        ),
       ),
     );
   }

@@ -1,5 +1,7 @@
 // ignore_for_file: use_build_context_synchronously, unused_local_variable, avoid_function_literals_in_foreach_calls, duplicate_ignore
 
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/data/model/recipe_model.dart';
@@ -31,6 +33,7 @@ import 'widgets/bottom_nav_recipe_details.dart';
 class RecipesDetailsPage extends StatefulWidget {
   final RecipeEntity recipeEntity;
   final bool isPlan;
+  final bool isRequestToStartRecipe;
   final bool isEdit;
 
   const RecipesDetailsPage({
@@ -38,6 +41,7 @@ class RecipesDetailsPage extends StatefulWidget {
     required this.recipeEntity,
     required this.isPlan,
     required this.isEdit,
+    required this.isRequestToStartRecipe,
   });
 
   @override
@@ -143,6 +147,7 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
 
   Widget _buildPrimaryActions(BuildContext context, PlannerState state) {
     return PrimaryActionsWidget(
+      canRequestToStartRecipe: widget.isRequestToStartRecipe,
       addPlanDummyLoading: addPlanDummyLoading,
       recipe: recipe,
       isPlan: widget.isPlan,
@@ -151,9 +156,10 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
       addToWeeklyPlanCallback: () => _handleAddToWeeklyPlan(context, state),
       onStartRecipe: () async {
         if (context.read<UserCubit>().state.role == "member") {
+          log("recipe-recipeId: ${recipe.recipeId} - recipe-id: ${recipe.id}");
           plannerBloc.add(
             RequestStartRecipeEvent(
-              recipeId: widget.recipeEntity.id,
+              recipeId: widget.recipeEntity.recipeId,
               kitchenId: context.read<UserCubit>().state.activeKitchenId,
               recipeName: widget.recipeEntity.title,
             ),
@@ -277,12 +283,21 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
         CompleteDialogWidget.show(
           context,
           onFinish: () {
-            plannerBloc.add(
-              MarkRecipeFinishedEvent(
-                kitchenId: context.read<UserCubit>().state.activeKitchenId,
-                recipeId: recipe.id,
-              ),
-            );
+            if (recipe.recipeId.isEmpty) {
+              plannerBloc.add(
+                MarkRecipeFinishedEvent(
+                  kitchenId: context.read<UserCubit>().state.activeKitchenId,
+                  recipeId: recipe.id,
+                ),
+              );
+            } else {
+              plannerBloc.add(
+                MarkRecipeFinishedEvent(
+                  kitchenId: context.read<UserCubit>().state.activeKitchenId,
+                  recipeId: recipe.recipeId,
+                ),
+              );
+            }
           },
         );
       }
@@ -350,12 +365,22 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
             doneSteps: [],
           ),
         );
-        plannerBloc.add(
-          MarkRecipeFinishedEvent(
-            kitchenId: context.read<UserCubit>().state.activeKitchenId,
-            recipeId: recipe.id,
-          ),
-        );
+        if (recipe.recipeId.isEmpty) {
+          plannerBloc.add(
+            MarkRecipeFinishedEvent(
+              kitchenId: context.read<UserCubit>().state.activeKitchenId,
+              recipeId: recipe.id,
+            ),
+          );
+        } else {
+          plannerBloc.add(
+            MarkRecipeFinishedEvent(
+              kitchenId: context.read<UserCubit>().state.activeKitchenId,
+              recipeId: recipe.recipeId,
+            ),
+          );
+        }
+
         setState(() => steps.forEach((step) => step["completed"] = false));
       },
       onSecondaryPressed: () {

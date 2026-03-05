@@ -104,7 +104,7 @@ class _PantrySectionState extends State<PantrySection> {
                   : () {
                       context.pushNamed(
                         Routes.addItem,
-                        extra: {"isMember": true},
+                        extra: {"isMember": isMember},
                       );
                     },
               icon: SvgPicture.asset(AppAssets.addSvg),

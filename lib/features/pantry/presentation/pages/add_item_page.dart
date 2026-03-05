@@ -8,6 +8,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/cubits/user_state.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
+import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
@@ -21,9 +22,13 @@ import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_dropdown_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
+import 'package:foodkitchen/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';
+import 'package:foodkitchen/features/home/domain/usecases/get_all_weekly_plans_usecase.dart';
+import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
+import 'package:foodkitchen/features/home/presentation/bloc/home_event.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_bloc.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_event.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_state.dart';
@@ -92,6 +97,12 @@ class _AddItemPageState extends State<AddItemPage> {
             recipeId: widget.recipeId,
           ),
         );
+        context.read<PlannerBloc>().add(
+          RemoveMissingIngredientFromPlanEvent(
+            selectedIngredients: widget.selectedIngredients,
+            recipeId: widget.recipeId,
+          ),
+        );
         _items.add(
           PantryItem(
             nameController: TextEditingController(),
@@ -104,6 +115,16 @@ class _AddItemPageState extends State<AddItemPage> {
         _addNewItem();
       }
     });
+
+    if (widget.addToInventory) {
+      context.read<PlannerBloc>().add(
+        GetAllWeeklyPlansEvent(
+          context.read<UserCubit>().state.activeKitchenId,
+          null,
+        ),
+      );
+      context.read<HomeBloc>().add(GetAllWeeklyPlansEventForHome());
+    }
   }
 
   @override

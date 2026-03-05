@@ -188,6 +188,15 @@ class RemoveMissingIngredientEvent extends PlannerEvent {
   });
 }
 
+class RemoveMissingIngredientFromPlanEvent extends PlannerEvent {
+  final List<IngredientEntity> selectedIngredients;
+  final String recipeId;
+  RemoveMissingIngredientFromPlanEvent({
+    required this.selectedIngredients,
+    required this.recipeId,
+  });
+}
+
 class RequestStartRecipeEvent extends PlannerEvent {
   final String recipeId;
   final String kitchenId;

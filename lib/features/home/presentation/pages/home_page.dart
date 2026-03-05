@@ -33,6 +33,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _userCubit = context.read<UserCubit>();
     _homeBloc = context.read<HomeBloc>();
+    _homeBloc.add(GenerateGroceryList());
   }
 
   @override

@@ -1,3 +1,5 @@
+import 'package:foodkitchen/features/planner/domain/entities/ingredient_entity.dart';
+
 sealed class HomeEvent {}
 
 class CreateKitchenEventForHome extends HomeEvent {
@@ -57,4 +59,14 @@ final class GenerateGroceryList extends HomeEvent {}
 final class GetRecipeSuggestionEvent extends HomeEvent {
   final String kitchenId;
   GetRecipeSuggestionEvent(this.kitchenId);
+}
+
+class RemoveMissingIngredientFromSuggestedEvent extends HomeEvent {
+  final String recipeId;
+  final List<IngredientEntity> selectedIngredients;
+
+  RemoveMissingIngredientFromSuggestedEvent({
+    required this.recipeId,
+    required this.selectedIngredients,
+  });
 }

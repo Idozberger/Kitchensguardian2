@@ -38,6 +38,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 _buildPlanSelectionSection(),
                 gap(height: 15),
                 _buildFeaturesSection(),
+                gap(height: 15),
               ],
             ),
           ),
@@ -158,20 +159,22 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   }
 
   Widget _buildBottomSection() {
-    return ColoredBox(
-      color: Colors.white,
-      child: Padding(
-        padding: gapOnly(left: 20, right: 20, bottom: 24, top: 14),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          spacing: h(16),
-          children: [
-            _buildPricingText(),
-            GenericButtonWidget(
-              onPressed: () => _handleStartTrial(),
-              text: 'Start Free Trial',
-            ),
-          ],
+    return SafeArea(
+      child: ColoredBox(
+        color: Colors.white,
+        child: Padding(
+          padding: gapOnly(left: 20, right: 20, bottom: 24, top: 14),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            spacing: h(16),
+            children: [
+              _buildPricingText(),
+              GenericButtonWidget(
+                onPressed: () => _handleStartTrial(),
+                text: 'Start Free Trial',
+              ),
+            ],
+          ),
         ),
       ),
     );

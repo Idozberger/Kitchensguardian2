@@ -52,7 +52,7 @@ class GroceryRemoteDatasourceImpl implements GroceryRemoteDatasource {
         final message = data["error"];
         throw message;
       }
-      final data = response.data["user_items"];
+      final data = response.data["items"];
 
       if (data is List) {
         return data.map((e) => Map<String, dynamic>.from(e)).toList();

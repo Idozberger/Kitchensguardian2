@@ -63,3 +63,21 @@ bool validateEmailLength({
 
   return true; // ✅ length OK
 }
+
+class MaxLengthFormatter extends TextInputFormatter {
+  final int maxLength;
+
+  MaxLengthFormatter(this.maxLength);
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (newValue.text.length <= maxLength) {
+      return newValue;
+    }
+
+    return oldValue; // block extra input
+  }
+}
