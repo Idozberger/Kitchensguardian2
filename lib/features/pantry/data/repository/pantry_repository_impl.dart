@@ -77,8 +77,8 @@ class PantryRepositoryImpl implements PantryRepository {
       for (var e in itemsJson) {
         final name = e['name'] as String? ?? '';
         final unit = e['unit'] as String? ?? 'Unit';
-        final amount = e['quantity'].toString();
-        final group = e['storage'].toString();
+        final amount = e['amount'].toString();
+        final group = e['recommended_storage'].toString();
         final expireDate = e['expiry_date'].toString();
         final thumbnail = e['thumbnail'];
 
