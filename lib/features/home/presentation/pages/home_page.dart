@@ -81,16 +81,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _handleGeneratePressed() {
-    if (_hasGroceryList()) {
-      _generateGroceryList();
-      _navigateToSmartCart();
-    } else {
-      _generateGroceryList();
-    }
-  }
-
-  bool _hasGroceryList() {
-    return _homeBloc.state.groceryList.isNotEmpty;
+    _generateGroceryList();
+    _navigateToSmartCart();
   }
 
   void _navigateToSmartCart() {

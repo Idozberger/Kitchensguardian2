@@ -179,6 +179,7 @@ class _SectionCardState extends State<SectionCard>
                   CollagePreview(
                     paths: widget.section.imagePaths,
                     accent: widget.section.accent,
+                    onAdd: widget.onScan,
                   ),
                 ],
                 SectionCardActions(

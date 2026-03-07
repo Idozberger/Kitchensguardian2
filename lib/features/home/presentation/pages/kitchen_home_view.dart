@@ -14,8 +14,7 @@ import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
-import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
-import 'package:foodkitchen/features/home/presentation/bloc/home_event.dart';
+
 import 'package:foodkitchen/features/home/presentation/bloc/home_state.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/action_tile.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/create_or_join_tile.dart';
@@ -176,30 +175,21 @@ class _KitchenHomeViewState extends State<KitchenHomeView> {
   }
 
   Widget _buildGrocerySection(HomeState state) {
-    return BlocListener<HomeBloc, HomeState>(
-      listenWhen: (previous, current) =>
-          previous.dateBasedPlan != current.dateBasedPlan,
-      listener: (context, state) {
-        context.read<HomeBloc>().add(GenerateGroceryList());
-      },
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 400),
-        child: state.showGroceryShimmer
-            ? _buildGroceryShimmer()
-            : state.groceryList.isEmpty
-            ? const SizedBox.shrink()
-            : SmartCartTile(
-                infoText: state.groceryList.length > 3
-                    ? "+${state.groceryList.length - 3} tap to see more"
-                    : null,
-                isGenerated: true,
-                previewItems: state.groceryList
-                    .take(3)
-                    .map((item) => item.name)
-                    .toList(),
-                onGenerate: widget.onGeneratePressed,
-              ),
-      ),
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 400),
+      child: state.showGroceryShimmer
+          ? _buildGroceryShimmer()
+          : SmartCartTile(
+              infoText: state.groceryList.length > 3
+                  ? "+${state.groceryList.length - 3} tap to see more"
+                  : null,
+              isGenerated: true,
+              previewItems: state.groceryList
+                  .take(3)
+                  .map((item) => item.name)
+                  .toList(),
+              onGenerate: widget.onGeneratePressed,
+            ),
     );
   }
 

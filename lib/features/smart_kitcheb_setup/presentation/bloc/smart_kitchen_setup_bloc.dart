@@ -179,17 +179,17 @@ class SmartKitchenSetupBloc
 
     final params = ScanKitchenImagesUseCaseParams(
       kitchenId: event.kitchenId,
-      fridgeFilePath: event.payload['fridge']?.first ?? '',
-      freezerFilePath: event.payload['freezer']?.first ?? '',
-      pantryFilePath: event.payload['pantry']?.first ?? '',
-      spicesFilePath: event.payload['spices']?.first ?? '',
-      miscFilePath: event.payload['misc']?.first ?? '',
+      fridgeFilePaths: event.payload['fridge'] ?? [],
+      freezerFilePaths: event.payload['freezer'] ?? [],
+      pantryFilePaths: event.payload['pantry'] ?? [],
+      spicesFilePaths: event.payload['spices'] ?? [],
+      miscFilePaths: event.payload['misc'] ?? [],
     );
 
     log(
-      'API params: fridge=${params.fridgeFilePath}, freezer=${params.freezerFilePath}, '
-      'pantry=${params.pantryFilePath}, spices=${params.spicesFilePath}, '
-      'misc=${params.miscFilePath}',
+      'API params: fridge=${params.fridgeFilePaths}, freezer=${params.freezerFilePaths}, '
+      'pantry=${params.pantryFilePaths}, spices=${params.spicesFilePaths}, '
+      'misc=${params.miscFilePaths}',
     );
 
     final result = await _scanKitchenImagesUseCase(params);

@@ -5,11 +5,11 @@ import 'package:fpdart/fpdart.dart';
 abstract class SmartKitchenSetupRepository {
   Future<List<ScannedItemEntity>> scanKitchenImages({
     required String kitchenId,
-    required String fridgeFilePath,
-    required String freezerFilePath,
-    required String pantryFilePath,
-    required String spicesFilePath,
-    required String miscFilePath,
+    required List<String> fridgeFilePaths,
+    required List<String> freezerFilePaths,
+    required List<String> pantryFilePaths,
+    required List<String> spicesFilePaths,
+    required List<String> miscFilePaths,
   });
   Future<Either<Failure, String>> skipKitchenSetup({required String kitchenId});
 }

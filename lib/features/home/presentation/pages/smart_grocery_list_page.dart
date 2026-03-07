@@ -5,6 +5,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
@@ -62,7 +63,9 @@ class _SmartCartPageState extends State<SmartCartPage> {
       backgroundColor: const Color(0xffF9F9F9),
       appBar: _buildAppBar(context),
       body: items.isEmpty ? _buildEmptyState() : _buildGroceryList(items),
-      bottomNavigationBar: _buildBottomActions(context, items),
+      bottomNavigationBar: items.isEmpty
+          ? SizedBox()
+          : _buildBottomActions(context, items),
     );
   }
 
@@ -71,21 +74,19 @@ class _SmartCartPageState extends State<SmartCartPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.shopping_basket_outlined,
-            size: 80,
-            color: Colors.grey[400],
-          ),
+          Image.asset(AppAssets.groceryEmpty, height: h(54)),
+
           gap(height: 20),
-          const Text(
-            "No items in your grocery list",
-            style: TextStyle(fontSize: 18, color: Colors.grey),
+
+          Text(
+            "Your grocery list is empty",
+            style: Theme.of(context).textTheme.headlineLarge!.copyWith(
+              fontSize: t(16),
+              color: Colors.grey.shade400,
+            ),
           ),
-          gap(height: 8),
-          const Text(
-            "Your upcoming meals are all set!",
-            style: TextStyle(color: Colors.grey),
-          ),
+
+          gap(height: 20),
         ],
       ),
     );

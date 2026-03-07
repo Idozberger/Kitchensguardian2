@@ -18,11 +18,11 @@ class ScanKitchenImagesUseCase
     try {
       final result = await smartKitchenSetupRepository.scanKitchenImages(
         kitchenId: params.kitchenId,
-        fridgeFilePath: params.fridgeFilePath,
-        freezerFilePath: params.freezerFilePath,
-        pantryFilePath: params.pantryFilePath,
-        spicesFilePath: params.spicesFilePath,
-        miscFilePath: params.miscFilePath,
+        fridgeFilePaths: params.fridgeFilePaths,
+        freezerFilePaths: params.freezerFilePaths,
+        pantryFilePaths: params.pantryFilePaths,
+        spicesFilePaths: params.spicesFilePaths,
+        miscFilePaths: params.miscFilePaths,
       );
       return Right(result);
     } catch (e) {
@@ -33,18 +33,18 @@ class ScanKitchenImagesUseCase
 
 class ScanKitchenImagesUseCaseParams {
   final String kitchenId;
-  final String fridgeFilePath;
-  final String freezerFilePath;
-  final String pantryFilePath;
-  final String spicesFilePath;
-  final String miscFilePath;
+  final List<String> fridgeFilePaths;
+  final List<String> freezerFilePaths;
+  final List<String> pantryFilePaths;
+  final List<String> spicesFilePaths;
+  final List<String> miscFilePaths;
 
   ScanKitchenImagesUseCaseParams({
     required this.kitchenId,
-    required this.fridgeFilePath,
-    required this.freezerFilePath,
-    required this.pantryFilePath,
-    required this.spicesFilePath,
-    required this.miscFilePath,
+    required this.fridgeFilePaths,
+    required this.freezerFilePaths,
+    required this.pantryFilePaths,
+    required this.spicesFilePaths,
+    required this.miscFilePaths,
   });
 }

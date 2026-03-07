@@ -21,7 +21,7 @@ import 'package:foodkitchen/features/dashboard/presentation/pages/recipes_start_
 import 'package:foodkitchen/features/dashboard/presentation/pages/referral_code_page.dart';
 import 'package:foodkitchen/features/grocery/presentation/pages/add_custom_items_page.dart';
 import 'package:foodkitchen/features/history/presentation/pages/scan_history_page.dart';
-import 'package:foodkitchen/features/home/presentation/pages/grocery_list_page.dart';
+import 'package:foodkitchen/features/home/presentation/pages/smart_grocery_list_page.dart';
 import 'package:foodkitchen/features/home/presentation/pages/item_requests_details/pages/item_requests_detail_page.dart';
 import 'package:foodkitchen/features/kitchens/presentation/pages/kitchen_selection_page.dart';
 import 'package:foodkitchen/features/kitchens/presentation/pages/invite_member_page.dart';

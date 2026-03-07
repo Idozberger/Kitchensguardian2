@@ -8,11 +8,11 @@ import 'package:foodkitchen/core/services/dio/dio_helper.dart';
 abstract class SmartKitchenSetupDatasource {
   Future<List<Map<String, dynamic>>> getScanResult({
     required String kitchenId,
-    required String fridgeFilePath,
-    required String freezerFilePath,
-    required String pantryFilePath,
-    required String spicesFilePath,
-    required String miscFilePath,
+    required List<String> fridgeFilePaths,
+    required List<String> freezerFilePaths,
+    required List<String> pantryFilePaths,
+    required List<String> spicesFilePaths,
+    required List<String> miscFilePaths,
   });
   Future<String> skipKitchenSetup({required String kitchenId});
 }
@@ -25,23 +25,38 @@ class SmartKitchenSetupDatasourceImpl implements SmartKitchenSetupDatasource {
   @override
   Future<List<Map<String, dynamic>>> getScanResult({
     required String kitchenId,
-    required String fridgeFilePath,
-    required String freezerFilePath,
-    required String pantryFilePath,
-    required String spicesFilePath,
-    required String miscFilePath,
+    required List<String> fridgeFilePaths,
+    required List<String> freezerFilePaths,
+    required List<String> pantryFilePaths,
+    required List<String> spicesFilePaths,
+    required List<String> miscFilePaths,
   }) async {
     try {
       final Map<String, dynamic> fields = {'kitchen_id': kitchenId};
-
-      await _addImageField(fields, 'image_fridge', fridgeFilePath);
-      await _addImageField(fields, 'image_freezer', freezerFilePath);
-      await _addImageField(fields, 'image_pantry', pantryFilePath);
-      await _addImageField(fields, 'image_spices', spicesFilePath);
-      await _addImageField(fields, 'image_miscellaneous', miscFilePath);
+      if (fridgeFilePaths.isNotEmpty) {
+        await _addImageField(fields, 'image_fridge', fridgeFilePaths.first);
+      }
+      if (freezerFilePaths.isNotEmpty) {
+        await _addImageField(fields, 'image_freezer', freezerFilePaths.first);
+      }
+      if (pantryFilePaths.isNotEmpty) {
+        await _addImageField(fields, 'image_pantry', pantryFilePaths.first);
+      }
+      if (spicesFilePaths.isNotEmpty) {
+        await _addImageField(fields, 'image_spices', spicesFilePaths.first);
+      }
+      if (miscFilePaths.isNotEmpty) {
+        await _addImageField(
+          fields,
+          'image_miscellaneous',
+          miscFilePaths.first,
+        );
+      }
 
       final formData = FormData.fromMap(fields);
-      log("formData: ${formData.files}");
+      log(
+        "formData: ${formData.files.map((file) => '${file.key} + ${file.value}')}",
+      );
       final response = await dio.post(
         AppConstants.kitchenSetupScan,
         data: formData,
@@ -81,6 +96,7 @@ class SmartKitchenSetupDatasourceImpl implements SmartKitchenSetupDatasource {
     String key,
     String path,
   ) async {
+    log("path: $path");
     if (path.isEmpty) return;
     final cleanPath = path.replaceFirst('file://', '');
     fields[key] = await MultipartFile.fromFile(
