@@ -7,7 +7,7 @@ final class PlannerState {
   final List<RecipeEntity> startedRecipe;
   final List<MergedRecipePlanEntity> getAllWeeklyPlans;
   final List<MergedRecipePlanEntity> dateBasedPlan;
-  final List<Map<String, dynamic>> doneSteps;
+  final List<List<Map<String, dynamic>>> doneSteps;
   final List<MergedRecipePlanEntity> mealPlans;
   final List<MergedRecipePlanEntity> editMealsPlans;
   final String? startDate;
@@ -22,6 +22,8 @@ final class PlannerState {
   final bool startRecipe;
   final bool isFinishingRecipe;
   final bool isRecipeFinished;
+  final bool isCheckingMissingIngredients;
+  final bool hasMissingIngredients;
   final String? errorMessage;
   final String successMessage;
   final int mealTypeSelectedIndex;
@@ -37,6 +39,8 @@ final class PlannerState {
     this.isLoading = false,
     this.isSubscribed = false,
     this.isFavLoading = false,
+    this.hasMissingIngredients = false,
+    this.isCheckingMissingIngredients = false,
     this.addingToInventory = false,
     this.startRecipe = false,
     this.loadingPlans = true,
@@ -67,14 +71,16 @@ final class PlannerState {
     bool? isFinishingRecipe,
     bool? addingToInventory,
     bool? startRecipe,
+    bool? hasMissingIngredients,
     bool? loadingPlans,
+    bool? isCheckingMissingIngredients,
     bool? addingToWeeklyPlan,
     bool? isSubscribed,
     String? errorMessage,
     bool? isRecipeFinished,
     bool? requestingStartRecipe,
     String? successMessage,
-    List<Map<String, dynamic>>? doneSteps,
+    List<List<Map<String, dynamic>>>? doneSteps,
     int? mealTypeSelectedIndex,
     DateTime? selectedDate,
     String? startDate,
@@ -107,6 +113,10 @@ final class PlannerState {
       isFavLoading: isFavLoading ?? this.isFavLoading,
       requestingStartRecipe:
           requestingStartRecipe ?? this.requestingStartRecipe,
+      isCheckingMissingIngredients:
+          isCheckingMissingIngredients ?? this.isCheckingMissingIngredients,
+      hasMissingIngredients:
+          hasMissingIngredients ?? this.hasMissingIngredients,
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 
@@ -10,6 +11,7 @@ import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
+import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dart';
 
 class PrimaryActionsWidget extends StatelessWidget {
@@ -21,7 +23,7 @@ class PrimaryActionsWidget extends StatelessWidget {
   final bool startRecipe;
   final bool completed;
   final bool canRequestToStartRecipe;
-  final VoidCallback onStartRecipe;
+  final VoidCallback onStartOrRequestRecipe;
   final VoidCallback onFinish;
   final VoidCallback onCancel;
   final VoidCallback addToWeeklyPlanCallback;
@@ -35,7 +37,7 @@ class PrimaryActionsWidget extends StatelessWidget {
     required this.startRecipe,
     this.completed = false,
     this.isRequestedRecipe = false,
-    required this.onStartRecipe,
+    required this.onStartOrRequestRecipe,
     required this.addToWeeklyPlanCallback,
     required this.onFinish,
     required this.onCancel,
@@ -46,7 +48,23 @@ class PrimaryActionsWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: gapSymmetric(horizontal: 20),
-      child: BlocBuilder<PlannerBloc, PlannerState>(
+      child: BlocConsumer<PlannerBloc, PlannerState>(
+        listenWhen: (previous, current) {
+          return previous.isCheckingMissingIngredients &&
+              !current.isCheckingMissingIngredients;
+        },
+        listener: (context, state) {
+          if (state.hasMissingIngredients) {
+            AppToast.show(
+              "Some ingredients are missing. Please add the required ingredients before continuing.",
+              ToastType.warning,
+              gravity: ToastGravity.TOP,
+              toastLength: Toast.LENGTH_LONG,
+            );
+          } else {
+            primaryButtonsCallback(context);
+          }
+        },
         builder: (_, state) {
           return Column(
             children: [
@@ -74,46 +92,19 @@ class PrimaryActionsWidget extends StatelessWidget {
                       ],
                     )
                   : GenericButtonWidget(
-                      isLoading: state.requestingStartRecipe,
+                      isLoading:
+                          state.requestingStartRecipe ||
+                          state.isCheckingMissingIngredients,
                       isDisabled: isRequestedRecipe
                           ? false
-                          : recipe.missingItems ||
-                                (context.read<UserCubit>().state.role ==
-                                        "member" &&
-                                    canRequestToStartRecipe == false) ||
+                          : context.read<UserCubit>().state.role == "member" &&
+                                    canRequestToStartRecipe == false ||
                                 completed,
                       onPressed: () {
-                        if (isRequestedRecipe) {
-                          onStartRecipe();
-                          return;
-                        }
-                        if (recipe.missingItems == false) {
-                          if (context.read<UserCubit>().state.role ==
-                                  "member" &&
-                              canRequestToStartRecipe == false) {
-                            AppToast.show(
-                              "Member Can Not Start Recipe",
-                              ToastType.error,
-                            );
-                          } else if (context.read<UserCubit>().state.role ==
-                                  "member" &&
-                              canRequestToStartRecipe) {
-                            onStartRecipe();
-                          } else if (context.read<UserCubit>().state.role !=
-                              "member") {
-                            onStartRecipe();
-                          }
-                        } else {
-                          AppToast.show(
-                            "Missing ingredients! Please restock before starting this recipe.",
-                            ToastType.error,
-                          );
-                        }
+                        _checkMissingIngredients(context);
                       },
                       text: isRequestedRecipe
                           ? "Start Recipe"
-                          : recipe.missingItems == true
-                          ? "Missing Ingredients"
                           : completed
                           ? "Recipe Completed"
                           : context.read<UserCubit>().state.role == "member"
@@ -156,5 +147,31 @@ class PrimaryActionsWidget extends StatelessWidget {
         },
       ),
     );
+  }
+
+  void _checkMissingIngredients(BuildContext context) {
+    final kitchenId = context.read<UserCubit>().state.activeKitchenId;
+    final recipeId = recipe.recipeId.isEmpty ? recipe.id : recipe.recipeId;
+
+    context.read<PlannerBloc>().add(
+      CheckMissingIngredientsEvent(kitchenId: kitchenId, recipeId: recipeId),
+    );
+  }
+
+  void primaryButtonsCallback(BuildContext context) {
+    if (isRequestedRecipe) {
+      onStartOrRequestRecipe();
+      return;
+    }
+
+    if (context.read<UserCubit>().state.role == "member" &&
+        canRequestToStartRecipe == false) {
+      AppToast.show("Member Can Not Start Recipe", ToastType.error);
+    } else if (context.read<UserCubit>().state.role == "member" &&
+        canRequestToStartRecipe) {
+      onStartOrRequestRecipe();
+    } else if (context.read<UserCubit>().state.role != "member") {
+      onStartOrRequestRecipe();
+    }
   }
 }

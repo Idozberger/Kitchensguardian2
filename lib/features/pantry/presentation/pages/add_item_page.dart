@@ -201,7 +201,7 @@ class _AddItemPageState extends State<AddItemPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _buildAddMoreButton(),
+                if (widget.addToInventory == false) _buildAddMoreButton(),
                 SizedBox(height: h(22)),
                 GenericButtonWidget(
                   isLoading: state is SubmittingItemLoading,

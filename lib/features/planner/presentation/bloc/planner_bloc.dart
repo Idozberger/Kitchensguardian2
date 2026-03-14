@@ -21,6 +21,7 @@ import 'package:foodkitchen/features/planner/domain/entities/ingredient_entity.d
 import 'package:foodkitchen/features/planner/domain/entities/merged_meal_type_entity.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/add_to_favourite_recipe.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/add_to_weekly_plan.dart';
+import 'package:foodkitchen/features/planner/domain/usecases/check_missing_ingredients.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/create_plan.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/delete_meal_type_from_weekly_plan.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/delete_plan.dart';
@@ -63,6 +64,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
   final GetAllPlans _getAllPlans;
   final GetDateRange _getDateRange;
   final SetDateRange _setDateRange;
+  final CheckMissingIngredients _checkMissingIngredients;
 
   PlannerBloc({
     required UserCubit userCubit,
@@ -85,6 +87,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     required GetAllPlans getAllPlans,
     required GetDateRange getDateRange,
     required SetDateRange setDateRange,
+    required CheckMissingIngredients checkMissingIngredients,
   }) : _generateRecipes = generateRecipes,
        _favouriteRecipes = favouriteRecipes,
        _addToFavouriteRecipe = addToFavouriteRecipe,
@@ -105,6 +108,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
        _getAllPlans = getAllPlans,
        _getDateRange = getDateRange,
        _setDateRange = setDateRange,
+       _checkMissingIngredients = checkMissingIngredients,
 
        super(PlannerState()) {
     on<GetFavouriteRecipesEvent>(_onGetFavouriteRecipes);
@@ -119,6 +123,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     on<DeleteMealTypeFromWeeklyPlanEvent>(_onDeleteMealTypeFromWeeklyPlan);
     on<MarkRecipeFinishedEvent>(_onMarkRecipeFinished);
     on<UpdateStartRecipeEvent>(_onUpdateStartRecipe);
+    on<CancelInProgressRecipeEvent>(_onCancelInProgressRecipe);
     on<ResetPlannerStateEvent>(_onResetPlanner);
     on<AddMealPlanEvent>(_onAddMealPlan);
     on<RequestMissingItemsEvent>(_onRequestMissingItems);
@@ -138,7 +143,47 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     on<RemoveMissingIngredientFromPlanEvent>(
       _onRemoveMissingIngredientFromPlanEvent,
     );
+    on<CheckMissingIngredientsEvent>(_onCheckMissingIngredientsEvent);
   }
+  Future<void> _onCheckMissingIngredientsEvent(
+    CheckMissingIngredientsEvent event,
+    Emitter<PlannerState> emit,
+  ) async {
+    emit(
+      state.copyWith(
+        isCheckingMissingIngredients: true,
+        hasMissingIngredients: false,
+      ),
+    );
+    final res = await _checkMissingIngredients(
+      CheckMissingIngredientsParams(
+        kitchenId: event.kitchenId,
+        recipeId: event.recipeId,
+      ),
+    );
+
+    res.fold(
+      (failure) {
+        log("hasMissingIngredients: Error ${failure.message}");
+        emit(
+          state.copyWith(
+            isCheckingMissingIngredients: false,
+            hasMissingIngredients: false,
+          ),
+        );
+      },
+      (hasMissingIngredients) {
+        log("hasMissingIngredients: $hasMissingIngredients");
+        emit(
+          state.copyWith(
+            isCheckingMissingIngredients: false,
+            hasMissingIngredients: hasMissingIngredients,
+          ),
+        );
+      },
+    );
+  }
+
   Future<void> _onSetDateRange(
     SetDateRangeEvent event,
     Emitter<PlannerState> emit,
@@ -875,6 +920,29 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     );
   }
 
+  Future<void> _onCancelInProgressRecipe(
+    CancelInProgressRecipeEvent event,
+    Emitter<PlannerState> emit,
+  ) async {
+    final updatedRecipes = List<RecipeModel>.from(state.startedRecipe);
+    final updatedDoneSteps = List<List<Map<String, dynamic>>>.from(
+      state.doneSteps,
+    );
+    if (event.inProgressRecipeIndex >= 0 &&
+        event.inProgressRecipeIndex < updatedRecipes.length) {
+      updatedRecipes.removeAt(event.inProgressRecipeIndex);
+      updatedDoneSteps.removeAt(event.inProgressRecipeIndex);
+    }
+    emit(
+      state.copyWith(
+        startedRecipe: updatedRecipes,
+        doneSteps: updatedDoneSteps,
+      ),
+    );
+
+    _userCubit.updateRecipeEntity(updatedRecipes);
+  }
+
   Future<void> _onUpdateStartRecipe(
     UpdateStartRecipeEvent event,
     Emitter<PlannerState> emit,
@@ -884,13 +952,13 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
       emit(
         state.copyWith(
           startedRecipe: event.recipeEntity,
-          doneSteps: event.doneSteps,
+          doneSteps: [...state.doneSteps, event.doneSteps],
         ),
       );
-      _userCubit.updateRecipeEntity(event.recipeEntity, event.doneSteps);
+      _userCubit.updateRecipeEntity(event.recipeEntity);
     } else {
       emit(state.copyWith(startedRecipe: [], doneSteps: []));
-      _userCubit.updateRecipeEntity([], []);
+      _userCubit.updateRecipeEntity([]);
     }
   }
 

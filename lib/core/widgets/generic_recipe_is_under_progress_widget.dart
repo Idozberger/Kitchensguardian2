@@ -86,16 +86,6 @@ class RecipeInProgressNotification extends StatelessWidget {
                     ).textTheme.headlineSmall!.copyWith(color: Colors.blueGrey),
                   ),
                 ),
-                if (canCancel)
-                  GestureDetector(
-                    onTap: onCancelRecipe,
-                    child: Text(
-                      "Clear",
-                      style: Theme.of(
-                        context,
-                      ).textTheme.headlineSmall!.copyWith(color: Colors.red),
-                    ),
-                  ),
               ],
             ),
           ],

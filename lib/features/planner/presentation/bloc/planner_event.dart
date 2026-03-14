@@ -1,5 +1,6 @@
 import 'package:foodkitchen/core/common/data/model/recipe_model.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
+import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/features/planner/domain/entities/ingredient_entity.dart';
 import 'package:foodkitchen/features/planner/domain/entities/meal_plan_entity.dart';
 import 'package:foodkitchen/features/planner/domain/entities/merged_meal_type_entity.dart';
@@ -66,13 +67,19 @@ class MarkRecipeFinishedEvent extends PlannerEvent {
 
 class UpdateStartRecipeEvent extends PlannerEvent {
   final bool startRecipe;
-  final List<RecipeModel> recipeEntity;
+  final List<RecipeEntity> recipeEntity;
   final List<Map<String, dynamic>> doneSteps;
   UpdateStartRecipeEvent({
     required this.startRecipe,
     required this.recipeEntity,
     required this.doneSteps,
   });
+}
+
+class CancelInProgressRecipeEvent extends PlannerEvent {
+  final int inProgressRecipeIndex;
+
+  CancelInProgressRecipeEvent({required this.inProgressRecipeIndex});
 }
 
 final class ResetPlannerStateEvent extends PlannerEvent {}
@@ -205,5 +212,15 @@ class RequestStartRecipeEvent extends PlannerEvent {
     required this.recipeId,
     required this.kitchenId,
     required this.recipeName,
+  });
+}
+
+final class CheckMissingIngredientsEvent extends PlannerEvent {
+  final String kitchenId;
+  final String recipeId;
+
+  CheckMissingIngredientsEvent({
+    required this.kitchenId,
+    required this.recipeId,
   });
 }

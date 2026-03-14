@@ -25,18 +25,6 @@ class RecipeInfoWidget extends StatelessWidget {
         widget: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (recipe.missingItems && isRequestedRecipe == false)
-              Align(
-                alignment: Alignment.topRight,
-                child: Text(
-                  "Some items are missing*",
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: Colors.red,
-                    fontSize: t(10),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
             Text(
               recipe.title,
               style: Theme.of(context).textTheme.headlineLarge,

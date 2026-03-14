@@ -101,6 +101,7 @@ import 'package:foodkitchen/features/planner/data/repository/planner_repository_
 import 'package:foodkitchen/features/planner/domain/repository/planner_repository.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/add_to_favourite_recipe.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/add_to_weekly_plan.dart';
+import 'package:foodkitchen/features/planner/domain/usecases/check_missing_ingredients.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/create_plan.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/delete_meal_type_from_weekly_plan.dart';
 import 'package:foodkitchen/features/planner/domain/usecases/delete_plan.dart';
@@ -513,6 +514,7 @@ void _initPlanner() async {
     ..registerFactory(() => GetAllPlans(sl()))
     ..registerFactory(() => GetDateRange(sl()))
     ..registerFactory(() => SetDateRange(sl()))
+    ..registerFactory(() => CheckMissingIngredients(sl()))
     // Bloc
     ..registerLazySingleton(
       () => PlannerBloc(
@@ -536,6 +538,7 @@ void _initPlanner() async {
         getAllPlans: GetAllPlans(sl()),
         getDateRange: GetDateRange(sl()),
         setDateRange: SetDateRange(sl()),
+        checkMissingIngredients: CheckMissingIngredients(sl()),
       ),
     );
 }

@@ -171,9 +171,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildRecipeInProgress(UserState userState) {
-    return RecipeInProgressNotification(
-      padding: gapOnly(left: 20, right: 20, top: 14, bottom: 0),
-      recipeEntity: userState.recipeEntity.first,
+    return Column(
+      children: userState.recipeEntity.map((recipe) {
+        return RecipeInProgressNotification(
+          padding: gapOnly(left: 20, right: 20, top: 14, bottom: 0),
+          recipeEntity: recipe,
+        );
+      }).toList(),
     );
   }
 

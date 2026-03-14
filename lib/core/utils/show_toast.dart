@@ -10,6 +10,7 @@ class AppToast {
     ToastType type, {
     ToastGravity gravity = ToastGravity.BOTTOM,
     int timeInSecForIosWeb = 1,
+    Toast toastLength = Toast.LENGTH_SHORT,
   }) {
     Color bgColor;
 
@@ -32,7 +33,7 @@ class AppToast {
 
     Fluttertoast.showToast(
       msg: " $message",
-      toastLength: Toast.LENGTH_SHORT,
+      toastLength: toastLength,
       gravity: gravity,
       timeInSecForIosWeb: timeInSecForIosWeb,
       backgroundColor: bgColor,

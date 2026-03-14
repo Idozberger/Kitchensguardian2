@@ -18,6 +18,9 @@ class SecondaryActionsWidget extends StatelessWidget {
       children: [
         Expanded(child: _buildSecondaryActionButton(context, "Ingredients", 0)),
         Expanded(child: _buildSecondaryActionButton(context, "Recipe", 1)),
+        Expanded(
+          child: _buildSecondaryActionButton(context, "Missing Items", 2),
+        ),
       ],
     );
   }
@@ -38,7 +41,7 @@ class SecondaryActionsWidget extends StatelessWidget {
               color: isSelected
                   ? AppColors.primaryColor
                   : const Color(0xffD4D2D2),
-              width: 3,
+              width: 2,
             ),
           ),
         ),

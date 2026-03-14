@@ -29,9 +29,18 @@ class ViewPlanDetailsPage extends StatelessWidget {
               child: Column(
                 children: [
                   if (state.recipeEntity.isNotEmpty)
-                    RecipeInProgressNotification(
-                      padding: gapOnly(left: 20, right: 20, bottom: 0, top: 14),
-                      recipeEntity: state.recipeEntity[0],
+                    Column(
+                      children: state.recipeEntity.map((recipe) {
+                        return RecipeInProgressNotification(
+                          padding: gapOnly(
+                            left: 20,
+                            right: 20,
+                            bottom: 0,
+                            top: 14,
+                          ),
+                          recipeEntity: recipe,
+                        );
+                      }).toList(),
                     ),
                   Padding(
                     padding: gapSymmetric(horizontal: 20, vertical: 20),

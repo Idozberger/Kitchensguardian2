@@ -41,7 +41,7 @@ class CollagePreview extends StatelessWidget {
 
 class _CollageImage extends StatelessWidget {
   final String path;
-  _CollageImage({required this.path});
+  const _CollageImage({required this.path});
 
   final Color _surface = const Color(0xFF1A1D27);
   final Color _textLow = const Color(0xFF555A70);

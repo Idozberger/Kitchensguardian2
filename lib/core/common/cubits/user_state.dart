@@ -16,7 +16,7 @@ class UserState {
   final String invitationCode;
   final bool entitlementIsActive;
   final List<RecipeEntity> recipeEntity;
-  final List<Map<String, dynamic>> doneSteps;
+  final List<List<Map<String, dynamic>>> doneSteps;
   final List<PantriesCommonEntity> userStorageAreas;
   final UserModel? userModel;
   const UserState({
@@ -50,7 +50,7 @@ class UserState {
     bool? isLoading,
     String? invitationCode,
     List<RecipeEntity>? recipeEntity,
-    List<Map<String, dynamic>>? doneSteps,
+    List<List<Map<String, dynamic>>>? doneSteps,
     List<PantriesCommonEntity>? userStorageAreas,
     UserModel? userModel,
   }) {

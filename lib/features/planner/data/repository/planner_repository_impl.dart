@@ -335,4 +335,23 @@ class PlannerRepositoryImpl implements PlannerRepository {
       return Left(UnknownFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, bool>> checkMissingIngredients({
+    required String kitchenId,
+    required String recipeId,
+  }) async {
+    try {
+      bool response = await plannerRemoteDatasource.checkMissingIngredients(
+        kitchenId: kitchenId,
+        recipeId: recipeId,
+      );
+
+      return Right(response);
+    } on Failure catch (f) {
+      return Left(f);
+    } catch (e) {
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
 }

@@ -17,7 +17,7 @@ class RecipeEntity {
   final List<IngredientEntity> ingredients;
   final List<IngredientEntity> missingIngredients;
   final Uint8List? thumbnail;
-  final bool missingItems;
+  bool missingItems;
   final bool available;
 
   final String recipeId;
@@ -32,6 +32,7 @@ class RecipeEntity {
   final int expiringItemsCount;
   final List<ExpiringItemEntity> expiringItems;
   final List<String> expiringItemsUsed;
+
   RecipeEntity({
     required this.id,
     required this.mealplanId,

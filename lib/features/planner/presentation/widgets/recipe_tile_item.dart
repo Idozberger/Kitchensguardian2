@@ -1,9 +1,7 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
-import 'package:foodkitchen/core/utils/show_toast.dart';
-import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
 import 'package:foodkitchen/features/planner/presentation/widgets/recipes_tile.dart';
 import 'package:foodkitchen/core/common/data/model/recipe_model.dart';
 import 'package:go_router/go_router.dart';
@@ -35,29 +33,20 @@ class RecipeTileItem extends StatelessWidget {
   });
 
   void _navigateToDetails(BuildContext context) {
-    if (context.read<PlannerBloc>().state.startRecipe == false) {
-      final updatedRecipe = recipe.copyWith(
-        formatedDateString: selectedDate,
-        mealType: selectedMealType,
-      );
+    final updatedRecipe = recipe.copyWith(
+      formatedDateString: selectedDate,
+      mealType: selectedMealType,
+    );
 
-      context.pushNamed(
-        Routes.generateRecipesDetails,
-        extra: {
-          "meal_type_entity": updatedRecipe,
-          "is_plan": isPlan,
-          "is_edit": isEdit,
-          "is_request_to_start_recipe": canRequestToStartRecipe,
-        },
-      );
-    } else {
-      AppToast.show(
-        "A recipe is already in progress. Please finish it first, or tap 'Go to Recipe' at the bottom.",
-        ToastType.error,
-        gravity: ToastGravity.TOP,
-        timeInSecForIosWeb: 3,
-      );
-    }
+    context.pushNamed(
+      Routes.generateRecipesDetails,
+      extra: {
+        "meal_type_entity": updatedRecipe,
+        "is_plan": isPlan,
+        "is_edit": isEdit,
+        "is_request_to_start_recipe": canRequestToStartRecipe,
+      },
+    );
   }
 
   @override
@@ -70,7 +59,9 @@ class RecipeTileItem extends StatelessWidget {
       trailingIcon: svgAsset.isEmpty
           ? AppAssets.arrowForwardAndroidSvg
           : svgAsset,
-      errorText: recipe.missingItems ? "Some items are missing" : "",
+      errorText: recipe.missingIngredients.isNotEmpty
+          ? "Some items are missing"
+          : "",
       selected: false,
       onTap: () => _navigateToDetails(context),
       onTrailingTap: () {

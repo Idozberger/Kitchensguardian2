@@ -28,6 +28,10 @@ abstract interface class PlannerRepository {
     required String kitchenId,
     required String recipeId,
   });
+  Future<Either<Failure, bool>> checkMissingIngredients({
+    required String kitchenId,
+    required String recipeId,
+  });
   Future<Either<Failure, String>> requestItems({required Pantry pantry});
   Future<Either<Failure, String>> createMealPlan({
     required List<MealPlanEntity> mealPlans,

@@ -89,11 +89,8 @@ class UserCubit extends Cubit<UserState> {
     );
   }
 
-  Future<void> updateRecipeEntity(
-    List<RecipeEntity> recipeEntity,
-    List<Map<String, dynamic>> doneSteps,
-  ) async {
-    emit(state.copyWith(recipeEntity: recipeEntity, doneSteps: doneSteps));
+  Future<void> updateRecipeEntity(List<RecipeEntity> recipeEntity) async {
+    emit(state.copyWith(recipeEntity: recipeEntity));
   }
 
   void toggleLoading(bool value) {

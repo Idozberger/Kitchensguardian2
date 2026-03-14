@@ -35,7 +35,13 @@ class _SignUpPageState extends State<SignUpPage> {
   void initState() {
     super.initState();
     _userCubit = context.read<UserCubit>();
-    _userCubit.setGoogleSignUpUserModel(firstName: "", lastName: "", email: "");
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _userCubit.setGoogleSignUpUserModel(
+        firstName: "",
+        lastName: "",
+        email: "",
+      );
+    });
   }
 
   final TextEditingController _firstNameController = TextEditingController();

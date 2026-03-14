@@ -215,7 +215,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       "Your request to join the kitchen \"$kitchenName\" has been approved by the host. You are now added to the kitchen. You can access it anytime using this invitation code: $inviteCode",
       _userCubit.state.invitationCode,
       _userCubit.state.kitchenName,
-      _userCubit.state.role,
+      "member",
       _userCubit.state.activeKitchenId,
       "Approved",
     );

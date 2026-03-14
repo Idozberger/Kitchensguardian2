@@ -8,14 +8,14 @@ import 'package:foodkitchen/features/planner/presentation/widgets/recipes_step_t
 class RecipeStepsTile extends StatelessWidget {
   final RecipeEntity recipe;
   final List<Map<String, dynamic>> steps;
-  final bool startRecipe;
+
   final Function(int index, bool isCompleted) onStepToggle;
 
   const RecipeStepsTile({
     super.key,
     required this.recipe,
     required this.steps,
-    required this.startRecipe,
+
     required this.onStepToggle,
   });
 

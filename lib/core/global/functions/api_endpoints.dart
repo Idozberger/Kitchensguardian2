@@ -76,4 +76,6 @@ class AppConstants {
   static const String consumptionConfirmationCount =
       "/api/consumption/confirmations/count";
   static const String kitchenSetupScan = "/api/kitchen/setup/scan";
+  static const String checkMissingIngredients =
+      "/api/recipe/check_missing_ingredients";
 }

@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, library_prefixes
 
 import 'dart:convert';
 import 'package:foodkitchen/features/home/presentation/bloc/home_event.dart'

@@ -121,7 +121,7 @@ class _RecipesStartRequestPageState extends State<RecipesStartRequestPage> {
             return ListView.separated(
               padding: gapSymmetric(horizontal: 12, vertical: 12),
               itemCount: filtered.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 8),
+              separatorBuilder: (_, _) => const SizedBox(height: 8),
               itemBuilder: (context, index) {
                 final data = filtered[index].data() as Map<String, dynamic>;
 

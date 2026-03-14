@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
@@ -11,6 +13,7 @@ import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_checktile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
+import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
 import 'package:foodkitchen/features/pantry/presentation/models/pantry_items.dart';
 import 'package:foodkitchen/features/planner/domain/entities/ingredient_entity.dart';
@@ -22,11 +25,13 @@ import 'package:go_router/go_router.dart';
 class MissingItemsListWidget extends StatefulWidget {
   final bool isPlanned;
   final String recipeId;
+  final String id;
 
   const MissingItemsListWidget({
     super.key,
     required this.isPlanned,
     required this.recipeId,
+    required this.id,
   });
 
   @override
@@ -51,10 +56,11 @@ class _MissingItemsListWidgetState extends State<MissingItemsListWidget> {
     final allRecipes = [
       ...state.recipes ?? [],
       ...state.favouriteRecipes ?? [],
+      ...state.startedRecipe,
     ];
 
     for (final recipe in allRecipes) {
-      if (recipe.id == widget.recipeId) {
+      if (recipe.recipeId == widget.recipeId || recipe.id == widget.recipeId) {
         return recipe.missingIngredients;
       }
     }
@@ -62,6 +68,7 @@ class _MissingItemsListWidgetState extends State<MissingItemsListWidget> {
     for (final weeklyPlan in state.getAllWeeklyPlans) {
       final breakfast = weeklyPlan.breakfast;
       if (breakfast != null && breakfast.id == widget.recipeId) {
+        log("Recipe Name: ${breakfast.title}");
         return breakfast.missingIngredients;
       }
 
@@ -103,103 +110,128 @@ class _MissingItemsListWidgetState extends State<MissingItemsListWidget> {
     return BlocBuilder<PlannerBloc, PlannerState>(
       builder: (_, state) {
         final ingredients = getIngredients(state);
-        return UpperTile(
-          widget: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Missing Items",
-                    style: Theme.of(context).textTheme.headlineLarge,
-                  ),
-                  ingredients.isEmpty
-                      ? SizedBox()
-                      : TextButton(
-                          onPressed: () {
-                            if (selectedIngredients.length ==
-                                ingredients.length) {
-                              setState(() => selectedIngredients = []);
-                            } else {
-                              selectAllIngredients(ingredients);
-                            }
-                          },
-                          child: Text(
-                            selectedIngredients.length == ingredients.length
-                                ? "Deselect All"
-                                : "Select All",
-                            style: Theme.of(context).textTheme.headlineLarge!
-                                .copyWith(
-                                  color: AppColors.primaryColor,
-                                  fontSize: t(14),
-                                ),
-                          ),
-                        ),
-                ],
-              ),
-              ingredients.isEmpty
-                  ? Padding(
-                      padding: gapOnly(top: 8),
-                      child: Text(
-                        "No ingredients are available",
-                        style: Theme.of(context).textTheme.headlineSmall,
-                      ),
-                    )
-                  : Column(
-                      children: List.generate(ingredients.length, (int index) {
-                        var item = ingredients[index];
-                        return Padding(
-                          padding: gapOnly(top: 8),
-                          child: GenericCircleCheckboxTile(
-                            unit: item.unit,
-                            quantity: item.amount,
-                            title: item.name,
-                            isChecked: selectedIngredients.contains(item),
-                            isFinalList: false,
-                            activeColor: AppColors.primaryColor,
-                            onChanged: (Object? value) {
-                              updateSelectedIngredients(item);
-                            },
-                          ),
-                        );
-                      }),
-                    ),
-              ingredients.isEmpty
-                  ? const SizedBox.shrink()
-                  : SizedBox(height: h(20)),
-              ingredients.isEmpty
-                  ? const SizedBox.shrink()
-                  : Row(
-                      spacing: w(6),
-                      children: [
-                        Flexible(
-                          child: GenericButtonWidget(
-                            isOutlined: true,
-                            isLoading: state.isLoading,
-                            onPressed: () => onAddInList(),
-                            text: "Add in List",
-                          ),
-                        ),
 
-                        Flexible(
-                          child: GenericButtonWidget(
-                            isLoading: state.addingToInventory,
-                            onPressed: () => onAddInInventory(
-                              context.read<UserCubit>().state.role == "member",
-                            ),
-                            text:
-                                (context.read<UserCubit>().state.role ==
-                                    "member")
-                                ? "Request Items"
-                                : "Add to Inventory",
-                          ),
+        return ingredients.isEmpty
+            ? UpperTile(
+                widget: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'All Ingredients Available',
+                      style: Theme.of(context).textTheme.headlineLarge,
+                    ),
+                    gap(height: 8),
+                    Text(
+                      'You have everything needed to prepare this recipe.',
+
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                  ],
+                ),
+              )
+            : UpperTile(
+                widget: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Missing Items",
+                          style: Theme.of(context).textTheme.headlineLarge,
                         ),
+                        ingredients.isEmpty
+                            ? SizedBox()
+                            : TextButton(
+                                onPressed: () {
+                                  if (selectedIngredients.length ==
+                                      ingredients.length) {
+                                    setState(() => selectedIngredients = []);
+                                  } else {
+                                    selectAllIngredients(ingredients);
+                                  }
+                                },
+                                child: Text(
+                                  selectedIngredients.length ==
+                                          ingredients.length
+                                      ? "Deselect All"
+                                      : "Select All",
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineLarge!
+                                      .copyWith(
+                                        color: AppColors.primaryColor,
+                                        fontSize: t(14),
+                                      ),
+                                ),
+                              ),
                       ],
                     ),
-            ],
-          ),
-        );
+                    ingredients.isEmpty
+                        ? Padding(
+                            padding: gapOnly(top: 8),
+                            child: Text(
+                              "No ingredients are available",
+                              style: Theme.of(context).textTheme.headlineSmall,
+                            ),
+                          )
+                        : Column(
+                            children: List.generate(ingredients.length, (
+                              int index,
+                            ) {
+                              var item = ingredients[index];
+                              return Padding(
+                                padding: gapOnly(top: 8),
+                                child: GenericCircleCheckboxTile(
+                                  unit: item.unit,
+                                  quantity: item.amount,
+                                  title: item.name,
+                                  isChecked: selectedIngredients.contains(item),
+                                  isFinalList: false,
+                                  activeColor: AppColors.primaryColor,
+                                  onChanged: (Object? value) {
+                                    updateSelectedIngredients(item);
+                                  },
+                                ),
+                              );
+                            }),
+                          ),
+                    ingredients.isEmpty
+                        ? const SizedBox.shrink()
+                        : SizedBox(height: h(20)),
+                    ingredients.isEmpty
+                        ? const SizedBox.shrink()
+                        : Row(
+                            spacing: w(6),
+                            children: [
+                              Flexible(
+                                child: GenericButtonWidget(
+                                  isOutlined: true,
+                                  isLoading: state.isLoading,
+                                  onPressed: () => onAddInList(),
+                                  text: "Add in List",
+                                ),
+                              ),
+
+                              Flexible(
+                                child: GenericButtonWidget(
+                                  isLoading: state.addingToInventory,
+                                  onPressed: () => onAddInInventory(
+                                    context.read<UserCubit>().state.role ==
+                                        "member",
+                                  ),
+                                  text:
+                                      (context.read<UserCubit>().state.role ==
+                                          "member")
+                                      ? "Request Items"
+                                      : "Add to Inventory",
+                                ),
+                              ),
+                            ],
+                          ),
+                  ],
+                ),
+              );
       },
     );
   }
@@ -219,7 +251,7 @@ class _MissingItemsListWidgetState extends State<MissingItemsListWidget> {
           qtyController: TextEditingController(text: ingredient.amount),
           manuFacturingDate: TextEditingController(text: ""),
           expireDate: TextEditingController(text: ""),
-          unit: null,
+          unit: ingredient.unit,
           pantry: null,
           file: null,
           fileBytes: null,
@@ -237,6 +269,7 @@ class _MissingItemsListWidgetState extends State<MissingItemsListWidget> {
         "selectedIngredients": selectedIngredients,
       },
     );
+    setState(() => selectedIngredients = []);
   }
 
   Future<void> onAddInList() async {

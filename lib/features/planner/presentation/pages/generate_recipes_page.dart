@@ -154,19 +154,23 @@ class _GenerateRecipesPageState extends State<GenerateRecipesPage> {
   }
 
   Widget _buildRecipeInProgressNotification(PlannerState state) {
-    return RecipeInProgressNotification(
-      onCancelRecipe: () {
-        _plannerBloc.add(
-          UpdateStartRecipeEvent(
-            startRecipe: false,
-            recipeEntity: [],
-            doneSteps: [],
-          ),
+    return Column(
+      children: state.startedRecipe.map((recipe) {
+        return RecipeInProgressNotification(
+          onCancelRecipe: () {
+            _plannerBloc.add(
+              UpdateStartRecipeEvent(
+                startRecipe: false,
+                recipeEntity: [],
+                doneSteps: [],
+              ),
+            );
+          },
+          padding: gapOnly(bottom: 14),
+          canCancel: true,
+          recipeEntity: recipe,
         );
-      },
-      padding: gapOnly(bottom: 14),
-      canCancel: true,
-      recipeEntity: state.startedRecipe[0],
+      }).toList(),
     );
   }
 

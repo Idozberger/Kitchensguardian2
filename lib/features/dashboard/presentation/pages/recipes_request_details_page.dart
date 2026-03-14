@@ -57,7 +57,8 @@ class RecipesRequestDetailsPage extends StatefulWidget {
 class _RecipesRequestDetailsPageState extends State<RecipesRequestDetailsPage> {
   late final PlannerBloc _plannerBloc;
   late final DashboardBloc _dashboardBloc;
-
+  int inProgressRecipeIndex = -1;
+  String inProgressRecipeId = "";
   RecipeEntity? _recipe;
 
   bool _isFav = false;
@@ -86,8 +87,17 @@ class _RecipesRequestDetailsPageState extends State<RecipesRequestDetailsPage> {
 
   void _initializeSteps(RecipeEntity recipe) {
     _plannerBloc.add(UpdateRecipeFinishedState());
-    if (_plannerBloc.state.startRecipe) {
-      _steps = _plannerBloc.state.doneSteps;
+
+    inProgressRecipeId = recipe.recipeId.isEmpty ? recipe.id : recipe.recipeId;
+    inProgressRecipeIndex = _plannerBloc.state.startedRecipe.indexWhere(
+      (recipe) =>
+          recipe.recipeId == inProgressRecipeId ||
+          (recipe.recipeId.isEmpty && recipe.id == inProgressRecipeId),
+    );
+    if (inProgressRecipeIndex != -1) {
+      _steps = (inProgressRecipeIndex < _plannerBloc.state.doneSteps.length)
+          ? _plannerBloc.state.doneSteps[inProgressRecipeIndex]
+          : recipe.doneSteps;
     } else {
       _steps = recipe.cookingSteps
           .map((step) => {"step": step, "completed": false})
@@ -124,12 +134,12 @@ class _RecipesRequestDetailsPageState extends State<RecipesRequestDetailsPage> {
         widget.backPageAvailable ? context.pop() : context.go(Routes.dashboard);
       },
       child: BlocListener<DashboardBloc, DashboardState>(
-        listener: (context, state) {
-          if (state is RecipeDetailsLoaded && _recipe == null) {
-            setState(() => _initRecipe(state.recipeEntity));
+        listener: (context, dashboardState) {
+          if (dashboardState is RecipeDetailsLoaded && _recipe == null) {
+            setState(() => _initRecipe(dashboardState.recipeEntity));
           }
-          if (state is DashboardFailure) {
-            AppToast.show(state.message, ToastType.error);
+          if (dashboardState is DashboardFailure) {
+            AppToast.show(dashboardState.message, ToastType.error);
           }
         },
         child: BlocConsumer<PlannerBloc, PlannerState>(
@@ -140,16 +150,7 @@ class _RecipesRequestDetailsPageState extends State<RecipesRequestDetailsPage> {
             if (state.isRecipeFinished) {
               updateRecipeStatus();
               context.pop();
-              _plannerBloc.add(
-                UpdateStartRecipeEvent(
-                  startRecipe: false,
-                  recipeEntity: [],
-                  doneSteps: [],
-                ),
-              );
-              setState(
-                () => _steps.forEach((step) => step["completed"] = false),
-              );
+              _handleCancelRecipe(context.read<DashboardBloc>().state);
             }
           },
           builder: (_, plannerState) {
@@ -170,7 +171,13 @@ class _RecipesRequestDetailsPageState extends State<RecipesRequestDetailsPage> {
                   ? null
                   : BlocBuilder<PlannerBloc, PlannerState>(
                       builder: (_, state) {
-                        return state.startRecipe && _selectedTab == 1
+                        return state.startedRecipe.any(
+                                  (recipe) =>
+                                      recipe.recipeId == inProgressRecipeId ||
+                                      (recipe.recipeId.isEmpty &&
+                                          recipe.id == inProgressRecipeId),
+                                ) &&
+                                _selectedTab == 1
                             ? BottomNavRecipeDetails(steps: _steps)
                             : const SizedBox.shrink();
                       },
@@ -180,6 +187,27 @@ class _RecipesRequestDetailsPageState extends State<RecipesRequestDetailsPage> {
         ),
       ),
     );
+  }
+
+  void _handleCancelRecipe(DashboardState state) {
+    if (state is RecipeDetailsLoaded) {
+      inProgressRecipeId = state.recipeEntity.id.isNotEmpty
+          ? state.recipeEntity.id
+          : state.recipeEntity.recipeId;
+      inProgressRecipeIndex = _plannerBloc.state.startedRecipe.indexWhere(
+        (r) =>
+            r.recipeId == inProgressRecipeId ||
+            (r.recipeId.isEmpty && r.id == inProgressRecipeId),
+      );
+
+      _plannerBloc.add(
+        CancelInProgressRecipeEvent(
+          inProgressRecipeIndex: inProgressRecipeIndex,
+        ),
+      );
+      // ignore: avoid_function_literals_in_foreach_calls
+      setState(() => _steps.forEach((step) => step['completed'] = false));
+    }
   }
 
   Widget _buildLoading() {
@@ -233,7 +261,13 @@ class _RecipesRequestDetailsPageState extends State<RecipesRequestDetailsPage> {
             RecipeInfoWidget(recipe: recipe, isRequestedRecipe: true),
             (context.read<UserCubit>().state.role == "member")
                 ? SizedBox()
-                : _buildPrimaryActions(context, state, recipe, true),
+                : _buildPrimaryActions(
+                    context,
+                    state,
+                    recipe,
+                    true,
+                    context.read<DashboardBloc>(),
+                  ),
             _buildTabs(),
             _buildTabContent(state, recipe),
             gap(height: 18),
@@ -263,7 +297,12 @@ class _RecipesRequestDetailsPageState extends State<RecipesRequestDetailsPage> {
     PlannerState state,
     RecipeEntity recipe,
     bool isRequestedRecipe,
+    DashboardBloc dashboardBloc,
   ) {
+    bool isInProgress = state.startedRecipe.any(
+      (r) => r.id == inProgressRecipeId,
+    );
+
     return PrimaryActionsWidget(
       isRequestedRecipe: isRequestedRecipe,
       completed: widget.isCompleted == "Completed",
@@ -271,15 +310,15 @@ class _RecipesRequestDetailsPageState extends State<RecipesRequestDetailsPage> {
       addPlanDummyLoading: false,
       recipe: recipe,
       isPlan: false,
-      startRecipe: state.startRecipe,
+      startRecipe: isInProgress,
       isFinishing: state.isFinishingRecipe,
       addToWeeklyPlanCallback: () {},
-      onStartRecipe: () async {
+      onStartOrRequestRecipe: () async {
         if (context.read<UserCubit>().state.role == "member") {
           log("recipe-recipeId: ${recipe.recipeId} - recipe-id: ${recipe.id}");
           _plannerBloc.add(
             RequestStartRecipeEvent(
-              recipeId: recipe.recipeId,
+              recipeId: recipe.id,
               kitchenId: context.read<UserCubit>().state.activeKitchenId,
               recipeName: recipe.title,
             ),
@@ -288,7 +327,7 @@ class _RecipesRequestDetailsPageState extends State<RecipesRequestDetailsPage> {
           _plannerBloc.add(
             UpdateStartRecipeEvent(
               startRecipe: true,
-              recipeEntity: [recipe as RecipeModel],
+              recipeEntity: [...state.startedRecipe, recipe as RecipeModel],
               doneSteps: _steps,
             ),
           );
@@ -296,14 +335,7 @@ class _RecipesRequestDetailsPageState extends State<RecipesRequestDetailsPage> {
         }
       },
       onCancel: () {
-        _plannerBloc.add(
-          UpdateStartRecipeEvent(
-            startRecipe: false,
-            recipeEntity: [],
-            doneSteps: [],
-          ),
-        );
-        setState(() => _steps.forEach((step) => step["completed"] = false));
+        _handleCancelRecipe(dashboardBloc.state);
       },
       onFinish: () => _showFinishConfirmationDialog(context, state, recipe),
     );
@@ -330,8 +362,6 @@ class _RecipesRequestDetailsPageState extends State<RecipesRequestDetailsPage> {
       children: [
         IngredientsListWidget(recipe: recipe),
         gap(height: 16),
-        if (recipe.missingItems)
-          MissingItemsListWidget(recipeId: recipe.id, isPlanned: false),
       ],
     );
   }
@@ -344,7 +374,6 @@ class _RecipesRequestDetailsPageState extends State<RecipesRequestDetailsPage> {
         RecipeStepsTile(
           recipe: recipe,
           steps: _steps,
-          startRecipe: state.startRecipe,
           onStepToggle: _handleStepToggle,
         ),
       ],
@@ -352,7 +381,13 @@ class _RecipesRequestDetailsPageState extends State<RecipesRequestDetailsPage> {
   }
 
   Future<void> _handleStepToggle(int index, bool isCompleted) async {
-    if (!_plannerBloc.state.startRecipe) {
+    final startRecipe = _plannerBloc.state.startedRecipe.any(
+      (recipe) =>
+          recipe.recipeId == inProgressRecipeId ||
+          (recipe.recipeId.isEmpty && recipe.id == inProgressRecipeId),
+    );
+
+    if (!startRecipe) {
       AppToast.show(
         "Start the recipe first before proceeding to the steps!",
         ToastType.warning,
@@ -438,13 +473,6 @@ class _RecipesRequestDetailsPageState extends State<RecipesRequestDetailsPage> {
       primaryButtonText: "Yes",
       secondaryButtonText: "Cancel",
       onPrimaryPressed: () {
-        _plannerBloc.add(
-          UpdateStartRecipeEvent(
-            startRecipe: false,
-            recipeEntity: [],
-            doneSteps: [],
-          ),
-        );
         _plannerBloc.add(
           MarkRecipeFinishedEvent(
             kitchenId: context.read<UserCubit>().state.activeKitchenId,

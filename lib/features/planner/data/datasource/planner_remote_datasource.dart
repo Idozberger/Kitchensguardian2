@@ -37,6 +37,10 @@ abstract interface class PlannerRemoteDatasource {
     required String kitchenId,
     required String date,
   });
+  Future<bool> checkMissingIngredients({
+    required String kitchenId,
+    required String recipeId,
+  });
   Future<List<Map<String, dynamic>>> listAllMealPlans({
     required String kitchenId,
   });
@@ -455,6 +459,30 @@ class PlannerRemoteDatasourceImpl implements PlannerRemoteDatasource {
       }
 
       return response.data;
+    } on DioException catch (e) {
+      throw dio.handleError(e);
+    }
+  }
+
+  @override
+  Future<bool> checkMissingIngredients({
+    required String kitchenId,
+    required String recipeId,
+  }) async {
+    try {
+      final response = await dio.get(
+        "${AppConstants.checkMissingIngredients}?recipe_id=$recipeId&kitchen_id=$kitchenId",
+      );
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+
+        final message = data["error"];
+        throw message;
+      }
+      log("response of missing ingredients: $response");
+      return response.data["has_missing_ingredients"];
     } on DioException catch (e) {
       throw dio.handleError(e);
     }

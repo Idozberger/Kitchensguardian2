@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/dialogs/logout.dart';
 import 'package:foodkitchen/core/dialogs/not_found_404.dart';
@@ -56,6 +57,7 @@ final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 final GoRouter router = GoRouter(
   navigatorKey: rootNavigatorKey,
   initialLocation: Routes.splash,
+  debugLogDiagnostics: kDebugMode,
   routes: [
     GoRoute(
       path: Routes.splash,
@@ -137,7 +139,6 @@ final GoRouter router = GoRouter(
       pageBuilder: (context, state) =>
           buildPage(state.pageKey, NotificationPage()),
     ),
-    // In your routes.dart
     GoRoute(
       name: Routes.countryAndCurrencySetup,
       path: Routes.countryAndCurrencySetup,
@@ -396,12 +397,14 @@ CustomTransitionPage buildPage(LocalKey key, Widget child) {
     child: child,
     transitionDuration: const Duration(milliseconds: 200),
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      final tween = Tween<Offset>(
+        begin: const Offset(1.0, 0.0),
+        end: Offset.zero,
+      ).chain(CurveTween(curve: Curves.easeOut));
+
       return SlideTransition(
-        position: Tween<Offset>(
-          begin: const Offset(1.0, 0.0),
-          end: Offset.zero,
-        ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOut)),
-        child: child,
+        position: animation.drive(tween),
+        child: RepaintBoundary(child: child),
       );
     },
   );
