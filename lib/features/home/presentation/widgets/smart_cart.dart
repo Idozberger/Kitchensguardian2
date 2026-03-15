@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
@@ -6,9 +7,11 @@ import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
+import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
+import 'package:foodkitchen/features/home/presentation/bloc/home_event.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/rounded_text_container.dart';
 
-class SmartCartTile extends StatelessWidget {
+class SmartCartTile extends StatefulWidget {
   final bool isGenerated;
   final List<String> previewItems;
   final VoidCallback onGenerate;
@@ -23,6 +26,19 @@ class SmartCartTile extends StatelessWidget {
   });
 
   @override
+  State<SmartCartTile> createState() => _SmartCartTileState();
+}
+
+class _SmartCartTileState extends State<SmartCartTile> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<HomeBloc>().add(GenerateGroceryList());
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return UpperTile(
       widget: Column(
@@ -30,14 +46,14 @@ class SmartCartTile extends StatelessWidget {
         spacing: h(8),
         children: [
           _buildHeader(context),
-          if (isGenerated)
+          if (widget.isGenerated)
             _buildPreview(context)
           else
             _buildEmptyState(context),
 
           GenericButtonWidget(
             text: "Generate Ai Grocery List",
-            onPressed: onGenerate,
+            onPressed: widget.onGenerate,
           ),
         ],
       ),
@@ -60,7 +76,7 @@ class SmartCartTile extends StatelessWidget {
   }
 
   Widget _buildPreview(BuildContext context) {
-    return previewItems.isEmpty
+    return widget.previewItems.isEmpty
         ? _buildEmptyState(context)
         : Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,7 +84,7 @@ class SmartCartTile extends StatelessWidget {
             children: [
               _buildPreviewLabel(context),
               _buildItemsList(),
-              if (infoText != null) _buildInfoButton(),
+              if (widget.infoText != null) _buildInfoButton(),
             ],
           );
   }
@@ -88,7 +104,7 @@ class SmartCartTile extends StatelessWidget {
       spacing: 6,
       runSpacing: 6,
       children: [
-        for (final item in previewItems)
+        for (final item in widget.previewItems)
           IntrinsicWidth(
             child: Padding(
               padding: gapOnly(right: 6),
@@ -105,8 +121,8 @@ class SmartCartTile extends StatelessWidget {
   Widget _buildInfoButton() {
     return IntrinsicWidth(
       child: InkWell(
-        onTap: onGenerate,
-        child: RoundedTextContainer(text: infoText!),
+        onTap: widget.onGenerate,
+        child: RoundedTextContainer(text: widget.infoText!),
       ),
     );
   }

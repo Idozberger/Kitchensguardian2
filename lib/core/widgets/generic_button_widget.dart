@@ -57,6 +57,7 @@ class GenericButtonWidget extends StatelessWidget {
           ? _buildLoadingIndicator(color: AppColors.primaryColor)
           : Text(
               text,
+              textAlign: TextAlign.center,
               style:
                   textStyle ??
                   Theme.of(context).textTheme.headlineMedium?.copyWith(
@@ -95,6 +96,7 @@ class GenericButtonWidget extends StatelessWidget {
   Widget _buildButtonText(BuildContext context) {
     return Text(
       text,
+      textAlign: TextAlign.center,
       style: Theme.of(context).textTheme.headlineMedium?.copyWith(
         fontSize: t(12),
         color: _getTextColor(),

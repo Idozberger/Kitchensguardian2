@@ -209,7 +209,7 @@ class _MissingItemsListWidgetState extends State<MissingItemsListWidget> {
                                   isOutlined: true,
                                   isLoading: state.isLoading,
                                   onPressed: () => onAddInList(),
-                                  text: "Add in List",
+                                  text: "Add to grocery list",
                                 ),
                               ),
 

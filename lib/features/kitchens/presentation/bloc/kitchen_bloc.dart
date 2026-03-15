@@ -258,24 +258,21 @@ class KitchenBloc extends Bloc<KitchenEvent, KitchenState> {
     Emitter<KitchenState> emit,
   ) async {
     emit(KitchensLoading());
-
     final kitchenId = event.kitchen.kitchenId;
-
     if (event.kitchen.invitationCode.isNotEmpty) {
       await _saveOrUpdateUserKitchen(kitchen: event.kitchen);
     }
     _plannerBloc.add(GetDateRangeEvent(kitchenId: kitchenId));
     _plannerBloc.add(GetAllWeeklyPlansEvent(kitchenId, null));
-
     _homeBloc.add(GetAllWeeklyPlansEventForHome());
     _homeBloc.add(GetUserStorageAreaEvent(kitchenId));
     _homeBloc.add(GetRecipeSuggestionEvent(kitchenId));
     _homeBloc.add(GetPantriesItemsEventForHome(kitchenId: kitchenId));
-    _homeBloc.add(GenerateGroceryList());
     _homeBloc.add(GetAllRequestedItemsEvent(kitchenId: kitchenId));
-
     _groceryBloc.add(RequestedGroceryEvent(kitchenId: kitchenId));
     await _userCubit.getUserStorageArea(kitchenId: kitchenId);
+
+    _homeBloc.add(GenerateGroceryList());
     emit(OpenKitchen());
   }
 
