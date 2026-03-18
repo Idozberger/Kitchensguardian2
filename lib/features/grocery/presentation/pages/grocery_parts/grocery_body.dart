@@ -236,7 +236,6 @@ class _GroceryBodyState extends State<GroceryBody> {
               child: Column(
                 children: List.generate(items.length, (index) {
                   final item = items[index];
-                  log("Grocery: ${item.unit}");
 
                   return GroceryListItem(
                     grocery: item,
@@ -296,6 +295,7 @@ class _GroceryBodyState extends State<GroceryBody> {
   }
 
   void _handleDeleteItem(String itemId) {
+    log("Grocery: ${itemId}");
     showDialogForItemDeletion(
       context,
       callback: () {

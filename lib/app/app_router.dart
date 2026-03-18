@@ -47,8 +47,8 @@ import 'package:foodkitchen/features/planner/presentation/pages/view_plan_detail
 import 'package:foodkitchen/features/profile/presentation/pages/change_password_page.dart';
 import 'package:foodkitchen/features/profile/presentation/pages/edit_profile_page.dart';
 import 'package:foodkitchen/features/profile/presentation/pages/profile_page.dart';
-import 'package:foodkitchen/features/smart_kitcheb_setup/presentation/pages/kitchen_analysis_page.dart';
-import 'package:foodkitchen/features/smart_kitcheb_setup/presentation/pages/smart_kitchen_setup_page.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/presentation/pages/kitchen_analysis_page.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/presentation/pages/smart_kitchen_setup_page.dart';
 import 'package:foodkitchen/features/subscription/presentation/pages/subscription_page.dart';
 import 'package:go_router/go_router.dart';
 

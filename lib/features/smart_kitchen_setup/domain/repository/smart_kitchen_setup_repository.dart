@@ -1,5 +1,5 @@
 import 'package:foodkitchen/core/error/failures.dart';
-import 'package:foodkitchen/features/smart_kitcheb_setup/domain/entities/scanned_item.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/domain/entities/scanned_item.dart';
 import 'package:fpdart/fpdart.dart';
 
 abstract class SmartKitchenSetupRepository {

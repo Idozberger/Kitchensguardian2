@@ -14,16 +14,24 @@ final class GenerateRecipesEvent extends PlannerEvent {
   GenerateRecipesEvent({required this.instructions, required this.kitchenId});
 }
 
-final class GetFavouriteRecipesEvent extends PlannerEvent {}
+final class GetFavouriteRecipesEvent extends PlannerEvent {
+  final String kitchenId;
+  GetFavouriteRecipesEvent(this.kitchenId);
+}
 
 final class AddToFavouriteRecipeEvent extends PlannerEvent {
   final String recipeId;
-  AddToFavouriteRecipeEvent(this.recipeId);
+  final String kitchenId;
+  AddToFavouriteRecipeEvent({required this.kitchenId, required this.recipeId});
 }
 
 final class RemoveFromFavouriteRecipeEvent extends PlannerEvent {
   final String recipeId;
-  RemoveFromFavouriteRecipeEvent(this.recipeId);
+  final String kitchenId;
+  RemoveFromFavouriteRecipeEvent({
+    required this.recipeId,
+    required this.kitchenId,
+  });
 }
 
 final class ClearAiGeneratedRecipes extends PlannerEvent {}

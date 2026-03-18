@@ -10,10 +10,16 @@ abstract interface class PlannerRepository {
     required String instructions,
     required String kitchenId,
   });
-  Future<Either<Failure, List<RecipeEntity>>> favouriteRecipes();
-  Future<Either<Failure, String>> addToFavourite({required String recipeId});
+  Future<Either<Failure, List<RecipeEntity>>> favouriteRecipes({
+    required String kitchenId,
+  });
+  Future<Either<Failure, String>> addToFavourite({
+    required String recipeId,
+    required String kitchenId,
+  });
   Future<Either<Failure, String>> removeFromFavourite({
     required String recipeId,
+    required String kitchenId,
   });
   Future<Either<Failure, String>> addToWeeklyPlan({
     required RecipeEntity recipeEntity,

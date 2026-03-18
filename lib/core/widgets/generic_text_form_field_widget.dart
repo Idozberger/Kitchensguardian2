@@ -8,6 +8,7 @@ import 'package:foodkitchen/core/theme/app_colors.dart';
 class AppTextField extends StatelessWidget {
   final String label;
   final bool isLabled;
+  final TextStyle? lableStyle;
   final bool enabled;
   final String hintText;
   final TextEditingController controller;
@@ -40,6 +41,7 @@ class AppTextField extends StatelessWidget {
     this.suffixIcon,
     this.prefixIcon,
     this.validator,
+    this.lableStyle,
     this.isLabled = true,
     this.enabled = true,
     this.onFieldSubmitted,
@@ -58,7 +60,10 @@ class AppTextField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (isLabled) ...[
-          Text(label, style: Theme.of(context).textTheme.headlineLarge),
+          Text(
+            label,
+            style: lableStyle ?? Theme.of(context).textTheme.headlineLarge,
+          ),
 
           SizedBox(height: h(10)),
         ],

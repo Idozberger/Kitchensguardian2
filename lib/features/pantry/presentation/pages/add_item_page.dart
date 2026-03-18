@@ -343,23 +343,24 @@ class _AddItemPageState extends State<AddItemPage> {
                 onChanged: (val) => setState(() => item.unit = val),
               ),
             ),
-            Flexible(
-              child: PopupDropdownField(
-                label: "Pantry",
-                hint: "Select Pantry",
-                value: item.pantry,
-                items: userState.userStorageAreas
-                    .map((area) => area.pantryName)
-                    .toList(),
-                onChanged: (val) => setState(() => item.pantry = val),
+            if (widget.isMember == false)
+              Flexible(
+                child: PopupDropdownField(
+                  label: "Pantry",
+                  hint: "Select Pantry",
+                  value: item.pantry,
+                  items: userState.userStorageAreas
+                      .map((area) => area.pantryName)
+                      .toList(),
+                  onChanged: (val) => setState(() => item.pantry = val),
+                ),
               ),
-            ),
           ],
         ),
-        SizedBox(height: h(15)),
-        _buildFormLabel("Expiring date"),
-        SizedBox(height: h(10)),
-        _buildDatePicker(item),
+        if (widget.isMember == false) SizedBox(height: h(15)),
+        if (widget.isMember == false) _buildFormLabel("Expiring date"),
+        if (widget.isMember == false) SizedBox(height: h(10)),
+        if (widget.isMember == false) _buildDatePicker(item),
       ],
     );
   }

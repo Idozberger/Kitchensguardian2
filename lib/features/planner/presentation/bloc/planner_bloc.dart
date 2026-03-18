@@ -6,7 +6,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/data/model/recipe_model.dart';
-import 'package:foodkitchen/core/common/domain/usecase/get_current_user.dart';
 import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/core/services/fcm/fcm_service.dart';
 import 'package:foodkitchen/core/services/notifications/flutter_local_notifications_service.dart';
@@ -258,10 +257,11 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
 
   void updateStartEndDate() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
+
     bool isSubscribed = prefs.getBool("is_subscribled") ?? false;
     final today = DateTime.now();
     final nextDays = List.generate(
-      isSubscribed ? 7 : 3,
+      isSubscribed ? 7 : 7,
       (i) => today.add(Duration(days: i)),
     );
 
@@ -491,7 +491,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     Emitter<PlannerState> emit,
   ) async {
     emit(state.copyWith(isFavLoading: true));
-    final res = await _favouriteRecipes(NoParams());
+    final res = await _favouriteRecipes(FavouriteRecipeParams(event.kitchenId));
 
     res.fold(
       (failure) {
@@ -543,7 +543,10 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
   ) async {
     emit(state.copyWith(isFavLoading: true));
     final res = await _addToFavouriteRecipe(
-      AddToFavouriteRecipeParams(recipeId: event.recipeId),
+      AddToFavouriteRecipeParams(
+        recipeId: event.recipeId,
+        kitchenId: event.kitchenId,
+      ),
     );
 
     res.fold(
@@ -553,7 +556,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
         );
       },
       (recipes) {
-        add(GetFavouriteRecipesEvent());
+        add(GetFavouriteRecipesEvent(event.kitchenId));
       },
     );
   }
@@ -564,7 +567,10 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
   ) async {
     emit(state.copyWith(isFavLoading: true));
     final res = await _removeFromFavouriteRecipe(
-      RemoveFromFavouriteRecipeParams(recipeId: event.recipeId),
+      RemoveFromFavouriteRecipeParams(
+        recipeId: event.recipeId,
+        kitchenId: event.kitchenId,
+      ),
     );
 
     res.fold(
@@ -574,7 +580,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
         );
       },
       (recipes) {
-        add(GetFavouriteRecipesEvent());
+        add(GetFavouriteRecipesEvent(event.kitchenId));
       },
     );
   }
@@ -987,18 +993,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
         } else {
           emit(state.copyWith(successMessage: message, isLoading: false));
         }
-        add(
-          RemoveMissingIngredientEvent(
-            recipeId: event.recipeId,
-            selectedIngredients: event.selectedIngredients,
-          ),
-        );
-        add(
-          RemoveMissingIngredientFromPlanEvent(
-            recipeId: event.recipeId,
-            selectedIngredients: event.selectedIngredients,
-          ),
-        );
+
         _groceryBloc.add(
           RequestedGroceryEvent(kitchenId: event.pantry.kitchenId),
         );

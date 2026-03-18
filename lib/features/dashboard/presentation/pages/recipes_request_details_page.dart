@@ -284,8 +284,14 @@ class _RecipesRequestDetailsPageState extends State<RecipesRequestDetailsPage> {
         setState(() => _isFav = !_isFav);
         _plannerBloc.add(
           _isFav
-              ? AddToFavouriteRecipeEvent(recipe.id)
-              : RemoveFromFavouriteRecipeEvent(recipe.id),
+              ? AddToFavouriteRecipeEvent(
+                  kitchenId: context.read<UserCubit>().state.activeKitchenId,
+                  recipeId: recipe.id,
+                )
+              : RemoveFromFavouriteRecipeEvent(
+                  kitchenId: context.read<UserCubit>().state.activeKitchenId,
+                  recipeId: recipe.id,
+                ),
         );
       },
       thumbnailBytes: recipe.thumbnail,

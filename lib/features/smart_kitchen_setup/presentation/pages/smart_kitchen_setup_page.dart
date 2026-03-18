@@ -10,12 +10,12 @@ import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:foodkitchen/features/kitchens/presentation/widgets/kitchen_snippet.dart';
-import 'package:foodkitchen/features/smart_kitcheb_setup/presentation/bloc/smart_kitchen_setup_bloc.dart';
-import 'package:foodkitchen/features/smart_kitcheb_setup/presentation/bloc/smart_kitchen_setup_event.dart';
-import 'package:foodkitchen/features/smart_kitcheb_setup/presentation/bloc/smart_kitchen_setup_state.dart';
-import 'package:foodkitchen/features/smart_kitcheb_setup/presentation/widgets/confirm_button.dart';
-import 'package:foodkitchen/features/smart_kitcheb_setup/presentation/widgets/header_section.dart';
-import 'package:foodkitchen/features/smart_kitcheb_setup/presentation/widgets/section_card.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/presentation/bloc/smart_kitchen_setup_bloc.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/presentation/bloc/smart_kitchen_setup_event.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/presentation/bloc/smart_kitchen_setup_state.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/presentation/widgets/confirm_button.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/presentation/widgets/header_section.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/presentation/widgets/section_card.dart';
 import 'package:go_router/go_router.dart';
 
 class SmartKitchenSetupPage extends StatefulWidget {

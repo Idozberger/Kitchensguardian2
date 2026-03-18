@@ -34,11 +34,11 @@ import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_bloc.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_event.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_state.dart';
-import 'package:foodkitchen/features/smart_kitcheb_setup/domain/entities/scanned_item.dart';
-import 'package:foodkitchen/features/smart_kitcheb_setup/presentation/bloc/smart_kitchen_setup_bloc.dart';
-import 'package:foodkitchen/features/smart_kitcheb_setup/presentation/bloc/smart_kitchen_setup_event.dart';
-import 'package:foodkitchen/features/smart_kitcheb_setup/presentation/bloc/smart_kitchen_setup_state.dart';
-import 'package:foodkitchen/features/smart_kitcheb_setup/presentation/widgets/ai_analyzing_loader.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/domain/entities/scanned_item.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/presentation/bloc/smart_kitchen_setup_bloc.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/presentation/bloc/smart_kitchen_setup_event.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/presentation/bloc/smart_kitchen_setup_state.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/presentation/widgets/ai_analyzing_loader.dart';
 import 'package:go_router/go_router.dart';
 
 class KitchenAnalysisPage extends StatefulWidget {

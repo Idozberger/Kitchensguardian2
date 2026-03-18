@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
-import 'package:foodkitchen/features/smart_kitcheb_setup/data/models/kitchen_section_model.dart';
-import 'package:foodkitchen/features/smart_kitcheb_setup/presentation/widgets/action_buttons.dart';
-import 'package:foodkitchen/features/smart_kitcheb_setup/presentation/widgets/clear_button.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/data/models/kitchen_section_model.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/presentation/widgets/action_buttons.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/presentation/widgets/clear_button.dart';
 
 class SectionCardActions extends StatelessWidget {
   final KitchenSection section;

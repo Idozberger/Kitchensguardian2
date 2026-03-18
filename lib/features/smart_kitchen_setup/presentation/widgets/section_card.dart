@@ -5,10 +5,10 @@ import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/features/kitchens/presentation/widgets/kitchen_snippet.dart';
-import 'package:foodkitchen/features/smart_kitcheb_setup/data/models/kitchen_section_model.dart';
-import 'package:foodkitchen/features/smart_kitcheb_setup/presentation/widgets/collage_preview.dart';
-import 'package:foodkitchen/features/smart_kitcheb_setup/presentation/widgets/section_card_action.dart';
-import 'package:foodkitchen/features/smart_kitcheb_setup/presentation/widgets/section_card_hint.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/data/models/kitchen_section_model.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/presentation/widgets/collage_preview.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/presentation/widgets/section_card_action.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/presentation/widgets/section_card_hint.dart';
 import 'package:go_router/go_router.dart';
 
 class SectionCard extends StatefulWidget {

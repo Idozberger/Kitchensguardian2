@@ -61,7 +61,7 @@ class _PlannerListState extends State<PlannerList> {
         return Column(
           children: [
             SelectDateWidget(
-              entitlementIsActive: AppConstants.entitlementIsActive,
+              entitlementIsActive: true,
               startDate: PlannerDateFormatter.getStartDate(widget.state),
               selectedDate: _selectedDate,
               onChanged: (date) {

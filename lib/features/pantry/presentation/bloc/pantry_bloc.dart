@@ -29,11 +29,14 @@ import 'package:foodkitchen/features/pantry/domain/usecases/show_notification.da
 import 'package:foodkitchen/features/pantry/domain/usecases/update_item.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_event.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_state.dart';
+import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
+import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dart';
 
 class PantryBloc extends Bloc<PantryEvent, PantryState> {
   final HomeBloc _homeBloc;
   final UserCubit _userCubit;
   final GroceryBloc _groceryBloc;
+  final PlannerBloc _plannerBloc;
   final AddPantryItem _addPantryItem;
   final AddPantryRequestItem _addPantryRequestItem;
 
@@ -53,6 +56,7 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
     required GroceryBloc groceryBloc,
     required AddPantryItem addPantryItem,
     required GetPantryItems getPantryItems,
+    required PlannerBloc plannerBloc,
     required ScanReceiptUseCase scanReceipt,
     required RequestItems requestItems,
     required ShowNotification showNotification,
@@ -73,6 +77,7 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
        _userCubit = userCubit,
        _deletePantry = deletePantry,
        _cartItems = cartItems,
+       _plannerBloc = plannerBloc,
        _deleteItem = deleteItem,
        _updateItem = updateItem,
        _addPantryRequestItem = addPantryRequestItem,
@@ -124,11 +129,21 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
   ) async {
     emit(SubmittingItemLoading());
 
-    final res = event.isMember
-        ? await _addPantryRequestItem(
-            AddPantryRequestItemParams(pantry: event.pantry),
-          )
-        : await _addPantryItem(AddPantryItemParams(pantry: event.pantry));
+    if (event.isMember) {
+      _plannerBloc.add(
+        RequestMissingItemsEvent(
+          pantry: event.pantry,
+          selectedIngredients: [],
+          recipeId: '',
+          isPlan: false,
+        ),
+      );
+
+      emit(PantrySuccess("Items requested successfully"));
+      return;
+    }
+
+    final res = await _addPantryItem(AddPantryItemParams(pantry: event.pantry));
 
     res.fold((failure) => emit(PantryFailure(failure.message)), (
       message,
@@ -138,6 +153,7 @@ class PantryBloc extends Bloc<PantryEvent, PantryState> {
       );
 
       add(GetPantryItemsEvent(kitchenId: event.pantry.kitchenId));
+
       _homeBloc.add(
         homeEvent.GetAllRequestedItemsEvent(kitchenId: event.pantry.kitchenId),
       );

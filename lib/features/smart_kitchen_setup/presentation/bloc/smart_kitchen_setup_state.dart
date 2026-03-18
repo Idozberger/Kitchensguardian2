@@ -1,6 +1,6 @@
-import 'package:foodkitchen/features/smart_kitcheb_setup/data/models/kitchen_section_model.dart';
-import 'package:foodkitchen/features/smart_kitcheb_setup/domain/entities/scanned_item.dart';
-import 'package:foodkitchen/features/smart_kitcheb_setup/presentation/data/kitchen_section_data.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/data/models/kitchen_section_model.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/domain/entities/scanned_item.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/presentation/data/kitchen_section_data.dart';
 
 class SmartKitchenSetupState {
   final bool isInitial;

@@ -14,6 +14,8 @@ import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
+import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_bloc.dart';
+import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_state.dart';
 
 import 'package:foodkitchen/features/home/presentation/bloc/home_state.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/action_tile.dart';
@@ -175,21 +177,22 @@ class _KitchenHomeViewState extends State<KitchenHomeView> {
   }
 
   Widget _buildGrocerySection(HomeState state) {
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 400),
-      child: state.showGroceryShimmer
-          ? _buildGroceryShimmer()
-          : SmartCartTile(
-              infoText: state.groceryList.length > 3
-                  ? "+${state.groceryList.length - 3} tap to see more"
-                  : null,
-              isGenerated: true,
-              previewItems: state.groceryList
-                  .take(3)
-                  .map((item) => item.name)
-                  .toList(),
-              onGenerate: widget.onGeneratePressed,
-            ),
+    return BlocBuilder<GroceryBloc, GroceryState>(
+      builder: (context, groceryState) {
+        final list = groceryState.aiGeneratedList ?? [];
+
+        return AnimatedSwitcher(
+          duration: const Duration(milliseconds: 400),
+          child: SmartCartTile(
+            infoText: list.length > 3
+                ? "+${list.length - 3} tap to see more"
+                : null,
+            isGenerated: true,
+            previewItems: list.take(3).map((item) => item.name).toList(),
+            onGenerate: widget.onGeneratePressed,
+          ),
+        );
+      },
     );
   }
 

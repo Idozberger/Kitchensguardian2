@@ -14,12 +14,17 @@ class RemoveFromFavouriteRecipe
   ) async {
     return await plannerRepository.removeFromFavourite(
       recipeId: params.recipeId,
+      kitchenId: params.kitchenId,
     );
   }
 }
 
 class RemoveFromFavouriteRecipeParams {
   final String recipeId;
+  final String kitchenId;
 
-  RemoveFromFavouriteRecipeParams({required this.recipeId});
+  RemoveFromFavouriteRecipeParams({
+    required this.recipeId,
+    required this.kitchenId,
+  });
 }

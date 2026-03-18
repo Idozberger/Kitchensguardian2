@@ -12,6 +12,7 @@ class GenericCircleCheckboxTile extends StatelessWidget {
   final bool isChecked;
   final ValueChanged<bool> onChanged;
   final VoidCallback? deleteCallback;
+  final VoidCallback? editCallback;
   final Color activeColor;
   final Color checkColor;
   final TextStyle? textStyle;
@@ -25,6 +26,7 @@ class GenericCircleCheckboxTile extends StatelessWidget {
     required this.onChanged,
     required this.quantity,
     this.deleteCallback,
+    this.editCallback,
     required this.activeColor,
     this.checkColor = Colors.white,
     this.isFinalList = false,
@@ -109,6 +111,22 @@ class GenericCircleCheckboxTile extends StatelessWidget {
                   ),
 
                   child: SvgPicture.asset(AppAssets.deleteSvg),
+                ),
+              ),
+            ),
+          if (editCallback != null)
+            Padding(
+              padding: gapOnly(left: 8),
+              child: GestureDetector(
+                onTap: editCallback,
+                child: Container(
+                  padding: gapAll(6),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Color(0xffD4D2D2)),
+                    shape: BoxShape.circle,
+                  ),
+
+                  child: SvgPicture.asset(AppAssets.editSvg),
                 ),
               ),
             ),

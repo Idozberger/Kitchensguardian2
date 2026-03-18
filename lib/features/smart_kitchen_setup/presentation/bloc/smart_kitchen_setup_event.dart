@@ -1,4 +1,4 @@
-import 'package:foodkitchen/features/smart_kitcheb_setup/data/models/kitchen_section_model.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/data/models/kitchen_section_model.dart';
 
 sealed class SmartKitchenSetupEvent {}
 

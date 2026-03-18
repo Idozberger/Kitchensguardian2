@@ -12,12 +12,15 @@ class AddToFavouriteRecipe
   Future<Either<Failure, String>> call(
     AddToFavouriteRecipeParams params,
   ) async {
-    return await plannerRepository.addToFavourite(recipeId: params.recipeId);
+    return await plannerRepository.addToFavourite(
+      recipeId: params.recipeId,
+      kitchenId: params.kitchenId,
+    );
   }
 }
 
 class AddToFavouriteRecipeParams {
   final String recipeId;
-
-  AddToFavouriteRecipeParams({required this.recipeId});
+  final String kitchenId;
+  AddToFavouriteRecipeParams({required this.recipeId, required this.kitchenId});
 }

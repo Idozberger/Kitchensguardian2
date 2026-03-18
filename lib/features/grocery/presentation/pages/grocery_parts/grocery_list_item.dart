@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/domain/entities/requested_item.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/widgets/generic_container_checktile_widget.dart';
+import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_bloc.dart';
+import 'package:foodkitchen/features/grocery/presentation/dialogs/show_edit_ingredient_dialog.dart';
 
 class GroceryListItem extends StatelessWidget {
   final RequestedItemEntity grocery;
@@ -27,6 +31,15 @@ class GroceryListItem extends StatelessWidget {
     return Column(
       children: [
         GenericCircleCheckboxTile(
+          editCallback: () => showEditItemDialog(
+            context,
+            kitchenId: context.read<UserCubit>().state.activeKitchenId,
+            itemId: grocery.itemId,
+            initialName: grocery.name,
+            initialQuantity: grocery.quantity,
+            initialUnit: grocery.unit,
+            groceryBloc: context.read<GroceryBloc>(),
+          ),
           unit: grocery.unit,
           quantity: grocery.quantity,
           title: grocery.name,

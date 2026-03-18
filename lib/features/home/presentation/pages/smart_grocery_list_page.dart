@@ -5,6 +5,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:foodkitchen/core/common/domain/entities/requested_item.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
@@ -12,8 +13,9 @@ import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
-import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
+import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_state.dart';
 import 'package:foodkitchen/features/planner/domain/entities/ingredient_entity.dart';
+import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_bloc.dart';
 import 'package:share_plus/share_plus.dart';
 
 class SmartCartPage extends StatefulWidget {
@@ -24,47 +26,60 @@ class SmartCartPage extends StatefulWidget {
 }
 
 class _SmartCartPageState extends State<SmartCartPage> {
-  late List<int> quantities;
-  late HomeBloc homeBloc;
+  List<int> quantities = [];
 
-  @override
-  void initState() {
-    super.initState();
-    homeBloc = context.read<HomeBloc>();
-    quantities = [];
-    for (int i = 0; i < homeBloc.state.groceryList.length; i++) {
-      log("Amount: ${homeBloc.state.groceryList[i].amount}");
-      quantities.add(
-        double.tryParse(homeBloc.state.groceryList[i].amount)?.toInt() ?? 1,
+  void _syncQuantities(List<RequestedItemEntity> items) {
+    if (quantities.length != items.length) {
+      quantities = List.generate(
+        items.length,
+        (i) => double.tryParse(items[i].quantity)?.toInt() ?? 1,
       );
+
+      for (var item in items) {
+        log("Amount: ${item.quantity}");
+      }
     }
   }
 
   void increase(int index) {
     setState(() {
-      quantities[index] = quantities[index] + 1;
+      quantities[index]++;
     });
   }
 
   void decrease(int index) {
     setState(() {
       if (quantities[index] > 1) {
-        quantities[index] = quantities[index] - 1;
+        quantities[index]--;
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final items = homeBloc.state.groceryList;
-
     return Scaffold(
       backgroundColor: const Color(0xffF9F9F9),
       appBar: _buildAppBar(context),
-      body: items.isEmpty ? _buildEmptyState() : _buildGroceryList(items),
-      bottomNavigationBar: items.isEmpty
-          ? SizedBox()
-          : _buildBottomActions(context, items),
+
+      body: BlocBuilder<GroceryBloc, GroceryState>(
+        builder: (context, groceryState) {
+          final items = groceryState.aiGeneratedList ?? [];
+
+          _syncQuantities(items);
+
+          return items.isEmpty ? _buildEmptyState() : _buildGroceryList(items);
+        },
+      ),
+
+      bottomNavigationBar: BlocBuilder<GroceryBloc, GroceryState>(
+        builder: (context, groceryState) {
+          final items = groceryState.aiGeneratedList ?? [];
+
+          return items.isEmpty
+              ? const SizedBox()
+              : _buildBottomActions(context, items);
+        },
+      ),
     );
   }
 
@@ -74,9 +89,7 @@ class _SmartCartPageState extends State<SmartCartPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Image.asset(AppAssets.groceryEmpty, height: h(54)),
-
           gap(height: 20),
-
           Text(
             "Your grocery list is empty",
             style: Theme.of(context).textTheme.headlineLarge!.copyWith(
@@ -84,14 +97,13 @@ class _SmartCartPageState extends State<SmartCartPage> {
               color: Colors.grey.shade400,
             ),
           ),
-
           gap(height: 20),
         ],
       ),
     );
   }
 
-  Widget _buildGroceryList(List<IngredientEntity> items) {
+  Widget _buildGroceryList(List<RequestedItemEntity> items) {
     return Padding(
       padding: gapSymmetric(horizontal: 20, vertical: 10),
       child: ListView.separated(
@@ -120,7 +132,6 @@ class _SmartCartPageState extends State<SmartCartPage> {
                   ),
                 ),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     _quantityButton(Icons.remove, () => decrease(index)),
                     SizedBox(
@@ -159,7 +170,7 @@ class _SmartCartPageState extends State<SmartCartPage> {
 
   Widget _buildBottomActions(
     BuildContext context,
-    List<IngredientEntity> items,
+    List<RequestedItemEntity> items,
   ) {
     return BottomAppBar(
       color: Colors.white,
@@ -184,41 +195,42 @@ class _SmartCartPageState extends State<SmartCartPage> {
     );
   }
 
-  void _copyList(List<IngredientEntity> items) {
+  void _copyList(List<RequestedItemEntity> items) {
     String result = "My Grocery List\n\n";
 
     for (int i = 0; i < items.length; i++) {
       final ingredient = items[i];
-      int qty = quantities[i].toInt();
+      int qty = quantities[i];
 
       if (qty > 1) {
         result +=
-            "• $qty × ${ingredient.amount} ${ingredient.unit} ${ingredient.name}\n";
+            "• $qty × ${ingredient.quantity} ${ingredient.unit} ${ingredient.name}\n";
       } else {
         result +=
-            "• ${ingredient.amount} ${ingredient.unit} ${ingredient.name}\n";
+            "• ${ingredient.quantity} ${ingredient.unit} ${ingredient.name}\n";
       }
     }
 
     Clipboard.setData(ClipboardData(text: result));
+
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text("List copied!")));
   }
 
-  void _shareList(List<IngredientEntity> items) {
+  void _shareList(List<RequestedItemEntity> items) {
     String result = "My Grocery List\n\n";
 
     for (int i = 0; i < items.length; i++) {
       final ingredient = items[i];
-      int qty = quantities[i].toInt();
+      int qty = quantities[i];
 
       if (qty > 1) {
         result +=
-            "• $qty × ${ingredient.amount} ${ingredient.unit} ${ingredient.name}\n";
+            "• $qty × ${ingredient.quantity} ${ingredient.unit} ${ingredient.name}\n";
       } else {
         result +=
-            "• ${ingredient.amount} ${ingredient.unit} ${ingredient.name}\n";
+            "• ${ingredient.quantity} ${ingredient.unit} ${ingredient.name}\n";
       }
     }
 

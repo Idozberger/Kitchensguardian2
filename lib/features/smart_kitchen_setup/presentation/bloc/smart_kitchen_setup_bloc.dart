@@ -6,12 +6,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/services/document_scanning/document_scanning_service.dart';
 
-import 'package:foodkitchen/features/smart_kitcheb_setup/data/models/kitchen_section_model.dart';
-import 'package:foodkitchen/features/smart_kitcheb_setup/domain/usecases/scan_kitchen_images.dart';
-import 'package:foodkitchen/features/smart_kitcheb_setup/domain/usecases/skip_kitchen_setup.dart';
-import 'package:foodkitchen/features/smart_kitcheb_setup/presentation/bloc/smart_kitchen_setup_event.dart';
-import 'package:foodkitchen/features/smart_kitcheb_setup/presentation/bloc/smart_kitchen_setup_state.dart';
-import 'package:foodkitchen/features/smart_kitcheb_setup/presentation/data/kitchen_section_data.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/data/models/kitchen_section_model.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/domain/usecases/scan_kitchen_images.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/domain/usecases/skip_kitchen_setup.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/presentation/bloc/smart_kitchen_setup_event.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/presentation/bloc/smart_kitchen_setup_state.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/presentation/data/kitchen_section_data.dart';
 
 class SmartKitchenSetupBloc
     extends Bloc<SmartKitchenSetupEvent, SmartKitchenSetupState> {

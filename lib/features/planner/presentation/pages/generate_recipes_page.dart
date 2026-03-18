@@ -63,7 +63,9 @@ class _GenerateRecipesPageState extends State<GenerateRecipesPage> {
 
   void _fetchFavouriteRecipes() {
     _plannerBloc.add(ClearAiGeneratedRecipes());
-    _plannerBloc.add(GetFavouriteRecipesEvent());
+    _plannerBloc.add(
+      GetFavouriteRecipesEvent(_userCubit.state.activeKitchenId),
+    );
   }
 
   void _updateTimeFormatters(double value) {

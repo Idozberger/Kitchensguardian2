@@ -13,9 +13,17 @@ abstract interface class PlannerRemoteDatasource {
     required String instructions,
     required String kitchenId,
   });
-  Future<List<Map<String, dynamic>>> favouriteRecipes();
-  Future<String> addToFavourite({required String recipeId});
-  Future<String> removeFromFavourite({required String recipeId});
+  Future<List<Map<String, dynamic>>> favouriteRecipes({
+    required String kitchenId,
+  });
+  Future<String> addToFavourite({
+    required String recipeId,
+    required String kitchenId,
+  });
+  Future<String> removeFromFavourite({
+    required String recipeId,
+    required String kitchenId,
+  });
   Future<String> markRecipeFinished({
     required String kitchenId,
     required String recipeId,
@@ -109,9 +117,13 @@ class PlannerRemoteDatasourceImpl implements PlannerRemoteDatasource {
   }
 
   @override
-  Future<List<Map<String, dynamic>>> favouriteRecipes() async {
+  Future<List<Map<String, dynamic>>> favouriteRecipes({
+    required String kitchenId,
+  }) async {
     try {
-      final response = await dio.get(AppConstants.favouriteRecipes);
+      final response = await dio.get(
+        "${AppConstants.favouriteRecipes}?kitchen_id=$kitchenId",
+      );
 
       final data = response.data["favourite_recipes"];
       if (response.statusCode != 200 && response.statusCode != 201) {
@@ -154,11 +166,14 @@ class PlannerRemoteDatasourceImpl implements PlannerRemoteDatasource {
   }
 
   @override
-  Future<String> addToFavourite({required String recipeId}) async {
+  Future<String> addToFavourite({
+    required String recipeId,
+    required String kitchenId,
+  }) async {
     try {
       final response = await dio.post(
         AppConstants.addToFavourite,
-        data: {"_id": recipeId},
+        data: {"_id": recipeId, "kitchen_id": kitchenId},
       );
       if (response.statusCode != 200 && response.statusCode != 201) {
         final data = response.data is String
@@ -175,11 +190,14 @@ class PlannerRemoteDatasourceImpl implements PlannerRemoteDatasource {
   }
 
   @override
-  Future<String> removeFromFavourite({required String recipeId}) async {
+  Future<String> removeFromFavourite({
+    required String recipeId,
+    required String kitchenId,
+  }) async {
     try {
       final response = await dio.post(
         AppConstants.removeFromFavourite,
-        data: {"recipe_id": recipeId},
+        data: {"recipe_id": recipeId, "kitchen_id": kitchenId},
       );
       if (response.statusCode != 200 && response.statusCode != 201) {
         final data = response.data is String

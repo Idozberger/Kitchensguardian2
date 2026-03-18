@@ -1,7 +1,7 @@
 import 'package:foodkitchen/core/error/failures.dart';
-import 'package:foodkitchen/features/smart_kitcheb_setup/data/datasource/smart_kitchen_setup_datasource.dart';
-import 'package:foodkitchen/features/smart_kitcheb_setup/domain/entities/scanned_item.dart';
-import 'package:foodkitchen/features/smart_kitcheb_setup/domain/repository/smart_kitchen_setup_repository.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/data/datasource/smart_kitchen_setup_datasource.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/domain/entities/scanned_item.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/domain/repository/smart_kitchen_setup_repository.dart';
 import 'package:fpdart/fpdart.dart';
 import '../models/scanned_item_model.dart';
 

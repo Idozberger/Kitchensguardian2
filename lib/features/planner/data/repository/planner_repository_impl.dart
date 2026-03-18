@@ -45,9 +45,13 @@ class PlannerRepositoryImpl implements PlannerRepository {
   }
 
   @override
-  Future<Either<Failure, List<RecipeEntity>>> favouriteRecipes() async {
+  Future<Either<Failure, List<RecipeEntity>>> favouriteRecipes({
+    required String kitchenId,
+  }) async {
     try {
-      final response = await plannerRemoteDatasource.favouriteRecipes();
+      final response = await plannerRemoteDatasource.favouriteRecipes(
+        kitchenId: kitchenId,
+      );
       final generatedRecipes = (response as List)
           .map((e) => RecipeModel.fromJson(e as Map<String, dynamic>))
           .toList();
@@ -63,10 +67,12 @@ class PlannerRepositoryImpl implements PlannerRepository {
   @override
   Future<Either<Failure, String>> addToFavourite({
     required String recipeId,
+    required String kitchenId,
   }) async {
     try {
       final response = await plannerRemoteDatasource.addToFavourite(
         recipeId: recipeId,
+        kitchenId: kitchenId,
       );
 
       return Right(response);
@@ -80,10 +86,12 @@ class PlannerRepositoryImpl implements PlannerRepository {
   @override
   Future<Either<Failure, String>> removeFromFavourite({
     required String recipeId,
+    required String kitchenId,
   }) async {
     try {
       final response = await plannerRemoteDatasource.removeFromFavourite(
         recipeId: recipeId,
+        kitchenId: kitchenId,
       );
 
       return Right(response);
