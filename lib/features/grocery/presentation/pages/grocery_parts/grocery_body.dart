@@ -295,7 +295,7 @@ class _GroceryBodyState extends State<GroceryBody> {
   }
 
   void _handleDeleteItem(String itemId) {
-    log("Grocery: ${itemId}");
+    log("Grocery: $itemId");
     showDialogForItemDeletion(
       context,
       callback: () {

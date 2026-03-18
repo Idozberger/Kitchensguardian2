@@ -14,7 +14,6 @@ import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_state.dart';
-import 'package:foodkitchen/features/planner/domain/entities/ingredient_entity.dart';
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_bloc.dart';
 import 'package:share_plus/share_plus.dart';
 

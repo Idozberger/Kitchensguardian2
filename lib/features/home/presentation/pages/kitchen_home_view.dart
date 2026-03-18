@@ -218,22 +218,6 @@ class _KitchenHomeViewState extends State<KitchenHomeView> {
     );
   }
 
-  Widget _buildGroceryShimmer() {
-    return UpperTile(
-      widget: Shimmer.fromColors(
-        baseColor: Colors.grey.shade300,
-        highlightColor: Colors.grey.shade100,
-        child: Container(
-          height: h(100),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(h(12)),
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildSuggestionShimmer() {
     return UpperTile(
       widget: Column(

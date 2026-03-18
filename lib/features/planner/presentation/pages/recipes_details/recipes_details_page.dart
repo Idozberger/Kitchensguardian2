@@ -279,6 +279,7 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
     plannerBloc.add(
       CancelInProgressRecipeEvent(inProgressRecipeIndex: inProgressRecipeIndex),
     );
+    // ignore: avoid_function_literals_in_foreach_calls
     setState(() => steps.forEach((step) => step['completed'] = false));
   }
 
@@ -396,6 +397,7 @@ class _RecipesDetailsPageState extends State<RecipesDetailsPage> {
             recipeId: _activeRecipeId,
           ),
         );
+        // ignore: avoid_function_literals_in_foreach_calls
         setState(() => steps.forEach((step) => step['completed'] = false));
       },
       onSecondaryPressed: () => context.pop(),

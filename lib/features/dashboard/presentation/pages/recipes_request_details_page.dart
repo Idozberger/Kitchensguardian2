@@ -25,7 +25,6 @@ import 'package:foodkitchen/features/planner/presentation/pages/recipes_details/
 import 'package:foodkitchen/features/planner/presentation/pages/recipes_details/complete_dialog_widget.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/recipes_details/header_image_widget.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/recipes_details/ingredients_list_widget.dart';
-import 'package:foodkitchen/features/planner/presentation/pages/recipes_details/missing_items_list_widget.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/recipes_details/primary_actions_widget.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/recipes_details/recipe_info_widget.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/recipes_details/recipe_steps_tile.dart';

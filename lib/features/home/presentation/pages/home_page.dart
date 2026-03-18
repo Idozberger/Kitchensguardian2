@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/cubits/user_state.dart';
-import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/utils/date_format_to_string.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
@@ -12,12 +11,10 @@ import 'package:foodkitchen/core/widgets/generic_recipe_is_under_progress_widget
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_bloc.dart';
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_event.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
-import 'package:foodkitchen/features/home/presentation/bloc/home_event.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_state.dart';
 import 'package:foodkitchen/features/home/presentation/pages/kitchen_home_view.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/Low_stock_and_expiry_banner.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/storage_area_section.dart';
-import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
 
 class HomePage extends StatefulWidget {
