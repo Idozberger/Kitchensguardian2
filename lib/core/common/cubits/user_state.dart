@@ -15,10 +15,12 @@ class UserState {
   final Uint8List? profilePictureFilePath;
   final String invitationCode;
   final bool entitlementIsActive;
+  final bool isPremiumUser;
   final List<RecipeEntity> recipeEntity;
   final List<List<Map<String, dynamic>>> doneSteps;
   final List<PantriesCommonEntity> userStorageAreas;
   final UserModel? userModel;
+
   const UserState({
     this.kitchenName = "",
     this.firstName = '',
@@ -29,6 +31,7 @@ class UserState {
     this.email = '',
     this.isLoading = false,
     this.entitlementIsActive = false,
+    this.isPremiumUser = false,
     this.activeKitchenId = '',
     this.invitationCode = '',
     this.recipeEntity = const [],
@@ -41,6 +44,7 @@ class UserState {
     String? firstName,
     String? kitchenName,
     bool? entitlementIsActive,
+    bool? isPremiumUser,
     String? lastName,
     String? userId,
     String? activeKitchenId,
@@ -57,6 +61,7 @@ class UserState {
     return UserState(
       firstName: firstName ?? this.firstName,
       entitlementIsActive: entitlementIsActive ?? this.entitlementIsActive,
+      isPremiumUser: isPremiumUser ?? this.isPremiumUser,
       role: role ?? this.role,
       lastName: lastName ?? this.lastName,
       kitchenName: kitchenName ?? this.kitchenName,

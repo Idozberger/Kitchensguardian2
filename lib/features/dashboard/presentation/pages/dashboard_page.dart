@@ -9,6 +9,7 @@ import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
+import 'package:foodkitchen/core/theme/app_colors.dart';
 
 import 'package:foodkitchen/features/consumptions/presentation/bloc/consumption_bloc.dart';
 import 'package:foodkitchen/features/consumptions/presentation/bloc/consumption_event.dart';
@@ -109,6 +110,8 @@ class _DashboardPageState extends State<DashboardPage> {
         _buildConsumptionPendingButton(),
         SizedBox(width: w(6)),
         _buildNotificationButton(),
+
+        _buildSwitchPremiumButton(context),
         SizedBox(width: w(16)),
       ],
     );
@@ -167,6 +170,24 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildSwitchPremiumButton(BuildContext context) {
+    final isPremium = context.watch<UserCubit>().state.isPremiumUser;
+
+    return Transform.scale(
+      scale: 0.8,
+      child: Switch(
+        value: isPremium,
+        activeColor: AppColors.primaryColor,
+        inactiveThumbColor: Colors.grey,
+        activeTrackColor: AppColors.primaryColor.withOpacity(0.5),
+        inactiveTrackColor: Colors.grey.shade300,
+        onChanged: (value) {
+          context.read<UserCubit>().updatePremiumStatus(value);
+        },
+      ),
     );
   }
 

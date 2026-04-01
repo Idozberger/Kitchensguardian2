@@ -258,10 +258,10 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
   void updateStartEndDate() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    bool isSubscribed = prefs.getBool("is_subscribled") ?? false;
+    bool isSubscribed = _userCubit.state.isPremiumUser;
     final today = DateTime.now();
     final nextDays = List.generate(
-      isSubscribed ? 7 : 7,
+      isSubscribed ? 7 : 3,
       (i) => today.add(Duration(days: i)),
     );
 

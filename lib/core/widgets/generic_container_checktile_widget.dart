@@ -82,19 +82,19 @@ class GenericCircleCheckboxTile extends StatelessWidget {
                     ),
                   ),
                 ),
-                Text(
-                  "$quantity $unit",
-                  style:
-                      textStyle ??
-                      Theme.of(context).textTheme.headlineSmall!.copyWith(
-                        decoration: isFinalList && isChecked
-                            ? TextDecoration.lineThrough
-                            : null,
-                        fontWeight: isFinalList && isChecked
-                            ? FontWeight.w400
-                            : FontWeight.w500,
-                      ),
-                ),
+                // Text(
+                //   "$quantity $unit",
+                //   style:
+                //       textStyle ??
+                //       Theme.of(context).textTheme.headlineSmall!.copyWith(
+                //         decoration: isFinalList && isChecked
+                //             ? TextDecoration.lineThrough
+                //             : null,
+                //         fontWeight: isFinalList && isChecked
+                //             ? FontWeight.w400
+                //             : FontWeight.w500,
+                //       ),
+                // ),
               ],
             ),
           ),

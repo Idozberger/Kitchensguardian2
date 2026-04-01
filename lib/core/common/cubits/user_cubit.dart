@@ -21,6 +21,10 @@ class UserCubit extends Cubit<UserState> {
     return response;
   }
 
+  void updatePremiumStatus(bool isPremium) {
+    emit(state.copyWith(isPremiumUser: isPremium));
+  }
+
   void setGoogleSignUpUserModel({
     required String firstName,
     required String lastName,

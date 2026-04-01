@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
+import 'package:foodkitchen/core/common/cubits/user_state.dart';
 import 'package:foodkitchen/core/widgets/generic_date_picker_widget.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
 
@@ -59,13 +61,17 @@ class _PlannerListState extends State<PlannerList> {
       builder: (context, state) {
         return Column(
           children: [
-            SelectDateWidget(
-              entitlementIsActive: true,
-              startDate: PlannerDateFormatter.getStartDate(widget.state),
-              selectedDate: _selectedDate,
-              onChanged: (date) {
-                setState(() => _selectedDate = date);
-                widget.controller.onDateSelected(date);
+            BlocBuilder<UserCubit, UserState>(
+              builder: (context, userState) {
+                return SelectDateWidget(
+                  entitlementIsActive: userState.isPremiumUser,
+                  startDate: PlannerDateFormatter.getStartDate(widget.state),
+                  selectedDate: _selectedDate,
+                  onChanged: (date) {
+                    setState(() => _selectedDate = date);
+                    widget.controller.onDateSelected(date);
+                  },
+                );
               },
             ),
             const SizedBox(height: 15),
