@@ -231,6 +231,8 @@ class _MyPantryPageState extends State<MyPantryPage> {
       kitchenId: _userCubit.state.activeKitchenId,
       highlightedItemId: widget.itemId,
       onAddToCart: _handleAddToCart,
+      isPremiumUser: context.read<UserCubit>().state.isPremiumUser,
+      pantryFilter: _selectedFilter,
     );
   }
 
@@ -441,55 +443,145 @@ class _PantryItemList extends StatelessWidget {
   final String highlightedItemId;
   final void Function(PantryItemEntity item, int index) onAddToCart;
 
+  final bool isPremiumUser;
+  final PantryFilter pantryFilter;
+
   const _PantryItemList({
     required this.items,
     required this.kitchenId,
     required this.highlightedItemId,
     required this.onAddToCart,
+    required this.isPremiumUser,
+    required this.pantryFilter,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (items.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.inventory_2_outlined, size: 80, color: Colors.grey[300]),
-            gap(height: 16),
-            Text(
-              "No Items found",
-              style: Theme.of(
-                context,
-              ).textTheme.headlineMedium?.copyWith(color: Colors.grey[600]),
-            ),
-          ],
-        ),
-      );
-    }
+    if (items.isEmpty) return _buildEmptyState(context);
+
+    final sortedItems = _getSortedItems();
 
     return ListView.separated(
-      itemCount: items.length,
+      itemCount: sortedItems.length,
       shrinkWrap: true,
-      physics: ScrollPhysics(),
+      physics: const ScrollPhysics(),
       separatorBuilder: (_, __) =>
           const Divider(color: Color(0xFFF4F4F4), height: 1),
       padding: gapSymmetric(horizontal: 12, vertical: 12),
       itemBuilder: (context, index) {
-        final item = items[index];
+        final item = sortedItems[index];
+
         final isHighlighted =
             highlightedItemId.isNotEmpty && item.itemId == highlightedItemId;
-        return Padding(
-          padding: gapOnly(bottom: 16),
-          child: _PantryItemTile(
-            item: item,
-            kitchenId: kitchenId,
-            isHighlighted: isHighlighted,
-            onAddToCart: () => onAddToCart(item, index),
-          ),
+
+        final isLocked = _isItemLocked(sortedItems, index);
+
+        return _buildItem(
+          context: context,
+          item: item,
+          index: index,
+          isHighlighted: isHighlighted,
+          isLocked: isLocked,
         );
       },
     );
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.inventory_2_outlined, size: 80, color: Colors.grey[300]),
+          gap(height: 16),
+          Text(
+            "No Items found",
+            style: Theme.of(
+              context,
+            ).textTheme.headlineMedium?.copyWith(color: Colors.grey[600]),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildItem({
+    required BuildContext context,
+    required PantryItemEntity item,
+    required int index,
+    required bool isHighlighted,
+    required bool isLocked,
+  }) {
+    return GestureDetector(
+      onTap: () {
+        if (isLocked) {
+          AppToast.show("Upgrade to unlock all items", ToastType.warning);
+          return;
+        }
+        onAddToCart(item, index);
+      },
+      child: Padding(
+        padding: gapOnly(bottom: 16),
+        child: _PantryItemTile(
+          isLocked: isLocked,
+          item: item,
+          kitchenId: kitchenId,
+          isHighlighted: isHighlighted,
+          onAddToCart: () => onAddToCart(item, index),
+        ),
+      ),
+    );
+  }
+
+  List<PantryItemEntity> _getSortedItems() {
+    if (pantryFilter == PantryFilter.expiring) {
+      return [...items]..sort((a, b) => a.expireDate.compareTo(b.expireDate));
+    }
+
+    if (pantryFilter == PantryFilter.lowStock) {
+      return [...items]..sort((a, b) => a.quantity.compareTo(b.quantity));
+    }
+
+    final expiring =
+        items.where((e) => e.expiryStatus == "expiring_soon").toList()
+          ..sort((a, b) => a.expireDate.compareTo(b.expireDate));
+
+    final lowStock = items.where((e) => e.stockStatus == "low_stock").toList()
+      ..sort((a, b) => a.quantity.compareTo(b.quantity));
+
+    final others = items
+        .where(
+          (e) =>
+              e.expiryStatus != "expiring_soon" && e.stockStatus != "low_stock",
+        )
+        .toList();
+
+    return [...expiring, ...lowStock, ...others];
+  }
+
+  bool _isItemLocked(List<PantryItemEntity> sortedItems, int index) {
+    if (isPremiumUser) return false;
+
+    if (pantryFilter != PantryFilter.all) {
+      return index >= 3;
+    }
+
+    int expiringCount = 0;
+    int lowStockCount = 0;
+
+    for (int i = 0; i <= index; i++) {
+      final item = sortedItems[i];
+
+      if (item.expiryStatus == "expiring_soon") {
+        expiringCount++;
+        if (expiringCount > 3 && i == index) return true;
+      } else if (item.stockStatus == "low_stock") {
+        lowStockCount++;
+        if (lowStockCount > 3 && i == index) return true;
+      }
+    }
+
+    return false;
   }
 }
 
@@ -497,11 +589,13 @@ class _PantryItemTile extends StatefulWidget {
   final PantryItemEntity item;
   final String kitchenId;
   final bool isHighlighted;
+  final bool isLocked;
   final VoidCallback onAddToCart;
 
   const _PantryItemTile({
     required this.item,
     required this.kitchenId,
+    required this.isLocked,
     required this.isHighlighted,
     required this.onAddToCart,
   });
@@ -568,6 +662,7 @@ class _PantryItemTileState extends State<_PantryItemTile>
             )
           : null,
       child: PantryItemCard(
+        isLocked: widget.isLocked,
         thumbnail: widget.item.thumbnailBytes ?? Uint8List(0),
         title: widget.item.name,
         quantity: widget.item.quantity.toString(),

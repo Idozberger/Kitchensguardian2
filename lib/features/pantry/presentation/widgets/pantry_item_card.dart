@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,6 +9,7 @@ import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
+import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
 import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
@@ -15,6 +17,7 @@ import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/services/date_picker/date_picker_service.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
+import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_dropdown_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
@@ -34,6 +37,7 @@ class PantryItemCard extends StatefulWidget {
   final String expiry;
   final PantryItemEntity pantryItemEntity;
   final String kitchenId;
+  final bool isLocked;
 
   const PantryItemCard({
     super.key,
@@ -47,6 +51,7 @@ class PantryItemCard extends StatefulWidget {
     required this.onCartItem,
     required this.pantryItemEntity,
     required this.kitchenId,
+    required this.isLocked,
   });
 
   @override
@@ -60,7 +65,11 @@ class _PantryItemCardState extends State<PantryItemCard> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        setState(() => _isExpanded = !_isExpanded);
+        if (widget.isLocked) {
+          context.push(Routes.subscription);
+        } else {
+          setState(() => _isExpanded = !_isExpanded);
+        }
         FocusScope.of(context).unfocus();
       },
       child: Container(
@@ -75,44 +84,47 @@ class _PantryItemCardState extends State<PantryItemCard> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: h(1)),
-            if (widget.pantryItemEntity.expiryStatus == "expiring_soon" ||
-                widget.pantryItemEntity.stockStatus == "low_stock")
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  SizedBox(height: h(1), width: double.maxFinite),
-                  Positioned(
-                    top: -h(22),
-                    right:
-                        widget.pantryItemEntity.expiryStatus ==
-                                "expiring_soon" &&
-                            widget.pantryItemEntity.stockStatus == "low_stock"
-                        ? w(134)
-                        : widget.pantryItemEntity.stockStatus == "low_stock" &&
-                              widget.pantryItemEntity.expiryStatus !=
-                                  "expiring_soon"
-                        ? w(54)
-                        : w(62),
-                    child: Badge(
-                      label: Padding(
-                        padding: gapAll(2),
-                        child: Text(
+            if (!widget.isLocked) ...[
+              if (widget.pantryItemEntity.expiryStatus == "expiring_soon" ||
+                  widget.pantryItemEntity.stockStatus == "low_stock")
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    SizedBox(height: h(1), width: double.maxFinite),
+                    Positioned(
+                      top: -h(22),
+                      right:
                           widget.pantryItemEntity.expiryStatus ==
-                                      "expiring_soon" &&
-                                  widget.pantryItemEntity.stockStatus ==
-                                      "low_stock"
-                              ? "Expiring soon and low-stock"
-                              : widget.pantryItemEntity.expiryStatus ==
+                                  "expiring_soon" &&
+                              widget.pantryItemEntity.stockStatus == "low_stock"
+                          ? w(134)
+                          : widget.pantryItemEntity.stockStatus ==
+                                    "low_stock" &&
+                                widget.pantryItemEntity.expiryStatus !=
                                     "expiring_soon"
-                              ? "Expiring soon"
-                              : "Running low",
+                          ? w(54)
+                          : w(62),
+                      child: Badge(
+                        label: Padding(
+                          padding: gapAll(2),
+                          child: Text(
+                            widget.pantryItemEntity.expiryStatus ==
+                                        "expiring_soon" &&
+                                    widget.pantryItemEntity.stockStatus ==
+                                        "low_stock"
+                                ? "Expiring soon and low-stock"
+                                : widget.pantryItemEntity.expiryStatus ==
+                                      "expiring_soon"
+                                ? "Expiring soon"
+                                : "Running low",
+                          ),
                         ),
+                        child: Container(),
                       ),
-                      child: Container(),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
+            ],
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -120,60 +132,90 @@ class _PantryItemCardState extends State<PantryItemCard> {
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(h(24)),
-                      child: Image.memory(
-                        widget.thumbnail,
-                        height: h(28),
-                        width: h(28),
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            height: h(28),
-                            width: h(28),
-                            alignment: Alignment.center,
-                            color: Colors.grey.shade200,
-                            child: Icon(
-                              Icons.food_bank,
-                              size: h(16),
-                              color: Colors.grey.shade500,
-                            ),
-                          );
-                        },
+                      child: ImageFiltered(
+                        imageFilter: ImageFilter.blur(
+                          sigmaX: widget.isLocked ? 6 : 0,
+                          sigmaY: widget.isLocked ? 6 : 0,
+                        ),
+                        child: Image.memory(
+                          widget.thumbnail,
+                          height: h(28),
+                          width: h(28),
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              height: h(28),
+                              width: h(28),
+                              alignment: Alignment.center,
+                              color: Colors.grey.shade200,
+                              child: Icon(
+                                Icons.food_bank,
+                                size: h(16),
+                                color: Colors.grey.shade500,
+                              ),
+                            );
+                          },
+                        ),
                       ),
                     ),
-
                     gap(width: 8),
                     SizedBox(
                       width: _isExpanded ? w(244) : w(54),
-                      child: Text(
-                        widget.title,
-                        maxLines: _isExpanded ? 2 : 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.headlineLarge,
-                      ),
+                      child: widget.isLocked
+                          ? ImageFiltered(
+                              imageFilter: ImageFilter.blur(
+                                sigmaX: 5,
+                                sigmaY: 5,
+                              ),
+                              child: Text(
+                                widget.title,
+                                maxLines: _isExpanded ? 2 : 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.headlineLarge,
+                              ),
+                            )
+                          : Text(
+                              widget.title,
+                              maxLines: _isExpanded ? 2 : 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.headlineLarge,
+                            ),
                     ),
                     if (!_isExpanded) ...[
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          SizedBox(
-                            width: w(38),
-                            child: Align(
-                              alignment: Alignment.topRight,
-                              child: _buildInlineInfo(widget.quantity),
-                            ),
-                          ),
-                          SizedBox(width: w(24), child: _dot()),
+                      ImageFiltered(
+                        imageFilter: ImageFilter.blur(
+                          sigmaX: widget.isLocked ? 5 : 0,
+                          sigmaY: widget.isLocked ? 5 : 0,
+                        ),
+                        child: Opacity(
+                          opacity: widget.isLocked ? 0.5 : 1,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              SizedBox(
+                                width: w(38),
+                                child: Align(
+                                  alignment: Alignment.topRight,
+                                  child: _buildInlineInfo(widget.quantity),
+                                ),
+                              ),
+                              SizedBox(width: w(24), child: _dot()),
 
-                          SizedBox(
-                            width: w(38),
-                            child: _buildInlineInfo(widget.unit),
+                              SizedBox(
+                                width: w(38),
+                                child: _buildInlineInfo(widget.unit),
+                              ),
+                              SizedBox(width: w(24), child: _dot()),
+
+                              SizedBox(
+                                width: w(54),
+                                child: _buildInlineInfo(widget.pantry),
+                              ),
+                            ],
                           ),
-                          SizedBox(width: w(24), child: _dot()),
-                          SizedBox(
-                            width: w(54),
-                            child: _buildInlineInfo(widget.pantry),
-                          ),
-                        ],
+                        ),
                       ),
                     ],
                   ],
@@ -181,7 +223,13 @@ class _PantryItemCardState extends State<PantryItemCard> {
                 AnimatedRotation(
                   turns: _isExpanded ? 0.5 : 0,
                   duration: const Duration(milliseconds: 200),
-                  child: SvgPicture.asset(AppAssets.downArrow),
+                  child: ImageFiltered(
+                    imageFilter: ImageFilter.blur(
+                      sigmaX: widget.isLocked ? 4 : 0,
+                      sigmaY: widget.isLocked ? 4 : 0,
+                    ),
+                    child: SvgPicture.asset(AppAssets.downArrow),
+                  ),
                 ),
               ],
             ),
@@ -230,9 +278,52 @@ class _PantryItemCardState extends State<PantryItemCard> {
                 ],
               ),
             ],
+            if (widget.isLocked) _buildBlurOverlay(),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildBlurOverlay() {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        SizedBox(height: 10),
+
+        Positioned(
+          top: -h(34),
+          left: w(62),
+
+          child: Container(
+            padding: gapAll(12),
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+              borderRadius: BorderRadius.circular(t(100)),
+            ),
+            child: Row(
+              spacing: w(12),
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(AppAssets.crownImage, height: h(24)),
+                Text(
+                  "Upgrade to Premium",
+                  style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                    fontSize: t(14),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 

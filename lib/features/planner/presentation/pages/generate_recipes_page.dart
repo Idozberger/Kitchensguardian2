@@ -9,6 +9,7 @@ import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
+import 'package:foodkitchen/core/services/recipe_limit/recipe_limit_service.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_recipe_is_under_progress_widget.dart';
@@ -76,12 +77,28 @@ class _GenerateRecipesPageState extends State<GenerateRecipesPage> {
   }
 
   Future<void> _generateRecipes() async {
+    final isSubscribed = context.read<UserCubit>().state.isPremiumUser;
+
+    if (!isSubscribed) {
+      bool canSearch = await RecipeLimitService.canSearchRecipe();
+
+      if (!canSearch) {
+        AppToast.show(
+          "You’ve used all 7 recipe searches today. Upgrade to keep finding recipes without ads.",
+          ToastType.warning,
+          gravity: ToastGravity.TOP,
+        );
+        return;
+      }
+    }
+
     final kitchenId = _userCubit.state.activeKitchenId;
 
     if (kitchenId.isEmpty) {
       AppToast.show("Please join a kitchen first!", ToastType.warning);
       return;
     }
+
     if (_searchController.text.isEmpty) {
       AppToast.show("Search field is required!", ToastType.warning);
       return;

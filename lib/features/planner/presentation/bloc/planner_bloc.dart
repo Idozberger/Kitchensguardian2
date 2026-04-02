@@ -9,6 +9,7 @@ import 'package:foodkitchen/core/common/data/model/recipe_model.dart';
 import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/core/services/fcm/fcm_service.dart';
 import 'package:foodkitchen/core/services/notifications/flutter_local_notifications_service.dart';
+import 'package:foodkitchen/core/services/recipe_limit/recipe_limit_service.dart';
 import 'package:foodkitchen/core/utils/date_format_to_string.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_bloc.dart';
@@ -520,6 +521,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     Emitter<PlannerState> emit,
   ) async {
     emit(state.copyWith(isLoading: true));
+
     final res = await _generateRecipes(
       GenerateRecipesParams(
         instructions: event.instructions,
@@ -527,11 +529,13 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
       ),
     );
 
-    res.fold(
-      (failure) {
+    await res.fold(
+      (failure) async {
         emit(state.copyWith(errorMessage: failure.message, isLoading: false));
       },
-      (recipes) {
+      (recipes) async {
+        await RecipeLimitService.incrementUsage();
+
         emit(state.copyWith(recipes: recipes, isLoading: false));
       },
     );

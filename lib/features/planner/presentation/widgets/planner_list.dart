@@ -64,7 +64,7 @@ class _PlannerListState extends State<PlannerList> {
             BlocBuilder<UserCubit, UserState>(
               builder: (context, userState) {
                 return SelectDateWidget(
-                  entitlementIsActive: userState.isPremiumUser,
+                  isPremiumUser: userState.isPremiumUser,
                   startDate: PlannerDateFormatter.getStartDate(widget.state),
                   selectedDate: _selectedDate,
                   onChanged: (date) {

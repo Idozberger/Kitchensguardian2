@@ -20,28 +20,42 @@ class CommonRemoteDatasourceImpl implements CommonRemoteDatasource {
   Future<List<Map<String, dynamic>>> getAllStorageArea({
     required String kitchenId,
   }) async {
-    try {
-      final response = await dio.get(
-        "${AppConstants.getPantries}?kitchen_id=$kitchenId",
-      );
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
+    int retries = 3;
 
-        final message = data["error"];
-        throw message;
-      }
-      final data = response.data["pantries"];
+    while (retries > 0) {
+      try {
+        final response = await dio.get(
+          "${AppConstants.getPantries}?kitchen_id=$kitchenId",
+        );
 
-      if (data is List) {
-        return List<Map<String, dynamic>>.from(data);
-      } else {
-        throw Exception("Invalid response format");
+        if (response.statusCode != 200 && response.statusCode != 201) {
+          final data = response.data is String
+              ? jsonDecode(response.data)
+              : response.data;
+
+          final message = data["error"];
+          throw message;
+        }
+
+        final data = response.data["pantries"];
+
+        if (data is List) {
+          return List<Map<String, dynamic>>.from(data);
+        } else {
+          throw Exception("Invalid response format");
+        }
+      } on DioException catch (e) {
+        retries--;
+
+        if (retries == 0) {
+          throw dio.handleError(e);
+        }
+
+        await Future.delayed(const Duration(seconds: 2));
       }
-    } on DioException catch (e) {
-      throw dio.handleError(e);
     }
+
+    throw Exception("Unexpected error");
   }
 
   @override

@@ -432,23 +432,37 @@ class PlannerRemoteDatasourceImpl implements PlannerRemoteDatasource {
 
   @override
   Future<Map<String, dynamic>> getDateRange({required String kitchenId}) async {
-    try {
-      final response = await dio.get(
-        "${AppConstants.getDateRange}?kitchen_id=$kitchenId",
-      );
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
+    int retries = 3;
 
-        final message = data["error"];
-        throw message;
+    while (retries > 0) {
+      try {
+        final response = await dio.get(
+          "${AppConstants.getDateRange}?kitchen_id=$kitchenId",
+        );
+
+        if (response.statusCode != 200 && response.statusCode != 201) {
+          final data = response.data is String
+              ? jsonDecode(response.data)
+              : response.data;
+
+          final message = data["error"];
+          throw message;
+        }
+
+        log("date ranges: ${response.data}");
+        return Map<String, dynamic>.from(response.data);
+      } on DioException catch (e) {
+        retries--;
+
+        if (retries == 0) {
+          throw dio.handleError(e);
+        }
+
+        await Future.delayed(const Duration(seconds: 1));
       }
-      log("date ranges: ${response.data}");
-      return response.data;
-    } on DioException catch (e) {
-      throw dio.handleError(e);
     }
+
+    throw Exception("Unexpected error");
   }
 
   @override

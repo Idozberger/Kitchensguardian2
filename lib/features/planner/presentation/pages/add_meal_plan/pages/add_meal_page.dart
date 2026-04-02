@@ -123,7 +123,7 @@ class _AddMealPageState extends State<AddMealPage>
         return SelectDateWidget(
           selectedDate: currentState.selectedDate,
           startDate: _startDate,
-          entitlementIsActive: context.read<UserCubit>().state.isPremiumUser,
+          isPremiumUser: context.read<UserCubit>().state.isPremiumUser,
           onChanged: (selected) => _handleDateSelection(currentState, selected),
         );
       },
