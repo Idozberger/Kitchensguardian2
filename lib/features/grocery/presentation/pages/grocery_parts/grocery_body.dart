@@ -212,7 +212,7 @@ class _GroceryBodyState extends State<GroceryBody> {
       children: [
         _buildItemsList(filteredList),
         gap(height: _gapHeight),
-        _buildFooterWidget(state),
+        _buildFooterWidget(state, _selectedTabIndex),
         SizedBox(height: h(_gapHeightSmall)),
       ],
     );
@@ -254,7 +254,7 @@ class _GroceryBodyState extends State<GroceryBody> {
     );
   }
 
-  Widget _buildFooterWidget(GroceryState state) {
+  Widget _buildFooterWidget(GroceryState state, int selectedTab) {
     if (_selectedTabIndex == 2) {
       return FinalListFooter(
         isFinalListTabTriggered: true,
@@ -269,7 +269,11 @@ class _GroceryBodyState extends State<GroceryBody> {
       isFinalListTabTriggered: false,
       groceryList: state.requestedItemsList ?? [],
       onRemoveCallback: () {
-        _handleDeleteAll(state.requestedItemsList ?? []);
+        if (_selectedTabIndex == 1) {
+          _handleDeleteAll(state.aiGeneratedList ?? []);
+        } else {
+          _handleDeleteAll(state.requestedItemsList ?? []);
+        }
       },
       onAddToFinalListCallback: _handleAddToFinalList,
     );

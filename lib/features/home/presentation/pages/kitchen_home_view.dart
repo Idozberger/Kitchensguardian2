@@ -14,8 +14,6 @@ import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
-import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_bloc.dart';
-import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_state.dart';
 
 import 'package:foodkitchen/features/home/presentation/bloc/home_state.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/action_tile.dart';
@@ -65,12 +63,12 @@ class _KitchenHomeViewState extends State<KitchenHomeView> {
               ItemRequestSection(state: state),
             ],
             gap(height: 12),
-            PantrySection(state: state),
 
+            PantrySection(state: state),
             gap(height: 12),
             _buildFindRecipesButton(context),
             gap(height: 12),
-            _buildGrocerySection(state),
+            _buildGrocerySection(),
             gap(height: 12),
             _buildRecipeSuggestionsSection(state),
             gap(height: 12),
@@ -176,23 +174,10 @@ class _KitchenHomeViewState extends State<KitchenHomeView> {
     );
   }
 
-  Widget _buildGrocerySection(HomeState state) {
-    return BlocBuilder<GroceryBloc, GroceryState>(
-      builder: (context, groceryState) {
-        final list = groceryState.aiGeneratedList ?? [];
-
-        return AnimatedSwitcher(
-          duration: const Duration(milliseconds: 400),
-          child: SmartCartTile(
-            infoText: list.length > 3
-                ? "+${list.length - 3} tap to see more"
-                : null,
-            isGenerated: true,
-            previewItems: list.take(3).map((item) => item.name).toList(),
-            onGenerate: widget.onGeneratePressed,
-          ),
-        );
-      },
+  Widget _buildGrocerySection() {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 400),
+      child: SmartCartTile(onGenerate: widget.onGeneratePressed),
     );
   }
 

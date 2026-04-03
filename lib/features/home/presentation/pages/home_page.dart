@@ -29,8 +29,6 @@ class _HomePageState extends State<HomePage> {
   late final GroceryBloc _groceryBloc;
   late final HomeBloc _homeBloc;
 
-  bool _generatedRecipes = false;
-
   @override
   void initState() {
     super.initState();
@@ -97,7 +95,6 @@ class _HomePageState extends State<HomePage> {
         date: formatDateToMeetBackendDate(DateTime.now()),
       ),
     );
-    setState(() => _generatedRecipes = true);
   }
 
   Widget _buildBody({
@@ -231,8 +228,8 @@ class _HomePageState extends State<HomePage> {
     return KitchenHomeView(
       key: ValueKey("kitchen_view_${userState.userStorageAreas.length}"),
       state: homeState,
-      isGeneratedRecipes: _generatedRecipes,
-      onGeneratePressed: _handleGeneratePressed,
+      isGeneratedRecipes: false,
+      onGeneratePressed: () => _handleGeneratePressed(),
     );
   }
 

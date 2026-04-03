@@ -125,32 +125,32 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       features: [
         PlanFeature(title: "No ads", freeValue: false, premiumValue: true),
         PlanFeature(
-          title: "See unlimited recipes",
+          title: "Unlimited Recipe generation",
           freeValue: false,
           premiumValue: true,
         ),
         PlanFeature(
-          title: "See all nutrition's",
+          title: "Full 2-week meal planning access",
           freeValue: false,
           premiumValue: true,
         ),
         PlanFeature(
-          title: "Unlimited users in kitchen",
+          title: "Unlimited users per shared kitchen",
           freeValue: false,
           premiumValue: true,
         ),
         PlanFeature(
-          title: "Expiry alerts and suggestive recipes",
+          title: "See all expiring ingredients",
           freeValue: false,
           premiumValue: true,
         ),
         PlanFeature(
-          title: "Unlimited pantry history",
+          title: "See all low stock ingredients",
           freeValue: false,
           premiumValue: true,
         ),
         PlanFeature(
-          title: "Auto grocery list from planner",
+          title: "Grocery List Generation",
           freeValue: false,
           premiumValue: true,
         ),

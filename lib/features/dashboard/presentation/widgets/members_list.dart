@@ -47,7 +47,7 @@ class MembersList extends StatelessWidget {
         ),
         ConstrainedBox(
           constraints: BoxConstraints(maxHeight: 400, minHeight: 0),
-          child: NotificationPage(showAppbar: false),
+          child: NotificationPage(showAppbar: false, shouldFetchMembers: false),
         ),
       ],
     );

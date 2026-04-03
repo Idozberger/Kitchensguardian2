@@ -11,7 +11,6 @@ import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_ico
 import 'package:foodkitchen/features/dashboard/presentation/widgets/empty_members_view.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/members_list.dart';
 import 'package:lottie/lottie.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class MyKitchenMembersPage extends StatefulWidget {
   const MyKitchenMembersPage({super.key});
@@ -33,11 +32,10 @@ class _MyKitchenMembersPageState extends State<MyKitchenMembersPage> {
   }
 
   void getAllKitchenMembers() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? activeKitchenId = prefs.getString('kitchen_id');
-
     dashboardBloc.add(
-      GetKitchenMembersEvent(activeKitchenId: activeKitchenId ?? ""),
+      GetKitchenMembersEvent(
+        activeKitchenId: context.read<UserCubit>().state.activeKitchenId,
+      ),
     );
   }
 

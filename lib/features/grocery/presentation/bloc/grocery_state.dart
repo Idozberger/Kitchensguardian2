@@ -18,7 +18,7 @@ class GroceryState {
     this.errorMessage,
     this.requestedItemsList,
     this.finalListItemsList,
-    this.aiGeneratedList,
+    this.aiGeneratedList = const [],
   });
 
   GroceryState copyWith({

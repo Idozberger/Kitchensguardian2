@@ -262,7 +262,7 @@ class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
     bool isSubscribed = _userCubit.state.isPremiumUser;
     final today = DateTime.now();
     final nextDays = List.generate(
-      isSubscribed ? 7 : 3,
+      isSubscribed ? 14 : 3,
       (i) => today.add(Duration(days: i)),
     );
 
