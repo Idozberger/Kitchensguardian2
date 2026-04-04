@@ -16,6 +16,7 @@ import 'package:foodkitchen/core/services/image_picker/image_picker_service.dart
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/date_format_to_string.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
+import 'package:foodkitchen/core/widgets/ad_loading_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_dropdown_widget.dart';
@@ -56,8 +57,27 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
     super.initState();
     _pantryBloc = context.read<PantryBloc>();
     _userCubit = context.read<UserCubit>();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showAdLoadingDialog(context, () {
+        context.pop();
+      });
+      scanReceipt();
+    });
+  }
 
-    scanReceipt();
+  void showAdLoadingDialog(BuildContext context, VoidCallback callback) async {
+    if (context.read<UserCubit>().state.isPremiumUser) return;
+    await Future.delayed(Duration(milliseconds: 50));
+    showGeneralDialog(
+      // ignore: use_build_context_synchronously
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black.withOpacity(0.6),
+      transitionDuration: const Duration(milliseconds: 250),
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return AdLoadingDialog(onTimeout: () => callback());
+      },
+    );
   }
 
   void scanReceipt() async {

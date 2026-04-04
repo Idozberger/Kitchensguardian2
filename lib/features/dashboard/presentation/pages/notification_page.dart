@@ -513,7 +513,7 @@ class _NotificationCard extends StatelessWidget {
                   SizedBox(height: h(1)),
                   Positioned(
                     left: -h(20),
-                    top: -h(192),
+                    top: -h(180),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(16),
                       child: Container(
@@ -528,7 +528,7 @@ class _NotificationCard extends StatelessWidget {
                           children: [
                             Image.asset(AppAssets.crownImage, height: h(24)),
                             Text(
-                              "Upgrade to Premium",
+                              "Upgrade to add more members",
                               style: Theme.of(context).textTheme.headlineLarge
                                   ?.copyWith(
                                     fontSize: t(14),

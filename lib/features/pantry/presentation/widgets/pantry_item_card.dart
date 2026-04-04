@@ -23,12 +23,14 @@ import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_bloc.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_event.dart';
+import 'package:foodkitchen/features/pantry/presentation/pages/my_pantry_page.dart';
 import 'package:go_router/go_router.dart';
 
 class PantryItemCard extends StatefulWidget {
   final Uint8List thumbnail;
   final String title;
   final String quantity;
+  final PantryFilter selectedFilter;
   final String unit;
   final String pantry;
   final VoidCallback onListCheckedCallback;
@@ -48,6 +50,7 @@ class PantryItemCard extends StatefulWidget {
     required this.expiry,
     required this.onListCheckedCallback,
     required this.onCartItem,
+    required this.selectedFilter,
     required this.pantryItemEntity,
     required this.kitchenId,
     required this.isLocked,
@@ -83,7 +86,8 @@ class _PantryItemCardState extends State<PantryItemCard> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: h(1)),
-            if (!widget.isLocked) ...[
+            if (!widget.isLocked &&
+                widget.selectedFilter != PantryFilter.all) ...[
               if (widget.pantryItemEntity.expiryStatus == "expiring_soon" ||
                   widget.pantryItemEntity.stockStatus == "low_stock")
                 Stack(
@@ -292,7 +296,7 @@ class _PantryItemCardState extends State<PantryItemCard> {
 
         Positioned(
           top: -h(34),
-          left: w(62),
+          left: w(58),
 
           child: Container(
             padding: gapAll(12),
@@ -312,7 +316,7 @@ class _PantryItemCardState extends State<PantryItemCard> {
               children: [
                 Image.asset(AppAssets.crownImage, height: h(24)),
                 Text(
-                  "Upgrade to Premium",
+                  "Upgrade to see more",
                   style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                     fontSize: t(14),
                     fontWeight: FontWeight.bold,

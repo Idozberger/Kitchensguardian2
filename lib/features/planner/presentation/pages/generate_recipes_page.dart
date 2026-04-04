@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_final_fields
+// ignore_for_file: prefer_final_fields, use_build_context_synchronously
 
 import 'dart:ui';
 
@@ -7,12 +7,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
+import 'package:foodkitchen/core/config/routes.dart';
+import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/services/recipe_limit/recipe_limit_service.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
+import 'package:foodkitchen/core/widgets/ad_loading_widget.dart';
+import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_recipe_is_under_progress_widget.dart';
+import 'package:foodkitchen/core/widgets/show_recipe_generation_limit_dialog.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dart';
@@ -77,31 +82,30 @@ class _GenerateRecipesPageState extends State<GenerateRecipesPage> {
   }
 
   Future<void> _generateRecipes() async {
-    final isSubscribed = context.read<UserCubit>().state.isPremiumUser;
-
-    if (!isSubscribed) {
-      bool canSearch = await RecipeLimitService.canSearchRecipe();
-
-      if (!canSearch) {
-        AppToast.show(
-          "You’ve used all 7 recipe searches today. Upgrade to keep finding recipes without ads.",
-          ToastType.warning,
-          gravity: ToastGravity.TOP,
-        );
-        return;
-      }
-    }
-
     final kitchenId = _userCubit.state.activeKitchenId;
 
     if (kitchenId.isEmpty) {
       AppToast.show("Please join a kitchen first!", ToastType.warning);
       return;
     }
-
     if (_searchController.text.isEmpty) {
       AppToast.show("Search field is required!", ToastType.warning);
       return;
+    }
+
+    final isSubscribed = context.read<UserCubit>().state.isPremiumUser;
+
+    if (!isSubscribed) {
+      bool canSearch = await RecipeLimitService.canSearchRecipe();
+
+      if (!canSearch) {
+        showLimitDialog(context, () {
+          showAdLoadingDialog(context);
+        });
+        return;
+      } else {
+        showAdLoadingDialog(context);
+      }
     }
 
     _plannerBloc.add(
@@ -109,6 +113,29 @@ class _GenerateRecipesPageState extends State<GenerateRecipesPage> {
         instructions: _buildRecipePrompt(),
         kitchenId: kitchenId,
       ),
+    );
+  }
+
+  void showAdLoadingDialog(BuildContext context) async {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black.withOpacity(0.6),
+      transitionDuration: const Duration(milliseconds: 250),
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return AdLoadingDialog(
+          onTimeout: () {
+            context.pop();
+            context.pop();
+            _plannerBloc.add(
+              GenerateRecipesEvent(
+                instructions: _buildRecipePrompt(),
+                kitchenId: context.read<UserCubit>().state.activeKitchenId,
+              ),
+            );
+          },
+        );
+      },
     );
   }
 

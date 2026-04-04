@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
@@ -122,6 +123,22 @@ class _SelectDateWidgetState extends State<SelectDateWidget>
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
+                              if (isLocked)
+                                Stack(
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    SizedBox(height: 1),
+                                    Positioned(
+                                      top: -h(8),
+
+                                      left: -w(13),
+                                      child: Image.asset(
+                                        AppAssets.crownImage,
+                                        height: h(24),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               Text(
                                 date.day.toString(),
                                 style: Theme.of(context)

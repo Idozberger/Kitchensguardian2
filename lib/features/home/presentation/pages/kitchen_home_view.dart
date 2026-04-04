@@ -10,11 +10,13 @@ import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/services/document_scanning/document_scanning_service.dart';
+import 'package:foodkitchen/core/services/recipe_limit/recipe_limit_service.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
+import 'package:foodkitchen/core/widgets/ad_loading_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
-
+import 'package:foodkitchen/core/widgets/show_recipe_generation_limit_dialog.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_state.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/action_tile.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/create_or_join_tile.dart';
@@ -157,7 +159,7 @@ class _KitchenHomeViewState extends State<KitchenHomeView> {
       title: "Find Recipes",
       buttonText: "Find Recipes",
       svgPath: AppAssets.findRecipesSvg,
-      onTap: () => navigateToGenerateRecipes(),
+      onTap: () => canSearchRecipe(),
     );
   }
 
@@ -170,6 +172,43 @@ class _KitchenHomeViewState extends State<KitchenHomeView> {
         "selected_meal_type": "Breakfast",
         "is_plan": false,
         "is_edit": false,
+      },
+    );
+  }
+
+  Future<void> canSearchRecipe() async {
+    final isSubscribed = context.read<UserCubit>().state.isPremiumUser;
+
+    if (!isSubscribed) {
+      bool canSearch = await RecipeLimitService.canSearchRecipe();
+
+      if (!canSearch) {
+        showLimitDialog(context, () {
+          showAdLoadingDialog(context);
+        });
+        return;
+      } else {
+        navigateToGenerateRecipes();
+      }
+    } else {
+      navigateToGenerateRecipes();
+    }
+  }
+
+  void showAdLoadingDialog(BuildContext context) async {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black.withOpacity(0.6),
+      transitionDuration: const Duration(milliseconds: 250),
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return AdLoadingDialog(
+          onTimeout: () {
+            context.pop();
+            context.pop();
+            navigateToGenerateRecipes();
+          },
+        );
       },
     );
   }

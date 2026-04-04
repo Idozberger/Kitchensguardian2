@@ -232,7 +232,7 @@ class _MyPantryPageState extends State<MyPantryPage> {
       highlightedItemId: widget.itemId,
       onAddToCart: _handleAddToCart,
       isPremiumUser: context.read<UserCubit>().state.isPremiumUser,
-      pantryFilter: _selectedFilter,
+      selectedFilter: _selectedFilter,
     );
   }
 
@@ -444,7 +444,7 @@ class _PantryItemList extends StatelessWidget {
   final void Function(PantryItemEntity item, int index) onAddToCart;
 
   final bool isPremiumUser;
-  final PantryFilter pantryFilter;
+  final PantryFilter selectedFilter;
 
   const _PantryItemList({
     required this.items,
@@ -452,7 +452,7 @@ class _PantryItemList extends StatelessWidget {
     required this.highlightedItemId,
     required this.onAddToCart,
     required this.isPremiumUser,
-    required this.pantryFilter,
+    required this.selectedFilter,
   });
 
   @override
@@ -477,6 +477,7 @@ class _PantryItemList extends StatelessWidget {
         final isLocked = _isItemLocked(sortedItems, index);
 
         return _buildItem(
+          selectedFilter: selectedFilter,
           context: context,
           item: item,
           index: index,
@@ -511,6 +512,7 @@ class _PantryItemList extends StatelessWidget {
     required int index,
     required bool isHighlighted,
     required bool isLocked,
+    required PantryFilter selectedFilter,
   }) {
     return GestureDetector(
       onTap: () {
@@ -523,6 +525,7 @@ class _PantryItemList extends StatelessWidget {
       child: Padding(
         padding: gapOnly(bottom: 16),
         child: _PantryItemTile(
+          selectedFilter: selectedFilter,
           isLocked: isLocked,
           item: item,
           kitchenId: kitchenId,
@@ -534,11 +537,11 @@ class _PantryItemList extends StatelessWidget {
   }
 
   List<PantryItemEntity> _getSortedItems() {
-    if (pantryFilter == PantryFilter.expiring) {
+    if (selectedFilter == PantryFilter.expiring) {
       return [...items]..sort((a, b) => a.expireDate.compareTo(b.expireDate));
     }
 
-    if (pantryFilter == PantryFilter.lowStock) {
+    if (selectedFilter == PantryFilter.lowStock) {
       return [...items]..sort((a, b) => a.quantity.compareTo(b.quantity));
     }
 
@@ -562,31 +565,17 @@ class _PantryItemList extends StatelessWidget {
   bool _isItemLocked(List<PantryItemEntity> sortedItems, int index) {
     if (isPremiumUser) return false;
 
-    if (pantryFilter != PantryFilter.all) {
-      return index >= 3;
+    if (selectedFilter == PantryFilter.all) {
+      return false;
     }
 
-    int expiringCount = 0;
-    int lowStockCount = 0;
-
-    for (int i = 0; i <= index; i++) {
-      final item = sortedItems[i];
-
-      if (item.expiryStatus == "expiring_soon") {
-        expiringCount++;
-        if (expiringCount > 3 && i == index) return true;
-      } else if (item.stockStatus == "low_stock") {
-        lowStockCount++;
-        if (lowStockCount > 3 && i == index) return true;
-      }
-    }
-
-    return false;
+    return index >= 3;
   }
 }
 
 class _PantryItemTile extends StatefulWidget {
   final PantryItemEntity item;
+  final PantryFilter selectedFilter;
   final String kitchenId;
   final bool isHighlighted;
   final bool isLocked;
@@ -596,6 +585,7 @@ class _PantryItemTile extends StatefulWidget {
     required this.item,
     required this.kitchenId,
     required this.isLocked,
+    required this.selectedFilter,
     required this.isHighlighted,
     required this.onAddToCart,
   });
@@ -654,7 +644,7 @@ class _PantryItemTileState extends State<_PantryItemTile>
         widget.item.stockStatus == "low_stock";
 
     final Widget cardWidget = Container(
-      decoration: shouldShowBorder
+      decoration: shouldShowBorder && widget.selectedFilter != PantryFilter.all
           ? BoxDecoration(
               color: AppColors.primaryColor.withOpacity(0.1),
               border: Border.all(color: Colors.red, width: 0.5),
@@ -662,6 +652,7 @@ class _PantryItemTileState extends State<_PantryItemTile>
             )
           : null,
       child: PantryItemCard(
+        selectedFilter: widget.selectedFilter,
         isLocked: widget.isLocked,
         thumbnail: widget.item.thumbnailBytes ?? Uint8List(0),
         title: widget.item.name,
