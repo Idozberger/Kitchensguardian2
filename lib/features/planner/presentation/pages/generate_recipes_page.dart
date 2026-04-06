@@ -5,19 +5,15 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:foodkitchen/core/ads/ad_service.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
-import 'package:foodkitchen/core/config/routes.dart';
-import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/services/recipe_limit/recipe_limit_service.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
-import 'package:foodkitchen/core/widgets/ad_loading_widget.dart';
-import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_recipe_is_under_progress_widget.dart';
-import 'package:foodkitchen/core/widgets/show_recipe_generation_limit_dialog.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dart';
@@ -99,9 +95,8 @@ class _GenerateRecipesPageState extends State<GenerateRecipesPage> {
       bool canSearch = await RecipeLimitService.canSearchRecipe();
 
       if (!canSearch) {
-        showLimitDialog(context, () {
-          showAdLoadingDialog(context);
-        });
+        showAdLoadingDialog(context);
+
         return;
       } else {
         showAdLoadingDialog(context);
@@ -117,25 +112,15 @@ class _GenerateRecipesPageState extends State<GenerateRecipesPage> {
   }
 
   void showAdLoadingDialog(BuildContext context) async {
-    showGeneralDialog(
+    _plannerBloc.add(
+      GenerateRecipesEvent(
+        instructions: _buildRecipePrompt(),
+        kitchenId: context.read<UserCubit>().state.activeKitchenId,
+      ),
+    );
+    AdService.instance.loadAndShowInterstitial(
       context: context,
-      barrierDismissible: false,
-      barrierColor: Colors.black.withOpacity(0.6),
-      transitionDuration: const Duration(milliseconds: 250),
-      pageBuilder: (context, animation, secondaryAnimation) {
-        return AdLoadingDialog(
-          onTimeout: () {
-            context.pop();
-            context.pop();
-            _plannerBloc.add(
-              GenerateRecipesEvent(
-                instructions: _buildRecipePrompt(),
-                kitchenId: context.read<UserCubit>().state.activeKitchenId,
-              ),
-            );
-          },
-        );
-      },
+      onDismissed: () {},
     );
   }
 

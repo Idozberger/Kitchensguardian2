@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:foodkitchen/core/ads/ad_service.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
@@ -13,7 +14,6 @@ import 'package:foodkitchen/core/services/document_scanning/document_scanning_se
 import 'package:foodkitchen/core/services/recipe_limit/recipe_limit_service.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
-import 'package:foodkitchen/core/widgets/ad_loading_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/core/widgets/show_recipe_generation_limit_dialog.dart';
@@ -184,7 +184,13 @@ class _KitchenHomeViewState extends State<KitchenHomeView> {
 
       if (!canSearch) {
         showLimitDialog(context, () {
-          showAdLoadingDialog(context);
+          AdService.instance.loadAndShowInterstitial(
+            context: context,
+            onDismissed: () {
+              context.pop();
+              navigateToGenerateRecipes();
+            },
+          );
         });
         return;
       } else {
@@ -193,24 +199,6 @@ class _KitchenHomeViewState extends State<KitchenHomeView> {
     } else {
       navigateToGenerateRecipes();
     }
-  }
-
-  void showAdLoadingDialog(BuildContext context) async {
-    showGeneralDialog(
-      context: context,
-      barrierDismissible: false,
-      barrierColor: Colors.black.withOpacity(0.6),
-      transitionDuration: const Duration(milliseconds: 250),
-      pageBuilder: (context, animation, secondaryAnimation) {
-        return AdLoadingDialog(
-          onTimeout: () {
-            context.pop();
-            context.pop();
-            navigateToGenerateRecipes();
-          },
-        );
-      },
-    );
   }
 
   Widget _buildGrocerySection() {

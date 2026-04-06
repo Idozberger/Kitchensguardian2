@@ -1,10 +1,7 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
-import 'package:foodkitchen/core/widgets/ad_loading_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:go_router/go_router.dart';
 
@@ -23,7 +20,7 @@ void showLimitDialog(BuildContext context, VoidCallback callback) {
             ),
             const SizedBox(height: 12),
             Text(
-              "You’ve used all 7 recipe searches today.\nUpgrade to keep finding recipes without ads.",
+              "You've used all 7 recipe searches today watch an ad or upgrade to keep finding recipes",
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(),
             ),

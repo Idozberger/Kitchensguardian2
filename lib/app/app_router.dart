@@ -34,7 +34,7 @@ import 'package:foodkitchen/features/pantry/presentation/pages/add_item_page.dar
 import 'package:foodkitchen/features/pantry/presentation/pages/add_pantry_storage_type_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/all_storage_areas_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/my_pantry_page.dart';
-import 'package:foodkitchen/features/pantry/presentation/pages/receipt_details/capture_details_page.dart';
+import 'package:foodkitchen/features/pantry/presentation/pages/receipt_details/receipt_scanned_details_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/request_now_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/scan_meal_page.dart';
 import 'package:foodkitchen/features/planner/domain/entities/merged_meal_type_entity.dart';

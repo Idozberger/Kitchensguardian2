@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/app/app_base.dart';
 import 'package:foodkitchen/app/di.dart';
+import 'package:foodkitchen/core/ads/ad_service.dart';
 import 'package:foodkitchen/core/common/cubits/app_cubit.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/features/auth/presentation/blocs/auth_bloc.dart';
@@ -25,7 +26,7 @@ List<CameraDescription> cameras = [];
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  await AdService.instance.initialize();
   await Future.wait([
     Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform),
     initDependencies(),
