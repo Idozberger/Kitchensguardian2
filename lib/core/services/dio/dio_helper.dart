@@ -1,41 +1,64 @@
-import 'dart:developer';
 import 'dart:io';
+
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:foodkitchen/app/app_router.dart';
 import 'package:foodkitchen/core/config/routes.dart';
+import 'package:foodkitchen/core/error/failures.dart';
+import 'package:foodkitchen/core/services/dio/network_error_message.dart';
+import 'package:foodkitchen/core/utils/dev_logging.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:foodkitchen/core/error/failures.dart';
 
 class DioHelper {
   final Dio _dio;
+  final SharedPreferences _prefs;
 
-  DioHelper(this._dio) {
+  DioHelper(this._dio, this._prefs) {
     _dio.interceptors.add(
       InterceptorsWrapper(
-        onRequest: (options, handler) async {
-          final prefs = await SharedPreferences.getInstance();
-          final token = prefs.getString("access-token");
+        onRequest: (options, handler) {
+          final token = _prefs.getString("access-token");
 
           if (token != null && token.isNotEmpty) {
             options.headers['Authorization'] = 'Bearer $token';
           }
 
-          log(
-            "➡️ [REQUEST]\n"
-            "URL: ${options.uri}\n"
-            "Method: ${options.method}\n"
-            "Headers: ${options.headers}\n",
-            // "Data: ${options.data}",
-          );
+          if (kDebugMode) {
+            final body = options.data != null ? 'Body: ${options.data}\n' : '';
+            devLog(
+              '➡️ [REQUEST]\n'
+              'URL: ${options.uri}\n'
+              'Method: ${options.method}\n'
+              'Headers: ${options.headers}\n'
+              '$body',
+            );
+          }
 
-          return handler.next(options);
+          handler.next(options);
         },
         onResponse: (response, handler) {
+          if (kDebugMode) {
+            devLog(
+              '⬅️ [RESPONSE]\n'
+              'URL: ${response.requestOptions.uri}\n'
+              'Status: ${response.statusCode}\n'
+              'Data: ${response.data}\n',
+            );
+          }
           return handler.next(response);
         },
         onError: (DioException e, handler) async {
+          if (kDebugMode && e.response != null) {
+            final res = e.response!;
+            devLog(
+              '⬅️ [RESPONSE ERROR]\n'
+              'URL: ${e.requestOptions.uri}\n'
+              'Status: ${res.statusCode}\n'
+              'Data: ${res.data}\n',
+            );
+          }
           if (e.response != null) {
             if (e.response?.statusCode == 401) {
               final data = e.response?.data;
@@ -57,14 +80,14 @@ class DioHelper {
                   ToastType.error,
                 );
 
-                final prefs = await SharedPreferences.getInstance();
-                await prefs.remove("access-token");
-                await prefs.remove('kitchen_id');
-                await prefs.remove('invitation_code');
-                await prefs.remove('role');
+                await _prefs.remove("access-token");
+                await _prefs.remove('kitchen_id');
+                await _prefs.remove('invitation_code');
+                await _prefs.remove('role');
 
                 final context = rootNavigatorKey.currentContext;
                 if (context != null) {
+                  // Global navigator; null-checked after async interceptor work.
                   // ignore: use_build_context_synchronously
                   context.go(Routes.signIn);
                 }
@@ -94,37 +117,28 @@ class DioHelper {
     );
   }
 
-  Future<Failure> handleError(DioException e) async {
-    String message = "Unexpected error occurred";
-    if (e.type == DioExceptionType.connectionError ||
-        e.error is SocketException) {
-      return NetworkFailure("No internet connection available");
-    }
-    if (e.response != null && e.response?.data != null) {
-      final data = e.response?.data;
+  Future<Response> delete(String path, {dynamic data}) async {
+    return await _dio.delete(
+      path,
+      data: data,
+      options: Options(contentType: Headers.jsonContentType),
+    );
+  }
 
-      if (data is Map<String, dynamic>) {
-        message =
-            data["message"] ??
-            data["error"] ??
-            data["detail"] ??
-            data["msg"] ??
-            message;
-      } else if (data is String) {
-        message = data;
-      }
-    }
+  Future<Failure> handleError(DioException e) async {
+    final message = userMessageFromDioException(e);
+
     if (message.toLowerCase().contains("token has expired")) {
-      log("🔒 Token expired — navigating to Sign In screen...");
+      devLog("🔒 Token expired — navigating to Sign In screen...");
 
       final context = rootNavigatorKey.currentContext;
       if (context != null) {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.remove("access-token");
-        await prefs.remove('kitchen_id');
-        await prefs.remove('invitation_code');
-        await prefs.remove('role');
+        await _prefs.remove("access-token");
+        await _prefs.remove('kitchen_id');
+        await _prefs.remove('invitation_code');
+        await _prefs.remove('role');
 
+        // Global navigator; null-checked after clearing prefs.
         // ignore: use_build_context_synchronously
         context.go(Routes.signIn);
       }
@@ -132,15 +146,18 @@ class DioHelper {
 
     switch (e.type) {
       case DioExceptionType.connectionTimeout:
-        return NetworkFailure("Connection timed out");
+      case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
-        return NetworkFailure("Server took too long to respond");
+      case DioExceptionType.connectionError:
+      case DioExceptionType.cancel:
+      case DioExceptionType.badCertificate:
+        return NetworkFailure(message);
       case DioExceptionType.badResponse:
         return ServerFailure(message);
-      case DioExceptionType.cancel:
-        return NetworkFailure("Request was cancelled");
       case DioExceptionType.unknown:
-      default:
+        if (e.error is SocketException) {
+          return NetworkFailure(message);
+        }
         return UnknownFailure(message);
     }
   }

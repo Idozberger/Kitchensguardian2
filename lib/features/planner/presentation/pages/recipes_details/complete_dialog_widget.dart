@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
-import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dart';
 import 'package:go_router/go_router.dart';
 
 class CompleteDialogWidget {
   static void show(BuildContext context, {required VoidCallback onFinish}) {
-    showDialog(
+    showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (context) => BlocBuilder<PlannerBloc, PlannerState>(

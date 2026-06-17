@@ -1,23 +1,26 @@
-// ignore_for_file: use_build_context_synchronously, unused_local_variable, avoid_function_literals_in_foreach_calls, duplicate_ignore
+// ignore_for_file: use_build_context_synchronously, unused_local_variable, avoid_function_literals_in_foreach_calls
+// Async navigation after awaits; legacy locals; forEach closures kept for readability.
 
-import 'dart:developer';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:foodkitchen/app/di.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/data/model/recipe_model.dart';
 import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
-import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
+import 'package:foodkitchen/core/utils/dev_logging.dart';
+import 'package:foodkitchen/core/utils/json_conversion.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_event.dart';
 import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_state.dart';
+import 'package:foodkitchen/features/dashboard/presentation/pages/recipes_request_details/recipes_request_details_loading_view.dart';
+import 'package:foodkitchen/features/dashboard/presentation/pages/recipes_request_details/recipes_request_details_uncheck_step_dialog.dart';
+import 'package:foodkitchen/features/planner/domain/usecases/complete_recipe_start_request_for_host.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dart';
@@ -32,7 +35,8 @@ import 'package:foodkitchen/features/planner/presentation/pages/recipes_details/
 import 'package:foodkitchen/features/planner/presentation/pages/recipes_details/secondary_actions_widget.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/recipes_details/widgets/bottom_nav_recipe_details.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lottie/lottie.dart';
+
+part 'recipes_request_details_page_part.dart';
 
 class RecipesRequestDetailsPage extends StatefulWidget {
   final String recipeId;
@@ -63,12 +67,15 @@ class _RecipesRequestDetailsPageState extends State<RecipesRequestDetailsPage> {
   bool _isFav = false;
   int _selectedTab = 0;
   List<Map<String, dynamic>> _steps = [];
+  late final CompleteRecipeStartRequestForHost
+  _completeRecipeStartRequestForHost;
 
   @override
   void initState() {
     super.initState();
     _plannerBloc = context.read<PlannerBloc>();
     _dashboardBloc = context.read<DashboardBloc>();
+    _completeRecipeStartRequestForHost = sl();
 
     _dashboardBloc.add(
       GetRecipeDetailsEvent(
@@ -104,88 +111,16 @@ class _RecipesRequestDetailsPageState extends State<RecipesRequestDetailsPage> {
     }
   }
 
-  Future<void> updateRecipeStatus() async {
-    log("calling recipe start requst");
-    final querySnapshot = await FirebaseFirestore.instance
-        .collection('recipe_start_requests')
-        .where(
-          'host_user_id',
-          isEqualTo: context.read<UserCubit>().state.userId,
-        )
-        .where('recipe_id', isEqualTo: widget.recipeId)
-        .limit(1)
-        .get();
-
-    if (querySnapshot.docs.isNotEmpty) {
-      await querySnapshot.docs.first.reference.update({
-        'recipe_status': 'Completed',
-
-        'updated_at': FieldValue.serverTimestamp(),
-      });
-    }
-  }
-
   @override
-  Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      onPopInvoked: (didPop) {
-        widget.backPageAvailable ? context.pop() : context.go(Routes.dashboard);
-      },
-      child: BlocListener<DashboardBloc, DashboardState>(
-        listener: (context, dashboardState) {
-          if (dashboardState is RecipeDetailsLoaded && _recipe == null) {
-            setState(() => _initRecipe(dashboardState.recipeEntity));
-          }
-          if (dashboardState is DashboardFailure) {
-            AppToast.show(dashboardState.message, ToastType.error);
-          }
-        },
-        child: BlocConsumer<PlannerBloc, PlannerState>(
-          listener: (_, state) {
-            if (state.successMessage.isNotEmpty) {
-              AppToast.show(state.successMessage, ToastType.success);
-            }
-            if (state.isRecipeFinished) {
-              updateRecipeStatus();
-              context.pop();
-              _handleCancelRecipe(context.read<DashboardBloc>().state);
-            }
-          },
-          builder: (_, plannerState) {
-            return Scaffold(
-              backgroundColor: const Color(0xffF9F9F9),
-              appBar: AppBarWidget(
-                onNavigatorback: () {
-                  log("backpress: ${widget.backPageAvailable}");
-                  widget.backPageAvailable
-                      ? context.pop()
-                      : context.go(Routes.dashboard);
-                },
-              ),
-              body: _recipe == null
-                  ? _buildLoading()
-                  : _buildContent(context, plannerState),
-              bottomNavigationBar: _recipe == null
-                  ? null
-                  : BlocBuilder<PlannerBloc, PlannerState>(
-                      builder: (_, state) {
-                        return state.startedRecipe.any(
-                                  (recipe) =>
-                                      recipe.recipeId == inProgressRecipeId ||
-                                      (recipe.recipeId.isEmpty &&
-                                          recipe.id == inProgressRecipeId),
-                                ) &&
-                                _selectedTab == 1
-                            ? BottomNavRecipeDetails(steps: _steps)
-                            : const SizedBox.shrink();
-                      },
-                    ),
-            );
-          },
-        ),
-      ),
-    );
+  Widget build(BuildContext context) => buildRecipesRequestDetailsPage(context);
+
+  void _onRecipesRequestDashboardListen(DashboardState dashboardState) {
+    if (dashboardState is RecipeDetailsLoaded && _recipe == null) {
+      setState(() => _initRecipe(dashboardState.recipeEntity));
+    }
+    if (dashboardState is DashboardFailure) {
+      AppToast.show(dashboardState.message, ToastType.error);
+    }
   }
 
   void _handleCancelRecipe(DashboardState state) {
@@ -204,185 +139,53 @@ class _RecipesRequestDetailsPageState extends State<RecipesRequestDetailsPage> {
           inProgressRecipeIndex: inProgressRecipeIndex,
         ),
       );
-      // ignore: avoid_function_literals_in_foreach_calls
       setState(() => _steps.forEach((step) => step['completed'] = false));
     }
   }
 
-  Widget _buildLoading() {
-    return BlocBuilder<DashboardBloc, DashboardState>(
-      builder: (_, state) {
-        if (state is DashboardFailure) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.error_outline,
-                  size: 48,
-                  color: Colors.grey.shade400,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  state.message,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(color: Colors.grey),
-                ),
-                const SizedBox(height: 16),
-                TextButton(
-                  onPressed: () => _dashboardBloc.add(
-                    GetRecipeDetailsEvent(
-                      recipeId: widget.recipeId,
-                      kitchenId: widget.kitchenId,
-                    ),
-                  ),
-                  child: const Text("Retry"),
-                ),
-              ],
+  void _onRequestDetailsFavoritePressed(RecipeEntity recipe) {
+    setState(() => _isFav = !_isFav);
+    _plannerBloc.add(
+      _isFav
+          ? AddToFavouriteRecipeEvent(
+              kitchenId: context.read<UserCubit>().state.activeKitchenId,
+              recipeId: recipe.id,
+            )
+          : RemoveFromFavouriteRecipeEvent(
+              kitchenId: context.read<UserCubit>().state.activeKitchenId,
+              recipeId: recipe.id,
             ),
-          );
-        }
-        return Center(child: Lottie.asset("assets/lotties/loader.json"));
-      },
     );
   }
 
-  Widget _buildContent(BuildContext context, PlannerState state) {
-    final recipe = _recipe!;
-    return SafeArea(
-      child: SingleChildScrollView(
-        child: Column(
-          spacing: h(14),
-          children: [
-            _buildHeader(recipe),
-            RecipeInfoWidget(recipe: recipe, isRequestedRecipe: true),
-            (context.read<UserCubit>().state.role == "member")
-                ? SizedBox()
-                : _buildPrimaryActions(
-                    context,
-                    state,
-                    recipe,
-                    true,
-                    context.read<DashboardBloc>(),
-                  ),
-            _buildTabs(),
-            _buildTabContent(state, recipe),
-            gap(height: 18),
-          ],
-        ),
-      ),
-    );
+  void _setRequestDetailsTab(int index) {
+    setState(() => _selectedTab = index);
   }
 
-  Widget _buildHeader(RecipeEntity recipe) {
-    return HeaderImageWidget(
-      isFavorite: _isFav,
-      onFavoritePressed: () {
-        setState(() => _isFav = !_isFav);
-        _plannerBloc.add(
-          _isFav
-              ? AddToFavouriteRecipeEvent(
-                  kitchenId: context.read<UserCubit>().state.activeKitchenId,
-                  recipeId: recipe.id,
-                )
-              : RemoveFromFavouriteRecipeEvent(
-                  kitchenId: context.read<UserCubit>().state.activeKitchenId,
-                  recipeId: recipe.id,
-                ),
-        );
-      },
-      thumbnailBytes: recipe.thumbnail,
-    );
-  }
-
-  Widget _buildPrimaryActions(
+  Future<void> _handleStartOrRequestRecipe(
     BuildContext context,
     PlannerState state,
     RecipeEntity recipe,
-    bool isRequestedRecipe,
-    DashboardBloc dashboardBloc,
-  ) {
-    bool isInProgress = state.startedRecipe.any(
-      (r) => r.id == inProgressRecipeId,
-    );
-
-    return PrimaryActionsWidget(
-      isRequestedRecipe: isRequestedRecipe,
-      completed: widget.isCompleted == "Completed",
-      canRequestToStartRecipe: false,
-      addPlanDummyLoading: false,
-      recipe: recipe,
-      isPlan: false,
-      startRecipe: isInProgress,
-      isFinishing: state.isFinishingRecipe,
-      addToWeeklyPlanCallback: () {},
-      onStartOrRequestRecipe: () async {
-        if (context.read<UserCubit>().state.role == "member") {
-          log("recipe-recipeId: ${recipe.recipeId} - recipe-id: ${recipe.id}");
-          _plannerBloc.add(
-            RequestStartRecipeEvent(
-              recipeId: recipe.id,
-              kitchenId: context.read<UserCubit>().state.activeKitchenId,
-              recipeName: recipe.title,
-            ),
-          );
-        } else {
-          _plannerBloc.add(
-            UpdateStartRecipeEvent(
-              startRecipe: true,
-              recipeEntity: [...state.startedRecipe, recipe as RecipeModel],
-              doneSteps: _steps,
-            ),
-          );
-          setState(() => _selectedTab = 1);
-        }
-      },
-      onCancel: () {
-        _handleCancelRecipe(dashboardBloc.state);
-      },
-      onFinish: () => _showFinishConfirmationDialog(context, state, recipe),
-    );
-  }
-
-  Widget _buildTabs() {
-    return SecondaryActionsWidget(
-      selectedIndex: _selectedTab,
-      onTabSelected: (index) => setState(() => _selectedTab = index),
-    );
-  }
-
-  Widget _buildTabContent(PlannerState state, RecipeEntity recipe) {
-    return Padding(
-      padding: gapSymmetric(horizontal: 20),
-      child: _selectedTab == 0
-          ? _buildIngredientsTab(recipe)
-          : _buildStepsTab(state, recipe),
-    );
-  }
-
-  Widget _buildIngredientsTab(RecipeEntity recipe) {
-    return Column(
-      children: [
-        IngredientsListWidget(recipe: recipe),
-        gap(height: 16),
-      ],
-    );
-  }
-
-  Widget _buildStepsTab(PlannerState state, RecipeEntity recipe) {
-    return Column(
-      children: [
-        RecipeSummaryTile(recipe: recipe),
-        gap(height: 15),
-        RecipeStepsTile(
-          recipe: recipe,
-          steps: _steps,
-          onStepToggle: _handleStepToggle,
+  ) async {
+    if (context.read<UserCubit>().state.role == "member") {
+      devLog("recipe-recipeId: ${recipe.recipeId} - recipe-id: ${recipe.id}");
+      _plannerBloc.add(
+        RequestStartRecipeEvent(
+          recipeId: recipe.id,
+          kitchenId: context.read<UserCubit>().state.activeKitchenId,
+          recipeName: recipe.title,
         ),
-      ],
-    );
+      );
+    } else {
+      _plannerBloc.add(
+        UpdateStartRecipeEvent(
+          startRecipe: true,
+          recipeEntity: [...state.startedRecipe, recipe as RecipeModel],
+          doneSteps: _steps,
+        ),
+      );
+      setState(() => _selectedTab = 1);
+    }
   }
 
   Future<void> _handleStepToggle(int index, bool isCompleted) async {
@@ -401,13 +204,15 @@ class _RecipesRequestDetailsPageState extends State<RecipesRequestDetailsPage> {
     }
 
     if (isCompleted) {
-      final uncheck = await _confirmUncheckDialog();
+      final uncheck = await showRecipesRequestUncheckStepDialog(context);
       if (uncheck == true) {
         setState(() => _steps[index]["completed"] = false);
       }
     } else {
       setState(() => _steps[index]["completed"] = true);
-      if (_steps.every((step) => step["completed"])) {
+      if (_steps.every(
+        (Map<String, dynamic> step) => readJsonBool(step, 'completed'),
+      )) {
         CompleteDialogWidget.show(
           context,
           onFinish: () {
@@ -423,70 +228,16 @@ class _RecipesRequestDetailsPageState extends State<RecipesRequestDetailsPage> {
     }
   }
 
-  Future<bool?> _confirmUncheckDialog() {
-    return showDialog<bool>(
-      context: context,
-      builder: (_) => GenericDialog(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              "Uncheck Step",
-              style: Theme.of(context).textTheme.headlineLarge!.copyWith(
-                fontWeight: FontWeight.w600,
-                fontSize: t(14),
-              ),
-            ),
-            gap(height: 12),
-            Text(
-              "Are you sure you want to mark this step as incomplete?",
-              style: Theme.of(context).textTheme.headlineLarge!.copyWith(
-                fontWeight: FontWeight.w600,
-                fontSize: t(14),
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context, false),
-                  child: const Text("Cancel"),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.pop(context, true),
-                  child: const Text("Yes"),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
+  void _clearRequestDetailsStepsCompleted() {
+    setState(() => _steps.forEach((step) => step["completed"] = false));
   }
 
-  Future<void> _showFinishConfirmationDialog(
-    BuildContext context,
-    PlannerState state,
-    RecipeEntity recipe,
-  ) {
-    return showCustomGenericDialog(
-      isloading: state.isFinishingRecipe,
-      context: context,
-      title: "Finish Recipe?",
-      subtitle:
-          "This will mark the recipe as completed and automatically remove all used ingredients from your kitchen inventory.",
-      primaryButtonText: "Yes",
-      secondaryButtonText: "Cancel",
-      onPrimaryPressed: () {
-        _plannerBloc.add(
-          MarkRecipeFinishedEvent(
-            kitchenId: context.read<UserCubit>().state.activeKitchenId,
-            recipeId: recipe.id,
-          ),
-        );
-        setState(() => _steps.forEach((step) => step["completed"] = false));
-      },
-      onSecondaryPressed: () => context.pop(),
+  Future<void> _completeRecipeStartRequestForHostSideEffect() async {
+    await _completeRecipeStartRequestForHost(
+      CompleteRecipeStartRequestForHostParams(
+        hostUserId: context.read<UserCubit>().state.userId,
+        recipeId: widget.recipeId,
+      ),
     );
   }
 }

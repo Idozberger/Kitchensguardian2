@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
+import 'package:foodkitchen/core/utils/image_bytes.dart';
+import 'package:foodkitchen/core/widgets/safe_image.dart';
 import 'package:foodkitchen/features/history/domain/entities/scan_item_entity.dart';
 
 class HistoryItemDetails extends StatelessWidget {
@@ -47,30 +49,27 @@ class HistoryDetailItem extends StatelessWidget {
         children: [
           SizedBox(width: w(14)),
 
-          if (item.thumbnail.isNotEmpty)
+          if (hasDisplayableImageBytes(item.thumbnail))
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
-              child: Image.memory(
-                item.thumbnail,
+              child: SafeMemoryImage(
+                bytes: item.thumbnail,
                 width: w(44),
                 height: h(44),
-
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    width: w(44),
-                    height: h(44),
-                    color: Colors.grey[200],
-                    child: Icon(
-                      Icons.image_not_supported,
-                      color: Colors.grey[400],
-                      size: 28,
-                    ),
-                  );
-                },
+                fallback: Container(
+                  width: w(44),
+                  height: h(44),
+                  color: Colors.grey[200],
+                  child: Icon(
+                    Icons.image_not_supported,
+                    color: Colors.grey[400],
+                    size: 28,
+                  ),
+                ),
               ),
             ),
 
-          if (item.thumbnail.isNotEmpty) SizedBox(width: w(14)),
+          if (hasDisplayableImageBytes(item.thumbnail)) SizedBox(width: w(14)),
 
           Expanded(
             child: Column(

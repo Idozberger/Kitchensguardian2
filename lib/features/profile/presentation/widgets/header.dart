@@ -8,6 +8,7 @@ import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
+import 'package:foodkitchen/core/widgets/safe_image.dart';
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_bloc.dart';
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_state.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
@@ -30,20 +31,17 @@ class ProfileHeader extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  state.profilePictureFilePath != null &&
-                          state.profilePictureFilePath!.isNotEmpty
-                      ? CircleAvatar(
-                          radius: w(36),
-                          backgroundColor: Colors.grey.shade200,
-                          backgroundImage: MemoryImage(
-                            state.profilePictureFilePath!,
-                          ),
-                        )
-                      : Image.asset(
-                          AppAssets.avatar,
-                          width: w(72),
-                          height: h(72),
-                        ),
+                  SafeCircleAvatar(
+                    radius: w(36),
+                    memoryBytes: state.profilePictureFilePath,
+                    backgroundColor: Colors.grey.shade200,
+                    fallback: Image.asset(
+                      AppAssets.avatar,
+                      width: w(72),
+                      height: h(72),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                   SizedBox(width: w(20)),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -116,8 +114,10 @@ class ProfileHeader extends StatelessWidget {
                   ),
                   icon: SvgPicture.asset(
                     AppAssets.editSvg,
-                    // ignore: deprecated_member_use
-                    color: AppColors.primaryColor,
+                    colorFilter: ColorFilter.mode(
+                      AppColors.primaryColor,
+                      BlendMode.srcIn,
+                    ),
                   ),
                   label: Text(
                     "Edit Profile",

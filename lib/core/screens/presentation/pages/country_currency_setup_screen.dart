@@ -13,6 +13,7 @@ import 'package:foodkitchen/core/screens/presentation/widgets/currency_section.d
 import 'package:foodkitchen/core/screens/presentation/widgets/info_card.dart';
 import 'package:foodkitchen/core/screens/presentation/widgets/loading_state.dart';
 import 'package:foodkitchen/core/screens/presentation/widgets/screen_header.dart';
+import 'package:foodkitchen/core/services/di/service_locator.dart';
 import 'package:foodkitchen/features/kitchens/presentation/widgets/kitchen_snippet.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -47,7 +48,7 @@ class _CountryAndCurrencySetupScreenState
 
   Future<void> _initializeData() async {
     try {
-      SharedPreferences pref = await SharedPreferences.getInstance();
+      SharedPreferences pref = sl<SharedPreferences>();
       _localDataSource = CachedCountryCurrencyRepository(
         dataSource: CountryCurrencyDataSource(),
         cache: CountryCurrencyCache(pref),
@@ -119,7 +120,7 @@ class _CountryAndCurrencySetupScreenState
     }
     setState(() => _isLoading = true);
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = sl<SharedPreferences>();
       await Future.wait([
         prefs.setString('country', _selectedCountry!.code),
         prefs.setString('currency', _selectedCurrency!.code),

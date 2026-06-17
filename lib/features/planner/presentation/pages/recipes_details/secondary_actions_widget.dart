@@ -4,7 +4,7 @@ import 'package:foodkitchen/core/theme/app_colors.dart';
 
 class SecondaryActionsWidget extends StatelessWidget {
   final int selectedIndex;
-  final Function(int) onTabSelected;
+  final void Function(int) onTabSelected;
 
   const SecondaryActionsWidget({
     super.key,

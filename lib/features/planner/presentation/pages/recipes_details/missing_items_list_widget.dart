@@ -1,14 +1,14 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';
+import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
+import 'package:foodkitchen/core/utils/dev_logging.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_checktile_widget.dart';
@@ -21,6 +21,8 @@ import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dart';
 import 'package:go_router/go_router.dart';
+
+part 'missing_items_list_widget_part.dart';
 
 class MissingItemsListWidget extends StatefulWidget {
   final bool isPlanned;
@@ -52,45 +54,6 @@ class _MissingItemsListWidgetState extends State<MissingItemsListWidget> {
     super.initState();
   }
 
-  List<IngredientEntity> getIngredients(PlannerState state) {
-    final allRecipes = [
-      ...state.recipes ?? [],
-      ...state.favouriteRecipes ?? [],
-      ...state.startedRecipe,
-    ];
-
-    for (final recipe in allRecipes) {
-      if (recipe.recipeId == widget.recipeId || recipe.id == widget.recipeId) {
-        return recipe.missingIngredients;
-      }
-    }
-
-    for (final weeklyPlan in state.getAllWeeklyPlans) {
-      final breakfast = weeklyPlan.breakfast;
-      if (breakfast != null && breakfast.id == widget.recipeId) {
-        log("Recipe Name: ${breakfast.title}");
-        return breakfast.missingIngredients;
-      }
-
-      final lunch = weeklyPlan.lunch;
-      if (lunch != null && lunch.id == widget.recipeId) {
-        return lunch.missingIngredients;
-      }
-
-      final dinner = weeklyPlan.dinner;
-      if (dinner != null && dinner.id == widget.recipeId) {
-        return dinner.missingIngredients;
-      }
-    }
-    for (final recipe in homeBloc.state.suggestedRecipe) {
-      if (recipe.id == widget.recipeId) {
-        return recipe.missingIngredients;
-      }
-    }
-
-    return [];
-  }
-
   void updateSelectedIngredients(IngredientEntity ingredient) {
     if (selectedIngredients.contains(ingredient)) {
       selectedIngredients.remove(ingredient);
@@ -109,7 +72,11 @@ class _MissingItemsListWidgetState extends State<MissingItemsListWidget> {
   Widget build(BuildContext context) {
     return BlocBuilder<PlannerBloc, PlannerState>(
       builder: (_, state) {
-        final ingredients = getIngredients(state);
+        final ingredients = missingItemsResolveIngredients(
+          plannerState: state,
+          suggestedRecipes: homeBloc.state.suggestedRecipe,
+          recipeId: widget.recipeId,
+        );
 
         return ingredients.isEmpty
             ? UpperTile(
@@ -208,7 +175,7 @@ class _MissingItemsListWidgetState extends State<MissingItemsListWidget> {
                                 child: GenericButtonWidget(
                                   isOutlined: true,
                                   isLoading: state.isLoading,
-                                  onPressed: () => onAddInList(),
+                                  onPressed: onAddInList,
                                   text: "Add to grocery list",
                                 ),
                               ),
@@ -242,22 +209,7 @@ class _MissingItemsListWidgetState extends State<MissingItemsListWidget> {
       return;
     }
 
-    List<PantryItem> pantryItems = [];
-
-    for (var ingredient in selectedIngredients) {
-      pantryItems.add(
-        PantryItem(
-          nameController: TextEditingController(text: ingredient.name),
-          qtyController: TextEditingController(text: ingredient.amount),
-          manuFacturingDate: TextEditingController(text: ""),
-          expireDate: TextEditingController(text: ""),
-          unit: ingredient.unit,
-          pantry: null,
-          file: null,
-          fileBytes: null,
-        ),
-      );
-    }
+    final pantryItems = missingItemsToPantryRows(selectedIngredients);
 
     context.pushNamed(
       Routes.addItem,
@@ -278,22 +230,7 @@ class _MissingItemsListWidgetState extends State<MissingItemsListWidget> {
       return;
     }
 
-    List<PantryItemEntity> requestingItems = [];
-    for (var i = 0; i < selectedIngredients.length; i++) {
-      requestingItems.add(
-        PantryItemEntity(
-          name: selectedIngredients[i].name,
-          quantity: double.tryParse(selectedIngredients[i].amount) ?? 1,
-          unit: selectedIngredients[i].unit,
-          group: "group",
-          expireDate: "",
-          thumbnail: "",
-          expiryStatus: '',
-          stockStatus: '',
-          itemId: '',
-        ),
-      );
-    }
+    final requestingItems = missingItemsToRequestEntities(selectedIngredients);
 
     final pantryModel = Pantry(
       kitchenId: userCubit.state.activeKitchenId,
@@ -309,7 +246,7 @@ class _MissingItemsListWidgetState extends State<MissingItemsListWidget> {
       ),
     );
 
-    await Future.delayed(Duration(seconds: 1));
+    await Future<void>.delayed(Duration(seconds: 1));
     setState(() {
       selectedIngredients = [];
     });

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 Future<void> showPermissionDialog(BuildContext context) async {
-  await showDialog(
+  await showDialog<void>(
     context: context,
     barrierDismissible: false,
     builder: (context) => AlertDialog(

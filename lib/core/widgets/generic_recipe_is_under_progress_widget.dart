@@ -38,8 +38,10 @@ class RecipeInProgressNotification extends StatelessWidget {
               children: [
                 SvgPicture.asset(
                   AppAssets.notificationSvg,
-                  // ignore: deprecated_member_use
-                  color: AppColors.primaryColor,
+                  colorFilter: ColorFilter.mode(
+                    AppColors.primaryColor,
+                    BlendMode.srcIn,
+                  ),
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

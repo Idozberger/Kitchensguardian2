@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 
+// False positive: StatelessWidget is immutable.
 // ignore: must_be_immutable
 class DiscoverText extends StatelessWidget {
   const DiscoverText({super.key});

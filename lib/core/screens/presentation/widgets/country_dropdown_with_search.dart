@@ -7,7 +7,7 @@ import 'package:foodkitchen/core/screens/presentation/widgets/country_item.dart'
 class CountryDropdownWithSearch extends StatefulWidget {
   final List<Country> countries;
   final Country? selectedCountry;
-  final Function(Country?) onChanged;
+  final void Function(Country?) onChanged;
 
   const CountryDropdownWithSearch({
     super.key,
@@ -56,7 +56,7 @@ class _CountryDropdownWithSearchState extends State<CountryDropdownWithSearch> {
     _searchController.clear();
     _filteredCountries = widget.countries;
 
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.white,
@@ -99,9 +99,7 @@ class _CountryDropdownWithSearchState extends State<CountryDropdownWithSearch> {
                 child: TextField(
                   controller: _searchController,
                   onChanged: (value) {
-                    setModalState(() {
-                      _filterCountries();
-                    });
+                    setModalState(_filterCountries);
                   },
                   decoration: InputDecoration(
                     hintText: 'Search country...',
@@ -118,9 +116,7 @@ class _CountryDropdownWithSearchState extends State<CountryDropdownWithSearch> {
                         ? GestureDetector(
                             onTap: () {
                               _searchController.clear();
-                              setModalState(() {
-                                _filterCountries();
-                              });
+                              setModalState(_filterCountries);
                             },
                             child: Icon(
                               Icons.clear,
@@ -179,7 +175,7 @@ class _CountryDropdownWithSearchState extends State<CountryDropdownWithSearch> {
                             },
                             child: Container(
                               color: isSelected
-                                  ? Colors.grey.withOpacity(0.1)
+                                  ? Colors.grey.withValues(alpha: 0.1)
                                   : Colors.transparent,
                               padding: gapSymmetric(
                                 horizontal: 16,
@@ -217,7 +213,7 @@ class _CountryDropdownWithSearchState extends State<CountryDropdownWithSearch> {
         borderRadius: BorderRadius.circular(t(12)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),

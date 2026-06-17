@@ -1,8 +1,7 @@
-import 'dart:developer';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/domain/usecase/get_current_user.dart';
+import 'package:foodkitchen/core/utils/dev_logging.dart';
 import 'package:foodkitchen/features/auth/domain/usecase/apple_sign_in_usecase.dart';
 import 'package:foodkitchen/features/auth/domain/usecase/apple_sign_up_usecase.dart';
 import 'package:foodkitchen/features/auth/domain/usecase/google_sign_in_usecase.dart';
@@ -13,6 +12,7 @@ import 'package:foodkitchen/features/auth/domain/usecase/set_user_new_password_u
 import 'package:foodkitchen/features/auth/domain/usecase/user_sign_in_usecase.dart';
 import 'package:foodkitchen/features/auth/domain/usecase/user_sign_up_usecase.dart';
 import 'package:foodkitchen/features/auth/domain/usecase/verify_user_email_usecase.dart';
+
 part 'auth_event.dart';
 part 'auth_state.dart';
 
@@ -64,7 +64,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthSetUserNewPassword>(_onSetUserNewPassword);
     on<AuthVerifyEmail>(_onVerifyUserEmail);
     on<AuthGetCurrentUser>(onGetCurrentUser);
-    on<ResendEmailVerficationCodeEvent>(_onResendEmailVerficationCode);
+    on<ResendEmailVerificationCodeEvent>(_onResendEmailVerficationCode);
     on<GoogleSignUpEvent>(_onGoogleSignUp);
     on<GoogleSignInEvent>(_onGoogleSignIn);
     on<AppleSignInEvent>(_onAppleSignIn);
@@ -80,7 +80,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     res.fold(
       (failure) {
-        emit(ErrorFetchingUserDetails(failure.message));
+        emit(ErrorFetchingUserDetails(failure.userMessage));
       },
       (user) {
         _userCubit.setUser();
@@ -96,7 +96,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AppleSignUpLoading());
     final res = await _appleSignUpUsecase(NoParams());
 
-    res.fold((failure) => emit(AuthFailure(failure.message)), (message) {
+    res.fold((failure) {
+      _clearSocialSignUpUserModel();
+      emit(AuthFailure(failure.userMessage));
+    }, (message) {
       emit(AuthUserCreatedSuccess(message));
     });
   }
@@ -108,7 +111,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(GoogleAuthsignUpLoading());
     final res = await _googleSignupUsecase(NoParams());
 
-    res.fold((failure) => emit(AuthFailure(failure.message)), (message) {
+    res.fold((failure) {
+      _clearSocialSignUpUserModel();
+      emit(AuthFailure(failure.userMessage));
+    }, (message) {
       emit(AuthUserCreatedSuccess(message));
     });
   }
@@ -120,7 +126,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AppleSignInLoading());
     final res = await _appleSignInUsecase(NoParams());
 
-    res.fold((failure) => emit(AuthFailure(failure.message)), (message) {
+    res.fold((failure) {
+      _clearSocialSignUpUserModel();
+      emit(AuthFailure(failure.userMessage));
+    }, (message) {
       emit(AuthSuccess(message));
       onGetCurrentUser(AuthGetCurrentUser(), emit);
     });
@@ -133,7 +142,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(GoogleAuthLoading());
     final res = await _googleSignInUsecase(NoParams());
 
-    res.fold((failure) => emit(AuthFailure(failure.message)), (message) {
+    res.fold((failure) {
+      _clearSocialSignUpUserModel();
+      emit(AuthFailure(failure.userMessage));
+    }, (message) {
       emit(AuthSuccess(message));
       onGetCurrentUser(AuthGetCurrentUser(), emit);
     });
@@ -150,7 +162,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       ),
     );
 
-    res.fold((failure) => emit(AuthFailure(failure.message)), (message) {
+    res.fold((failure) => emit(AuthFailure(failure.userMessage)), (message) {
       emit(AuthUserCreatedSuccess(message));
     });
   }
@@ -169,7 +181,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       ),
     );
 
-    res.fold((failure) => emit(AuthFailure(failure.message)), (message) {
+    res.fold((failure) => emit(AuthFailure(failure.userMessage)), (message) {
       emit(AuthEmailVerificationCodeSent(message));
     });
   }
@@ -180,7 +192,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       UserSignInParams(email: event.email, password: event.password),
     );
 
-    res.fold((failure) => emit(AuthFailure(failure.message)), (message) {
+    res.fold((failure) => emit(AuthFailure(failure.userMessage)), (message) {
       emit(AuthSuccess(message));
 
       onGetCurrentUser(AuthGetCurrentUser(), emit);
@@ -192,7 +204,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     emit(AuthLoading());
-    log("verfication code: ${event.verificationCode}");
+    devLog("verfication code: ${event.verificationCode}");
     final res = await _verifyUserEmail(
       VerifyUserEmailParams(
         email: event.email,
@@ -201,13 +213,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
 
     res.fold(
-      (failure) => emit(AuthFailure(failure.message)),
+      (failure) => emit(AuthFailure(failure.userMessage)),
       (message) => emit(AuthUserVerified(message)),
     );
   }
 
   void _onResendEmailVerficationCode(
-    ResendEmailVerficationCodeEvent event,
+    ResendEmailVerificationCodeEvent event,
     Emitter<AuthState> emit,
   ) async {
     emit(CodeResendLoading());
@@ -216,7 +228,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
 
     res.fold(
-      (failure) => emit(AuthFailure(failure.message)),
+      (failure) => emit(AuthFailure(failure.userMessage)),
       (message) => emit(ResendEmailVerficationCode(message)),
     );
   }
@@ -231,7 +243,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
 
     res.fold(
-      (failure) => emit(AuthFailure(failure.message)),
+      (failure) => emit(AuthFailure(failure.userMessage)),
       (message) => emit(AuthForgotMailSent(message)),
     );
   }
@@ -250,7 +262,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
 
     res.fold(
-      (failure) => emit(AuthFailure(failure.message)),
+      (failure) => emit(AuthFailure(failure.userMessage)),
       (message) => emit(AuthUserPasswordChanged(message)),
     );
   }
@@ -264,5 +276,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     res.fold((failure) {}, (user) {
       _userCubit.setUser();
     });
+  }
+
+  void _clearSocialSignUpUserModel() {
+    _userCubit.setGoogleSignUpUserModel(
+      firstName: "",
+      lastName: "",
+      email: "",
+    );
   }
 }

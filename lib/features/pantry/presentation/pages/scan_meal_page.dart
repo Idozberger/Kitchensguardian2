@@ -1,16 +1,18 @@
 // ignore_for_file: use_build_context_synchronously
+// Camera lifecycle and capture futures finish before navigation; guard later.
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:foodkitchen/core/camera/app_cameras.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/dialogs/camera_permission_denied.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
+import 'package:foodkitchen/core/utils/dev_logging.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
-import 'package:foodkitchen/main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -62,10 +64,11 @@ class _ScanMealPageState extends State<ScanMealPage>
   }
 
   Future<void> _initializeCameraController() async {
-    if (cameras.isEmpty) return;
+    await ensureAppCamerasLoaded();
+    if (appCameras.isEmpty) return;
 
     _controller = CameraController(
-      cameras[0],
+      appCameras[0],
       ResolutionPreset.medium,
       enableAudio: false,
     );
@@ -75,7 +78,7 @@ class _ScanMealPageState extends State<ScanMealPage>
       if (!mounted) return;
       setState(() => _isCameraInitialized = true);
     } catch (e) {
-      debugPrint('Camera init error: $e');
+      devPrint('Camera init error: $e');
       _controller?.dispose();
     }
   }
@@ -117,7 +120,7 @@ class _ScanMealPageState extends State<ScanMealPage>
         extra: {"image_path": image.path},
       );
     } catch (e) {
-      debugPrint("Capture error: $e");
+      devPrint("Capture error: $e");
     } finally {
       setState(() => _isCapturing = false);
     }
@@ -132,7 +135,7 @@ class _ScanMealPageState extends State<ScanMealPage>
       );
       setState(() {});
     } catch (e) {
-      debugPrint("Flash toggle error: $e");
+      devPrint("Flash toggle error: $e");
     }
   }
 

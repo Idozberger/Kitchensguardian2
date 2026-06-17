@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
+import 'package:foodkitchen/core/widgets/safe_memory_image.dart';
 
 class RecipeTile extends StatelessWidget {
   final String title;
@@ -50,19 +51,18 @@ class RecipeTile extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(h(10)),
-              child: uint8list != null
-                  ? Image.memory(
-                      uint8list!,
-                      width: w(78),
-                      height: h(78),
-                      fit: BoxFit.cover,
-                    )
-                  : Image.asset(
-                      AppAssets.onBoardingSliderBg01,
-                      width: w(78),
-                      height: h(78),
-                      fit: BoxFit.cover,
-                    ),
+              child: SafeMemoryImage(
+                bytes: uint8list,
+                width: w(78),
+                height: h(78),
+                fit: BoxFit.cover,
+                fallback: Image.asset(
+                  AppAssets.onBoardingSliderBg01,
+                  width: w(78),
+                  height: h(78),
+                  fit: BoxFit.cover,
+                ),
+              ),
             ),
 
             SizedBox(width: w(12)),

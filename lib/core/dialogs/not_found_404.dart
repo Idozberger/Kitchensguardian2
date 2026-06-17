@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
+import 'package:foodkitchen/core/config/routes.dart';
+import 'package:foodkitchen/core/navigation/router_navigation.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
-import 'package:go_router/go_router.dart';
 
 class NotFound404Dialog extends StatelessWidget {
   const NotFound404Dialog({super.key});
@@ -49,7 +50,7 @@ class NotFound404Dialog extends StatelessWidget {
             gap(height: 20),
             GenericButtonWidget(
               onPressed: () {
-                context.pop();
+                popOrGo(context, fallbackLocation: Routes.splash);
               },
               text: "Close",
             ),

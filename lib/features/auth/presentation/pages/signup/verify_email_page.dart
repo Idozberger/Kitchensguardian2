@@ -5,11 +5,12 @@ import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
+import 'package:foodkitchen/core/utils/dev_logging.dart';
+import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_otp_widget.dart';
 import 'package:foodkitchen/features/auth/data/model/user_model.dart';
 import 'package:foodkitchen/features/auth/presentation/blocs/auth_bloc.dart';
-import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/features/auth/presentation/widgets/appbar.dart';
 import 'package:foodkitchen/features/auth/presentation/widgets/textspan_widget.dart';
 import 'package:go_router/go_router.dart';
@@ -128,11 +129,11 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                         OtpField(
                           onChanged: (pin) {
                             updatePin(pin);
-                            debugPrint("Entered OTP: $pin");
+                            devPrint("Entered OTP: $pin");
                           },
                           onCompleted: (code) {
                             updatePin(code);
-                            debugPrint("Entered OTP: $code");
+                            devPrint("Entered OTP: $code");
                           },
                         ),
                       ],
@@ -169,9 +170,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                     child: TextspanWidget(
                       isLoading: state is CodeResendLoading,
                       buttonColor: AppColors.primaryColor,
-                      callback: () {
-                        onResendCode();
-                      },
+                      callback: onResendCode,
                       text: "I don’t receive a verification code!",
                       buttonText: "Resend",
                     ),

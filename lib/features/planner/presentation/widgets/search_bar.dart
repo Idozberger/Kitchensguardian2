@@ -34,8 +34,10 @@ class SearchBarWidgetForGenerateRecipes extends StatelessWidget {
             backgroundColor: AppColors.primaryColor,
             child: SvgPicture.asset(
               AppAssets.searchSvg,
-              // ignore: deprecated_member_use
-              color: Colors.black,
+              colorFilter: const ColorFilter.mode(
+                Colors.black,
+                BlendMode.srcIn,
+              ),
               height: h(15),
             ),
           ),

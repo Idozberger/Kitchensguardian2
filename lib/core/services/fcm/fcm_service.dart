@@ -1,7 +1,9 @@
 import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:flutter/widgets.dart';
+import 'package:foodkitchen/core/config/env.dart';
+import 'package:foodkitchen/core/utils/dev_logging.dart';
 import 'package:googleapis_auth/auth_io.dart';
 
 class FCMService {
@@ -11,10 +13,9 @@ class FCMService {
 
   final Dio _dio = Dio();
 
-  final String _serviceAccountPath = 'assets/services/service_account.json';
+  String get _serviceAccountPath => Env.fcmServiceAccountAsset;
 
-  final String _fcmUrl =
-      'https://fcm.googleapis.com/v1/projects/kdasda-976c4/messages:send';
+  String get _fcmUrl => Env.fcmSendUrl;
 
   Future<String> _getAccessToken() async {
     try {
@@ -36,9 +37,7 @@ class FCMService {
       authClient.close();
       return accessToken;
     } catch (e) {
-      debugPrint(
-        'Error reading service account or generating access token: $e',
-      );
+      devPrint('Error reading service account or generating access token: $e');
       rethrow;
     }
   }
@@ -103,19 +102,19 @@ class FCMService {
         },
       };
 
-      final response = await _dio.post(
+      final response = await _dio.post<dynamic>(
         _fcmUrl,
         data: json.encode(payload),
         options: Options(headers: headers),
       );
 
       if (response.statusCode == 200) {
-        debugPrint('FCM notification sent successfully!');
+        devPrint('FCM notification sent successfully!');
       } else {
-        debugPrint('Failed to send notification: ${response.data}');
+        devPrint('Failed to send notification: ${response.data}');
       }
     } catch (e) {
-      debugPrint('Error sending notification: $e');
+      devPrint('Error sending notification: $e');
     }
   }
 }

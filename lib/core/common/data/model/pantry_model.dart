@@ -3,22 +3,28 @@ import 'dart:typed_data';
 
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';
+import 'package:foodkitchen/core/utils/json_conversion.dart';
 
 class PantryModel extends Pantry {
   PantryModel({required super.kitchenId, required super.items});
 
   factory PantryModel.fromJson(Map<String, dynamic> json) {
+    final Object? itemsRaw = json['items'];
+    final List<dynamic> itemsList = itemsRaw is List<dynamic> ? itemsRaw : [];
     return PantryModel(
-      kitchenId: json['kitchen_id'] as String,
-      items: (json['items'] as List<dynamic>)
-          .map((item) => PantryItemModel.fromJson(item))
+      kitchenId: readJsonString(json, 'kitchen_id'),
+      items: itemsList
+          .map(
+            (Object? item) =>
+                PantryItemModel.fromJson(jsonObjectFromResponseData(item)),
+          )
           .toList(),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'kitchen_id': kitchenId.toString(),
+      'kitchen_id': kitchenId,
       'items': items.map((item) {
         if (item is PantryItemModel) {
           return item.toJson();
@@ -35,9 +41,7 @@ class PantryModel extends Pantry {
 
   factory PantryModel.fromEntity(Pantry entity) => PantryModel(
     kitchenId: entity.kitchenId,
-    items: entity.items
-        .map((item) => PantryItemModel.fromEntity(item))
-        .toList(),
+    items: entity.items.map(PantryItemModel.fromEntity).toList(),
   );
 }
 
@@ -65,7 +69,7 @@ class PantryItemModel extends PantryItemEntity {
         final base64Image = thumbnailBase64.split('base64,').last;
         thumbnailBytes = base64Decode(base64Image);
       } catch (_) {
-        thumbnailBytes = Uint8List(0);
+        thumbnailBytes = null;
       }
     }
 
@@ -82,21 +86,23 @@ class PantryItemModel extends PantryItemEntity {
       expiryStatus: json['expiry_status']?.toString() ?? '',
       stockStatus: json['stock_status']?.toString() ?? '',
       itemId: json['item_id']?.toString() ?? '',
-      addedAt: DateTime.parse(json['added_at']),
+      addedAt:
+          DateTime.tryParse(readJsonString(json, 'added_at')) ??
+          DateTime.fromMillisecondsSinceEpoch(0),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'name': name.toString(),
+      'name': name,
       'quantity': quantity,
-      'unit': unit.toString(),
-      'group': group.toString(),
-      "expiry_date": expireDate.toString(),
+      'unit': unit,
+      'group': group,
+      "expiry_date": expireDate,
       "thumbnail": thumbnail,
-      "expiry_status": expiryStatus.toString(),
-      "stock_status": stockStatus.toString(),
-      "item_id": itemId.toString(),
+      "expiry_status": expiryStatus,
+      "stock_status": stockStatus,
+      "item_id": itemId,
       "added_at": addedAt.toString(),
     };
   }

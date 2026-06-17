@@ -1,4 +1,5 @@
 // ignore_for_file: deprecated_member_use
+// Card styling APIs not yet migrated (opacity / decoration deprecations).
 
 import 'dart:typed_data';
 
@@ -8,6 +9,7 @@ import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
+import 'package:foodkitchen/core/widgets/safe_memory_image.dart';
 
 class RecipeCard extends StatelessWidget {
   final double width;
@@ -37,24 +39,28 @@ class RecipeCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
+          ClipRRect(
+            borderRadius: BorderRadius.circular(h(10)),
+            child: Container(
             alignment: Alignment.topRight,
             width: w(width),
             height: h(height),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(h(10)),
-              image: DecorationImage(
-                image: imageBytes != null
-                    ? MemoryImage(imageBytes!)
-                    : AssetImage(AppAssets.onBoardingSliderBg02)
-                          as ImageProvider,
-                fit: BoxFit.cover,
-              ),
-            ),
-            child: isTodayPlan == false
-                ? SizedBox()
-                : Container(
+            color: Colors.white,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                SafeMemoryImage(
+                  bytes: imageBytes,
+                  fit: BoxFit.cover,
+                  fallback: Image.asset(
+                    AppAssets.onBoardingSliderBg02,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                if (isTodayPlan)
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: Container(
                     margin: gapOnly(top: 8, right: 8),
                     decoration: const BoxDecoration(
                       color: Colors.grey,
@@ -77,6 +83,10 @@ class RecipeCard extends StatelessWidget {
                       _ => const Icon(Icons.fastfood, color: Colors.white),
                     },
                   ),
+                  ),
+              ],
+            ),
+          ),
           ),
           SizedBox(
             width: w(width),

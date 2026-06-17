@@ -7,11 +7,12 @@ import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
+import 'package:foodkitchen/core/utils/dev_logging.dart';
+import 'package:foodkitchen/core/utils/show_toast.dart';
+import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_otp_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
 import 'package:foodkitchen/features/auth/presentation/blocs/auth_bloc.dart';
-import 'package:foodkitchen/core/utils/show_toast.dart';
-import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/features/auth/presentation/widgets/appbar.dart';
 import 'package:go_router/go_router.dart';
 
@@ -55,7 +56,7 @@ class _CreateNewPasswordPageState extends State<CreateNewPasswordPage> {
 
   void onResendCode() {
     context.read<AuthBloc>().add(
-      ResendEmailVerficationCodeEvent(email: widget.email),
+      ResendEmailVerificationCodeEvent(email: widget.email),
     );
   }
 
@@ -110,11 +111,11 @@ class _CreateNewPasswordPageState extends State<CreateNewPasswordPage> {
                         OtpField(
                           onChanged: (pin) {
                             updatePin(pin);
-                            debugPrint("Entered OTP: $pin");
+                            devPrint("Entered OTP: $pin");
                           },
                           onCompleted: (code) {
                             updatePin(code);
-                            debugPrint("Entered OTP: $code");
+                            devPrint("Entered OTP: $code");
                           },
                         ),
                         SizedBox(height: h(20)),
@@ -126,7 +127,7 @@ class _CreateNewPasswordPageState extends State<CreateNewPasswordPage> {
                           hintText: "Enter new password",
                           obscureText: !_isObscurePassword,
                           suffixIcon: GestureDetector(
-                            onTap: () => updateObsecurePassword(),
+                            onTap: updateObsecurePassword,
                             child: Padding(
                               padding: gapSymmetric(
                                 vertical: 13,
@@ -147,7 +148,7 @@ class _CreateNewPasswordPageState extends State<CreateNewPasswordPage> {
                           // validator: passwordValidator,
                           hintText: "Enter new password",
                           suffixIcon: GestureDetector(
-                            onTap: () => updateObsecureConfirmPassword(),
+                            onTap: updateObsecureConfirmPassword,
                             child: Padding(
                               padding: gapSymmetric(
                                 vertical: 13,
@@ -218,9 +219,7 @@ class _CreateNewPasswordPageState extends State<CreateNewPasswordPage> {
                   ),
                   Center(
                     child: TextButton(
-                      onPressed: () {
-                        onResendCode();
-                      },
+                      onPressed: onResendCode,
                       child: state is CodeResendLoading
                           ? Center(
                               child: CircularProgressIndicator(

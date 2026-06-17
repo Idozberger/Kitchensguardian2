@@ -1,16 +1,17 @@
-// ignore_for_file: avoid_print
-
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
-import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:foodkitchen/core/common/data/model/pantry_model.dart';
 import 'package:foodkitchen/core/global/functions/api_endpoints.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
-import 'package:foodkitchen/core/common/data/model/pantry_model.dart';
 import 'package:foodkitchen/core/services/notifications/flutter_local_notifications_service.dart';
+import 'package:foodkitchen/core/utils/dev_logging.dart';
+import 'package:foodkitchen/core/utils/json_conversion.dart';
+
+part 'pantry_remote_datasource_impl_part.dart';
+part 'pantry_remote_datasource_impl_part2.dart';
 
 abstract interface class PantryRemoteDatasource {
   Future<String> addPantryItem({required PantryModel pantryModel});
@@ -50,194 +51,34 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
     required this.dio,
     required this.notificationService,
   });
+
+  Future<String> compressImage(File imageFile) =>
+      _pantryImplCompressImage(this, imageFile);
+
   @override
-  Future<String> addPantryItem({required PantryModel pantryModel}) async {
-    try {
-      final response = await dio.post(
-        AppConstants.addPantryItem,
-        data: pantryModel.toJson(),
-      );
-      log("add pantry status: $response");
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
-
-        final message = data["error"];
-        throw message;
-      }
-      return response.data["message"];
-    } on DioException catch (e) {
-      throw dio.handleError(e);
-    }
-  }
-
-  Future<String> compressImage(File imageFile) async {
-    var result = await FlutterImageCompress.compressWithList(
-      imageFile.readAsBytesSync(),
-      minWidth: 800,
-      minHeight: 600,
-      quality: 15,
-      rotate: 0,
-      inSampleSize: 1,
-      autoCorrectionAngle: true,
-      format: CompressFormat.jpeg,
-      keepExif: false,
-    );
-    String base64Thumbnail = base64Encode(result);
-
-    String dataUri = "data:image/jpeg;base64,$base64Thumbnail";
-
-    return dataUri;
-  }
+  Future<String> addPantryItem({required PantryModel pantryModel}) =>
+      _pantryImplAddPantryItem(this, pantryModel: pantryModel);
 
   @override
   Future<List<Map<String, dynamic>>> getPantryItems({
     required String kitchenId,
-  }) async {
-    try {
-      log("Get pantry items");
-      final url = "${AppConstants.getPantryItems}?kitchen_id=$kitchenId";
-
-      final response = await dio.get(url);
-
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
-
-        final message = data?["error"] ?? "Unknown error";
-
-        throw message;
-      }
-
-      final data = response.data?["items"];
-
-      if (data is List) {
-        final parsedList = data.map((e) {
-          return Map<String, dynamic>.from(e);
-        }).toList();
-
-        return parsedList;
-      } else {
-        throw Exception("Invalid data");
-      }
-    } on DioException catch (e) {
-      final error = await dio.handleError(e);
-
-      throw error;
-    } catch (e) {
-      rethrow;
-    }
-  }
+  }) => _pantryImplGetPantryItems(this, kitchenId: kitchenId);
 
   @override
   Future<Map<String, dynamic>> scanRecipt({
     required String filePath,
     required String currency,
     required String country,
-  }) async {
-    try {
-      final formData = FormData.fromMap({
-        "file": await MultipartFile.fromFile(
-          filePath,
-          filename: filePath.split('/').last,
-          contentType: DioMediaType('image', 'jpeg'),
-        ),
-        "currency": currency,
-        "country": country,
-        "use_google_document": false,
-      });
-
-      final response = await dio.post(AppConstants.scanRecipt, data: formData);
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
-        final message = data?["error"] ?? "Unknown error";
-        throw message;
-      }
-
-      final message = response.data?["message"] ?? "Unknown response";
-
-      final res = response.data;
-
-      final items = res?["items"] as List<dynamic>? ?? [];
-
-      final parsedItems = items.map<Map<String, dynamic>>((item) {
-        final map = Map<String, dynamic>.from(item);
-
-        if (map["thumbnail"] != null && map["thumbnail"] is String) {
-          try {
-            final thumb = map["thumbnail"] as String;
-            final cleanedBase64 = thumb.contains(',')
-                ? thumb.split(',').last
-                : thumb;
-            map["thumbnail"] = base64Decode(cleanedBase64);
-          } catch (_) {
-            map["thumbnail"] = Uint8List(0);
-          }
-        }
-
-        return map;
-      }).toList();
-
-      log(
-        "ParsedItems: ${parsedItems.map((item) => item["recommended_storage"])}",
-      );
-
-      return {"message": message, "items": parsedItems};
-    } on DioException catch (e) {
-      throw await dio.handleError(e);
-    } catch (e) {
-      rethrow;
-    }
-  }
+  }) => _pantryImplScanRecipt(
+    this,
+    filePath: filePath,
+    currency: currency,
+    country: country,
+  );
 
   @override
-  Future<String> requestItems({required PantryModel pantryModel}) async {
-    log("${pantryModel.toJson()}");
-    try {
-      final response = await dio.post(
-        AppConstants.requestItems,
-        data: pantryModel.toJson(),
-      );
-
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
-
-        final message = data["error"] ?? "Unknown error";
-
-        //  LOG API ERROR RESPONSE
-        debugPrint(" API Error");
-        debugPrint("Status Code: ${response.statusCode}");
-        debugPrint("Response Data: $data");
-
-        throw message;
-      }
-
-      return response.data["message"];
-    } on DioException catch (e) {
-      //  LOG DIO ERROR DETAILS
-      debugPrint(" DioException");
-      debugPrint("Message: ${e.message}");
-      debugPrint("Type: ${e.type}");
-      debugPrint("Path: ${e.requestOptions.path}");
-
-      if (e.response != null) {
-        debugPrint("Status Code: ${e.response?.statusCode}");
-        debugPrint("Response Data: ${e.response?.data}");
-      }
-
-      throw await dio.handleError(e);
-    } catch (e) {
-      // LOG ANY OTHER ERROR
-      debugPrint(" Unexpected Error: $e");
-      rethrow;
-    }
-  }
+  Future<String> requestItems({required PantryModel pantryModel}) =>
+      _pantryImplRequestItems(this, pantryModel: pantryModel);
 
   @override
   Future<String> showNotification({
@@ -245,162 +86,35 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
     required String title,
     required String body,
     String? payload,
-  }) async {
-    try {
-      await notificationService.showNotification(
-        id: id,
-        title: title,
-        body: body,
-        payload: payload,
-      );
-      return "Notfication scheduled";
-    } catch (e) {
-      throw e.toString();
-    }
-  }
+  }) => _pantryImplShowNotification(
+    this,
+    id: id,
+    title: title,
+    body: body,
+    payload: payload,
+  );
 
   @override
   Future<String> createPantry({
     required String kitchenId,
     required List<String> pantries,
-  }) async {
-    try {
-      final pantryList = pantries.map((name) => {"pantry_name": name}).toList();
-
-      final requestData = {"kitchen_id": kitchenId, "pantries": pantryList};
-
-      final response = await dio.post(
-        AppConstants.createPantry,
-        data: requestData,
-      );
-
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
-
-        final message = data["error"];
-        debugPrint('[createPantry] Error Message: $message');
-        throw message;
-      }
-
-      return response.data["message"];
-    } on DioException catch (e) {
-      throw await dio.handleError(e);
-    } catch (e, stacktrace) {
-      debugPrint('Stacktrace: $stacktrace');
-      rethrow;
-    }
-  }
+  }) => _pantryImplCreatePantry(this, kitchenId: kitchenId, pantries: pantries);
 
   @override
   Future<String> deletePantry({
     required String kitchenId,
     required String pantryId,
-  }) async {
-    try {
-      final response = await dio.post(
-        AppConstants.deletePantry,
-        data: {"kitchen_id": kitchenId, "pantry_id": pantryId},
-      );
-
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
-
-        final message = data["error"];
-
-        throw message;
-      }
-
-      return response.data["message"];
-    } on DioException catch (e) {
-      throw dio.handleError(e);
-    } catch (e, stacktrace) {
-      debugPrint('Stacktrace: $stacktrace');
-      rethrow;
-    }
-  }
+  }) => _pantryImplDeletePantry(this, kitchenId: kitchenId, pantryId: pantryId);
 
   @override
-  Future<String> deleteItem({required PantryModel pantryModel}) async {
-    try {
-      final response = await dio.post(
-        AppConstants.removeItems,
-        data: {
-          "item_ids": [pantryModel.items[0].itemId],
-          "kitchen_id": pantryModel.kitchenId,
-        },
-      );
-
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
-
-        final message = data["error"];
-        throw message;
-      }
-
-      final successMessage = response.data["message"];
-      return successMessage;
-    } on DioException catch (e) {
-      final handledError = dio.handleError(e);
-
-      throw handledError;
-    } catch (e) {
-      rethrow;
-    }
-  }
+  Future<String> deleteItem({required PantryModel pantryModel}) =>
+      _pantryImplDeleteItem(this, pantryModel: pantryModel);
 
   @override
-  Future<String> updateItem({required PantryModel pantryModel}) async {
-    try {
-      final response = await dio.post(
-        AppConstants.updateKitchenItems,
-        data: pantryModel.toJson(),
-      );
-
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
-
-        final message = data["error"];
-        throw message;
-      }
-
-      final successMessage = response.data["message"];
-      return successMessage;
-    } on DioException catch (e) {
-      final handledError = dio.handleError(e);
-
-      throw handledError;
-    } catch (e) {
-      rethrow;
-    }
-  }
+  Future<String> updateItem({required PantryModel pantryModel}) =>
+      _pantryImplUpdateItem(this, pantryModel: pantryModel);
 
   @override
-  Future<String> addRequestItem({required PantryModel pantryModel}) async {
-    try {
-      final response = await dio.post(
-        AppConstants.addPantryRequestItems,
-        data: pantryModel.toJson(),
-      );
-      log("add pantry status: $response");
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
-
-        final message = data["error"];
-        throw message;
-      }
-      return response.data["message"];
-    } on DioException catch (e) {
-      throw dio.handleError(e);
-    }
-  }
+  Future<String> addRequestItem({required PantryModel pantryModel}) =>
+      _pantryImplAddRequestItem(this, pantryModel: pantryModel);
 }

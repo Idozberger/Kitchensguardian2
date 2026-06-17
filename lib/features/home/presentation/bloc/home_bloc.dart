@@ -1,12 +1,7 @@
-import 'dart:convert';
-import 'dart:math';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/data/model/recipe_model.dart';
-import 'package:foodkitchen/core/services/fcm/fcm_service.dart';
-import 'package:foodkitchen/core/services/notifications/flutter_local_notifications_service.dart';
+import 'package:foodkitchen/core/utils/dev_logging.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/features/home/domain/entities/kitchen.dart';
 import 'package:foodkitchen/features/home/domain/entities/pantry_items.dart';
@@ -15,651 +10,76 @@ import 'package:foodkitchen/features/home/domain/usecases/get_all_requested_item
 import 'package:foodkitchen/features/home/domain/usecases/get_all_weekly_plans_usecase.dart';
 import 'package:foodkitchen/features/home/domain/usecases/get_pantries_usecase.dart';
 import 'package:foodkitchen/features/home/domain/usecases/get_recipe_suggestion_usecase.dart';
-import 'package:foodkitchen/features/home/domain/usecases/join_kitchen_usecase.dart';
 import 'package:foodkitchen/features/home/domain/usecases/respond_to_item_request.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_event.dart';
+import 'package:foodkitchen/features/home/presentation/bloc/home_pantry_notifications.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_state.dart';
+import 'package:foodkitchen/features/kitchens/domain/datasources/kitchen_document_firestore_datasource.dart';
+import 'package:foodkitchen/features/kitchens/domain/usecases/submit_kitchen_join_request.dart';
 import 'package:foodkitchen/features/planner/domain/entities/ingredient_entity.dart';
 import 'package:intl/intl.dart';
+
+part 'home_bloc_handlers.dart';
+part 'home_bloc_handlers_part2.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final UserCubit _userCubit;
   final CreateKitchen _createKitchen;
   final RespondToItemRequest _respondToItemRequest;
-  // ignore: unused_field
-  final JoinKitchen _joinKitchen;
   final GetPantriesForHome _getPantriesForHome;
   final GetAllWeeklyPlansForHome _getAllWeeklyPlansForHome;
   final GetRecipeSuggestionUsecase _getRecipeSuggestionUsecase;
   final GetAllRequestedItems _getAllRequestedItems;
+  final SubmitKitchenJoinRequest _submitKitchenJoinRequest;
+  final KitchenDocumentFirestoreDatasource _kitchenDocumentFirestore;
+
   HomeBloc({
     required UserCubit userCubit,
     required RespondToItemRequest respondToItemRequest,
     required CreateKitchen createKitchen,
-    required JoinKitchen joinKitchen,
     required GetPantriesForHome getPantriesForHome,
     required GetAllWeeklyPlansForHome getAllWeeklyPlansForHome,
     required GetRecipeSuggestionUsecase getRecipeSuggestionUsecase,
     required GetAllRequestedItems getAllRequestedItems,
+    required SubmitKitchenJoinRequest submitKitchenJoinRequest,
+    required KitchenDocumentFirestoreDatasource kitchenDocumentFirestore,
   }) : _userCubit = userCubit,
        _createKitchen = createKitchen,
-       _joinKitchen = joinKitchen,
        _getAllWeeklyPlansForHome = getAllWeeklyPlansForHome,
        _getPantriesForHome = getPantriesForHome,
        _getRecipeSuggestionUsecase = getRecipeSuggestionUsecase,
        _getAllRequestedItems = getAllRequestedItems,
        _respondToItemRequest = respondToItemRequest,
+       _submitKitchenJoinRequest = submitKitchenJoinRequest,
+       _kitchenDocumentFirestore = kitchenDocumentFirestore,
 
        super(const HomeState()) {
-    on<CreateKitchenEventForHome>(_onCreateKitchenEvent);
-    on<GetPantriesItemsEventForHome>(_onGetPantryItems);
-    on<JoinKitchenEventForHome>(_onJoinKitchenEvent);
-    on<GetAllWeeklyPlansEventForHome>(_onGetAllWeeklyPlans);
-    on<ResetHomeStateEvent>(_onResetHomeState);
-    on<GetUserStorageAreaEvent>(_onGetUserStorageArea);
-    on<GenerateGroceryList>(_onGetGenerateGroceryList);
-    on<GetRecipeSuggestionEvent>(_onGetRecipeSuggestion);
-    on<GetAllRequestedItemsEvent>(_onGetAllRequestedItems);
-    on<RespondToItemRequestEvent>(_onRespondToItemRequestEvent);
-    on<RespondToItemRejectRequestEvent>(_onRespondToItemRejectRequestEvent);
+    on<CreateKitchenEventForHome>(
+      (e, em) => _onCreateKitchenEvent(this, e, em),
+    );
+    on<GetPantriesItemsEventForHome>((e, em) => _onGetPantryItems(this, e, em));
+    on<JoinKitchenEventForHome>((e, em) => _onJoinKitchenEvent(this, e, em));
+    on<GetAllWeeklyPlansEventForHome>(
+      (e, em) => _onGetAllWeeklyPlans(this, e, em),
+    );
+    on<ResetHomeStateEvent>((e, em) => _onResetHomeState(this, e, em));
+    on<GetUserStorageAreaEvent>((e, em) => _onGetUserStorageArea(this, e, em));
+    on<GenerateGroceryList>((e, em) => _onGetGenerateGroceryList(this, e, em));
+    on<GetRecipeSuggestionEvent>(
+      (e, em) => _onGetRecipeSuggestion(this, e, em),
+    );
+    on<GetAllRequestedItemsEvent>(
+      (e, em) => _onGetAllRequestedItems(this, e, em),
+    );
+    on<RespondToItemRequestEvent>(
+      (e, em) => _onRespondToItemRequestEvent(this, e, em),
+    );
+    on<RespondToItemRejectRequestEvent>(
+      (e, em) => _onRespondToItemRejectRequestEvent(this, e, em),
+    );
     on<RemoveMissingIngredientFromSuggestedEvent>(
-      _onRemoveMissingIngredientFromSuggested,
+      (e, em) => _onRemoveMissingIngredientFromSuggested(this, e, em),
     );
-  }
-  Future<void> _onRemoveMissingIngredientFromSuggested(
-    RemoveMissingIngredientFromSuggestedEvent event,
-    Emitter<HomeState> emit,
-  ) async {
-    final updatedSuggestedRecipes = List<RecipeModel>.from(
-      state.suggestedRecipe,
-    );
-
-    bool updated = false;
-
-    for (var i = 0; i < updatedSuggestedRecipes.length; i++) {
-      final recipe = updatedSuggestedRecipes[i];
-      if (recipe.id == event.recipeId) {
-        final updatedIngredients =
-            List<IngredientEntity>.from(recipe.missingIngredients)..removeWhere(
-              (ing) => event.selectedIngredients.any((e) => e.name == ing.name),
-            );
-
-        updatedSuggestedRecipes[i] = recipe.copyWith(
-          missingIngredients: updatedIngredients,
-        );
-
-        updated = true;
-        break;
-      }
-    }
-
-    if (updated) {
-      emit(state.copyWith(suggestedRecipe: updatedSuggestedRecipes));
-    }
-  }
-
-  Future<void> _onRespondToItemRejectRequestEvent(
-    RespondToItemRejectRequestEvent event,
-    Emitter<HomeState> emit,
-  ) async {
-    emit(state.copyWith(requestRejecting: true));
-
-    final res = await _respondToItemRequest(
-      RespondToItemRequestParams(
-        action: event.action,
-        requestId: event.requestId,
-        rejectReason: event.rejectReason,
-      ),
-    );
-
-    await res.fold<Future<void>>(
-      (failure) async {
-        emit(
-          state.copyWith(
-            requestRejecting: false,
-            approveRejectError: failure.message,
-            approveRejectSuccess: null,
-          ),
-        );
-      },
-      (message) async {
-        emit(
-          state.copyWith(
-            requestRejecting: false,
-            approveRejectSuccess: message,
-            approveRejectError: null,
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> _onRespondToItemRequestEvent(
-    RespondToItemRequestEvent event,
-    Emitter<HomeState> emit,
-  ) async {
-    emit(state.copyWith(requestApproving: true));
-
-    final res = await _respondToItemRequest(
-      RespondToItemRequestParams(
-        action: event.action,
-        requestId: event.requestId,
-        rejectReason: event.rejectReason,
-      ),
-    );
-
-    await res.fold<Future<void>>(
-      (failure) async {
-        emit(
-          state.copyWith(
-            requestApproving: false,
-            approveRejectError: failure.message,
-            approveRejectSuccess: null,
-          ),
-        );
-      },
-      (message) async {
-        emit(
-          state.copyWith(
-            requestApproving: false,
-            approveRejectSuccess: message,
-            approveRejectError: null,
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> _onGetAllRequestedItems(
-    GetAllRequestedItemsEvent event,
-    Emitter<HomeState> emit,
-  ) async {
-    emit(state.copyWith(itemsRequestLoading: true));
-
-    final res = await _getAllRequestedItems(
-      GetAllRequestedItemsParams(kitchenId: event.kitchenId),
-    );
-
-    await res.fold<Future<void>>(
-      (failure) async {
-        emit(state.copyWith(itemsRequestLoading: false));
-      },
-      (items) async {
-        emit(state.copyWith(itemsRequest: items, itemsRequestLoading: false));
-      },
-    );
-  }
-
-  Future<void> _onGetRecipeSuggestion(
-    GetRecipeSuggestionEvent event,
-    Emitter<HomeState> emit,
-  ) async {
-    emit(state.copyWith(loadingRecipeSuggestion: true));
-
-    final res = await _getRecipeSuggestionUsecase(
-      GetRecipeSuggestionUsecaseParams(event.kitchenId),
-    );
-
-    res.fold(
-      (failure) {
-        emit(
-          state.copyWith(
-            loadingRecipeSuggestion: false,
-            errorMessage: failure.message,
-          ),
-        );
-      },
-      (recipe) {
-        final bool isValid =
-            recipe.title.isNotEmpty && recipe.recipeShortSummary.isNotEmpty;
-
-        emit(
-          state.copyWith(
-            loadingRecipeSuggestion: false,
-            suggestedRecipe: isValid ? [recipe] : [],
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> _onGetGenerateGroceryList(
-    GenerateGroceryList event,
-    Emitter<HomeState> emit,
-  ) async {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-
-    final allWeeklyPlans = state.dateBasedPlan;
-    final lowStockItems = state.lowStockItems;
-
-    final List<IngredientEntity> missingIngredientNames = [];
-
-    final dateFormatter = DateFormat('yyyy-MM-dd');
-
-    for (var plan in allWeeklyPlans) {
-      try {
-        final planDate = dateFormatter.parse(plan.date);
-
-        if (planDate.isBefore(today)) {
-          continue;
-        }
-
-        for (var ingredient in plan.ingredients) {
-          missingIngredientNames.add(ingredient);
-          debugPrint(
-            'Grocery: ${ingredient.amount} → ${DateFormat('EEE, MMM d').format(planDate)}',
-          );
-        }
-      } on FormatException catch (e) {
-        debugPrint('Invalid date format in plan: ${plan.date}, error: $e');
-      }
-    }
-    for (var i = 0; i < lowStockItems.length; i++) {
-      missingIngredientNames.add(
-        IngredientEntity(
-          amount: lowStockItems[i].quantity.toString(),
-          name: lowStockItems[i].name,
-          unit: lowStockItems[i].unit,
-        ),
-      );
-    }
-    missingIngredientNames.sort(
-      (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
-    );
-
-    emit(state.copyWith(groceryList: missingIngredientNames));
-  }
-
-  Future<void> _onCreateKitchenEvent(
-    CreateKitchenEventForHome event,
-    Emitter<HomeState> emit,
-  ) async {
-    emit(state.copyWith(isLoading: true));
-
-    final res = await _createKitchen(
-      CreateKitchenParams(kitchenName: event.kitchenName),
-    );
-
-    await res.fold(
-      (failure) async {
-        emit(state.copyWith(isLoading: false, errorMessage: failure.message));
-      },
-      (kitchen) async {
-        _userCubit.updateActiveKitchenIdInvitationCodeAndRole(
-          kitchenName: event.kitchenName,
-          activeKitchenId: kitchen.kitchenId,
-          invitationCode: kitchen.invitationCode,
-          role: "host",
-        );
-
-        await _saveOrUpdateUserKitchen(
-          kitchen: kitchen,
-          kitchenName: event.kitchenName,
-        );
-
-        emit(state.copyWith(isLoading: false, successMessage: kitchen.message));
-        add(GetPantriesItemsEventForHome(kitchenId: kitchen.kitchenId));
-      },
-    );
-  }
-
-  Future<void> _onJoinKitchenEvent(
-    JoinKitchenEventForHome event,
-    Emitter<HomeState> emit,
-  ) async {
-    emit(state.copyWith(isLoading: true));
-
-    try {
-      final kitchenDoc = await FirebaseFirestore.instance
-          .collection('kitchens')
-          .where('invitation_code', isEqualTo: event.invitationCode)
-          .limit(1)
-          .get();
-
-      if (kitchenDoc.docs.isEmpty) {
-        emit(
-          state.copyWith(
-            isLoading: false,
-            errorMessage: "Invitation code is not valid",
-          ),
-        );
-        return;
-      }
-
-      final kitchenData = kitchenDoc.docs.first.data();
-      final userId = kitchenData['user_id'];
-      final kitchenName = kitchenData['kitchen_name'];
-
-      if (_userCubit.state.userId == userId) {
-        AppToast.show(
-          "You are the host of this kitchen: $kitchenName. You already have access.",
-          ToastType.error,
-        );
-        add(
-          GetPantriesItemsEventForHome(
-            kitchenId: _userCubit.state.activeKitchenId,
-          ),
-        );
-        return;
-      }
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
-          .get();
-
-      if (!userDoc.exists) {
-        emit(
-          state.copyWith(
-            isLoading: false,
-            errorMessage: "Kitchen host not found",
-          ),
-        );
-        return;
-      }
-
-      final userData = userDoc.data();
-      final userDeviceToken = userData?['user_device_token'];
-
-      if (userDeviceToken == null) {
-        emit(state.copyWith(isLoading: false, errorMessage: "User not found"));
-        return;
-      }
-
-      await FCMService().sendNotification(
-        userDeviceToken,
-        "Request to join your kitchen",
-        "User ${_userCubit.state.firstName} wants to join your kitchen: $kitchenName.",
-        _userCubit.state.invitationCode,
-        _userCubit.state.kitchenName,
-        _userCubit.state.role,
-        _userCubit.state.activeKitchenId,
-        "Pending",
-      );
-      final random = Random();
-      final notificationId = random.nextInt(999999);
-      final notificationData = {
-        "status": false,
-        'id': notificationId,
-        'title': "Request to join your kitchen",
-        'body':
-            "User ${_userCubit.state.firstName} wants to join your kitchen: $kitchenName.",
-        'host_user_id': userId,
-        'sender_user_id': _userCubit.state.userId,
-        'kitchen_id': kitchenData['kitchen_id'],
-        'date': DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
-        'sender_name':
-            "${_userCubit.state.firstName} ${_userCubit.state.lastName}",
-        'read': false,
-        'kitchen_joining_status': "Pending",
-      };
-      debugPrint('📦 Sending notification data: $notificationData');
-
-      await FirebaseFirestore.instance
-          .collection('notifications')
-          .add(notificationData);
-
-      add(
-        GetPantriesItemsEventForHome(
-          kitchenId: _userCubit.state.activeKitchenId,
-        ),
-      );
-
-      emit(
-        state.copyWith(
-          isLoading: false,
-          successMessage: "Join request sent to the host.",
-        ),
-      );
-    } catch (e) {
-      emit(
-        state.copyWith(isLoading: false, errorMessage: 'An error occurred.'),
-      );
-    }
-  }
-
-  Future<void> _onGetPantryItems(
-    GetPantriesItemsEventForHome event,
-    Emitter<HomeState> emit,
-  ) async {
-    emit(state.copyWith(isLoading: true));
-    final res = await _getPantriesForHome(
-      GetPantriesForHomeParams(kitchenId: event.kitchenId),
-    );
-
-    res.fold(
-      (failure) =>
-          emit(state.copyWith(isLoading: false, errorMessage: failure.message)),
-      (pantries) async {
-        final List<PantriesItemsEntity> pantryItems = [];
-        final List<PantriesItemsEntity> lowStockItems = [];
-        final List<PantriesItemsEntity> expiringItems = [];
-
-        for (final item in pantries.items) {
-          if (item.stockStatus == "low_stock") {
-            lowStockItems.add(item);
-            continue;
-          }
-
-          if (item.expiryStatus == "expiring_soon") {
-            expiringItems.add(item);
-
-            continue;
-          }
-
-          if (item.stockStatus == "in_stock" ||
-              item.expiryStatus == "" ||
-              item.expiryStatus == "null") {
-            pantryItems.add(item);
-            continue;
-          }
-
-          pantryItems.add(item);
-        }
-
-        emit(
-          state.copyWith(
-            isLoading: false,
-            pantryItems: [pantries],
-            lowStockItems: lowStockItems,
-            expiringItems: expiringItems,
-          ),
-        );
-
-        await _schedulePantryNotifications(
-          lowStockItems: lowStockItems,
-          expiringItems: expiringItems,
-        );
-      },
-    );
-  }
-
-  Future<void> _schedulePantryNotifications({
-    required List<PantriesItemsEntity> lowStockItems,
-    required List<PantriesItemsEntity> expiringItems,
-  }) async {
-    final notificationService = NotificationService();
-    final DateTime now = DateTime.now();
-    final DateTime morningTime = DateTime(now.year, now.month, now.day, 9, 0);
-    final DateTime eveningTime = DateTime(now.year, now.month, now.day, 18, 0);
-
-    // Current items' base IDs
-    final currentItemIds = <int>{};
-    for (final item in lowStockItems) {
-      currentItemIds.add(item.itemId.hashCode & 0x7fffffff); // morning
-      currentItemIds.add((item.itemId.hashCode & 0x7fffffff) + 1); // evening
-    }
-    for (final item in expiringItems) {
-      currentItemIds.add(
-        (item.itemId.hashCode & 0x7fffffff) + 100000,
-      ); // morning
-      currentItemIds.add(
-        (item.itemId.hashCode & 0x7fffffff) + 100001,
-      ); // evening
-    }
-
-    // Pending notifications
-    final pendingNotifications = await notificationService
-        .pendingNotifications();
-
-    // Cancel notifications for items that no longer exist
-    for (final pending in pendingNotifications) {
-      if (!currentItemIds.contains(pending.id)) {
-        await notificationService.cancelNotification(pending.id);
-        if (kDebugMode) {
-          print("Canceled obsolete notification (ID: ${pending.id})");
-        }
-      }
-    }
-
-    final scheduledIds = pendingNotifications.map((e) => e.id).toSet();
-    if (kDebugMode) {
-      print("Pending notification IDs: $scheduledIds");
-    }
-    // Schedule notifications for current low stock items for the new items
-    for (final item in lowStockItems) {
-      final int morningId = item.itemId.hashCode & 0x7fffffff;
-      final int eveningId = morningId + 1;
-
-      if (!scheduledIds.contains(morningId)) {
-        await notificationService.scheduleDaily(
-          id: morningId,
-          title: 'Low stock: ${item.name}',
-          body:
-              'You are running low on ${item.name} (${item.quantity} ${item.unit}).',
-          dailyTime: morningTime,
-          payload: jsonEncode({
-            'type': 'low_stock',
-            "invitationCode": _userCubit.state.invitationCode,
-            "kitchenName": _userCubit.state.kitchenName,
-            "role": _userCubit.state.role,
-            'kitchenId': _userCubit.state.activeKitchenId,
-            'item': item.toMap(),
-          }),
-        );
-        if (kDebugMode) {
-          print(
-            "Scheduled morning low stock notification for ${item.name} (ID: $morningId)",
-          );
-        }
-      }
-
-      if (!scheduledIds.contains(eveningId)) {
-        await notificationService.scheduleDaily(
-          id: eveningId,
-          title: 'Low stock: ${item.name}',
-          body: 'Remember to restock ${item.name}.',
-          dailyTime: eveningTime,
-          payload: jsonEncode({
-            'type': 'low_stock',
-            "invitationCode": _userCubit.state.invitationCode,
-            "kitchenName": _userCubit.state.kitchenName,
-            "role": _userCubit.state.role,
-            'kitchenId': _userCubit.state.activeKitchenId,
-            'item': item.toMap(),
-          }),
-        );
-        if (kDebugMode) {
-          print(
-            "Scheduled evening low stock notification for ${item.name} (ID: $eveningId)",
-          );
-        }
-      }
-    }
-
-    // Schedule notifications for current expiring items
-    for (final item in expiringItems) {
-      final int morningId = (item.itemId.hashCode & 0x7fffffff) + 100000;
-      final int eveningId = morningId + 1;
-
-      if (!scheduledIds.contains(morningId)) {
-        await notificationService.scheduleDaily(
-          id: morningId,
-          title: 'Expiring soon: ${item.name}',
-          body: '${item.name} is expiring soon (${item.expireDate}).',
-          dailyTime: morningTime,
-          payload: jsonEncode({
-            'type': 'expiring_soon',
-            "invitationCode": _userCubit.state.invitationCode,
-            "kitchenName": _userCubit.state.kitchenName,
-            "role": _userCubit.state.role,
-            'kitchenId': _userCubit.state.activeKitchenId,
-            'item': item.toMap(),
-          }),
-        );
-        if (kDebugMode) {
-          print(
-            "Scheduled morning expiring notification for ${item.name} (ID: $morningId)",
-          );
-        }
-      }
-
-      if (!scheduledIds.contains(eveningId)) {
-        await notificationService.scheduleDaily(
-          id: eveningId,
-          title: 'Expiring soon: ${item.name}',
-          body: 'Use ${item.name} before it expires.',
-          dailyTime: eveningTime,
-          payload: jsonEncode({
-            'type': 'expiring_soon',
-            "invitationCode": _userCubit.state.invitationCode,
-            "kitchenName": _userCubit.state.kitchenName,
-            "role": _userCubit.state.role,
-            'kitchenId': _userCubit.state.activeKitchenId,
-            'item': item.toMap(),
-          }),
-        );
-        if (kDebugMode) {
-          print(
-            "Scheduled evening expiring notification for ${item.name} (ID: $eveningId)",
-          );
-        }
-      }
-    }
-  }
-
-  Future<void> _onGetUserStorageArea(
-    GetUserStorageAreaEvent event,
-    Emitter<HomeState> emit,
-  ) async {
-    _userCubit.getUserStorageArea(kitchenId: event.kitchenId);
-  }
-
-  Future<void> _onGetAllWeeklyPlans(
-    GetAllWeeklyPlansEventForHome event,
-    Emitter<HomeState> emit,
-  ) async {
-    if (_userCubit.state.activeKitchenId.isEmpty) return;
-    emit(state.copyWith(loadingWeeklyPlans: true, showGroceryShimmer: true));
-    final res = await _getAllWeeklyPlansForHome(
-      GetAllWeeklyPlansForHomeParams(_userCubit.state.activeKitchenId),
-    );
-
-    await res.fold(
-      (failure) {
-        emit(
-          state.copyWith(
-            errorMessage: failure.message,
-            loadingWeeklyPlans: false,
-          ),
-        );
-      },
-      (getAllWeeklyPlans) async {
-        emit(
-          state.copyWith(
-            dateBasedPlan: getAllWeeklyPlans,
-            loadingWeeklyPlans: false,
-          ),
-        );
-
-        add(GenerateGroceryList());
-        emit(state.copyWith(showGroceryShimmer: false));
-      },
-    );
-  }
-
-  void _onResetHomeState(ResetHomeStateEvent event, Emitter<HomeState> emit) {
-    emit(state.copyWith(pantryItems: []));
   }
 
   Future<void> _saveOrUpdateUserKitchen({
@@ -667,25 +87,14 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     String? kitchenName,
   }) async {
     try {
-      final firestore = FirebaseFirestore.instance;
-
-      final kitchenRef = firestore
-          .collection('kitchens')
-          .doc(kitchen.kitchenId);
-
-      final data = {
-        'kitchen_id': kitchen.kitchenId,
-        'user_id': _userCubit.state.userId,
-        'kitchen_name': kitchenName,
-        'role': "host",
-        'invitation_code': kitchen.invitationCode,
-        'created_at': FieldValue.serverTimestamp(),
-        'updated_at': FieldValue.serverTimestamp(),
-      };
-
-      await kitchenRef.set(data);
+      await _kitchenDocumentFirestore.setKitchenDocumentForNewHost(
+        kitchenId: kitchen.kitchenId,
+        userId: _userCubit.state.userId,
+        invitationCode: kitchen.invitationCode,
+        kitchenName: kitchenName,
+      );
     } catch (e, st) {
-      debugPrint(st.toString());
+      devPrint(st.toString());
     }
   }
 }

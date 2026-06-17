@@ -7,7 +7,7 @@ import 'package:foodkitchen/core/screens/presentation/widgets/country_item.dart'
 class CountryDropdown extends StatelessWidget {
   final List<Country> countries;
   final Country? selectedCountry;
-  final Function(Country?) onChanged;
+  final void Function(Country?) onChanged;
 
   const CountryDropdown({
     super.key,
@@ -23,7 +23,7 @@ class CountryDropdown extends StatelessWidget {
         borderRadius: BorderRadius.circular(t(12)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),

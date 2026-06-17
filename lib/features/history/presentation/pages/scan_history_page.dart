@@ -4,13 +4,16 @@ import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/utils/date_format_to_string.dart';
+import 'package:foodkitchen/core/utils/dev_logging.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
+import 'package:foodkitchen/features/history/domain/entities/scan_history_entity.dart';
 import 'package:foodkitchen/features/history/presentation/bloc/scan_history_cubit.dart';
 import 'package:foodkitchen/features/history/presentation/bloc/scan_history_state.dart';
 import 'package:lottie/lottie.dart';
+
+import '../widgets/history_empty_view.dart';
 import '../widgets/history_list_tile.dart';
 import '../widgets/history_loading_view.dart';
-import '../widgets/history_empty_view.dart';
 
 class ScanHistoryPage extends StatefulWidget {
   const ScanHistoryPage({super.key});
@@ -62,7 +65,7 @@ class _ScanHistoryPageState extends State<ScanHistoryPage> {
     try {
       await _scanHistoryCubit.fetchHistory(pageNumber: _pageNumber.toString());
     } catch (e, st) {
-      debugPrint('Error loading history: $e\n$st');
+      devPrint('Error loading history: $e\n$st');
     }
   }
 
@@ -75,7 +78,7 @@ class _ScanHistoryPageState extends State<ScanHistoryPage> {
     try {
       await _scanHistoryCubit.fetchHistory(pageNumber: _pageNumber.toString());
     } catch (e, st) {
-      debugPrint('Error loading more history: $e\n$st');
+      devPrint('Error loading more history: $e\n$st');
       _pageNumber--;
     } finally {
       if (!_isDisposed) {
@@ -140,7 +143,7 @@ class _ScanHistoryPageState extends State<ScanHistoryPage> {
     );
   }
 
-  Widget _buildHistoryTile(int index, dynamic historyData) {
+  Widget _buildHistoryTile(int index, ScanHistoryEntity historyData) {
     return Padding(
       padding: gapOnly(bottom: 12),
       child: HistoryListTile(

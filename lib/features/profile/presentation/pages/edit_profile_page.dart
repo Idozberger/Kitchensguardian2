@@ -1,4 +1,5 @@
 // ignore_for_file: deprecated_member_use
+// ImagePicker / platform APIs not yet migrated to latest replacements.
 
 import 'dart:convert';
 
@@ -16,6 +17,7 @@ import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/services/image_picker/image_picker_service.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
+import 'package:foodkitchen/core/widgets/safe_image.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
@@ -147,30 +149,18 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           children: [
                             BlocBuilder<UserCubit, UserState>(
                               builder: (_, userstate) {
-                                if (imageBytes != null) {
-                                  return CircleAvatar(
-                                    radius: w(36),
-                                    backgroundColor: Colors.grey.shade200,
-                                    backgroundImage: MemoryImage(imageBytes!),
-                                  );
-                                }
-                                return userstate.profilePictureFilePath !=
-                                            null &&
-                                        userstate
-                                            .profilePictureFilePath!
-                                            .isNotEmpty
-                                    ? CircleAvatar(
-                                        radius: w(36),
-                                        backgroundColor: Colors.grey.shade200,
-                                        backgroundImage: MemoryImage(
-                                          userstate.profilePictureFilePath!,
-                                        ),
-                                      )
-                                    : Image.asset(
-                                        AppAssets.avatar,
-                                        width: w(72),
-                                        height: h(72),
-                                      );
+                                return SafeCircleAvatar(
+                                  radius: w(36),
+                                  memoryBytes:
+                                      imageBytes ?? userstate.profilePictureFilePath,
+                                  backgroundColor: Colors.grey.shade200,
+                                  fallback: Image.asset(
+                                    AppAssets.avatar,
+                                    width: w(72),
+                                    height: h(72),
+                                    fit: BoxFit.cover,
+                                  ),
+                                );
                               },
                             ),
 
@@ -225,7 +215,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
                     GenericButtonWidget(
                       isLoading: state.isLoading,
-                      onPressed: () => _saveUser(),
+                      onPressed: _saveUser,
                       text: "Save",
                     ),
                   ],

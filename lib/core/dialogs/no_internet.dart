@@ -51,7 +51,7 @@ class NoInternetDialog extends StatelessWidget {
               gap(height: 20),
               GenericButtonWidget(
                 isLoading: loading,
-                onPressed: () => callback(),
+                onPressed: callback,
                 text: "Try Again",
               ),
             ],

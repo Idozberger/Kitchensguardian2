@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/data/model/recipe_model.dart';
 import 'package:foodkitchen/core/config/routes.dart';
-import 'package:foodkitchen/core/global/functions/api_endpoints.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/features/planner/domain/entities/merged_meal_type_entity.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
@@ -78,7 +78,7 @@ class PlannerController {
   }
 
   void onAddToCart(BuildContext context) {
-    if (AppConstants.entitlementIsActive) {
+    if (context.read<UserCubit>().state.hasPremiumAccess) {
       AppToast.show("Added to cart", ToastType.success);
     } else {
       AppToast.show("Only premium users can add to cart", ToastType.error);

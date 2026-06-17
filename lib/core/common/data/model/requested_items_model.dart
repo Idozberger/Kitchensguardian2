@@ -25,7 +25,7 @@ class RequestedItemModel extends RequestedItemEntity {
       unit: json['unit']?.toString() ?? '',
       userId: json['user_id']?.toString() ?? '',
       checked: json['checked'] is bool
-          ? json['checked']
+          ? json['checked'] as bool
           : json['checked']?.toString().toLowerCase() == 'true',
       requestedAt:
           DateTime.tryParse(json['requested_at']?.toString() ?? '') ??

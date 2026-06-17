@@ -21,7 +21,7 @@ void showEditItemDialog(
   final nameController = TextEditingController(text: initialName);
   final quantityController = TextEditingController(text: initialQuantity);
 
-  showDialog(
+  showDialog<void>(
     context: context,
     builder: (_) => BlocProvider.value(
       value: groceryBloc,

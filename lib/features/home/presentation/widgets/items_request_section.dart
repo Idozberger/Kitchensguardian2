@@ -9,6 +9,7 @@ import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
+import 'package:foodkitchen/features/home/domain/entities/item_request.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_state.dart';
 import 'package:foodkitchen/features/pantry/presentation/widgets/list_tile.dart';
@@ -87,7 +88,7 @@ class _ItemRequestSectionState extends State<ItemRequestSection> {
     );
   }
 
-  Widget _buildRequestRow(BuildContext context, dynamic request) {
+  Widget _buildRequestRow(BuildContext context, ItemRequest request) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -121,7 +122,10 @@ class _ItemRequestSectionState extends State<ItemRequestSection> {
           onPressed: () => context.push(Routes.itemRequestsDetails),
           icon: SvgPicture.asset(
             AppAssets.eyeSvg,
-            color: AppColors.primaryColor,
+            colorFilter: ColorFilter.mode(
+              AppColors.primaryColor,
+              BlendMode.srcIn,
+            ),
             width: w(10),
             height: h(10),
           ),

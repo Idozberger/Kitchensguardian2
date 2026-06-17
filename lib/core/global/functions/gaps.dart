@@ -1,5 +1,5 @@
-import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:flutter/material.dart';
+import 'package:foodkitchen/core/global/functions/resize.dart';
 
 EdgeInsets get gapZero => EdgeInsets.zero;
 

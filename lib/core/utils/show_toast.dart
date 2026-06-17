@@ -17,16 +17,10 @@ class AppToast {
     switch (type) {
       case ToastType.success:
         bgColor = Colors.green;
-
-        break;
       case ToastType.error:
         bgColor = Colors.red;
-
-        break;
       case ToastType.warning:
         bgColor = Colors.orange;
-
-        break;
       case ToastType.info:
         bgColor = Colors.blue;
     }

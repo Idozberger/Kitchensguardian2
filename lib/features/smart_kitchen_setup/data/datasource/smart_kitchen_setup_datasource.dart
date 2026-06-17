@@ -1,9 +1,8 @@
-import 'dart:convert';
-import 'dart:developer';
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/global/functions/api_endpoints.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
+import 'package:foodkitchen/core/utils/dev_logging.dart';
+import 'package:foodkitchen/core/utils/json_conversion.dart';
 
 abstract class SmartKitchenSetupDatasource {
   Future<List<Map<String, dynamic>>> getScanResult({
@@ -54,7 +53,7 @@ class SmartKitchenSetupDatasourceImpl implements SmartKitchenSetupDatasource {
       }
 
       final formData = FormData.fromMap(fields);
-      log(
+      devLog(
         "formData: ${formData.files.map((file) => '${file.key} + ${file.value}')}",
       );
       final response = await dio.post(
@@ -64,29 +63,31 @@ class SmartKitchenSetupDatasourceImpl implements SmartKitchenSetupDatasource {
       );
 
       if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
-        throw data?['error'] ?? 'Unknown error';
+        final Map<String, dynamic> data = jsonObjectFromResponseData(
+          response.data,
+        );
+        throw apiExceptionFrom(data['error'] ?? 'Unknown error');
       }
 
-      final decoded = response.data is String
-          ? jsonDecode(response.data)
-          : response.data;
+      final Map<String, dynamic> decoded = jsonObjectFromResponseData(
+        response.data,
+      );
 
-      final autoConfirmed = decoded["auto_confirmed"] is List
-          ? List<Map<String, dynamic>>.from(decoded["auto_confirmed"])
+      final Object? autoRaw = decoded['auto_confirmed'];
+      final List<Map<String, dynamic>> autoConfirmed = autoRaw is List
+          ? autoRaw.map(jsonObjectFromResponseData).toList()
           : <Map<String, dynamic>>[];
 
-      final userReview = decoded["user_review"] is List
-          ? List<Map<String, dynamic>>.from(decoded["user_review"])
+      final Object? reviewRaw = decoded['user_review'];
+      final List<Map<String, dynamic>> userReview = reviewRaw is List
+          ? reviewRaw.map(jsonObjectFromResponseData).toList()
           : <Map<String, dynamic>>[];
 
       return [...autoConfirmed, ...userReview];
     } on DioException catch (e) {
-      throw dio.handleError(e);
+      throw await dio.handleError(e);
     } catch (e, stacktrace) {
-      debugPrint('Stacktrace: $stacktrace');
+      devPrint('Stacktrace: $stacktrace');
       rethrow;
     }
   }
@@ -96,7 +97,7 @@ class SmartKitchenSetupDatasourceImpl implements SmartKitchenSetupDatasource {
     String key,
     String path,
   ) async {
-    log("path: $path");
+    devLog("path: $path");
     if (path.isEmpty) return;
     final cleanPath = path.replaceFirst('file://', '');
     fields[key] = await MultipartFile.fromFile(
@@ -123,20 +124,21 @@ class SmartKitchenSetupDatasourceImpl implements SmartKitchenSetupDatasource {
       );
 
       if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
+        final Map<String, dynamic> data = jsonObjectFromResponseData(
+          response.data,
+        );
 
-        final message = data["error"];
-        debugPrint('[createPantry] Error Message: $message');
-        throw message;
+        final Object? message = data['error'];
+        devPrint('[createPantry] Error Message: $message');
+        throw apiExceptionFrom(message);
       }
 
-      return response.data["message"];
+      final Map<String, dynamic> ok = jsonObjectFromResponseData(response.data);
+      return readJsonString(ok, 'message');
     } on DioException catch (e) {
-      throw dio.handleError(e);
+      throw await dio.handleError(e);
     } catch (e, stacktrace) {
-      debugPrint('Stacktrace: $stacktrace');
+      devPrint('Stacktrace: $stacktrace');
       rethrow;
     }
   }

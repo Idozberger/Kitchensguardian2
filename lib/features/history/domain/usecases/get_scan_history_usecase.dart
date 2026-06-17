@@ -1,8 +1,7 @@
-import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/core/common/usecase/usecase.dart';
+import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/features/history/domain/entities/scan_history_entity.dart';
 import 'package:foodkitchen/features/history/domain/repository/scan_history_repository.dart';
-
 import 'package:fpdart/fpdart.dart';
 
 class GetScanHistoryUsecase

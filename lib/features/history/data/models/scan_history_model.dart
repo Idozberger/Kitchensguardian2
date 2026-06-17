@@ -1,3 +1,4 @@
+import 'package:foodkitchen/core/utils/json_conversion.dart';
 import 'package:foodkitchen/features/history/data/models/scan_item_model.dart';
 import 'package:foodkitchen/features/history/domain/entities/scan_history_entity.dart';
 
@@ -9,12 +10,19 @@ class ScanHistoryModel extends ScanHistoryEntity {
   });
 
   factory ScanHistoryModel.fromJson(Map<String, dynamic> json) {
+    final Object? itemsRaw = json['items'];
+    final List<dynamic> itemsList = itemsRaw is List<dynamic> ? itemsRaw : [];
     return ScanHistoryModel(
-      items: (json['items'] as List? ?? [])
-          .map((item) => ScanItemModel.fromJson(item))
+      items: itemsList
+          .map(
+            (Object? item) =>
+                ScanItemModel.fromJson(jsonObjectFromResponseData(item)),
+          )
           .toList(),
-      scannedAt: DateTime.parse(json['scanned_at']),
-      userId: json['user_id'] ?? 0,
+      scannedAt:
+          DateTime.tryParse(readJsonString(json, 'scanned_at')) ??
+          DateTime.fromMillisecondsSinceEpoch(0),
+      userId: readJsonString(json, 'user_id'),
     );
   }
 

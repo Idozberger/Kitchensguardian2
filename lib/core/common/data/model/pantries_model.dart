@@ -1,4 +1,5 @@
 import 'package:foodkitchen/core/common/domain/entities/pantries_entity.dart';
+import 'package:foodkitchen/core/utils/json_conversion.dart';
 
 class PantriesCommonModel extends PantriesCommonEntity {
   PantriesCommonModel({
@@ -29,9 +30,9 @@ class PantriesCommonModel extends PantriesCommonEntity {
 
   factory PantriesCommonModel.fromJson(Map<String, dynamic> json) {
     return PantriesCommonModel(
-      pantryId: json["pantry_id"] ?? "",
-      pantryName: json["pantry_name"] ?? "",
-      createdAt: json["created_at"] ?? "",
+      pantryId: readJsonString(json, 'pantry_id'),
+      pantryName: readJsonString(json, 'pantry_name'),
+      createdAt: readJsonString(json, 'created_at'),
     );
   }
 }

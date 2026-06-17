@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/screens/data/local_datasource/country_currency_cache.dart';
 import 'package:foodkitchen/core/screens/data/models/country_currency_model.dart';
 import 'package:foodkitchen/core/screens/data/remote_datasource/country_currency_datasource.dart';
+import 'package:foodkitchen/core/utils/dev_logging.dart';
 
 class CachedCountryCurrencyRepository {
   final ICountryCurrencyDataSource _dataSource;
@@ -26,7 +26,7 @@ class CachedCountryCurrencyRepository {
 
       return countries;
     } catch (e) {
-      debugPrint('Error fetching countries: $e');
+      devPrint('Error fetching countries: $e');
       return _cache.getCountries();
     }
   }

@@ -1,3 +1,4 @@
+import 'package:foodkitchen/core/utils/json_conversion.dart';
 import 'package:foodkitchen/features/auth/domain/entities/user.dart';
 
 class UserModel extends User {
@@ -10,10 +11,10 @@ class UserModel extends User {
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      firstName: json['first_name'] ?? '',
-      lastName: json['last_name'] ?? '',
-      email: json['email'] ?? '',
-      password: json['password'] ?? '',
+      firstName: readJsonString(json, 'first_name'),
+      lastName: readJsonString(json, 'last_name'),
+      email: readJsonString(json, 'email'),
+      password: readJsonString(json, 'password'),
     );
   }
 

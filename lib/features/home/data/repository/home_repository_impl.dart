@@ -1,15 +1,12 @@
-// ignore_for_file: avoid_print
-
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:foodkitchen/core/common/data/datasource/common_remote_datasource.dart';
-
 import 'package:foodkitchen/core/common/data/model/recipe_model.dart';
-
 import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/core/error/failures.dart';
+import 'package:foodkitchen/core/utils/dev_logging.dart';
+import 'package:foodkitchen/core/utils/json_conversion.dart';
 import 'package:foodkitchen/features/home/data/datasource/home_remote_datasource.dart';
 import 'package:foodkitchen/features/home/data/models/item_request_model.dart';
 import 'package:foodkitchen/features/home/data/models/kitchen_model.dart';
@@ -34,33 +31,18 @@ class HomeRepositoryImpl implements HomeRepository {
       final response = await homeRemoteDataSource.createKitchen(
         kitchenName: kitchenName,
       );
+      final Map<String, dynamic> r = jsonObjectFromResponseData(response);
       final kitchenModel = KitchenModel(
-        invitationCode: response["invitation_code"],
-        kitchenId: response["kitchen_id"],
-        message: response["message"],
+        invitationCode: readJsonString(r, 'invitation_code'),
+        kitchenId: readJsonString(r, 'kitchen_id'),
+        message: readJsonString(r, 'message'),
       );
 
       return right(kitchenModel);
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
-    }
-  }
-
-  @override
-  Future<Either<Failure, String>> joinKitchen({
-    required String invitationCode,
-  }) async {
-    try {
-      final response = await homeRemoteDataSource.joinKitchen(
-        invitationCode: invitationCode,
-      );
-      return right(response);
-    } on Failure catch (f) {
-      return Left(f);
-    } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -78,7 +60,7 @@ class HomeRepositoryImpl implements HomeRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -99,7 +81,7 @@ class HomeRepositoryImpl implements HomeRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -134,8 +116,8 @@ class HomeRepositoryImpl implements HomeRepository {
 
           mergedJson["thumbnail"] = base64Decode(cleanedBase64);
         } catch (e) {
-          print("Thumbnail decode failed: $e");
-          mergedJson["thumbnail"] = Uint8List(0);
+          devPrint("Thumbnail decode failed: $e");
+          mergedJson["thumbnail"] = null;
         }
       }
 
@@ -163,25 +145,25 @@ class HomeRepositoryImpl implements HomeRepository {
 
       for (int i = 0; i < (response as List).length; i++) {
         try {
-          log("Parsing item $i: ${response[i]}");
+          devLog("Parsing item $i: ${response[i]}");
           final item = ItemRequestModel.fromJson(response[i]);
-          log("Parsed item $i successfully: $item");
+          devLog("Parsed item $i successfully: $item");
           pantryItems.add(item);
         } catch (e, stack) {
-          log("FAILED at item $i: ${response[i]}");
-          log("ERROR: $e");
-          log("STACK: $stack");
+          devLog("FAILED at item $i: ${response[i]}");
+          devLog("ERROR: $e");
+          devLog("STACK: $stack");
         }
       }
 
-      log("Total parsed: ${pantryItems.length}");
+      devLog("Total parsed: ${pantryItems.length}");
       return Right(pantryItems);
     } on Failure catch (f) {
       return Left(f);
     } catch (e, stack) {
-      log("OUTER ERROR: $e");
-      log("OUTER STACK: $stack");
-      return Left(UnknownFailure(e.toString()));
+      devLog("OUTER ERROR: $e");
+      devLog("OUTER STACK: $stack");
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -201,7 +183,7 @@ class HomeRepositoryImpl implements HomeRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 }

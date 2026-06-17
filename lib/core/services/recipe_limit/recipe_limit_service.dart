@@ -1,4 +1,5 @@
-import 'dart:developer';
+import 'package:foodkitchen/core/services/di/service_locator.dart';
+import 'package:foodkitchen/core/utils/dev_logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class RecipeLimitService {
@@ -12,7 +13,7 @@ class RecipeLimitService {
   }
 
   static Future<bool> canSearchRecipe() async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = sl<SharedPreferences>();
 
     final today = _getTodayDate();
     final storedDate = prefs.getString(_dateKey);
@@ -20,14 +21,14 @@ class RecipeLimitService {
     int count = prefs.getInt(_countKey) ?? 0;
 
     if (storedDate != today) {
-      log("New day detected (check only)");
+      devLog("New day detected (check only)");
       return true;
     }
 
-    log("Current count: $count/$maxLimit");
+    devLog("Current count: $count/$maxLimit");
 
     if (count >= maxLimit) {
-      log("Limit reached");
+      devLog("Limit reached");
       return false;
     }
 
@@ -35,7 +36,7 @@ class RecipeLimitService {
   }
 
   static Future<void> incrementUsage() async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = sl<SharedPreferences>();
 
     final today = _getTodayDate();
     final storedDate = prefs.getString(_dateKey);
@@ -45,13 +46,13 @@ class RecipeLimitService {
     if (storedDate != today) {
       await prefs.setString(_dateKey, today);
       count = 0;
-      log("Resetting count for new day");
+      devLog("Resetting count for new day");
     }
 
     count++;
 
     await prefs.setInt(_countKey, count);
 
-    log("Updated count: $count/$maxLimit");
+    devLog("Updated count: $count/$maxLimit");
   }
 }

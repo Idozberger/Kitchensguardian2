@@ -1,6 +1,52 @@
 include: package:flutter_lints/flutter.yaml
+
 analyzer:
+  language:
+    strict-casts: true
+    strict-inference: true
   errors:
-    deprecated_member_use: ignore
-    unused_field: ignore
-    # use_build_context_synchronously: ignore ignore ignore ignore
+    # Unused code fails analysis (keeps dead code from accumulating).
+    unused_element: error
+    unused_field: error
+    unused_import: error
+    unused_local_variable: error
+    unused_shown_name: error
+    dead_code: error
+
+# Full `package:flutter_lints/flutter.yaml` rules are active (nothing disabled here).
+#
+# Do not downgrade lints to "ignore" here unless there is a short comment why.
+# Prefer fixing the issue. If a rule must be scoped to one file, use ignore_for_file
+# on that file and add a one-line comment after the directive explaining the tradeoff.
+#
+# Examples in this repo:
+# - lib/firebase_options.dart: hand-maintained FirebaseOptions from `.env`; `type=lint`.
+# - Several UI/service files: use_build_context_synchronously (async gaps before using
+#   BuildContext) — refactor to mounted checks or document until refactored.
+#
+# Related project conventions (see code): debug-only logging (no tokens in release);
+# Dio default success status (non-2xx → DioException); user strings in
+# lib/core/services/dio/network_error_message.dart; secrets in `.env` + lib/core/config/env.dart.
+
+linter:
+  rules:
+    # Stricter unused / dead-code signal (on top of flutter_lints + lints/recommended).
+    avoid_unused_constructor_parameters: true
+    unnecessary_statements: true
+    # Mechanical consistency (many fixes via `dart fix --apply lib`).
+    avoid_types_as_parameter_names: true
+    collection_methods_unrelated_type: true
+    combinators_ordering: true
+    directives_ordering: true
+    implicit_call_tearoffs: true
+    noop_primitive_operations: true
+    prefer_const_constructors_in_immutables: true
+    prefer_if_null_operators: true
+    require_trailing_commas: true
+    sized_box_for_whitespace: true
+    sort_child_properties_last: true
+    unnecessary_breaks: true
+    unnecessary_lambdas: true
+    unnecessary_null_aware_assignments: true
+    unnecessary_parenthesis: true
+    use_string_in_part_of_directives: true

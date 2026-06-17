@@ -103,7 +103,11 @@ class ReferralCodePage extends StatelessWidget {
   }
 
   Future<void> _handleShare(String code) async {
-    await Share.share("Join Kitchen's Guardian using my referral code: $code");
+    await SharePlus.instance.share(
+      ShareParams(
+        text: "Join Kitchen's Guardian using my referral code: $code",
+      ),
+    );
   }
 
   AppBar _buildAppBar(BuildContext context) {

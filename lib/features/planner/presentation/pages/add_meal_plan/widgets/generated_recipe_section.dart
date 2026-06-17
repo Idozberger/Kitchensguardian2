@@ -1,4 +1,5 @@
 // ignore_for_file: use_build_context_synchronously
+// Uses context after recipe-generation async work; refactor with mounted checks later.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -115,7 +116,7 @@ class GeneratedRecipeSection extends StatelessWidget {
           context.read<PlannerBloc>().add(
             DeletePlanFromRemoteDbEvent(mealPlanId: meal.mealplanId),
           );
-          await Future.delayed(Duration(seconds: 6));
+          await Future<void>.delayed(Duration(seconds: 6));
         }
       },
       onSecondaryPressed: () => Navigator.pop(context),

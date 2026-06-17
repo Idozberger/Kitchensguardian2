@@ -19,7 +19,7 @@ class ScanHistoryCubit extends Cubit<ScanHistoryState> {
 
     res.fold(
       (failure) =>
-          emit(state.copyWith(error: failure.message, isLoading: false)),
+          emit(state.copyWith(error: failure.userMessage, isLoading: false)),
       (newItems) {
         final updatedItems = List<ScanHistoryEntity>.from(state.items)
           ..addAll(newItems);

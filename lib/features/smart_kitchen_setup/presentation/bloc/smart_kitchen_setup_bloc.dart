@@ -1,11 +1,12 @@
 // ignore_for_file: pattern_never_matches_value_type
+// Analyzer is conservative on sealed/runtime state shapes for AI setup events.
 
-import 'dart:developer';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
+import 'package:foodkitchen/core/error/user_facing_error_mapper.dart';
 import 'package:foodkitchen/core/services/document_scanning/document_scanning_service.dart';
-
+import 'package:foodkitchen/core/utils/dev_logging.dart';
 import 'package:foodkitchen/features/smart_kitchen_setup/data/models/kitchen_section_model.dart';
 import 'package:foodkitchen/features/smart_kitchen_setup/domain/usecases/scan_kitchen_images.dart';
 import 'package:foodkitchen/features/smart_kitchen_setup/domain/usecases/skip_kitchen_setup.dart';
@@ -46,7 +47,7 @@ class SmartKitchenSetupBloc
 
     await result.fold(
       (failure) {
-        emit(state.copyWith(errorMessage: failure.message, isSkipping: false));
+        emit(state.copyWith(errorMessage: failure.userMessage, isSkipping: false));
       },
       (successMessage) async {
         await _userCubit.getUserStorageArea(kitchenId: event.kitchenId);
@@ -65,7 +66,7 @@ class SmartKitchenSetupBloc
 
     await result.fold(
       (failure) {
-        emit(state.copyWith(errorMessage: failure.message, isSkipping: false));
+        emit(state.copyWith(errorMessage: failure.userMessage, isSkipping: false));
       },
       (successMessage) async {
         await _userCubit.getUserStorageArea(kitchenId: event.kitchenId);
@@ -105,7 +106,7 @@ class SmartKitchenSetupBloc
 
     try {
       final result = await DocumentScannerService().scanAndGetPath();
-      log('scanning result: $result');
+      devLog('scanning result: $result');
 
       if (result == null) {
         emit(state.copyWith(isScanning: false, clearActiveSection: true));
@@ -135,11 +136,16 @@ class SmartKitchenSetupBloc
         ),
       );
     } on PlatformException catch (e) {
+      final userMessage = UserFacingErrorMapper.fromPlatform(
+        e,
+        fallbackUserMessage:
+            "We couldn't scan that. Please try again or pick another image.",
+      ).userMessage;
       emit(
         state.copyWith(
           isScanning: false,
           clearActiveSection: true,
-          errorMessage: 'Scan failed: ${e.message}',
+          errorMessage: userMessage,
         ),
       );
     } catch (_) {
@@ -186,7 +192,7 @@ class SmartKitchenSetupBloc
       miscFilePaths: event.payload['misc'] ?? [],
     );
 
-    log(
+    devLog(
       'API params: fridge=${params.fridgeFilePaths}, freezer=${params.freezerFilePaths}, '
       'pantry=${params.pantryFilePaths}, spices=${params.spicesFilePaths}, '
       'misc=${params.miscFilePaths}',
@@ -199,7 +205,7 @@ class SmartKitchenSetupBloc
         emit(
           state.copyWith(
             isScanning: false,
-            errorMessage: failure.message,
+            errorMessage: failure.userMessage,
             isLoading: false,
           ),
         );

@@ -71,7 +71,10 @@ class MemberPopupMenu extends StatelessWidget {
           SvgPicture.asset(
             icon,
             height: label == "Demote Cohost" ? 18 : 12,
-            color: const Color(0xff787878),
+            colorFilter: const ColorFilter.mode(
+              Color(0xff787878),
+              BlendMode.srcIn,
+            ),
           ),
           const SizedBox(width: 8),
           Text(

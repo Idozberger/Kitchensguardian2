@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
+// syncfusion_flutter_core is a transitive dep of sliders; direct import needs this allow.
 // ignore: depend_on_referenced_packages
 import 'package:syncfusion_flutter_core/theme.dart';
 import 'package:syncfusion_flutter_sliders/sliders.dart'
-    show SfSlider, SfRectangularTooltipShape;
+    show SfRectangularTooltipShape, SfSlider;
 
 class GenericSlider extends StatefulWidget {
   final double min;
@@ -84,15 +85,22 @@ class _GenericSliderState extends State<GenericSlider> {
           minorTicksPerInterval: widget.minorTicksPerInterval,
 
           tooltipTextFormatterCallback:
-              (dynamic actualValue, String formattedText) {
-                return _formatToHoursMinutes(actualValue);
+              (Object? actualValue, String formattedText) {
+                final double v = actualValue is num
+                    ? actualValue.toDouble()
+                    : double.tryParse(actualValue?.toString() ?? '') ??
+                          _currentValue;
+                return _formatToHoursMinutes(v);
               },
 
-          onChanged: (dynamic value) {
+          onChanged: (Object? value) {
+            final double v = value is num
+                ? value.toDouble()
+                : double.tryParse(value?.toString() ?? '') ?? _currentValue;
             setState(() {
-              _currentValue = value;
+              _currentValue = v;
             });
-            widget.onChanged(value);
+            widget.onChanged(v);
           },
         ),
       ),

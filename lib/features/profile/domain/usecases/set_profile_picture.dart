@@ -1,5 +1,5 @@
-import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/core/common/usecase/usecase.dart';
+import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/features/profile/domain/repository/profile_repository.dart';
 import 'package:fpdart/fpdart.dart';
 

@@ -32,7 +32,7 @@ class CreateOrJoinKitchenTile extends StatelessWidget {
               Expanded(
                 child: GenericButtonWidget(
                   text: "Join",
-                  onPressed: () => showJoinKitchenDialog(context),
+                  onPressed: () => showJoinKitchenDialogForHome(context),
                 ),
               ),
             ],

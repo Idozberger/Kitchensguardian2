@@ -1,11 +1,10 @@
 import 'dart:convert';
-import 'dart:developer';
-import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:flutter/widgets.dart';
 import 'package:foodkitchen/core/global/functions/api_endpoints.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
+import 'package:foodkitchen/core/utils/dev_logging.dart';
+import 'package:foodkitchen/core/utils/json_conversion.dart';
 
 abstract interface class DashboardRemoteDatasource {
   Future<List<Map<String, dynamic>>> getRecipeDetails({
@@ -50,23 +49,26 @@ class DashboardRemoteDatasourceImpl implements DashboardRemoteDatasource {
         "${AppConstants.getMembers}?kitchen_id=$kitchenId",
       );
       if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
+        final Map<String, dynamic> data = jsonObjectFromResponseData(
+          response.data,
+        );
 
-        final message = data["error"];
-        throw message;
+        final Object? message = data['error'];
+        throw apiExceptionFrom(message);
       }
-      final data = response.data["members"];
+      final Map<String, dynamic> root = jsonObjectFromResponseData(
+        response.data,
+      );
+      final Object? membersRaw = root['members'];
 
-      if (data is List) {
-        debugPrint("Kitchen members: ${data.map((member) => member)}");
-        return data.map((e) => Map<String, dynamic>.from(e)).toList();
+      if (membersRaw is List) {
+        devPrint("Kitchen members: ${membersRaw.map((member) => member)}");
+        return membersRaw.map(jsonObjectFromResponseData).toList();
       } else {
         throw Exception("Invalid data");
       }
     } on DioException catch (e) {
-      throw dio.handleError(e);
+      throw await dio.handleError(e);
     }
   }
 
@@ -81,16 +83,17 @@ class DashboardRemoteDatasourceImpl implements DashboardRemoteDatasource {
         data: {"kitchen_id": kitchenId, "member_id": memberId},
       );
       if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
+        final Map<String, dynamic> data = jsonObjectFromResponseData(
+          response.data,
+        );
 
-        final message = data["error"];
-        throw message;
+        final Object? message = data['error'];
+        throw apiExceptionFrom(message);
       }
-      return response.data["message"];
+      final Map<String, dynamic> ok = jsonObjectFromResponseData(response.data);
+      return readJsonString(ok, 'message');
     } on DioException catch (e) {
-      throw dio.handleError(e);
+      throw await dio.handleError(e);
     }
   }
 
@@ -105,16 +108,17 @@ class DashboardRemoteDatasourceImpl implements DashboardRemoteDatasource {
         data: {"kitchen_id": kitchenId, "member_id": memberId},
       );
       if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
+        final Map<String, dynamic> data = jsonObjectFromResponseData(
+          response.data,
+        );
 
-        final message = data["error"];
-        throw message;
+        final Object? message = data['error'];
+        throw apiExceptionFrom(message);
       }
-      return response.data["message"];
+      final Map<String, dynamic> ok = jsonObjectFromResponseData(response.data);
+      return readJsonString(ok, 'message');
     } on DioException catch (e) {
-      throw dio.handleError(e);
+      throw await dio.handleError(e);
     }
   }
 
@@ -129,16 +133,17 @@ class DashboardRemoteDatasourceImpl implements DashboardRemoteDatasource {
         data: {"kitchen_id": kitchenId, "member_id": memberId},
       );
       if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
+        final Map<String, dynamic> data = jsonObjectFromResponseData(
+          response.data,
+        );
 
-        final message = data["error"];
-        throw message;
+        final Object? message = data['error'];
+        throw apiExceptionFrom(message);
       }
-      return response.data["message"];
+      final Map<String, dynamic> ok = jsonObjectFromResponseData(response.data);
+      return readJsonString(ok, 'message');
     } on DioException catch (e) {
-      throw dio.handleError(e);
+      throw await dio.handleError(e);
     }
   }
 
@@ -147,26 +152,28 @@ class DashboardRemoteDatasourceImpl implements DashboardRemoteDatasource {
     required String kitchenId,
   }) async {
     try {
-      log("comsumption confirmation pending: ");
+      devLog("comsumption confirmation pending: ");
       final response = await dio.get(
         "${AppConstants.consumptionConfirmationPending}?kitchen_id=$kitchenId",
       );
 
       if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
+        final Map<String, dynamic> data = jsonObjectFromResponseData(
+          response.data,
+        );
 
-        final message = data["error"];
-        throw message;
+        final Object? message = data['error'];
+        throw apiExceptionFrom(message);
       }
-      log("comsumption confirmation pending: ${response.data}");
-      final data = response.data is String
-          ? jsonDecode(response.data)
-          : response.data;
-      return List<Map<String, dynamic>>.from(data['confirmations']);
+      devLog("comsumption confirmation pending: ${response.data}");
+      final Map<String, dynamic> root = jsonObjectFromResponseData(
+        response.data,
+      );
+      final Object? conf = root['confirmations'];
+      if (conf is! List) return [];
+      return conf.map(jsonObjectFromResponseData).toList();
     } on DioException catch (e) {
-      throw dio.handleError(e);
+      throw await dio.handleError(e);
     }
   }
 
@@ -177,7 +184,7 @@ class DashboardRemoteDatasourceImpl implements DashboardRemoteDatasource {
     required String actualQuantityRemaining,
   }) async {
     try {
-      log("confirmatin id: $confirmationId");
+      devLog("confirmatin id: $confirmationId");
       final response = await dio.post(
         AppConstants.consumptionConfirmationRespond,
         data: {
@@ -187,16 +194,17 @@ class DashboardRemoteDatasourceImpl implements DashboardRemoteDatasource {
         },
       );
       if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
+        final Map<String, dynamic> data = jsonObjectFromResponseData(
+          response.data,
+        );
 
-        final message = data["error"];
-        throw message;
+        final Object? message = data['error'];
+        throw apiExceptionFrom(message);
       }
-      return response.data["message"];
+      final Map<String, dynamic> ok = jsonObjectFromResponseData(response.data);
+      return readJsonString(ok, 'message');
     } on DioException catch (e) {
-      throw dio.handleError(e);
+      throw await dio.handleError(e);
     }
   }
 
@@ -210,16 +218,18 @@ class DashboardRemoteDatasourceImpl implements DashboardRemoteDatasource {
       );
 
       if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
+        final Map<String, dynamic> data = jsonObjectFromResponseData(
+          response.data,
+        );
 
-        final message = data["error"];
-        throw message;
+        final Object? message = data['error'];
+        throw apiExceptionFrom(message);
       }
-      return response.data["pending_count"].toString();
+      final Map<String, dynamic> ok = jsonObjectFromResponseData(response.data);
+      final Object? pc = ok['pending_count'];
+      return pc?.toString() ?? '0';
     } on DioException catch (e) {
-      throw dio.handleError(e);
+      throw await dio.handleError(e);
     }
   }
 
@@ -232,32 +242,30 @@ class DashboardRemoteDatasourceImpl implements DashboardRemoteDatasource {
       final response = await dio.get("${AppConstants.recipeById}$recipeId");
 
       if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
-        throw data["error"] ?? "Something went wrong";
+        final Map<String, dynamic> data = jsonObjectFromResponseData(
+          response.data,
+        );
+        throw apiExceptionFrom(data['error'] ?? 'Something went wrong');
       }
 
-      if (response.data is Map<String, dynamic>) {
-        final recipe = Map<String, dynamic>.from(response.data);
+      final Map<String, dynamic> recipe = Map<String, dynamic>.from(
+        jsonObjectFromResponseData(response.data),
+      );
 
-        final thumbnailBase64 = recipe["thumbnail"];
-        if (thumbnailBase64 is String && thumbnailBase64.isNotEmpty) {
-          try {
-            recipe["thumbnail"] = base64Decode(
-              thumbnailBase64.contains(",")
-                  ? thumbnailBase64.split(",").last.trim()
-                  : thumbnailBase64.trim(),
-            );
-          } catch (_) {
-            recipe["thumbnail"] = Uint8List(0);
-          }
+      final Object? thumbnailBase64 = recipe['thumbnail'];
+      if (thumbnailBase64 is String && thumbnailBase64.isNotEmpty) {
+        try {
+          recipe['thumbnail'] = base64Decode(
+            thumbnailBase64.contains(",")
+                ? thumbnailBase64.split(',').last.trim()
+                : thumbnailBase64.trim(),
+          );
+        } catch (_) {
+          recipe['thumbnail'] = null;
         }
-
-        return [recipe];
       }
 
-      throw Exception("Invalid data format for recipe details");
+      return [recipe];
     } on DioException catch (e) {
       throw await dio.handleError(e);
     }

@@ -9,7 +9,6 @@ class PlannerEmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: EmptyStateWidget(
-        context,
         imagePath: AppAssets.noKitchenFound,
         title: 'No meal found here',
       ),

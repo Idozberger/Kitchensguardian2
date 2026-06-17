@@ -1,8 +1,9 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:foodkitchen/core/screens/data/models/country_currency_model.dart';
 import 'package:foodkitchen/core/screens/data/models/currency_model.dart';
+import 'package:foodkitchen/core/utils/dev_logging.dart';
+import 'package:foodkitchen/core/utils/json_conversion.dart';
 
 abstract class ICountryCurrencyDataSource {
   Future<List<Country>> getCountries();
@@ -14,10 +15,10 @@ class CountryCurrencyDataSource implements ICountryCurrencyDataSource {
   @override
   Future<List<Country>> getCountries() async {
     try {
-      debugPrint('Loading countries from local JSON');
+      devPrint('Loading countries from local JSON');
       return await _getCountriesFromAssets();
     } catch (e) {
-      debugPrint('Asset Error: $e');
+      devPrint('Asset Error: $e');
       return [];
     }
   }
@@ -25,9 +26,14 @@ class CountryCurrencyDataSource implements ICountryCurrencyDataSource {
   Future<List<Country>> _getCountriesFromAssets() async {
     try {
       final jsonString = await rootBundle.loadString(_jsonPath);
-      final List<dynamic> data = jsonDecode(jsonString);
+      final Object? decoded = jsonDecode(jsonString);
+      if (decoded is! List) {
+        devPrint('country_currency.json root is not a list');
+        return [];
+      }
+      final List<dynamic> data = decoded;
 
-      debugPrint('Loaded ${data.length} countries from assets');
+      devPrint('Loaded ${data.length} countries from assets');
 
       final countries = <Country>[];
 
@@ -44,12 +50,13 @@ class CountryCurrencyDataSource implements ICountryCurrencyDataSource {
 
           final currencies = <Currency>[];
           if (currenciesObj != null) {
-            currenciesObj.forEach((key, value) {
+            currenciesObj.forEach((String key, Object? value) {
+              final Map<String, dynamic> v = jsonObjectFromResponseData(value);
               currencies.add(
                 Currency(
                   code: key,
-                  name: value['name'] ?? '',
-                  symbol: value['symbol'] ?? '',
+                  name: readJsonString(v, 'name'),
+                  symbol: readJsonString(v, 'symbol'),
                 ),
               );
             });
@@ -60,19 +67,19 @@ class CountryCurrencyDataSource implements ICountryCurrencyDataSource {
               Country(code: code, name: name, currencies: currencies),
             );
           } else {
-            debugPrint('Skipping country with null code');
+            devPrint('Skipping country with null code');
           }
         } catch (e) {
-          debugPrint('Error processing country item\n$e');
+          devPrint('Error processing country item\n$e');
         }
       }
 
       countries.sort((a, b) => a.name.compareTo(b.name));
-      debugPrint('Processed ${countries.length} countries');
+      devPrint('Processed ${countries.length} countries');
 
       return countries;
     } catch (e) {
-      debugPrint('Exception in _getCountriesFromAssets: $e');
+      devPrint('Exception in _getCountriesFromAssets: $e');
       rethrow;
     }
   }

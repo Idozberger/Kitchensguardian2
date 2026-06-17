@@ -9,7 +9,7 @@ class CurrencyDropdown extends StatelessWidget {
   final List<Currency> currencies;
   final Currency? selectedCurrency;
   final Country? selectedCountry;
-  final Function(Currency?) onChanged;
+  final void Function(Currency?) onChanged;
 
   const CurrencyDropdown({
     super.key,
@@ -26,7 +26,7 @@ class CurrencyDropdown extends StatelessWidget {
         borderRadius: BorderRadius.circular(t(12)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: t(12),
             offset: Offset(0, 4),
           ),

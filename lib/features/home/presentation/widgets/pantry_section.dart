@@ -1,4 +1,5 @@
 // ignore_for_file: unnecessary_underscores
+// Legacy private field names in this widget; rename when touching layout.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,6 +13,7 @@ import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
+import 'package:foodkitchen/features/home/domain/entities/pantry_items.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_state.dart';
 import 'package:foodkitchen/features/pantry/presentation/widgets/list_tile.dart';
@@ -167,7 +169,7 @@ class _PantrySectionState extends State<PantrySection> {
     );
   }
 
-  Widget _buildPantryItemRow(BuildContext context, dynamic pantry) {
+  Widget _buildPantryItemRow(BuildContext context, PantriesItemsEntity pantry) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -201,7 +203,10 @@ class _PantrySectionState extends State<PantrySection> {
           onPressed: () => context.push(Routes.myPantry),
           icon: SvgPicture.asset(
             AppAssets.eyeSvg,
-            color: AppColors.primaryColor,
+            colorFilter: ColorFilter.mode(
+              AppColors.primaryColor,
+              BlendMode.srcIn,
+            ),
             width: w(10),
             height: h(10),
           ),

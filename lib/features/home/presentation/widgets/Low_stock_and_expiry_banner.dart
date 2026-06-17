@@ -1,4 +1,5 @@
 // ignore_for_file: file_names
+// File name predates lower_case_with_underscores rule; renaming risks import churn.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

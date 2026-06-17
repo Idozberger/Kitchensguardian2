@@ -147,7 +147,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                             hintText: "Enter current password",
                             obscureText: !_currentPasswordObscure,
                             suffixIcon: GestureDetector(
-                              onTap: () => updateCurrentPasswordObscure(),
+                              onTap: updateCurrentPasswordObscure,
                               child: Padding(
                                 padding: gapSymmetric(
                                   vertical: 13,
@@ -169,7 +169,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                             hintText: "Enter new password",
                             obscureText: !_isObscurePassword,
                             suffixIcon: GestureDetector(
-                              onTap: () => updateObsecurePassword(),
+                              onTap: updateObsecurePassword,
                               child: Padding(
                                 padding: gapSymmetric(
                                   vertical: 13,
@@ -190,7 +190,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                             hintText: "Renter new password",
                             obscureText: !_isObscureConfirmPassword,
                             suffixIcon: GestureDetector(
-                              onTap: () => updateObsecureConfirmPassword(),
+                              onTap: updateObsecureConfirmPassword,
                               child: Padding(
                                 padding: gapSymmetric(
                                   vertical: 13,
@@ -208,7 +208,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                     gap(height: 20),
                     GenericButtonWidget(
                       isLoading: state.isLoading,
-                      onPressed: () => onUpdatePassword(),
+                      onPressed: onUpdatePassword,
                       text: "Confirm",
                     ),
                   ],

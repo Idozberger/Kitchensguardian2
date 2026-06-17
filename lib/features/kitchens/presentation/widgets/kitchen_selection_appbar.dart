@@ -26,7 +26,13 @@ class KitchenSelectionAppBar extends StatelessWidget
       actions: [
         IconButton(
           onPressed: () => context.push(Routes.logout),
-          icon: SvgPicture.asset(AppAssets.signoutSvg, color: Colors.redAccent),
+          icon: SvgPicture.asset(
+            AppAssets.signoutSvg,
+            colorFilter: const ColorFilter.mode(
+              Colors.redAccent,
+              BlendMode.srcIn,
+            ),
+          ),
         ),
         SizedBox(width: w(8)),
       ],

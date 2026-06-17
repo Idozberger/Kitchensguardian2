@@ -1,25 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
-import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
+import 'package:foodkitchen/core/navigation/paywall_navigation.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 class SelectDateWidget extends StatefulWidget {
   final DateTime startDate;
   final DateTime? selectedDate;
   final ValueChanged<DateTime> onChanged;
-  final bool isPremiumUser;
+  final bool hasPremiumAccess;
 
   const SelectDateWidget({
     super.key,
     required this.startDate,
     required this.onChanged,
-    required this.isPremiumUser,
+    required this.hasPremiumAccess,
     this.selectedDate,
   });
 
@@ -34,7 +33,6 @@ class _SelectDateWidgetState extends State<SelectDateWidget>
 
   late List<List<DateTime>> _weeks;
   late PageController _pageController;
-  int _currentPage = 0;
 
   @override
   void initState() {
@@ -78,9 +76,6 @@ class _SelectDateWidgetState extends State<SelectDateWidget>
           child: PageView.builder(
             controller: _pageController,
             itemCount: 2,
-            onPageChanged: (page) {
-              setState(() => _currentPage = page);
-            },
             itemBuilder: (context, weekIndex) {
               final days = _weeks[weekIndex];
 
@@ -94,12 +89,12 @@ class _SelectDateWidgetState extends State<SelectDateWidget>
                     final isSelected = _isSameDate(date, currentSelected);
 
                     final globalIndex = weekIndex * 7 + dayIndex;
-                    final isLocked = !widget.isPremiumUser && globalIndex > 2;
+                    final isLocked = !widget.hasPremiumAccess && globalIndex > 2;
 
                     return GestureDetector(
                       onTap: () {
                         if (isLocked) {
-                          context.push(Routes.subscription);
+                          openPaywallIfEnabled(context);
                           return;
                         }
                         widget.onChanged(date);

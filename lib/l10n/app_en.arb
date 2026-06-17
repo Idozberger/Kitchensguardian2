@@ -1,0 +1,7 @@
+{
+  "@@locale": "en",
+  "appName": "Kitchen's Guardian",
+  "@appName": {
+    "description": "Application title shown in task manager and system UI where supported."
+  }
+}

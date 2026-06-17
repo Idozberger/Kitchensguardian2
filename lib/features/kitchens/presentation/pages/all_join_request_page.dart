@@ -6,7 +6,7 @@ import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
-import 'package:foodkitchen/features/kitchens/presentation/pages/kitchen_joining_status.dart';
+import 'package:foodkitchen/features/kitchens/domain/entities/join_request_info.dart';
 
 class AllJoinRequestsPage extends StatelessWidget {
   final List<JoinRequestInfo> requests;
@@ -123,7 +123,7 @@ class _StatusPill extends StatelessWidget {
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

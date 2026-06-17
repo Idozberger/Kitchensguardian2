@@ -1,6 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
+// Kitchen join/create flows await network then use context.
 
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -13,6 +13,7 @@ import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/services/notifications/flutter_local_notifications_service.dart';
+import 'package:foodkitchen/core/utils/dev_logging.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_bloc.dart';
@@ -26,7 +27,6 @@ import 'package:foodkitchen/features/kitchens/presentation/widgets/kitchen_selec
 import 'package:foodkitchen/features/kitchens/presentation/widgets/kitchen_selection_appbar.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class KitchenSelectionPage extends StatefulWidget {
   const KitchenSelectionPage({super.key});
@@ -39,7 +39,6 @@ class _KitchenSelectionPageState extends State<KitchenSelectionPage> {
   late KitchenBloc kitchenBloc;
   late UserCubit userCubit;
   late AppCubit appCubit;
-  late SharedPreferences perf;
   @override
   void initState() {
     kitchenBloc = context.read<KitchenBloc>();
@@ -52,7 +51,7 @@ class _KitchenSelectionPageState extends State<KitchenSelectionPage> {
   }
 
   Future<void> getNotificationPermission() async {
-    await Future.delayed(Duration(seconds: 1));
+    await Future<void>.delayed(Duration(seconds: 1));
     bool hasPermission = await NotificationService().isExactAlarmAllowed();
     if (!hasPermission && Platform.isAndroid) {
       showCustomGenericDialog(
@@ -89,7 +88,7 @@ class _KitchenSelectionPageState extends State<KitchenSelectionPage> {
           }
           if (state is OpenKitchen) {
             kitchenBloc.add(FetchKitchens());
-            log("Storage area: ${userCubit.state.userStorageAreas}");
+            devLog("Storage area: ${userCubit.state.userStorageAreas}");
             if (userCubit.state.userStorageAreas.isNotEmpty) {
               context.goNamed(
                 Routes.dashboard,

@@ -1,14 +1,18 @@
-import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:foodkitchen/core/common/data/datasource/common_remote_datasource.dart';
 import 'package:foodkitchen/core/common/data/model/pantries_model.dart';
-import 'package:foodkitchen/core/common/domain/entities/pantries_entity.dart';
-import 'package:foodkitchen/core/error/failures.dart';
-import 'package:foodkitchen/features/pantry/data/datasource/pantry_remote_datasource.dart';
 import 'package:foodkitchen/core/common/data/model/pantry_model.dart';
-import 'package:foodkitchen/features/pantry/data/model/scan_receipt_model.dart';
-import 'package:foodkitchen/features/pantry/data/model/scan_receipt_item_model.dart';
+import 'package:foodkitchen/core/common/domain/entities/pantries_entity.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';
+import 'package:foodkitchen/core/error/failures.dart';
+import 'package:foodkitchen/core/utils/dev_logging.dart';
+import 'package:foodkitchen/core/utils/json_conversion.dart';
+import 'package:foodkitchen/features/pantry/data/datasource/pantry_remote_datasource.dart';
+import 'package:foodkitchen/features/pantry/data/model/scan_receipt_item_model.dart';
+import 'package:foodkitchen/features/pantry/data/model/scan_receipt_model.dart';
 import 'package:foodkitchen/features/pantry/domain/entities/scan_receipt.dart';
 import 'package:foodkitchen/features/pantry/domain/repository/pantry_repository.dart';
 import 'package:fpdart/fpdart.dart';
@@ -32,7 +36,7 @@ class PantryRepositoryImpl implements PantryRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -45,15 +49,18 @@ class PantryRepositoryImpl implements PantryRepository {
         kitchenId: kitchenId,
       );
 
-      final pantryItems = (response as List).map((e) {
-        return PantryItemModel.fromJson(e as Map<String, dynamic>);
-      }).toList();
+      final pantryItems = (response as List)
+          .map(
+            (Object? e) =>
+                PantryItemModel.fromJson(jsonObjectFromResponseData(e)),
+          )
+          .toList();
 
       return Right(pantryItems);
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -69,20 +76,31 @@ class PantryRepositoryImpl implements PantryRepository {
         currency: currency,
         country: country,
       );
-      debugPrint("response result: ${response["items"]}");
+      devPrint("response result: ${response["items"]}");
       final itemsJson = response['items'] as List<dynamic>? ?? [];
 
       List<ScanReceiptItemModel> items = [];
 
-      for (var e in itemsJson) {
-        final name = e['name'] as String? ?? '';
-        final unit = e['unit'] as String? ?? 'Unit';
-        final amount = e['amount'].toString();
-        final group = e['recommended_storage'].toString();
-        final expireDate = e['expiry_date'].toString();
-        final thumbnail = e['thumbnail'];
+      for (final Object? raw in itemsJson) {
+        final Map<String, dynamic> e = jsonObjectFromResponseData(raw);
+        final name = readJsonString(e, 'name');
+        final unit = readJsonString(e, 'unit', fallback: 'Unit');
+        final amount = readJsonString(e, 'amount');
+        final group = readJsonString(e, 'recommended_storage');
+        final expireDate = readJsonString(e, 'expiry_date');
+        final Object? thumbRaw = e['thumbnail'];
+        Uint8List thumbnailBytes = Uint8List(0);
+        if (thumbRaw is Uint8List) {
+          thumbnailBytes = thumbRaw;
+        } else if (thumbRaw is String && thumbRaw.isNotEmpty) {
+          try {
+            thumbnailBytes = base64Decode(thumbRaw);
+          } catch (_) {
+            thumbnailBytes = Uint8List(0);
+          }
+        }
 
-        debugPrint(
+        devPrint(
           "Item parsed - name: $name, unit: $unit, quantity: $amount, expireDate: $expireDate",
         );
 
@@ -93,7 +111,7 @@ class PantryRepositoryImpl implements PantryRepository {
             unit: unit,
             amount: amount.isEmpty ? "1" : amount,
             expireDate: expireDate,
-            thumbnail: thumbnail,
+            thumbnail: thumbnailBytes,
           ),
         );
       }
@@ -103,15 +121,15 @@ class PantryRepositoryImpl implements PantryRepository {
         items: items,
       );
 
-      debugPrint("ScanReceiptModel created: ${receipt.toString()}");
+      devPrint("ScanReceiptModel created: $receipt");
 
       return Right(receipt);
     } on Failure catch (f) {
-      debugPrint("Failure caught: ${f.message}");
+      devPrint("Failure caught: ${f.message}");
       return Left(f);
     } catch (e) {
-      debugPrint("Unknown error: $e");
-      return Left(UnknownFailure(e.toString()));
+      devPrint("Unknown error: $e");
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -126,7 +144,7 @@ class PantryRepositoryImpl implements PantryRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -149,7 +167,7 @@ class PantryRepositoryImpl implements PantryRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -168,7 +186,7 @@ class PantryRepositoryImpl implements PantryRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -181,15 +199,13 @@ class PantryRepositoryImpl implements PantryRepository {
         kitchenId: kitchenId,
       );
 
-      final pantries = response
-          .map((json) => PantriesCommonModel.fromJson(json))
-          .toList();
+      final pantries = response.map(PantriesCommonModel.fromJson).toList();
 
       return Right(pantries);
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -208,7 +224,7 @@ class PantryRepositoryImpl implements PantryRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -223,7 +239,7 @@ class PantryRepositoryImpl implements PantryRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -238,7 +254,7 @@ class PantryRepositoryImpl implements PantryRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -253,7 +269,7 @@ class PantryRepositoryImpl implements PantryRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -270,7 +286,7 @@ class PantryRepositoryImpl implements PantryRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -6,17 +7,20 @@ import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
+import 'package:foodkitchen/core/dialogs/delete_account_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
+//import 'package:foodkitchen/core/services/di/service_locator.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
-import 'package:foodkitchen/core/widgets/generic_premium_card_widget.dart';
+//import 'package:foodkitchen/core/widgets/generic_premium_card_widget.dart';
 import 'package:foodkitchen/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:foodkitchen/features/profile/presentation/bloc/profile_event.dart';
 import 'package:foodkitchen/features/profile/presentation/bloc/profile_state.dart';
 import 'package:foodkitchen/features/profile/presentation/widgets/header.dart';
+//import 'package:foodkitchen/features/subscription/data/datasource/subscription_remote_datasource.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -41,6 +45,27 @@ class _ProfilePageState extends State<ProfilePage> {
     profileBloc.add(LoadProfilePicture());
   }
 
+/*
+  Future<void> _restoreSubscription(BuildContext context) async {
+    try {
+      final userCubit = context.read<UserCubit>();
+      final result = await sl<SubscriptionRemoteDatasource>().restoreSubscription();
+      if (!context.mounted) return;
+      await userCubit.setUser();
+      if (!context.mounted) return;
+      final active = result['entitlement_is_active'] == true;
+      AppToast.show(
+        active
+            ? 'Subscription restored.'
+            : 'No active subscription found on your account.',
+        active ? ToastType.success : ToastType.warning,
+      );
+    } on Object catch (e) {
+      AppToast.show(e.toString(), ToastType.error);
+    }
+  }
+*/
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ProfileBloc, ProfileState>(
@@ -61,8 +86,8 @@ class _ProfilePageState extends State<ProfilePage> {
                       children: [
                         ProfileHeader(profileState: state),
                         gap(height: 20),
-                        PremiumCardWidget(isGoProButtonEnabled: true),
-                        gap(height: 20),
+                        /*PremiumCardWidget(isGoProButtonEnabled: true),
+                        gap(height: 20),*/
                         UpperTile(
                           widget: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,16 +121,23 @@ class _ProfilePageState extends State<ProfilePage> {
                               gap(height: 5),
                               _buildListTile(
                                 context,
+                                assetPath: AppAssets.deleteSvg,
+                                title: "Delete Account",
+                                subTitle: "Permanently delete your account",
+                                callback: () {
+                                  showDeleteAccountDialog(context);
+                                },
+                              ),
+                              /*gap(height: 5),
+                              _buildListTile(
+                                context,
                                 assetPath: AppAssets.restorePurchaseSvg,
                                 title: "Restore Purchases",
                                 subTitle: "",
                                 callback: () {
-                                  AppToast.show(
-                                    "Restore Purchases",
-                                    ToastType.success,
-                                  );
+                                  unawaited(_restoreSubscription(context));
                                 },
-                              ),
+                              ),*/
                             ],
                           ),
                         ),
@@ -207,7 +239,11 @@ Shared with love from KitchenGuardian
 '''
                                           .trim();
 
-                                  Share.share(shareText);
+                                  unawaited(
+                                    SharePlus.instance.share(
+                                      ShareParams(text: shareText),
+                                    ),
+                                  );
                                 },
                               ),
                               gap(height: 5),

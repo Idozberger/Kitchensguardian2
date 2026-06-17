@@ -1,3 +1,4 @@
+import 'package:foodkitchen/core/utils/json_conversion.dart';
 import 'package:foodkitchen/features/planner/domain/entities/kitchen_date_range_entity.dart';
 
 class KitchenDateRangeModel extends KitchenDateRangeEntity {
@@ -11,11 +12,11 @@ class KitchenDateRangeModel extends KitchenDateRangeEntity {
 
   factory KitchenDateRangeModel.fromJson(Map<String, dynamic> json) {
     return KitchenDateRangeModel(
-      kitchenId: json["kitchen_id"] ?? "",
-      kitchenName: json["kitchen_name"] ?? "",
-      startDate: json["start_date"] ?? "",
-      endDate: json["end_date"] ?? "",
-      dateRangeUpdatedAt: json["date_range_updated_at"] ?? "",
+      kitchenId: readJsonString(json, 'kitchen_id'),
+      kitchenName: readJsonString(json, 'kitchen_name'),
+      startDate: readJsonString(json, 'start_date'),
+      endDate: readJsonString(json, 'end_date'),
+      dateRangeUpdatedAt: readJsonString(json, 'date_range_updated_at'),
     );
   }
 }

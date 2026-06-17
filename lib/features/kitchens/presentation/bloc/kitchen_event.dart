@@ -10,15 +10,6 @@ abstract class KitchenEvent extends Equatable {
 
 class FetchKitchens extends KitchenEvent {}
 
-class JoinKitchen extends KitchenEvent {
-  final String invitationCode;
-
-  const JoinKitchen(this.invitationCode);
-
-  @override
-  List<Object?> get props => [invitationCode];
-}
-
 class LeaveKitchenEvent extends KitchenEvent {
   final String kitchenId;
 

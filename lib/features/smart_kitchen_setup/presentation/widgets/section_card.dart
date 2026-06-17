@@ -120,14 +120,18 @@ class _SectionCardState extends State<SectionCard>
                       children: [
                         Row(
                           children: [
-                            Text(
-                              widget.section.title,
-                              style: Theme.of(context).textTheme.headlineLarge
-                                  ?.copyWith(
-                                    color: Colors.black,
-                                    fontSize: t(15),
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                            Expanded(
+                              child: Text(
+                                widget.section.title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context).textTheme.headlineLarge
+                                    ?.copyWith(
+                                      color: Colors.black,
+                                      fontSize: t(15),
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                              ),
                             ),
                             if (isSpices) ...[
                               const SizedBox(width: 6),
@@ -208,7 +212,7 @@ class _PhotoBadge extends StatelessWidget {
     return Container(
       padding: gapSymmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: section.accent.withOpacity(0.15),
+        color: section.accent.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
@@ -241,7 +245,7 @@ class SpicesImportantInfo extends StatelessWidget {
 }
 
 void _showSpicesInfoSheet(BuildContext context) {
-  showModalBottomSheet(
+  showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     isDismissible: false,

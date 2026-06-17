@@ -26,13 +26,11 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   late final UserCubit _userCubit;
   late final GroceryBloc _groceryBloc;
-  late final HomeBloc _homeBloc;
 
   @override
   void initState() {
     super.initState();
     _userCubit = context.read<UserCubit>();
-    _homeBloc = context.read<HomeBloc>();
     _groceryBloc = context.read<GroceryBloc>();
   }
 
@@ -85,7 +83,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _generateGroceryList() async {
-    if (!context.read<UserCubit>().state.isPremiumUser) {
+    if (!context.read<UserCubit>().state.hasPremiumAccess) {
       await AdService.instance.loadAndShowInterstitial(
         context: context,
         onDismissed: () {
@@ -239,7 +237,7 @@ class _HomePageState extends State<HomePage> {
       key: ValueKey("kitchen_view_${userState.userStorageAreas.length}"),
       state: homeState,
       isGeneratedRecipes: false,
-      onGeneratePressed: () => _handleGeneratePressed(),
+      onGeneratePressed: _handleGeneratePressed,
     );
   }
 

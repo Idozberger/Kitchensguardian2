@@ -1,10 +1,12 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:foodkitchen/core/global/functions/api_endpoints.dart';
+import 'package:foodkitchen/core/network/profile_response_cache.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
+import 'package:foodkitchen/core/utils/dev_logging.dart';
+import 'package:foodkitchen/core/utils/json_conversion.dart';
 
 abstract interface class CommonRemoteDatasource {
   Future<List<Map<String, dynamic>>> getAllStorageArea({
@@ -14,8 +16,14 @@ abstract interface class CommonRemoteDatasource {
 }
 
 class CommonRemoteDatasourceImpl implements CommonRemoteDatasource {
+  CommonRemoteDatasourceImpl({
+    required this.dio,
+    required this.profileCache,
+  });
+
   final DioHelper dio;
-  CommonRemoteDatasourceImpl({required this.dio});
+  final ProfileResponseCache profileCache;
+
   @override
   Future<List<Map<String, dynamic>>> getAllStorageArea({
     required String kitchenId,
@@ -29,55 +37,65 @@ class CommonRemoteDatasourceImpl implements CommonRemoteDatasource {
         );
 
         if (response.statusCode != 200 && response.statusCode != 201) {
-          final data = response.data is String
-              ? jsonDecode(response.data)
-              : response.data;
+          final Map<String, dynamic> errBody = jsonObjectFromResponseData(
+            response.data,
+          );
 
-          final message = data["error"];
-          throw message;
+          final Object? message = errBody['error'];
+          throw apiExceptionFrom(message);
         }
 
-        final data = response.data["pantries"];
+        final Map<String, dynamic> body = jsonObjectFromResponseData(
+          response.data,
+        );
+        final Object? pantriesRaw = body['pantries'];
 
-        if (data is List) {
-          return List<Map<String, dynamic>>.from(data);
+        if (pantriesRaw is List) {
+          return List<Map<String, dynamic>>.from(
+            pantriesRaw.map(jsonObjectFromResponseData),
+          );
         } else {
-          throw Exception("Invalid response format");
+          throw Exception('Invalid response format');
         }
       } on DioException catch (e) {
         retries--;
 
         if (retries == 0) {
-          throw dio.handleError(e);
+          throw await dio.handleError(e);
         }
 
-        await Future.delayed(const Duration(seconds: 2));
+        await Future<void>.delayed(const Duration(seconds: 2));
       }
     }
 
-    throw Exception("Unexpected error");
+    throw Exception('Unexpected error');
   }
 
   @override
   Future<Map<String, dynamic>> getProfileData() async {
+    return profileCache.getOrFetch(_loadProfileFromNetwork);
+  }
+
+  Future<Map<String, dynamic>> _loadProfileFromNetwork() async {
     try {
       final response = await dio.get(AppConstants.getUserProfile);
 
       if (response.statusCode != 200 && response.statusCode != 201) {
-        log(response.data);
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
+        devLog(response.data.toString());
+        final Map<String, dynamic> errBody = jsonObjectFromResponseData(
+          response.data,
+        );
 
-        throw data["error"] ?? "Unknown error occurred";
+        final Object? err = errBody['error'];
+        throw apiExceptionFrom(err ?? 'Unknown error occurred');
       }
 
-      final data = response.data is Map<String, dynamic>
-          ? response.data
-          : (response.data is String ? jsonDecode(response.data) : {});
+      final Map<String, dynamic> data = jsonObjectFromResponseData(
+        response.data,
+      );
 
-      final avatar = data["avatar"];
-      Uint8List avatarBytes = Uint8List(0);
+      final Object? avatar = data['avatar'];
+      Uint8List? avatarBytes;
 
       if (avatar != null && avatar.toString().isNotEmpty) {
         try {
@@ -86,22 +104,23 @@ class CommonRemoteDatasourceImpl implements CommonRemoteDatasource {
               : avatar.toString();
           avatarBytes = base64Decode(base64String);
         } catch (e) {
-          log("Avatar decode error: $e");
-          avatarBytes = Uint8List(0);
+          devLog('Avatar decode error: $e');
+          avatarBytes = null;
         }
       }
 
       return {
-        "avatar": avatarBytes,
-        "first_name": data["first_name"] ?? "",
-        "last_name": data["last_name"] ?? "",
-        "email": data["email"] ?? "",
-        "user_id": data["user_id"] ?? "",
-        "verified": data["verified"] ?? false,
-        "created_at": data["created_at"] ?? "",
+        'avatar': avatarBytes,
+        'first_name': data['first_name'] ?? '',
+        'last_name': data['last_name'] ?? '',
+        'email': data['email'] ?? '',
+        'user_id': data['user_id'] ?? '',
+        'verified': data['verified'] ?? false,
+        'created_at': data['created_at'] ?? '',
+        'entitlement_is_active': data['entitlement_is_active'] == true,
       };
     } catch (e, s) {
-      log("getProfileData error: $e\n$s");
+      devLog('getProfileData error: $e\n$s');
       return {};
     }
   }

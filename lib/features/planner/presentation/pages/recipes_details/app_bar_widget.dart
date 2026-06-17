@@ -17,7 +17,7 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
           SizedBox(width: w(16)),
           CircularIconButton(
             iconAsset: AppAssets.backArrowiOS,
-            onTap: () => onNavigatorback(),
+            onTap: onNavigatorback,
           ),
         ],
       ),

@@ -8,7 +8,7 @@ class CurrencySection extends StatelessWidget {
   final List<Currency> currencies;
   final Currency? selectedCurrency;
   final Country? selectedCountry;
-  final Function(Currency?) onCurrencyChanged;
+  final void Function(Currency?) onCurrencyChanged;
 
   const CurrencySection({
     super.key,

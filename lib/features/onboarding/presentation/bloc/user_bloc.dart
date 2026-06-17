@@ -28,18 +28,19 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     GetCurrentUser event,
     Emitter<UserState> emit,
   ) async {
-    bool? isOnboard = _sharedPreferences.getBool("is_onboard");
-
     final res = await _getCurrentUser(NoParams());
 
-    await Future.delayed(const Duration(seconds: 2));
+    await Future<void>.delayed(const Duration(seconds: 2));
 
     res.fold(
       (failure) => emit(
-        failure.message.contains("No Internet") ? NoInternet() : UserInitial(),
+        failure.userMessage.toLowerCase().contains('no internet')
+            ? NoInternet()
+            : UserInitial(),
       ),
       (user) {
         if (user == null) {
+          final isOnboard = _sharedPreferences.getBool("is_onboard");
           if (isOnboard != null && isOnboard) {
             emit(UserOnBoarded());
           } else {

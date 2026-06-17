@@ -1,9 +1,10 @@
-import 'dart:convert';
-import 'dart:developer';
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/global/functions/api_endpoints.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
+import 'package:foodkitchen/core/utils/dev_logging.dart';
+import 'package:foodkitchen/core/utils/json_conversion.dart';
+
+part 'grocery_remote_datasource_impl_part.dart';
 
 abstract interface class GroceryRemoteDatasource {
   Future<List<Map<String, dynamic>>> getUserRequestedItems({
@@ -47,173 +48,43 @@ abstract interface class GroceryRemoteDatasource {
 class GroceryRemoteDatasourceImpl implements GroceryRemoteDatasource {
   final DioHelper dio;
   GroceryRemoteDatasourceImpl(this.dio);
+
   @override
   Future<List<Map<String, dynamic>>> getUserRequestedItems({
     required String kitchenId,
-  }) async {
-    try {
-      final response = await dio.get(
-        "${AppConstants.getRequestedItems}?kitchen_id=$kitchenId",
-      );
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
-
-        final message = data["error"];
-        throw message;
-      }
-      final data = response.data["items"];
-
-      if (data is List) {
-        return data.map((e) => Map<String, dynamic>.from(e)).toList();
-      } else {
-        throw Exception("Invalid data");
-      }
-    } on DioException catch (e) {
-      throw dio.handleError(e);
-    }
-  }
+  }) => _groceryImplGetUserRequestedItems(this, kitchenId: kitchenId);
 
   @override
   Future<List<Map<String, dynamic>>> updateBucketType({
     required String kitchenId,
     required List<String> itemsIds,
     required String bucketType,
-  }) async {
-    try {
-      final response = await dio.post(
-        AppConstants.updateBucketType,
-        data: {
-          "kitchen_id": kitchenId,
-          "item_ids": itemsIds,
-          "bucket_type": bucketType,
-        },
-      );
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
-
-        final message = data["error"];
-        throw message;
-      }
-      return await getUserRequestedItems(kitchenId: kitchenId);
-    } on DioException catch (e) {
-      throw dio.handleError(e);
-    }
-  }
+  }) => _groceryImplUpdateBucketType(
+    this,
+    kitchenId: kitchenId,
+    itemsIds: itemsIds,
+    bucketType: bucketType,
+  );
 
   @override
   Future<List<Map<String, dynamic>>> addMyListToKitchenInventory({
     required String kitchenId,
-  }) async {
-    try {
-      final response = await dio.post(
-        AppConstants.addMyListItemToKitchenInventory,
-        data: {"kitchen_id": kitchenId},
-      );
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
-
-        final message = data["error"];
-        throw message;
-      }
-      return await getUserRequestedItems(kitchenId: kitchenId);
-    } on DioException catch (e) {
-      throw dio.handleError(e);
-    }
-  }
+  }) => _groceryImplAddMyListToKitchenInventory(this, kitchenId: kitchenId);
 
   @override
   Future<List<Map<String, dynamic>>> getAiGeneratedItems({
     required String kitchenId,
-  }) async {
-    try {
-      final response = await dio.get(
-        "${AppConstants.getAiGeneratedList}?kitchen_id=$kitchenId",
-      );
-
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
-        final message = data["error"] ?? "Failed to fetch AI items";
-        throw message;
-      }
-
-      final data = response.data["missing_items"];
-
-      if (data is! List) {
-        throw Exception("Expected list of items, got: ${data.runtimeType}");
-      }
-
-      log("Raw AI generated items: $data");
-
-      final List<Map<String, dynamic>> parsedList = data.map((item) {
-        if (item is Map<String, dynamic>) {
-          final map = Map<String, dynamic>.from(item);
-
-          if (!map.containsKey("item_id") || map["item_id"] == null) {
-            map["item_id"] = _generateUniqueId();
-          }
-          return map;
-        } else if (item is String) {
-          return {
-            "item_id": _generateUniqueId(),
-            "name": item.trim(),
-            "is_custom": true,
-          };
-        } else {
-          return {
-            "item_id": _generateUniqueId(),
-            "name": item.toString(),
-            "is_custom": true,
-          };
-        }
-      }).toList();
-
-      log("Parsed AI items with item_id: $parsedList");
-      return parsedList;
-    } on DioException catch (e) {
-      throw dio.handleError(e);
-    } catch (e, stackTrace) {
-      debugPrint("Error in getAiGeneratedItems: $e");
-      debugPrint("StackTrace: $stackTrace");
-      rethrow;
-    }
-  }
-
-  String _generateUniqueId() {
-    return "ai_${DateTime.now().millisecondsSinceEpoch}_${DateTime.now().microsecondsSinceEpoch}";
-  }
+  }) => _groceryImplGetAiGeneratedItems(this, kitchenId: kitchenId);
 
   @override
   Future<List<Map<String, dynamic>>> deleteKitchenItems({
     required String kitchenId,
     required List<String> itemsIds,
-  }) async {
-    try {
-      final response = await dio.post(
-        AppConstants.deleteKitchenItems,
-        data: {"kitchen_id": kitchenId, "item_ids": itemsIds},
-      );
-
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
-
-        final message = data["error"];
-        throw message;
-      }
-      return await getUserRequestedItems(kitchenId: kitchenId);
-    } on DioException catch (e) {
-      throw dio.handleError(e);
-    }
-  }
+  }) => _groceryImplDeleteKitchenItems(
+    this,
+    kitchenId: kitchenId,
+    itemsIds: itemsIds,
+  );
 
   @override
   Future<List<Map<String, dynamic>>> addCustomItems({
@@ -222,56 +93,24 @@ class GroceryRemoteDatasourceImpl implements GroceryRemoteDatasource {
     required String quantity,
     required String unit,
     required String bucketType,
-  }) async {
-    try {
-      final response = await dio.post(
-        AppConstants.addItemToList,
-        data: {
-          "kitchen_id": kitchenId,
-          "name": name,
-          "quantity": quantity,
-          "unit": unit,
-          "bucket_type": bucketType,
-        },
-      );
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
-
-        final message = data["error"];
-        throw message;
-      }
-      return await getUserRequestedItems(kitchenId: kitchenId);
-    } on DioException catch (e) {
-      throw dio.handleError(e);
-    }
-  }
+  }) => _groceryImplAddCustomItems(
+    this,
+    kitchenId: kitchenId,
+    name: name,
+    quantity: quantity,
+    unit: unit,
+    bucketType: bucketType,
+  );
 
   @override
   Future<String> generateAutoGeneratedList({
     required String kitchenId,
     required String date,
-  }) async {
-    try {
-      final response = await dio.post(
-        AppConstants.generateAutoGeneratedList,
-        data: {"kitchen_id": kitchenId, "date": date},
-      );
-
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
-
-        final message = data["error"];
-        throw message;
-      }
-      return response.data["message"];
-    } on DioException catch (e) {
-      throw dio.handleError(e);
-    }
-  }
+  }) => _groceryImplGenerateAutoGeneratedList(
+    this,
+    kitchenId: kitchenId,
+    date: date,
+  );
 
   @override
   Future<String> editGroceryListItem({
@@ -280,30 +119,12 @@ class GroceryRemoteDatasourceImpl implements GroceryRemoteDatasource {
     required String name,
     required String quantity,
     required String unit,
-  }) async {
-    try {
-      final response = await dio.post(
-        AppConstants.editGroceryListItem,
-        data: {
-          "item_id": itemId,
-          "kitchen_id": kitchenId,
-          "name": name,
-          "quantity": quantity,
-          "unit": unit,
-        },
-      );
-
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
-
-        final message = data["error"];
-        throw message;
-      }
-      return response.data["message"];
-    } on DioException catch (e) {
-      throw dio.handleError(e);
-    }
-  }
+  }) => _groceryImplEditGroceryListItem(
+    this,
+    kitchenId: kitchenId,
+    itemId: itemId,
+    name: name,
+    quantity: quantity,
+    unit: unit,
+  );
 }

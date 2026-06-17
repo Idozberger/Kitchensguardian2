@@ -1,4 +1,5 @@
 // ignore_for_file: library_prefixes
+// `dart:math` imported as Math to avoid clashing with local identifiers.
 
 import 'dart:async';
 import 'dart:math' as Math;
@@ -15,11 +16,7 @@ class AiAnalyzingLoader extends StatefulWidget {
   State<AiAnalyzingLoader> createState() => AiAnalyzingLoaderState();
 }
 
-class AiAnalyzingLoaderState extends State<AiAnalyzingLoader>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _pulseController;
-  late Animation<double> _pulseAnimation;
-
+class AiAnalyzingLoaderState extends State<AiAnalyzingLoader> {
   final List<String> _messages = [
     'Scanning your kitchen...',
     'Identifying ingredients...',
@@ -35,15 +32,6 @@ class AiAnalyzingLoaderState extends State<AiAnalyzingLoader>
   void initState() {
     super.initState();
 
-    _pulseController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 2),
-    )..repeat(reverse: true);
-
-    _pulseAnimation = Tween<double>(begin: 0.85, end: 1.0).animate(
-      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
-    );
-
     _messageTimer = Timer.periodic(const Duration(seconds: 2), (_) {
       if (mounted) {
         setState(() {
@@ -55,7 +43,6 @@ class AiAnalyzingLoaderState extends State<AiAnalyzingLoader>
 
   @override
   void dispose() {
-    _pulseController.dispose();
     _messageTimer.cancel();
     super.dispose();
   }
@@ -77,7 +64,7 @@ class AiAnalyzingLoaderState extends State<AiAnalyzingLoader>
             shaderCallback: (bounds) => LinearGradient(
               colors: [
                 AppColors.primaryColor,
-                AppColors.primaryColor.withOpacity(0.6),
+                AppColors.primaryColor.withValues(alpha: 0.6),
               ],
             ).createShader(bounds),
             child: const Text(
@@ -162,14 +149,14 @@ class _AnimatedDotsState extends State<_AnimatedDots>
           children: List.generate(3, (i) {
             final delay = i / 3;
             final value = (_controller.value - delay).clamp(0.0, 1.0);
-            final opacity = (Math.sin(value * Math.pi)).clamp(0.2, 1.0);
+            final opacity = Math.sin(value * Math.pi).clamp(0.2, 1.0);
             return Container(
               margin: const EdgeInsets.symmetric(horizontal: 4),
               width: 8,
               height: 8,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.primaryColor.withOpacity(opacity),
+                color: AppColors.primaryColor.withValues(alpha: opacity),
               ),
             );
           }),
