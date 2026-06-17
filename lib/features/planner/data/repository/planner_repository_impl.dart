@@ -1,18 +1,21 @@
 // ignore_for_file: non_constant_identifier_names
+// Backend JSON uses snake_case keys mapped without renaming.
 
-import 'package:foodkitchen/core/common/data/model/recipe_model.dart';
 import 'package:foodkitchen/core/common/data/model/pantry_model.dart';
-import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
+import 'package:foodkitchen/core/common/data/model/recipe_model.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
+import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/features/planner/data/datasource/planner_local_datasource.dart';
 import 'package:foodkitchen/features/planner/data/datasource/planner_remote_datasource.dart';
 import 'package:foodkitchen/features/planner/data/models/kitchen_date_range_model.dart';
 import 'package:foodkitchen/features/planner/domain/entities/kitchen_date_range_entity.dart';
 import 'package:foodkitchen/features/planner/domain/entities/meal_plan_entity.dart';
-
 import 'package:foodkitchen/features/planner/domain/repository/planner_repository.dart';
 import 'package:fpdart/fpdart.dart';
+
+part 'planner_repository_impl_part.dart';
+part 'planner_repository_impl_part2.dart';
 
 class PlannerRepositoryImpl implements PlannerRepository {
   final PlannerLocalDatasource plannerLocalDatasource;
@@ -26,218 +29,90 @@ class PlannerRepositoryImpl implements PlannerRepository {
   Future<Either<Failure, List<RecipeEntity>>> generateRecipes({
     required String instructions,
     required String kitchenId,
-  }) async {
-    try {
-      final response = await plannerRemoteDatasource.generateRecipes(
-        instructions: instructions,
-        kitchenId: kitchenId,
-      );
-      final generatedRecipes = (response as List)
-          .map((e) => RecipeModel.fromJson(e as Map<String, dynamic>))
-          .toList();
-
-      return Right(generatedRecipes);
-    } on Failure catch (f) {
-      return Left(f);
-    } catch (e) {
-      return Left(UnknownFailure(e.toString()));
-    }
-  }
+  }) => _plannerRepoImplGenerateRecipes(
+    this,
+    instructions: instructions,
+    kitchenId: kitchenId,
+  );
 
   @override
   Future<Either<Failure, List<RecipeEntity>>> favouriteRecipes({
     required String kitchenId,
-  }) async {
-    try {
-      final response = await plannerRemoteDatasource.favouriteRecipes(
-        kitchenId: kitchenId,
-      );
-      final generatedRecipes = (response as List)
-          .map((e) => RecipeModel.fromJson(e as Map<String, dynamic>))
-          .toList();
-
-      return Right(generatedRecipes);
-    } on Failure catch (f) {
-      return Left(f);
-    } catch (e) {
-      return Left(UnknownFailure(e.toString()));
-    }
-  }
+  }) => _plannerRepoImplFavouriteRecipes(this, kitchenId: kitchenId);
 
   @override
   Future<Either<Failure, String>> addToFavourite({
     required String recipeId,
     required String kitchenId,
-  }) async {
-    try {
-      final response = await plannerRemoteDatasource.addToFavourite(
-        recipeId: recipeId,
-        kitchenId: kitchenId,
-      );
-
-      return Right(response);
-    } on Failure catch (f) {
-      return Left(f);
-    } catch (e) {
-      return Left(UnknownFailure(e.toString()));
-    }
-  }
+  }) => _plannerRepoImplAddToFavourite(
+    this,
+    recipeId: recipeId,
+    kitchenId: kitchenId,
+  );
 
   @override
   Future<Either<Failure, String>> removeFromFavourite({
     required String recipeId,
     required String kitchenId,
-  }) async {
-    try {
-      final response = await plannerRemoteDatasource.removeFromFavourite(
-        recipeId: recipeId,
-        kitchenId: kitchenId,
-      );
-
-      return Right(response);
-    } on Failure catch (f) {
-      return Left(f);
-    } catch (e) {
-      return Left(UnknownFailure(e.toString()));
-    }
-  }
+  }) => _plannerRepoImplRemoveFromFavourite(
+    this,
+    recipeId: recipeId,
+    kitchenId: kitchenId,
+  );
 
   @override
   Future<Either<Failure, String>> addToWeeklyPlan({
     required RecipeEntity recipeEntity,
-  }) async {
-    try {
-      final response = await plannerLocalDatasource.addToWeeklyPlan(
-        newPlan: recipeEntity as RecipeModel,
-      );
-
-      return Right(response);
-    } on Failure catch (f) {
-      return Left(f);
-    } catch (e) {
-      return Left(UnknownFailure(e.toString()));
-    }
-  }
+  }) => _plannerRepoImplAddToWeeklyPlan(this, recipeEntity: recipeEntity);
 
   @override
-  Future<Either<Failure, List<RecipeEntity>>> getAllWeeklyPlans() async {
-    try {
-      final response = await plannerLocalDatasource.getWeeklyPlans();
-
-      return Right(response);
-    } on Failure catch (f) {
-      return Left(f);
-    } catch (e) {
-      return Left(UnknownFailure(e.toString()));
-    }
-  }
+  Future<Either<Failure, List<RecipeEntity>>> getAllWeeklyPlans() =>
+      _plannerRepoImplGetAllWeeklyPlans(this);
 
   @override
-  Future<Either<Failure, String>> deletePlan({required String id}) async {
-    try {
-      final response = await plannerLocalDatasource.deleteWeeklyPlan(
-        selectedDate: id,
-      );
-
-      return Right(response);
-    } on Failure catch (f) {
-      return Left(f);
-    } catch (e) {
-      return Left(UnknownFailure(e.toString()));
-    }
-  }
+  Future<Either<Failure, String>> deletePlan({required String id}) =>
+      _plannerRepoImplDeletePlan(this, id: id);
 
   @override
   Future<Either<Failure, List<RecipeEntity>>> deleteMealTypeFromWeeklyPlan({
     required String selectedDate,
     required String mealType,
-  }) async {
-    try {
-      final response = await plannerLocalDatasource
-          .deleteMealTypeFromWeeklyPlan(
-            selectedDate: selectedDate,
-            mealType: mealType,
-          );
-
-      return Right(response);
-    } on Failure catch (f) {
-      return Left(f);
-    } catch (e) {
-      return Left(UnknownFailure(e.toString()));
-    }
-  }
+  }) => _plannerRepoImplDeleteMealTypeFromWeeklyPlan(
+    this,
+    selectedDate: selectedDate,
+    mealType: mealType,
+  );
 
   @override
   Future<Either<Failure, String>> markRecipeFinished({
     required String kitchenId,
     required String recipeId,
-  }) async {
-    try {
-      final response = await plannerRemoteDatasource.markRecipeFinished(
-        kitchenId: kitchenId,
-        recipeId: recipeId,
-      );
-
-      return Right(response);
-    } on Failure catch (f) {
-      return Left(f);
-    } catch (e) {
-      return Left(UnknownFailure(e.toString()));
-    }
-  }
+  }) => _plannerRepoImplMarkRecipeFinished(
+    this,
+    kitchenId: kitchenId,
+    recipeId: recipeId,
+  );
 
   @override
-  Future<Either<Failure, String>> requestItems({required Pantry pantry}) async {
-    try {
-      String response = await plannerRemoteDatasource.requestItems(
-        pantryModel: PantryModel.fromEntity(pantry),
-      );
-
-      return Right(response);
-    } on Failure catch (f) {
-      return Left(f);
-    } catch (e) {
-      return Left(UnknownFailure(e.toString()));
-    }
-  }
+  Future<Either<Failure, String>> requestItems({required Pantry pantry}) =>
+      _plannerRepoImplRequestItems(this, pantry: pantry);
 
   @override
   Future<Either<Failure, String>> createMealPlan({
     required List<MealPlanEntity> mealPlans,
-  }) async {
-    try {
-      String response = await plannerRemoteDatasource.createPlan(
-        mealPlans: mealPlans,
-      );
-
-      return Right(response);
-    } on Failure catch (f) {
-      return Left(f);
-    } catch (e) {
-      return Left(UnknownFailure(e.toString()));
-    }
-  }
+  }) => _plannerRepoImplCreateMealPlan(this, mealPlans: mealPlans);
 
   @override
   Future<Either<Failure, String>> deletePlanFromRemoteDb({
     required String mealPlanId,
     required String kitchenId,
     required String date,
-  }) async {
-    try {
-      String response = await plannerRemoteDatasource.deletePlanFromRemoteDb(
-        mealPlanId: mealPlanId,
-        kitchenId: kitchenId,
-        date: date,
-      );
-
-      return Right(response);
-    } on Failure catch (f) {
-      return Left(f);
-    } catch (e) {
-      return Left(UnknownFailure(e.toString()));
-    }
-  }
+  }) => _plannerRepoImplDeletePlanFromRemoteDb(
+    this,
+    mealPlanId: mealPlanId,
+    kitchenId: kitchenId,
+    date: date,
+  );
 
   @override
   Future<Either<Failure, String>> updateMealPlan({
@@ -245,121 +120,49 @@ class PlannerRepositoryImpl implements PlannerRepository {
     required String mealType,
     required String notes,
     required String recipeId,
-  }) async {
-    try {
-      String response = await plannerRemoteDatasource.updateMealPlan(
-        mealPlanId: mealPlanId,
-        mealType: mealType,
-        notes: notes,
-        recipeId: recipeId,
-      );
-
-      return Right(response);
-    } on Failure catch (f) {
-      return Left(f);
-    } catch (e) {
-      return Left(UnknownFailure(e.toString()));
-    }
-  }
+  }) => _plannerRepoImplUpdateMealPlan(
+    this,
+    mealPlanId: mealPlanId,
+    mealType: mealType,
+    notes: notes,
+    recipeId: recipeId,
+  );
 
   @override
   Future<Either<Failure, String>> getMealByDate({
     required String kitchenId,
     required String date,
-  }) async {
-    try {
-      String response = await plannerRemoteDatasource.getMealByDate(
-        kitchenId: kitchenId,
-        date: date,
-      );
-
-      return Right(response);
-    } on Failure catch (f) {
-      return Left(f);
-    } catch (e) {
-      return Left(UnknownFailure(e.toString()));
-    }
-  }
+  }) => _plannerRepoImplGetMealByDate(this, kitchenId: kitchenId, date: date);
 
   @override
   Future<Either<Failure, List<RecipeEntity>>> listAllMealPlans({
     required String kitchenId,
-  }) async {
-    try {
-      final response = await plannerRemoteDatasource.listAllMealPlans(
-        kitchenId: kitchenId,
-      );
-
-      final generatedRecipes = (response as List).map((e) {
-        return RecipeModel.fromJson(e as Map<String, dynamic>);
-      }).toList();
-
-      return Right(generatedRecipes);
-    } on Failure catch (f) {
-      return Left(f);
-    } catch (e) {
-      return Left(UnknownFailure(e.toString()));
-    }
-  }
+  }) => _plannerRepoImplListAllMealPlans(this, kitchenId: kitchenId);
 
   @override
   Future<Either<Failure, KitchenDateRangeEntity>> getDateRange({
     required String kitchenId,
-  }) async {
-    try {
-      final response = await plannerRemoteDatasource.getDateRange(
-        kitchenId: kitchenId,
-      );
-
-      final model = KitchenDateRangeModel.fromJson(response);
-
-      return Right(model);
-    } on Failure catch (f) {
-      return Left(f);
-    } catch (e) {
-      return Left(UnknownFailure(e.toString()));
-    }
-  }
+  }) => _plannerRepoImplGetDateRange(this, kitchenId: kitchenId);
 
   @override
   Future<Either<Failure, KitchenDateRangeEntity>> setDateRange({
     required String kitchenId,
     required String startDate,
     required String endDate,
-  }) async {
-    try {
-      final response = await plannerRemoteDatasource.setDateRange(
-        kitchenId: kitchenId,
-        startDate: startDate,
-        endDate: endDate,
-      );
-
-      final model = KitchenDateRangeModel.fromJson(response);
-
-      return Right(model);
-    } on Failure catch (f) {
-      return Left(f);
-    } catch (e) {
-      return Left(UnknownFailure(e.toString()));
-    }
-  }
+  }) => _plannerRepoImplSetDateRange(
+    this,
+    kitchenId: kitchenId,
+    startDate: startDate,
+    endDate: endDate,
+  );
 
   @override
   Future<Either<Failure, bool>> checkMissingIngredients({
     required String kitchenId,
     required String recipeId,
-  }) async {
-    try {
-      bool response = await plannerRemoteDatasource.checkMissingIngredients(
-        kitchenId: kitchenId,
-        recipeId: recipeId,
-      );
-
-      return Right(response);
-    } on Failure catch (f) {
-      return Left(f);
-    } catch (e) {
-      return Left(UnknownFailure(e.toString()));
-    }
-  }
+  }) => _plannerRepoImplCheckMissingIngredients(
+    this,
+    kitchenId: kitchenId,
+    recipeId: recipeId,
+  );
 }

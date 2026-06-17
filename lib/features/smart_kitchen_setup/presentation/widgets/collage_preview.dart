@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:foodkitchen/core/utils/image_bytes.dart';
+import 'package:foodkitchen/core/widgets/safe_image.dart';
 
 class CollagePreview extends StatelessWidget {
   final List<String> paths;
@@ -46,19 +48,30 @@ class _CollageImage extends StatelessWidget {
   final Color _surface = const Color(0xFF1A1D27);
   final Color _textLow = const Color(0xFF555A70);
 
+  Widget get _fallback => Container(
+    color: _surface,
+    child: Icon(Icons.image_outlined, color: _textLow, size: 28),
+  );
+
   @override
   Widget build(BuildContext context) {
-    try {
-      if (path.startsWith('http')) {
-        return Image.network(path, fit: BoxFit.cover);
-      }
-      final file = File(path.replaceFirst('file://', ''));
-      return Image.file(file, fit: BoxFit.cover);
-    } catch (_) {
-      return Container(
-        color: _surface,
-        child: Icon(Icons.image_outlined, color: _textLow, size: 28),
+    if (hasDisplayableNetworkUrl(path)) {
+      return SafeNetworkImage(
+        url: path,
+        width: 80,
+        height: 80,
+        fit: BoxFit.cover,
+        fallback: _fallback,
       );
     }
+
+    final file = File(path.replaceFirst('file://', ''));
+    return SafeFileImage(
+      file: file,
+      width: 80,
+      height: 80,
+      fit: BoxFit.cover,
+      fallback: _fallback,
+    );
   }
 }

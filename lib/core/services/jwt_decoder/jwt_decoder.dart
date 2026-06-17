@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:foodkitchen/core/utils/dev_logging.dart';
 import 'package:intl/intl.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 
@@ -24,7 +24,7 @@ class DartJwtDecoder {
 
       return userMap;
     } catch (e) {
-      debugPrint("JWT Decode Error: $e");
+      devPrint("JWT Decode Error: $e");
       return {};
     }
   }

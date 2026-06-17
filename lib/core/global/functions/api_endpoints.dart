@@ -1,7 +1,7 @@
-class AppConstants {
-  static const bool entitlementIsActive = false;
+import 'package:foodkitchen/core/config/env.dart';
 
-  static const String baseUrl = 'https://web-production-c7f89.up.railway.app';
+class AppConstants {
+  static String get baseUrl => Env.apiBaseUrl;
 
   static const String login = '/api/login';
   static const String createAccount = '/api/register_user';
@@ -59,6 +59,7 @@ class AppConstants {
   static const String deletePantry = "/api/kitchen/pantry/delete";
   static const String editUser = "/api/edit_user";
   static const String changePassword = "/api/change_password";
+  static const String deleteAccount = "/api/delete_account";
   /////MEAL-PLANNER
   static const String createMealPlan = "/api/meal_plan/create";
   static const String deleteMealPlan = "/api/meal_plan/delete";
@@ -68,6 +69,9 @@ class AppConstants {
   static const String getDateRange = "/api/kitchen/get_date_range";
   static const String setDateRange = "/api/kitchen/set_date_range";
   static const String getUserProfile = "/api/get_user_profile";
+  static const String subscriptionPlans = "/api/subscription/plans";
+  static const String subscriptionSubscribe = "/api/subscription/subscribe";
+  static const String subscriptionRestore = "/api/subscription/restore";
   static const String suggestRecipe =
       "/api/kitchen/suggest_recipes_expiring_items";
 

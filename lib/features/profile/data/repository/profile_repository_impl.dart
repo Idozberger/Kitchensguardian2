@@ -55,7 +55,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -74,7 +74,19 @@ class ProfileRepositoryImpl implements ProfileRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
+    }
+  }
+
+  @override
+  Future<Either<Failure, String>> deleteAccount() async {
+    try {
+      final result = await profileRemoteDatasource.deleteAccount();
+      return Right(result);
+    } on Failure catch (f) {
+      return Left(f);
+    } catch (e) {
+      return Left(unknownFailureFrom(e));
     }
   }
 }

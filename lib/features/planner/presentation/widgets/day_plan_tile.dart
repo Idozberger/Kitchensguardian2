@@ -74,7 +74,7 @@ class DayPlanTile extends StatelessWidget {
     return SizedBox(
       height: h(40),
       child: OutlinedButton(
-        onPressed: () => viewRecipe(),
+        onPressed: viewRecipe,
         child: Text(
           "View Plan Details",
           style: Theme.of(context).textTheme.headlineMedium?.copyWith(

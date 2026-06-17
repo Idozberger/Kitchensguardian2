@@ -82,7 +82,7 @@ class _CardActions extends StatelessWidget {
 
   void _showRejectDialog(BuildContext context) {
     final controller = TextEditingController();
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (ctx) => GenericDialog(
         child: Column(
@@ -183,9 +183,9 @@ class _LoadingButton extends StatelessWidget {
       height: h(32),
       width: w(80),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.4)),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       alignment: Alignment.center,
       child: SizedBox(
@@ -216,9 +216,9 @@ class _ActionButton extends StatelessWidget {
         height: h(32),
         padding: EdgeInsets.symmetric(horizontal: w(16)),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: color.withOpacity(0.4)),
+          border: Border.all(color: color.withValues(alpha: 0.4)),
         ),
         alignment: Alignment.center,
         child: Text(

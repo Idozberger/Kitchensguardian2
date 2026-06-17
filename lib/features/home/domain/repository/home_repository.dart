@@ -8,7 +8,6 @@ import 'package:fpdart/fpdart.dart';
 
 abstract interface class HomeRepository {
   Future<Either<Failure, Kitchen>> createKitchen({required String kitchenName});
-  Future<Either<Failure, String>> joinKitchen({required String invitationCode});
   Future<Either<Failure, String>> respondToItemRequest({
     required String action,
     required String rejectReason,

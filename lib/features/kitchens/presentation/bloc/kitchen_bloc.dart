@@ -1,16 +1,12 @@
-import 'dart:math';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
-import 'package:foodkitchen/core/services/fcm/fcm_service.dart';
+import 'package:foodkitchen/core/utils/dev_logging.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
-
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_bloc.dart';
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_event.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_event.dart';
+import 'package:foodkitchen/features/kitchens/domain/datasources/kitchen_document_firestore_datasource.dart';
 import 'package:foodkitchen/features/kitchens/domain/entities/kitchen.dart';
 import 'package:foodkitchen/features/kitchens/domain/usecases/create_kitchen.dart';
 import 'package:foodkitchen/features/kitchens/domain/usecases/get_kitchens.dart';
@@ -18,11 +14,13 @@ import 'package:foodkitchen/features/kitchens/domain/usecases/invite_user.dart';
 import 'package:foodkitchen/features/kitchens/domain/usecases/join_kitchen.dart';
 import 'package:foodkitchen/features/kitchens/domain/usecases/leave_kitchen.dart';
 import 'package:foodkitchen/features/kitchens/domain/usecases/remove_kitchen.dart';
+import 'package:foodkitchen/features/kitchens/domain/usecases/submit_kitchen_join_request.dart';
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_event.dart';
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_state.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_event.dart';
-import 'package:intl/intl.dart';
+
+part 'kitchen_bloc_handlers.dart';
 
 class KitchenBloc extends Bloc<KitchenEvent, KitchenState> {
   final GetKitchens _getKitchens;
@@ -35,6 +33,8 @@ class KitchenBloc extends Bloc<KitchenEvent, KitchenState> {
   final PlannerBloc _plannerBloc;
   final GroceryBloc _groceryBloc;
   final InviteUser _inviteUser;
+  final SubmitKitchenJoinRequest _submitKitchenJoinRequest;
+  final KitchenDocumentFirestoreDatasource _kitchenDocumentFirestore;
 
   KitchenBloc({
     required GetKitchens getKitchens,
@@ -47,316 +47,52 @@ class KitchenBloc extends Bloc<KitchenEvent, KitchenState> {
     required LeaveKitchenUsecase leaveKitchenUsecase,
     required RemoveKitchenUsecase removeKitchenUsecase,
     required InviteUser inviteUser,
+    required SubmitKitchenJoinRequest submitKitchenJoinRequest,
+    required KitchenDocumentFirestoreDatasource kitchenDocumentFirestore,
   }) : _getKitchens = getKitchens,
        _createKitchen = createKitchen,
        _joinKitchen = joinKitchen,
        _leaveKitchenUsecase = leaveKitchenUsecase,
        _removeKitchenUsecase = removeKitchenUsecase,
        _inviteUser = inviteUser,
+       _submitKitchenJoinRequest = submitKitchenJoinRequest,
+       _kitchenDocumentFirestore = kitchenDocumentFirestore,
        _homeBloc = homeBloc,
        _userCubit = userCubit,
 
        _plannerBloc = plannerBloc,
        _groceryBloc = groceryBloc,
        super(KitchenInitial()) {
-    on<FetchKitchens>(_onFetchKitchens);
-    on<CreateKitchenEvent>(_onCreateKitchenEvent);
-    on<JoinKitchenEvent>(_onJoinKitchenEvent);
-    on<SwitchKitchenEvent>(_onSwitchKitchen);
-    on<LeaveKitchenEvent>(_onLeaveKitchen);
-    on<RemoveKitchenEvent>(_onRemoveKitchen);
-    on<DeleteOrLeaveKitchenEvent>(_onDeleteOrLeaveKitchen);
-    on<FetchAllUsers>(_onFetchAllUsers);
-    on<InviteUserEvent>(_onInviteUser);
-    on<MemberApprovedEvent>(_onMemberApproved);
-  }
-  Future<void> _onMemberApproved(
-    MemberApprovedEvent event,
-    Emitter<KitchenState> emit,
-  ) async {
-    emit(KitchensLoading());
-
-    final res = await _joinKitchen(
-      JoinKitchenUsecaseParams(
-        invitationCode: event.invitationCode,
-        userId: event.userId,
-      ),
+    on<FetchKitchens>((e, em) => _onFetchKitchens(this, e, em));
+    on<CreateKitchenEvent>((e, em) => _onCreateKitchenEvent(this, e, em));
+    on<JoinKitchenEvent>((e, em) => _onJoinKitchenEvent(this, e, em));
+    on<SwitchKitchenEvent>((e, em) => _onSwitchKitchen(this, e, em));
+    on<LeaveKitchenEvent>((e, em) => _onLeaveKitchen(this, e, em));
+    on<RemoveKitchenEvent>((e, em) => _onRemoveKitchen(this, e, em));
+    on<DeleteOrLeaveKitchenEvent>(
+      (e, em) => _onDeleteOrLeaveKitchen(this, e, em),
     );
-
-    res.fold(
-      (failure) => emit(KitchenFailure(failure.message)),
-      (message) => emit(KitchenSuccess(message)),
-    );
-    add(FetchKitchens());
-  }
-
-  Future<void> _onFetchKitchens(
-    FetchKitchens event,
-    Emitter<KitchenState> emit,
-  ) async {
-    emit(KitchensLoading());
-
-    final res = await _getKitchens(NoParams());
-    res.fold((failure) => emit(KitchenFailure(failure.message)), (kitchens) {
-      emit(KitchensLoaded(kitchens));
-    });
-  }
-
-  Future<void> _onCreateKitchenEvent(
-    CreateKitchenEvent event,
-    Emitter<KitchenState> emit,
-  ) async {
-    emit(KitchensLoading());
-    final res = await _createKitchen(
-      CreateKitchenParams(kitchenName: event.kitchenName),
-    );
-
-    res.fold((failure) => emit(KitchenFailure(failure.message)), (message) {
-      emit(KitchenSuccess(message));
-    });
-  }
-
-  Future<void> _onJoinKitchenEvent(
-    JoinKitchenEvent event,
-    Emitter<KitchenState> emit,
-  ) async {
-    emit(KitchensLoading());
-
-    try {
-      final kitchenDoc = await FirebaseFirestore.instance
-          .collection('kitchens')
-          .where('invitation_code', isEqualTo: event.invitationCode)
-          .limit(1)
-          .get();
-
-      if (kitchenDoc.docs.isEmpty) {
-        emit(KitchenFailure("Invitation code is not valid"));
-        return;
-      }
-
-      final kitchenData = kitchenDoc.docs.first.data();
-      final userId = kitchenData['user_id'];
-      final kitchenName = kitchenData['kitchen_name'];
-      if (_userCubit.state.userId == userId) {
-        AppToast.show(
-          "You are the host of this kitchen: $kitchenName. You already have access.",
-          ToastType.error,
-        );
-        add(FetchKitchens());
-
-        return;
-      }
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
-          .get();
-
-      if (!userDoc.exists) {
-        emit(KitchenFailure("Kitchen host not found"));
-
-        return;
-      }
-      final pendingRequest = await FirebaseFirestore.instance
-          .collection('notifications')
-          .where('sender_user_id', isEqualTo: _userCubit.state.userId)
-          .where('kitchen_id', isEqualTo: kitchenData['kitchen_id'])
-          .where('kitchen_joining_status', isEqualTo: 'Pending')
-          .limit(1)
-          .get();
-
-      if (pendingRequest.docs.isNotEmpty) {
-        AppToast.show(
-          "Your request to join \"$kitchenName\" is already pending",
-          ToastType.error,
-        );
-        add(FetchKitchens());
-        return;
-      }
-      final userData = userDoc.data();
-      final userDeviceToken = userData?['user_device_token'];
-
-      if (userDeviceToken == null) {
-        emit(KitchenFailure("User not found"));
-
-        return;
-      }
-      final random = Random();
-      final notificationId = random.nextInt(999999);
-      final notificationDataForHost = {
-        "status": false,
-        "id": notificationId,
-        'title': "Request to join your kitchen",
-        'body':
-            "User ${_userCubit.state.firstName} wants to join your kitchen: $kitchenName.",
-        'host_user_id': userId,
-        'sender_user_id': _userCubit.state.userId,
-        'sender_name':
-            "${_userCubit.state.firstName} ${_userCubit.state.lastName}",
-        'kitchen_id': kitchenData['kitchen_id'],
-        'date': DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
-        'read': false,
-        "kitchen_joining_status": "Pending",
-        'approved_by': "",
-      };
-
-      await FCMService().sendNotification(
-        userDeviceToken,
-        "Request to join your kitchen",
-        "User ${_userCubit.state.firstName} wants to join your kitchen: $kitchenName.",
-        kitchenData["invitation_code"],
-        kitchenData["kitchen_name"],
-        kitchenData["role"],
-        kitchenData["kitchen_id"],
-        "Pending",
-      );
-
-      await FirebaseFirestore.instance
-          .collection('notifications')
-          .add(notificationDataForHost);
-
-      AppToast.show("Kitchen join request sent", ToastType.success);
-      add(FetchKitchens());
-    } catch (e, st) {
-      emit(KitchenFailure("An error accured"));
-
-      debugPrint('🧾 Stack Trace: $st');
-    }
-  }
-
-  Future<void> _onLeaveKitchen(
-    LeaveKitchenEvent event,
-    Emitter<KitchenState> emit,
-  ) async {
-    emit(KitchensLoading());
-    final res = await _leaveKitchenUsecase(
-      LeaveKitchenParams(kitchenId: event.kitchenId),
-    );
-
-    res.fold((failure) => emit(KitchenFailure(failure.message)), (message) {
-      add(DeleteOrLeaveKitchenEvent());
-      emit(KitchenSuccess(message));
-    });
-  }
-
-  Future<void> _onRemoveKitchen(
-    RemoveKitchenEvent event,
-    Emitter<KitchenState> emit,
-  ) async {
-    emit(KitchensLoading());
-    final res = await _removeKitchenUsecase(
-      RemoveKitchenParams(kitchenId: event.kitchenId),
-    );
-
-    res.fold((failure) => emit(KitchenFailure(failure.message)), (message) {
-      add(DeleteOrLeaveKitchenEvent());
-      emit(KitchenSuccess(message));
-    });
-  }
-
-  Future<void> _onSwitchKitchen(
-    SwitchKitchenEvent event,
-    Emitter<KitchenState> emit,
-  ) async {
-    emit(KitchensLoading());
-    final kitchenId = event.kitchen.kitchenId;
-    if (event.kitchen.invitationCode.isNotEmpty) {
-      await _saveOrUpdateUserKitchen(kitchen: event.kitchen);
-    }
-    _plannerBloc.add(GetDateRangeEvent(kitchenId: kitchenId));
-    _plannerBloc.add(GetAllWeeklyPlansEvent(kitchenId, null));
-    _homeBloc.add(GetAllWeeklyPlansEventForHome());
-    _homeBloc.add(GetUserStorageAreaEvent(kitchenId));
-    _homeBloc.add(GetRecipeSuggestionEvent(kitchenId));
-    _homeBloc.add(GetPantriesItemsEventForHome(kitchenId: kitchenId));
-    _homeBloc.add(GetAllRequestedItemsEvent(kitchenId: kitchenId));
-    _groceryBloc.add(RequestedGroceryEvent(kitchenId: kitchenId));
-    await _userCubit.getUserStorageArea(kitchenId: kitchenId);
-
-    _homeBloc.add(GenerateGroceryList());
-    emit(OpenKitchen());
-  }
-
-  Future<void> _onDeleteOrLeaveKitchen(
-    DeleteOrLeaveKitchenEvent event,
-    Emitter<KitchenState> emit,
-  ) async {
-    emit(KitchensLoading());
-    _userCubit.updateKitchenIdAndRefferalCode("", "");
-    _homeBloc.add(ResetHomeStateEvent());
-    _groceryBloc.add(ResetGroceryStateEvent());
-    _plannerBloc.add(ResetPlannerStateEvent());
-
-    add(FetchKitchens());
-  }
-
-  Future<void> _onInviteUser(
-    InviteUserEvent event,
-    Emitter<KitchenState> emit,
-  ) async {
-    emit(
-      (state as AllUserLoaded).copyWith(isLoading: true, index: event.index),
-    );
-
-    final res = await _inviteUser(
-      InviteUserKitchenParams(kitchenId: event.kitchenId, email: event.email),
-    );
-
-    res.fold(
-      (failure) {
-        emit(
-          (state as AllUserLoaded).copyWith(
-            isLoading: false,
-            index: -1,
-            errorMessage: failure.message,
-          ),
-        );
-      },
-      (successMessage) {
-        emit(
-          (state as AllUserLoaded).copyWith(
-            isLoading: false,
-            index: -1,
-            successMessage: successMessage,
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> _onFetchAllUsers(
-    FetchAllUsers event,
-    Emitter<KitchenState> emit,
-  ) async {
-    emit(AllUserLoaded(isLoading: true));
-    await Future.delayed(Duration(seconds: 3));
-    emit(AllUserLoaded(isLoading: false));
+    on<FetchAllUsers>((e, em) => _onFetchAllUsers(this, e, em));
+    on<InviteUserEvent>((e, em) => _onInviteUser(this, e, em));
+    on<MemberApprovedEvent>((e, em) => _onMemberApproved(this, e, em));
   }
 
   Future<void> _saveOrUpdateUserKitchen({required Kitchen kitchen}) async {
     try {
       if (kitchen.role != 'host') {
-        debugPrint('Skipping kitchen update — user is not host');
+        devPrint('Skipping kitchen update — user is not host');
         return;
       }
 
-      final firestore = FirebaseFirestore.instance;
-
-      final kitchenRef = firestore
-          .collection('kitchens')
-          .doc(kitchen.kitchenId);
-
-      final data = {
-        'kitchen_id': kitchen.kitchenId,
-        'user_id': _userCubit.state.userId,
-        'kitchen_name': kitchen.kitchenName,
-        'role': kitchen.role,
-        'invitation_code': kitchen.invitationCode,
-        'updated_at': FieldValue.serverTimestamp(),
-      };
-
-      await kitchenRef.set(data, SetOptions(merge: true));
+      await _kitchenDocumentFirestore.mergeUpdateKitchenForHost(
+        kitchenId: kitchen.kitchenId,
+        userId: _userCubit.state.userId,
+        kitchenName: kitchen.kitchenName,
+        role: kitchen.role,
+        invitationCode: kitchen.invitationCode,
+      );
     } catch (e, st) {
-      debugPrint('Kitchen update failed: $e\n$st');
+      devPrint('Kitchen update failed: $e\n$st');
     }
   }
 }

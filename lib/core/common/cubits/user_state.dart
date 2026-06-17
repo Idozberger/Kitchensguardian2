@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantries_entity.dart';
+import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/features/auth/data/model/user_model.dart';
 
 class UserState {
@@ -16,6 +16,7 @@ class UserState {
   final String invitationCode;
   final bool entitlementIsActive;
   final bool isPremiumUser;
+  final bool hasPremiumAccess;
   final List<RecipeEntity> recipeEntity;
   final List<List<Map<String, dynamic>>> doneSteps;
   final List<PantriesCommonEntity> userStorageAreas;
@@ -32,6 +33,7 @@ class UserState {
     this.isLoading = false,
     this.entitlementIsActive = false,
     this.isPremiumUser = false,
+    this.hasPremiumAccess = true,
     this.activeKitchenId = '',
     this.invitationCode = '',
     this.recipeEntity = const [],
@@ -45,6 +47,7 @@ class UserState {
     String? kitchenName,
     bool? entitlementIsActive,
     bool? isPremiumUser,
+    bool? hasPremiumAccess,
     String? lastName,
     String? userId,
     String? activeKitchenId,
@@ -62,6 +65,7 @@ class UserState {
       firstName: firstName ?? this.firstName,
       entitlementIsActive: entitlementIsActive ?? this.entitlementIsActive,
       isPremiumUser: isPremiumUser ?? this.isPremiumUser,
+      hasPremiumAccess: hasPremiumAccess ?? this.hasPremiumAccess,
       role: role ?? this.role,
       lastName: lastName ?? this.lastName,
       kitchenName: kitchenName ?? this.kitchenName,

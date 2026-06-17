@@ -1,3 +1,4 @@
+import 'package:foodkitchen/core/utils/json_conversion.dart';
 import 'package:foodkitchen/features/dashboard/domain/entities/member.dart';
 
 class MemberModel extends Member {
@@ -9,9 +10,9 @@ class MemberModel extends Member {
 
   factory MemberModel.fromJson(Map<String, dynamic> json) {
     return MemberModel(
-      name: json['name'] ?? '',
-      type: json['type'] ?? '',
-      userId: json['user_id'] ?? '',
+      name: readJsonString(json, 'name'),
+      type: readJsonString(json, 'type'),
+      userId: readJsonString(json, 'user_id'),
     );
   }
 

@@ -89,8 +89,8 @@ class _FavouriteFoodPageState extends State<FavouriteFoodPage> {
                                         },
                                       );
                                     },
-                                    title: recipe.title.toString(),
-                                    subtitle: recipe.cookingTime.toString(),
+                                    title: recipe.title,
+                                    subtitle: recipe.cookingTime,
                                     uint8list: recipe.thumbnail,
                                     trailingIcon:
                                         AppAssets.arrowForwardAndroidSvg,

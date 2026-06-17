@@ -1,3 +1,4 @@
+import 'package:foodkitchen/core/utils/json_conversion.dart';
 import 'package:foodkitchen/features/home/domain/entities/item_request.dart';
 
 class ItemRequestModel extends ItemRequest {
@@ -25,10 +26,10 @@ class ItemRequestModel extends ItemRequest {
       group: json['group']?.toString() ?? '',
       kitchenId: json['kitchen_id']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
-      quantity: (json['quantity'] as num).toDouble(),
+      quantity: readJsonDouble(json, 'quantity'),
       rejectReason: json['reject_reason']?.toString(),
       requestId: json['request_id']?.toString() ?? '',
-      requestedBy: json['requested_by'],
+      requestedBy: readJsonString(json, 'requested_by'),
       requesterName: json['requester_name']?.toString() ?? '',
       reviewedAt: json['reviewed_at'] != null
           ? DateTime.parse(json['reviewed_at'].toString())

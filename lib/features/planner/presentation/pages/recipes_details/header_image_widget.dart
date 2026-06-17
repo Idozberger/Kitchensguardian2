@@ -1,4 +1,5 @@
 // ignore_for_file: deprecated_member_use
+// Color.opacity / image APIs pending migration to withValues-style APIs.
 
 import 'dart:typed_data';
 
@@ -9,6 +10,7 @@ import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_bloc.dart';
+import 'package:foodkitchen/core/widgets/safe_memory_image.dart';
 import 'package:foodkitchen/features/planner/presentation/bloc/planner_state.dart';
 
 class HeaderImageWidget extends StatelessWidget {
@@ -29,33 +31,35 @@ class HeaderImageWidget extends StatelessWidget {
       padding: gapOnly(left: 20, right: 20, top: 20),
       child: BlocBuilder<PlannerBloc, PlannerState>(
         builder: (context, state) {
-          return Container(
+          return ClipRRect(
+            borderRadius: BorderRadius.circular(h(10)),
+            child: SizedBox(
             height: h(154),
             width: double.infinity,
-            padding: gapAll(15),
-            alignment: Alignment.topRight,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(h(10)),
-              image: _buildBackgroundImage(),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                SafeMemoryImage(
+                  bytes: thumbnailBytes,
+                  fit: BoxFit.cover,
+                  fallback: Image.asset(
+                    AppAssets.onBoardingSliderBg02,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                Padding(
+                  padding: gapAll(15),
+                  child: Align(
+                    alignment: Alignment.topRight,
+                    child: _buildFavoriteButton(state),
+                  ),
+                ),
+              ],
             ),
-            child: _buildFavoriteButton(state),
+          ),
           );
         },
       ),
-    );
-  }
-
-  DecorationImage _buildBackgroundImage() {
-    if (thumbnailBytes != null && thumbnailBytes!.isNotEmpty) {
-      return DecorationImage(
-        image: MemoryImage(thumbnailBytes!),
-        fit: BoxFit.cover,
-      );
-    }
-
-    return DecorationImage(
-      image: AssetImage(AppAssets.onBoardingSliderBg02),
-      fit: BoxFit.cover,
     );
   }
 
@@ -66,7 +70,7 @@ class HeaderImageWidget extends StatelessWidget {
       onTap: isLoading ? null : onFavoritePressed,
       child: CircleAvatar(
         radius: h(18),
-        backgroundColor: Colors.grey.withOpacity(0.75),
+        backgroundColor: Colors.grey.withValues(alpha: 0.75),
         child: isLoading ? _buildLoadingIndicator() : _buildFavoriteIcon(),
       ),
     );

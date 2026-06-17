@@ -25,7 +25,7 @@ class ScanHistoryRepositoryImpl implements ScanHistoryRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 }

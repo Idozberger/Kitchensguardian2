@@ -1,11 +1,12 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:foodkitchen/core/global/functions/gaps.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
+import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class ImagePickerService {
   static final ImagePicker _picker = ImagePicker();
@@ -71,6 +72,7 @@ class ImagePickerService {
                       icon: Icons.camera_alt_rounded,
                       label: 'Camera',
                       onTap: () async {
+                        // Same bottom-sheet context used after picker future; sheet still mounted.
                         // ignore: use_build_context_synchronously
                         Navigator.pop(context, await pickFromCamera(context));
                       },
@@ -81,6 +83,7 @@ class ImagePickerService {
                       icon: Icons.photo_library_rounded,
                       label: 'Gallery',
                       onTap: () async {
+                        // Same bottom-sheet context used after picker future; sheet still mounted.
                         // ignore: use_build_context_synchronously
                         Navigator.pop(context, await pickFromGallery(context));
                       },

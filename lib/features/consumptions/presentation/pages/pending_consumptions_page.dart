@@ -7,8 +7,8 @@ import 'package:foodkitchen/features/consumptions/domain/entities/consumption_co
 import 'package:foodkitchen/features/consumptions/presentation/bloc/consumption_bloc.dart';
 import 'package:foodkitchen/features/consumptions/presentation/bloc/consumption_event.dart';
 import 'package:foodkitchen/features/consumptions/presentation/bloc/consumption_state.dart';
-import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:foodkitchen/features/consumptions/presentation/widgets/consumption_confirmation_card.dart';
+import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';

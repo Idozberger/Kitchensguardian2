@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
-import 'package:foodkitchen/core/config/app_assets.dart';
 
 class PopupDropdownField extends StatefulWidget {
   final String label;
@@ -189,8 +189,10 @@ class _PopupDropdownFieldState extends State<PopupDropdownField> {
                   ),
                   SvgPicture.asset(
                     _isOpen ? AppAssets.downArrow : AppAssets.downArrow,
-                    // ignore: deprecated_member_use
-                    color: const Color(0xff787878),
+                    colorFilter: const ColorFilter.mode(
+                      Color(0xff787878),
+                      BlendMode.srcIn,
+                    ),
                   ),
                 ],
               ),

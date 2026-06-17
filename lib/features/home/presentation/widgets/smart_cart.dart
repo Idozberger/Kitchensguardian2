@@ -54,7 +54,10 @@ class SmartCartTile extends StatelessWidget {
         Text("Smart Cart", style: Theme.of(context).textTheme.headlineLarge),
         SvgPicture.asset(
           AppAssets.cartSvg,
-          color: AppColors.primaryColor,
+          colorFilter: ColorFilter.mode(
+            AppColors.primaryColor,
+            BlendMode.srcIn,
+          ),
           width: w(24),
           height: h(24),
         ),

@@ -1,3 +1,4 @@
+import 'package:foodkitchen/core/utils/json_conversion.dart';
 import 'package:foodkitchen/features/kitchens/domain/entities/kitchen.dart';
 
 class KitchenModel extends Kitchen {
@@ -9,10 +10,10 @@ class KitchenModel extends Kitchen {
   });
   factory KitchenModel.fromJson(Map<String, dynamic> map) {
     return KitchenModel(
-      invitationCode: map['invitation_code'] ?? '',
-      kitchenId: map['kitchen_id'] ?? '',
-      kitchenName: map['kitchen_name'] ?? '',
-      role: map['role'] ?? '',
+      invitationCode: readJsonString(map, 'invitation_code'),
+      kitchenId: readJsonString(map, 'kitchen_id'),
+      kitchenName: readJsonString(map, 'kitchen_name'),
+      role: readJsonString(map, 'role'),
     );
   }
 }

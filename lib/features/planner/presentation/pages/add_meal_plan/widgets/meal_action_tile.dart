@@ -1,11 +1,10 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
+import 'package:foodkitchen/core/utils/dev_logging.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/dashboard/presentation/pages/dashboard_page.dart';
@@ -127,7 +126,7 @@ class MealActionRow extends StatelessWidget {
       formattedDate = formatDateForBackend(formattedDate);
     }
 
-    log("DATE: $formattedDate");
+    devLog("DATE: $formattedDate");
     return formattedDate;
   }
 
@@ -201,7 +200,7 @@ class MealActionRow extends StatelessWidget {
     final parts = inputDate.split("/");
 
     if (parts.length != 3) {
-      log("Invalid date format: $inputDate");
+      devLog("Invalid date format: $inputDate");
       return inputDate;
     }
 

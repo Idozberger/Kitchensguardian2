@@ -1,5 +1,7 @@
 import 'dart:convert';
+
 import 'package:foodkitchen/core/screens/data/models/country_currency_model.dart';
+import 'package:foodkitchen/core/utils/json_conversion.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CountryCurrencyCache {
@@ -15,8 +17,11 @@ class CountryCurrencyCache {
     if (cached == null) return [];
 
     try {
-      final List data = jsonDecode(cached);
-      return data.map((e) => Country.fromMap(e)).toList();
+      final Object? decoded = jsonDecode(cached);
+      if (decoded is! List) return [];
+      return decoded
+          .map((Object? e) => Country.fromMap(jsonObjectFromResponseData(e)))
+          .toList();
     } catch (_) {
       return [];
     }

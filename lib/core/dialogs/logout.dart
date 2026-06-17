@@ -5,7 +5,10 @@ import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
+import 'package:foodkitchen/core/network/profile_response_cache.dart';
+import 'package:foodkitchen/core/services/di/service_locator.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
+import 'package:foodkitchen/core/navigation/router_navigation.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:go_router/go_router.dart';
@@ -51,7 +54,7 @@ class LogoutDialog extends StatelessWidget {
                     height: h(40),
                     child: OutlinedButton(
                       onPressed: () {
-                        context.pop();
+                        popOrGo(context, fallbackLocation: Routes.dashboard);
                       },
 
                       child: Text(
@@ -71,13 +74,15 @@ class LogoutDialog extends StatelessWidget {
                   child: GenericButtonWidget(
                     onPressed: () async {
                       UserCubit userCubit = context.read<UserCubit>();
+                      sl<ProfileResponseCache>().invalidate();
                       userCubit.clearUser();
-                      final prefs = await SharedPreferences.getInstance();
+                      final prefs = sl<SharedPreferences>();
                       await prefs.remove('access-token');
                       await prefs.remove('kitchen_id');
                       await prefs.remove('invitation_code');
                       await prefs.remove('role');
 
+                      // Still in dialog callback; route after prefs I/O completes.
                       // ignore: use_build_context_synchronously
                       context.go(Routes.signIn);
                     },

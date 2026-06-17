@@ -12,10 +12,7 @@ class OnlyLettersFormatter extends TextInputFormatter {
     TextEditingValue newValue,
   ) {
     // Keep only letters
-    String filtered = newValue.text
-        .split('')
-        .where((char) => _regExp.hasMatch(char))
-        .join();
+    String filtered = newValue.text.split('').where(_regExp.hasMatch).join();
 
     // Restrict length
     if (filtered.length > maxLength) {

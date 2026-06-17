@@ -130,7 +130,7 @@ feature_name/
 | State Management | Bloc / Cubit |
 | Networking | Dio |
 | API | REST |
-| DI | get_it / injectable |
+| DI | get_it |
 | Testing | Unit Tests (domain layer) |
 
 ---
@@ -155,16 +155,28 @@ test/
 ```bash
 # Clone the repo
 git clone https://github.com/your-org/food-guardian.git
+# cd into the cloned repository root
 
-# Install dependencies
+# Local secrets (required): copy the template and fill in real values — .env is gitignored
+cp .env.example .env
+
+# FCM server sends (if you use FCM HTTP v1 from the app): place your service account JSON at
+# assets/services/service_account.json (path overridable via FCM_SERVICE_ACCOUNT_ASSET in .env)
+
 flutter pub get
-
-# Run code generation (if using injectable / freezed)
-flutter pub run build_runner build --delete-conflicting-outputs
-
-# Run the app
 flutter run
 ```
+
+### Android release signing
+
+1. Create a keystore under `android/`, e.g.  
+   `keytool -genkey -v -keystore android/kitchenguardian.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload`
+2. Copy `android/key.properties.example` → `android/key.properties` and set secrets. **`storeFile` is relative to the `android/` directory** (e.g. `storeFile=kitchenguardian.jks` for `android/kitchenguardian.jks`). Keystore and `key.properties` are gitignored — do not commit them.
+3. If `key.properties` is missing, release builds use the **debug** keystore for local testing only — use a real keystore for Play upload.
+
+**Release builds** use R8 (`minifyEnabled` / `shrinkResources`). Ship with:
+
+`flutter build apk --release` or `flutter build appbundle --release`.
 
 ---
 

@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
-import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
+import 'package:foodkitchen/core/navigation/paywall_navigation.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
-import 'package:go_router/go_router.dart';
-
 class PremiumCardWidget extends StatelessWidget {
   final String titleLine1;
   final String titleLine2;
@@ -25,7 +23,7 @@ class PremiumCardWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       borderRadius: BorderRadius.circular(h(12)),
-      onTap: () => context.push(Routes.subscription),
+      onTap: () => openPaywallIfEnabled(context),
       child: Container(
         width: double.infinity,
         padding: gapSymmetric(horizontal: 15, vertical: 20),
@@ -54,9 +52,7 @@ class PremiumCardWidget extends StatelessWidget {
             if (isGoProButtonEnabled) ...[
               gap(height: 10),
               GenericButtonWidget(
-                onPressed: () {
-                  context.push(Routes.subscription);
-                },
+                onPressed: () => openPaywallIfEnabled(context),
                 width: w(110),
                 height: h(24),
                 text: "Go Pro",

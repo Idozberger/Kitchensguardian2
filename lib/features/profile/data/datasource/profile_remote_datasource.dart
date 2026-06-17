@@ -1,10 +1,11 @@
 // ignore_for_file: unnecessary_brace_in_string_interps
-
-import 'dart:convert';
+// String templates use explicit `${id}` for readability with adjacent text.
 
 import 'package:dio/dio.dart';
 import 'package:foodkitchen/core/global/functions/api_endpoints.dart';
+import 'package:foodkitchen/core/network/profile_response_cache.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
+import 'package:foodkitchen/core/utils/json_conversion.dart';
 
 abstract class ProfileRemoteDatasource {
   Future<String> editProfile({
@@ -16,11 +17,18 @@ abstract class ProfileRemoteDatasource {
     required String currentPassword,
     required String newPassword,
   });
+  Future<String> deleteAccount();
 }
 
 class ProfileRemoteDatasourceImpl implements ProfileRemoteDatasource {
-  final DioHelper dio;
-  ProfileRemoteDatasourceImpl({required this.dio});
+  ProfileRemoteDatasourceImpl({
+    required DioHelper dio,
+    required ProfileResponseCache profileCache,
+  }) : _dio = dio,
+       _profileCache = profileCache;
+
+  final DioHelper _dio;
+  final ProfileResponseCache _profileCache;
   @override
   Future<String> editProfile({
     required String firstName,
@@ -28,7 +36,7 @@ class ProfileRemoteDatasourceImpl implements ProfileRemoteDatasource {
     required String thumbnail,
   }) async {
     try {
-      final response = await dio.post(
+      final response = await _dio.post(
         AppConstants.editUser,
         data: {
           "first_name": firstName,
@@ -37,16 +45,18 @@ class ProfileRemoteDatasourceImpl implements ProfileRemoteDatasource {
         },
       );
       if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
+        final Map<String, dynamic> data = jsonObjectFromResponseData(
+          response.data,
+        );
 
-        final message = data["error"];
-        throw message;
+        final Object? message = data['error'];
+        throw apiExceptionFrom(message);
       }
-      return response.data["message"];
+      _profileCache.invalidate();
+      final Map<String, dynamic> ok = jsonObjectFromResponseData(response.data);
+      return readJsonString(ok, 'message');
     } on DioException catch (e) {
-      throw dio.handleError(e);
+      throw await _dio.handleError(e);
     }
   }
 
@@ -56,7 +66,7 @@ class ProfileRemoteDatasourceImpl implements ProfileRemoteDatasource {
     required String newPassword,
   }) async {
     try {
-      final response = await dio.post(
+      final response = await _dio.post(
         AppConstants.changePassword,
         data: {
           "current_password": currentPassword,
@@ -64,16 +74,37 @@ class ProfileRemoteDatasourceImpl implements ProfileRemoteDatasource {
         },
       );
       if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
+        final Map<String, dynamic> data = jsonObjectFromResponseData(
+          response.data,
+        );
 
-        final message = data["error"];
-        throw message;
+        final Object? message = data['error'];
+        throw apiExceptionFrom(message);
       }
-      return response.data["message"];
+      final Map<String, dynamic> ok = jsonObjectFromResponseData(response.data);
+      return readJsonString(ok, 'message');
     } on DioException catch (e) {
-      throw dio.handleError(e);
+      throw await _dio.handleError(e);
+    }
+  }
+
+  @override
+  Future<String> deleteAccount() async {
+    try {
+      final response = await _dio.delete(AppConstants.deleteAccount);
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final Map<String, dynamic> data = jsonObjectFromResponseData(
+          response.data,
+        );
+
+        final Object? message = data['error'];
+        throw apiExceptionFrom(message);
+      }
+      _profileCache.invalidate();
+      final Map<String, dynamic> ok = jsonObjectFromResponseData(response.data);
+      return readJsonString(ok, 'message');
+    } on DioException catch (e) {
+      throw await _dio.handleError(e);
     }
   }
 }

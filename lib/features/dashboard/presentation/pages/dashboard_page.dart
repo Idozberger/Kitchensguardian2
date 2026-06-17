@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,13 +6,13 @@ import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
+//import 'package:foodkitchen/core/navigation/paywall_navigation.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
-import 'package:foodkitchen/core/theme/app_colors.dart';
-
+//import 'package:foodkitchen/core/theme/app_colors.dart';
+import 'package:foodkitchen/core/utils/dev_logging.dart';
 import 'package:foodkitchen/features/consumptions/presentation/bloc/consumption_bloc.dart';
 import 'package:foodkitchen/features/consumptions/presentation/bloc/consumption_event.dart';
 import 'package:foodkitchen/features/consumptions/presentation/bloc/consumption_state.dart';
-import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/drawer_view.dart';
 import 'package:foodkitchen/features/grocery/presentation/pages/grocery_page.dart';
@@ -22,6 +20,8 @@ import 'package:foodkitchen/features/home/presentation/pages/home_page.dart';
 import 'package:foodkitchen/features/planner/presentation/pages/planner_page.dart';
 import 'package:foodkitchen/features/profile/presentation/pages/profile_page.dart';
 import 'package:go_router/go_router.dart';
+
+part 'dashboard_page_part.dart';
 
 enum DashboardEntryType { normal, notification, planner }
 
@@ -40,12 +40,7 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  static const _pages = [
-    HomePage(),
-    PlannerPage(),
-    GroceryPage(),
-    ProfilePage(),
-  ];
+  late final List<bool> _tabEverOpened;
 
   static const _backPressWindow = Duration(seconds: 2);
 
@@ -53,16 +48,15 @@ class _DashboardPageState extends State<DashboardPage> {
   DateTime? _lastBackPressed;
 
   late final UserCubit _userCubit;
-  late final DashboardBloc _dashboardBloc;
   @override
   void initState() {
     super.initState();
+    _tabEverOpened = [true, false, false, false];
 
     _userCubit = context.read<UserCubit>();
-    _dashboardBloc = context.read<DashboardBloc>();
 
     _fetchConsumptionData();
-    log(
+    devLog(
       "check notification tapped: ${widget.isFromNotification} ${widget.entryType}",
     );
     if (widget.isFromNotification) {
@@ -74,8 +68,10 @@ class _DashboardPageState extends State<DashboardPage> {
 
   void _handleNotificationEntry() {
     if (widget.entryType == DashboardEntryType.planner) {
-      _selectedIndex = 1;
-      setState(() {});
+      setState(() {
+        _selectedIndex = 1;
+        _tabEverOpened[1] = true;
+      });
     }
   }
 
@@ -86,214 +82,14 @@ class _DashboardPageState extends State<DashboardPage> {
       onPopInvokedWithResult: (didPop, result) => _handleBackPress(),
       child: Scaffold(
         drawer: const AppDrawer(),
-        appBar: _buildAppBar(context),
+        appBar: buildDashboardAppBar(context),
         body: SafeArea(
-          child: IndexedStack(index: _selectedIndex, children: _pages),
-        ),
-        bottomNavigationBar: _buildBottomNav(),
-      ),
-    );
-  }
-
-  AppBar _buildAppBar(BuildContext context) {
-    return AppBar(
-      leadingWidth: w(55),
-      centerTitle: false,
-      leading: _buildDrawerButton(),
-      title: Text(
-        "Kitchen's Guardian",
-        style: Theme.of(context).textTheme.headlineLarge,
-      ),
-      actions: [
-        _buildSubscriptionButton(),
-        SizedBox(width: w(6)),
-        _buildConsumptionPendingButton(),
-        SizedBox(width: w(6)),
-        _buildNotificationButton(),
-
-        _buildSwitchPremiumButton(context),
-        SizedBox(width: w(16)),
-      ],
-    );
-  }
-
-  Widget _buildSubscriptionButton() {
-    return InkWell(
-      onTap: () => context.push(Routes.subscription),
-      child: Image.asset(AppAssets.gemPNG, height: h(16), fit: BoxFit.cover),
-    );
-  }
-
-  Widget _buildDrawerButton() {
-    return Builder(
-      builder: (context) => Row(
-        children: [
-          SizedBox(width: w(16)),
-          CircularIconButton(
-            size: 32,
-            iconAsset: AppAssets.drawerSvg,
-            onTap: () => Scaffold.of(context).openDrawer(),
+          child: IndexedStack(
+            index: _selectedIndex,
+            children: List<Widget>.generate(4, _lazyTab),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildConsumptionPendingButton() {
-    return BlocBuilder<ConsumptionBloc, ConsumptionState>(
-      builder: (context, state) {
-        final String pendingCount =
-            state.comsumptionConfirmationPendingCount != "0"
-            ? state.comsumptionConfirmationPendingCount
-            : "";
-
-        final bool showBadge = pendingCount.isNotEmpty;
-
-        return Badge(
-          backgroundColor: const Color(0xffFF3300),
-          isLabelVisible: showBadge,
-          label: Text(
-            pendingCount,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          child: CircularIconButton(
-            size: 32,
-            iconAsset: AppAssets.consumptionPending,
-            onTap: () => context.pushNamed(
-              Routes.pendingconsumptionconfirmation,
-              extra: _userCubit.state.activeKitchenId,
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildSwitchPremiumButton(BuildContext context) {
-    final isPremium = context.watch<UserCubit>().state.isPremiumUser;
-
-    return Transform.scale(
-      scale: 0.8,
-      child: Switch(
-        value: isPremium,
-        activeColor: AppColors.primaryColor,
-        inactiveThumbColor: Colors.grey,
-        activeTrackColor: AppColors.primaryColor.withOpacity(0.5),
-        inactiveTrackColor: Colors.grey.shade300,
-        onChanged: (value) {
-          context.read<UserCubit>().updatePremiumStatus(value);
-        },
-      ),
-    );
-  }
-
-  Widget _buildNotificationButton() {
-    return CircularIconButton(
-      size: 32,
-      iconAsset: AppAssets.notificationSvg,
-      onTap: () => context.push(Routes.notification),
-    );
-  }
-
-  Widget _buildBottomNav() {
-    return Theme(
-      data: Theme.of(context).copyWith(
-        splashColor: Colors.transparent,
-        highlightColor: Colors.grey.shade200,
-      ),
-      child: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _selectedIndex,
-        elevation: 0,
-        onTap: _onItemTapped,
-        items: _buildNavItems(),
-      ),
-    );
-  }
-
-  List<BottomNavigationBarItem> _buildNavItems() {
-    return [
-      _buildNavItem(
-        activeIcon: AppAssets.homeActiveSvg,
-        inactiveIcon: AppAssets.homeInactiveSvg,
-        label: "Home",
-      ),
-      _buildNavItem(
-        activeIcon: AppAssets.plannerActiveSvg,
-        inactiveIcon: AppAssets.plannerInactiveSvg,
-        label: "Planner",
-      ),
-      _buildNavItem(
-        activeIcon: AppAssets.groceryActiveSvg,
-        inactiveIcon: AppAssets.groceryInactiveSvg,
-        label: "Grocery",
-      ),
-      _buildNavItem(
-        activeIcon: AppAssets.profileActiveSvg,
-        inactiveIcon: AppAssets.profileInactiveSvg,
-        label: "Profile",
-      ),
-    ];
-  }
-
-  BottomNavigationBarItem _buildNavItem({
-    required String activeIcon,
-    required String inactiveIcon,
-    required String label,
-  }) {
-    return BottomNavigationBarItem(
-      activeIcon: _buildNavIcon(activeIcon),
-      icon: _buildNavIcon(inactiveIcon),
-      label: label,
-    );
-  }
-
-  Widget _buildNavIcon(String assetPath) {
-    return Padding(
-      padding: gapOnly(top: 8),
-      child: SvgPicture.asset(assetPath),
-    );
-  }
-
-  void _showExitSnackBar() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(
-              Icons.exit_to_app_rounded,
-              color: Color(0xFF2D3142),
-              size: 20,
-            ),
-            const SizedBox(width: 12),
-            const Expanded(
-              child: Text(
-                "Press back again to exit",
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                  letterSpacing: 0.2,
-                  color: Color(0xFF2D3142),
-                ),
-              ),
-            ),
-          ],
         ),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: Colors.grey.shade200, width: 1),
-        ),
-        margin: const EdgeInsets.all(16),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        duration: _backPressWindow,
-        elevation: 2,
-        dismissDirection: DismissDirection.horizontal,
+        bottomNavigationBar: buildDashboardBottomNav(),
       ),
     );
   }
@@ -316,7 +112,7 @@ class _DashboardPageState extends State<DashboardPage> {
     }
 
     _lastBackPressed = now;
-    _showExitSnackBar();
+    showDashboardExitSnackBar();
   }
 
   void _fetchConsumptionData() {
@@ -329,7 +125,32 @@ class _DashboardPageState extends State<DashboardPage> {
 
   void _onItemTapped(int index) {
     if (_selectedIndex != index) {
-      setState(() => _selectedIndex = index);
+      setState(() {
+        _tabEverOpened[index] = true;
+        _selectedIndex = index;
+      });
+    }
+  }
+
+  Widget _lazyTab(int i) {
+    if (!_tabEverOpened[i]) {
+      return const SizedBox.shrink();
+    }
+    return _pageForIndex(i);
+  }
+
+  Widget _pageForIndex(int i) {
+    switch (i) {
+      case 0:
+        return const HomePage();
+      case 1:
+        return const PlannerPage();
+      case 2:
+        return const GroceryPage();
+      case 3:
+        return const ProfilePage();
+      default:
+        return const SizedBox.shrink();
     }
   }
 }

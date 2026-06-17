@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
+import 'package:foodkitchen/core/utils/json_conversion.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/planner/presentation/widgets/recipes_step_tile.dart';
@@ -9,7 +10,7 @@ class RecipeStepsTile extends StatelessWidget {
   final RecipeEntity recipe;
   final List<Map<String, dynamic>> steps;
 
-  final Function(int index, bool isCompleted) onStepToggle;
+  final void Function(int index, bool isCompleted) onStepToggle;
 
   const RecipeStepsTile({
     super.key,
@@ -35,10 +36,12 @@ class RecipeStepsTile extends StatelessWidget {
               (index) => Padding(
                 padding: gapOnly(top: 14),
                 child: RecipeStepTile(
-                  stepText: steps[index]["step"],
-                  callback: () =>
-                      onStepToggle(index, steps[index]["completed"]),
-                  isCompleted: steps[index]["completed"],
+                  stepText: readJsonString(steps[index], 'step'),
+                  callback: () => onStepToggle(
+                    index,
+                    readJsonBool(steps[index], 'completed'),
+                  ),
+                  isCompleted: readJsonBool(steps[index], 'completed'),
                 ),
               ),
             ),

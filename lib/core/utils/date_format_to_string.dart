@@ -1,5 +1,4 @@
-import 'dart:developer';
-
+import 'package:foodkitchen/core/utils/dev_logging.dart';
 import 'package:intl/intl.dart';
 
 String formatDate(DateTime date) => DateFormat('dd/MM/yyyy').format(date);
@@ -12,11 +11,11 @@ DateTime parseDate(String formattedDateString) {
 
 String formatDateToMeetBackendDate(DateTime date) {
   final formatted = DateFormat('yyyy-MM-dd').format(date);
-  log("calling [formatDateToMeetBackendDate]: $date → $formatted");
+  devLog("calling [formatDateToMeetBackendDate]: $date → $formatted");
   return formatted;
 }
 
 DateTime formatStringDateToMeetBackendDate(String formattedDateString) {
-  log("Formatting date: $formattedDateString");
+  devLog("Formatting date: $formattedDateString");
   return DateFormat('yyyy-MM-d').parse(formattedDateString);
 }

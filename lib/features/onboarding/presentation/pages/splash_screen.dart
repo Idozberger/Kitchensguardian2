@@ -1,12 +1,14 @@
 // ignore_for_file: type_literal_in_constant_pattern, use_build_context_synchronously
-import 'dart:developer';
+// Switch on runtime types during cold start; context used after async init.
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/app/app_base.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/routes.dart';
+import 'package:foodkitchen/core/services/di/service_locator.dart';
 import 'package:foodkitchen/core/utils/date_format_to_string.dart';
+import 'package:foodkitchen/core/utils/dev_logging.dart';
 import 'package:foodkitchen/features/onboarding/presentation/bloc/user_bloc.dart';
 import 'package:foodkitchen/features/onboarding/presentation/widgets/no_internet_view.dart';
 import 'package:foodkitchen/features/onboarding/presentation/widgets/splash_content_widget.dart';
@@ -59,12 +61,12 @@ class _SplashScreenState extends State<SplashScreen>
     try {
       await Future.wait([_getCurrentUser(), _updatePlansStartDate()]);
     } catch (e) {
-      log('Error initializing app: $e');
+      devLog('Error initializing app: $e');
     }
   }
 
   void navigateAuthenticatedUser() async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = sl<SharedPreferences>();
     final country = prefs.getString("country");
     final currency = prefs.getString("currency");
     if (country == null || currency == null) {
@@ -88,7 +90,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   Future<void> _updatePlansStartDate() async {
     try {
-      final sharedPreferences = await SharedPreferences.getInstance();
+      final sharedPreferences = sl<SharedPreferences>();
       final endDateString = sharedPreferences.getString("end-date");
 
       if (endDateString == null) return;
@@ -104,7 +106,7 @@ class _SplashScreenState extends State<SplashScreen>
         ]);
       }
     } catch (e) {
-      log('Error updating plans start date: $e');
+      devLog('Error updating plans start date: $e');
     }
   }
 
@@ -121,19 +123,14 @@ class _SplashScreenState extends State<SplashScreen>
           "Your session has ended. You've been logged out, please sign in again!",
           Routes.signIn,
         );
-        break;
       case NoInternet:
         _showError("No Internet Connection");
-        break;
       case UserInitial:
         context.go(Routes.onBoarding);
-        break;
       case UserOnBoarded:
         context.go(Routes.signIn);
-        break;
       case UserSuccess:
         navigateAuthenticatedUser();
-        break;
     }
   }
 

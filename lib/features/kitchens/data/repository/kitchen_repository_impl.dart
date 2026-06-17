@@ -20,7 +20,7 @@ class KitchenRepositoryImpl implements KitchenRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -36,7 +36,7 @@ class KitchenRepositoryImpl implements KitchenRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -54,7 +54,7 @@ class KitchenRepositoryImpl implements KitchenRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -70,7 +70,7 @@ class KitchenRepositoryImpl implements KitchenRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -86,7 +86,7 @@ class KitchenRepositoryImpl implements KitchenRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -104,7 +104,7 @@ class KitchenRepositoryImpl implements KitchenRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 }

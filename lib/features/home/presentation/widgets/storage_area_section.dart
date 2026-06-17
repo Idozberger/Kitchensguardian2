@@ -1,4 +1,5 @@
 // ignore_for_file: unnecessary_underscores
+// Legacy private field names in this widget; rename when touching layout.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -67,7 +68,6 @@ class StorageAreasSection extends StatelessWidget {
             Padding(
               padding: gapSymmetric(horizontal: 42),
               child: EmptyStateWidget(
-                context,
                 imagePath: AppAssets.noKitchenFound,
                 title: 'No storage areas added yet',
               ),
@@ -163,7 +163,10 @@ class StorageAreasSection extends StatelessWidget {
             onPressed: () => context.push(Routes.myPantry),
             icon: SvgPicture.asset(
               AppAssets.eyeSvg,
-              color: AppColors.primaryColor,
+              colorFilter: ColorFilter.mode(
+                AppColors.primaryColor,
+                BlendMode.srcIn,
+              ),
               width: w(10),
               height: h(10),
             ),

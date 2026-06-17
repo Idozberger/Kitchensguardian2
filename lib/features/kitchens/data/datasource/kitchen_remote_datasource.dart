@@ -1,13 +1,11 @@
 // ignore_for_file: unnecessary_brace_in_string_interps
-
-import 'dart:convert';
-import 'dart:developer';
+// Log and error strings use `${field}` next to literals for clarity.
 
 import 'package:dio/dio.dart';
-import 'package:flutter/widgets.dart';
 import 'package:foodkitchen/core/global/functions/api_endpoints.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
-import 'package:http/http.dart' as http;
+import 'package:foodkitchen/core/utils/dev_logging.dart';
+import 'package:foodkitchen/core/utils/json_conversion.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract interface class KitchenRemoteDatasource {
@@ -31,22 +29,25 @@ class KitchenRemoteDataSourceImpl implements KitchenRemoteDatasource {
     try {
       final response = await dio.get(AppConstants.kitchens);
       if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
+        final Map<String, dynamic> data = jsonObjectFromResponseData(
+          response.data,
+        );
 
-        final message = data["error"];
-        throw message;
+        final Object? message = data['error'];
+        throw apiExceptionFrom(message);
       }
-      final data = response.data["kitchens"];
+      final Map<String, dynamic> root = jsonObjectFromResponseData(
+        response.data,
+      );
+      final Object? kitchensRaw = root['kitchens'];
 
-      if (data is List) {
-        return data.map((e) => Map<String, dynamic>.from(e)).toList();
+      if (kitchensRaw is List) {
+        return kitchensRaw.map(jsonObjectFromResponseData).toList();
       } else {
         throw Exception("Invalid data");
       }
     } on DioException catch (e) {
-      throw dio.handleError(e);
+      throw await dio.handleError(e);
     }
   }
 
@@ -59,25 +60,26 @@ class KitchenRemoteDataSourceImpl implements KitchenRemoteDatasource {
       );
 
       if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
-        throw data["error"];
+        final Map<String, dynamic> data = jsonObjectFromResponseData(
+          response.data,
+        );
+        throw apiExceptionFrom(data['error']);
       }
 
-      final data = response.data;
-      final kitchenId = data["kitchen_id"];
-      final invitationCode = data["invitation_code"];
-      final role = data["role"];
+      final Map<String, dynamic> data = jsonObjectFromResponseData(
+        response.data,
+      );
+      final String kitchenId = readJsonString(data, 'kitchen_id');
+      final String invitationCode = readJsonString(data, 'invitation_code');
+      final String role = readJsonString(data, 'role');
 
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('kitchen_id', kitchenId.toString());
-      await prefs.setString('invitation_code', invitationCode.toString());
-      await prefs.setString('role', role.toString());
+      await sharedPreferences.setString('kitchen_id', kitchenId);
+      await sharedPreferences.setString('invitation_code', invitationCode);
+      await sharedPreferences.setString('role', role);
 
-      return data["message"];
+      return readJsonString(data, 'message');
     } on DioException catch (e) {
-      throw dio.handleError(e);
+      throw await dio.handleError(e);
     }
   }
 
@@ -96,20 +98,21 @@ class KitchenRemoteDataSourceImpl implements KitchenRemoteDatasource {
       );
 
       if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
+        final Map<String, dynamic> data = jsonObjectFromResponseData(
+          response.data,
+        );
 
-        final message = data["error"];
-        debugPrint('⚠️ [createPantry] Error Message: $message');
-        throw message;
+        final Object? message = data['error'];
+        devPrint('⚠️ [createPantry] Error Message: $message');
+        throw apiExceptionFrom(message);
       }
 
-      return response.data["message"];
+      final Map<String, dynamic> ok = jsonObjectFromResponseData(response.data);
+      return readJsonString(ok, 'message');
     } on DioException catch (e) {
-      throw dio.handleError(e);
+      throw await dio.handleError(e);
     } catch (e, stacktrace) {
-      debugPrint('🧩 Stacktrace: $stacktrace');
+      devPrint('🧩 Stacktrace: $stacktrace');
       rethrow;
     }
   }
@@ -119,25 +122,28 @@ class KitchenRemoteDataSourceImpl implements KitchenRemoteDatasource {
     required String invitationCode,
     required String userId,
   }) async {
-    final url = Uri.parse("${AppConstants.baseUrl}${AppConstants.joinKitchen}");
+    try {
+      final response = await dio.post(
+        AppConstants.joinKitchen,
+        data: {
+          "invitation_code": invitationCode,
+          "user_id": userId,
+        },
+      );
 
-    final body = jsonEncode({
-      "invitation_code": invitationCode,
-      "user_id": userId,
-    });
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final Map<String, dynamic> data = jsonObjectFromResponseData(
+          response.data,
+        );
+        throw apiExceptionFrom(data['error'] ?? 'Unknown error');
+      }
 
-    final response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: body,
-    );
-
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      final json = jsonDecode(response.body);
-      return json["message"];
-    } else {
-      final json = jsonDecode(response.body);
-      throw json["error"] ?? "Unknown error";
+      final Map<String, dynamic> json = jsonObjectFromResponseData(
+        response.data,
+      );
+      return readJsonString(json, 'message');
+    } on DioException catch (e) {
+      throw await dio.handleError(e);
     }
   }
 
@@ -149,21 +155,22 @@ class KitchenRemoteDataSourceImpl implements KitchenRemoteDatasource {
         data: {"kitchen_id": kitchenId},
       );
       if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
+        final Map<String, dynamic> data = jsonObjectFromResponseData(
+          response.data,
+        );
 
-        final message = data["error"];
-        throw message;
+        final Object? message = data['error'];
+        throw apiExceptionFrom(message);
       }
       await sharedPreferences.remove('kitchen_id');
       await sharedPreferences.remove('invitation_code');
       await sharedPreferences.remove('role');
-      log(response.data["message"]);
+      final Map<String, dynamic> ok = jsonObjectFromResponseData(response.data);
+      devLog(readJsonString(ok, 'message'));
 
-      return response.data["message"];
+      return readJsonString(ok, 'message');
     } on DioException catch (e) {
-      throw dio.handleError(e);
+      throw await dio.handleError(e);
     }
   }
 
@@ -175,22 +182,23 @@ class KitchenRemoteDataSourceImpl implements KitchenRemoteDatasource {
         data: {"kitchen_id": kitchenId},
       );
       if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
+        final Map<String, dynamic> data = jsonObjectFromResponseData(
+          response.data,
+        );
 
-        final message = data["error"];
-        throw message;
+        final Object? message = data['error'];
+        throw apiExceptionFrom(message);
       }
       await sharedPreferences.remove('kitchen_id');
       await sharedPreferences.remove('invitation_code');
       await sharedPreferences.remove('role');
 
-      log(response.data["message"]);
+      final Map<String, dynamic> ok = jsonObjectFromResponseData(response.data);
+      devLog(readJsonString(ok, 'message'));
 
-      return response.data["message"];
+      return readJsonString(ok, 'message');
     } on DioException catch (e) {
-      throw dio.handleError(e);
+      throw await dio.handleError(e);
     }
   }
 
@@ -205,18 +213,19 @@ class KitchenRemoteDataSourceImpl implements KitchenRemoteDatasource {
         data: {"kitchen_id": kitchenId, "email": email},
       );
       if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
+        final Map<String, dynamic> data = jsonObjectFromResponseData(
+          response.data,
+        );
 
-        final message = data["error"];
-        throw message;
+        final Object? message = data['error'];
+        throw apiExceptionFrom(message);
       }
-      log(response.data["message"]);
+      final Map<String, dynamic> ok = jsonObjectFromResponseData(response.data);
+      devLog(readJsonString(ok, 'message'));
 
-      return response.data["message"];
+      return readJsonString(ok, 'message');
     } on DioException catch (e) {
-      throw dio.handleError(e);
+      throw await dio.handleError(e);
     }
   }
 }

@@ -14,11 +14,27 @@
       },
       "oauth_client": [
         {
+          "client_id": "295968556562-nc4suf12i7sjl9ua55j4s47udh25dhsr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.itz.kitchens.guardian",
+            "certificate_hash": "b762af3024a1871ce0dc515cf70887081a403817"
+          }
+        },
+        {
           "client_id": "295968556562-o7c8lrqj1tfup8j5c8fb0868gv2or5ek.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.itz.kitchens.guardian",
             "certificate_hash": "4cadb918bff3c2b5419f908856f42903adb60fd0"
+          }
+        },
+        {
+          "client_id": "295968556562-qeglnc73jclu7fnogpur290edpvbhs06.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.itz.kitchens.guardian",
+            "certificate_hash": "fd71140b765d7992c0b296c6d54f44da36f548e5"
           }
         },
         {

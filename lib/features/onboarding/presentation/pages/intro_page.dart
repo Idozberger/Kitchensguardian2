@@ -89,7 +89,7 @@ class _IntroPageState extends State<IntroPage> {
   Widget build(BuildContext context) {
     return BlocConsumer<UserBloc, UserState>(
       listener: _handleStateChange,
-      builder: (context, state) => _buildScaffold(),
+      builder: (context, state) => _buildScaffold(state),
     );
   }
 
@@ -99,7 +99,7 @@ class _IntroPageState extends State<IntroPage> {
     }
   }
 
-  Widget _buildScaffold() {
+  Widget _buildScaffold(UserState userState) {
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -121,7 +121,7 @@ class _IntroPageState extends State<IntroPage> {
                   itemBuilder: (context, index) => _buildPageContent(index),
                 ),
               ),
-              _buildBottomSection(),
+              _buildBottomSection(userState),
             ],
           ),
         ),
@@ -209,13 +209,14 @@ class _IntroPageState extends State<IntroPage> {
     );
   }
 
-  Widget _buildBottomSection() {
+  Widget _buildBottomSection(UserState userState) {
     return Padding(
       padding: gapOnly(left: 20, right: 20, bottom: 14, top: 14),
       child: Column(
         children: [
           GenericButtonWidget(
             onPressed: _onNextPressed,
+            isLoading: userState is UserLoading,
             text: _currentPage == _pages.length - 1
                 ? "Get Started"
                 : "Continue",

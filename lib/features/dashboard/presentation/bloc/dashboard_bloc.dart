@@ -1,11 +1,10 @@
-import 'dart:developer';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
-import 'package:foodkitchen/core/services/fcm/fcm_service.dart';
+import 'package:foodkitchen/core/utils/dev_logging.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
+import 'package:foodkitchen/features/dashboard/domain/usecases/approve_kitchen_join_request.dart';
+import 'package:foodkitchen/features/dashboard/domain/usecases/decline_kitchen_join_request.dart';
 import 'package:foodkitchen/features/dashboard/domain/usecases/demote_cohost.dart';
-
 import 'package:foodkitchen/features/dashboard/domain/usecases/get_kitchen_members.dart';
 import 'package:foodkitchen/features/dashboard/domain/usecases/get_recipe_details.dart';
 import 'package:foodkitchen/features/dashboard/domain/usecases/kick_member.dart';
@@ -14,7 +13,8 @@ import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_event
 import 'package:foodkitchen/features/dashboard/presentation/bloc/dashboard_state.dart';
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_bloc.dart';
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_event.dart';
-import 'package:intl/intl.dart';
+
+part 'dashboard_bloc_handlers.dart';
 
 class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   final GetKitchenMembers _getKitchenMembers;
@@ -25,6 +25,9 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   final KitchenBloc _kitchenBloc;
   final UserCubit _userCubit;
   final GetRecipeDetails _getRecipeDetails;
+  final ApproveKitchenJoinRequest _approveKitchenJoinRequest;
+  final DeclineKitchenJoinRequest _declineKitchenJoinRequest;
+
   DashboardBloc({
     required GetKitchenMembers getMembers,
     required MakeCohost makeCohost,
@@ -33,8 +36,8 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     required DemoteCohost demoteCohost,
     required UserCubit userCubit,
     required GetRecipeDetails getRecipeDetails,
-
-    respondConsumptionConfirmation,
+    required ApproveKitchenJoinRequest approveKitchenJoinRequest,
+    required DeclineKitchenJoinRequest declineKitchenJoinRequest,
   }) : _getKitchenMembers = getMembers,
        _makeCohost = makeCohost,
        _kickMember = kickMember,
@@ -42,304 +45,15 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
        _kitchenBloc = kitchenBloc,
        _getRecipeDetails = getRecipeDetails,
        _userCubit = userCubit,
-
+       _approveKitchenJoinRequest = approveKitchenJoinRequest,
+       _declineKitchenJoinRequest = declineKitchenJoinRequest,
        super(DashboardInitial()) {
-    on<GetKitchenMembersEvent>(_onGetDashboardMembers);
-    on<MakeCohostEvent>(_onMakeCohostEvent);
-    on<KickMemberEvent>(_onKickMemberEvent);
-    on<DemoteCohostEvent>(_onDemoteCohostEvent);
-    on<ApproveRequestEvent>(_onApproveRequestEvent);
-    on<DeclineRequestEvent>(_onDeclineRequestEvent);
-    on<GetRecipeDetailsEvent>(_onGetRecipeDetailsEvent);
-  }
-
-  Future<void> _onGetRecipeDetailsEvent(
-    GetRecipeDetailsEvent event,
-    Emitter<DashboardState> emit,
-  ) async {
-    emit(DashboardLoading());
-    final res = await _getRecipeDetails(
-      GetRecipeDetailsParams(
-        recipeId: event.recipeId,
-        kitchenId: event.kitchenId,
-      ),
-    );
-
-    res.fold(
-      (failure) {
-        emit(DashboardFailure(failure.message));
-      },
-      (recipes) {
-        emit(RecipeDetailsLoaded(recipes));
-      },
-    );
-  }
-
-  Future<void> _onGetDashboardMembers(
-    GetKitchenMembersEvent event,
-    Emitter<DashboardState> emit,
-  ) async {
-    emit(DashboardLoading());
-
-    final res = await _getKitchenMembers(
-      GetKitchenMembersParams(kitchenId: event.activeKitchenId),
-    );
-
-    res.fold((failure) => emit(DashboardFailure(failure.message)), (members) {
-      final currentState = state;
-
-      if (currentState is DashboardLoaded) {
-        emit(currentState.copyWith(kitchenMembers: members));
-      } else {
-        emit(DashboardLoaded(kitchenMembers: members));
-      }
-    });
-  }
-
-  Future<void> _onMakeCohostEvent(
-    MakeCohostEvent event,
-    Emitter<DashboardState> emit,
-  ) async {
-    emit(DashboardLoading());
-    final res = await _makeCohost(
-      MakeCohostParams(
-        kitchenId: event.activeKitchenId,
-        memberId: event.memberId,
-      ),
-    );
-
-    res.fold((failure) => emit(DashboardFailure(failure.message)), (message) {
-      emit(DashboardSuccess(message));
-    });
-  }
-
-  Future<void> _onDemoteCohostEvent(
-    DemoteCohostEvent event,
-    Emitter<DashboardState> emit,
-  ) async {
-    emit(DashboardLoading());
-    final res = await _demoteCohost(
-      DemoteCohostParams(
-        kitchenId: event.activeKitchenId,
-        memberId: event.memberId,
-      ),
-    );
-
-    res.fold((failure) => emit(DashboardFailure(failure.message)), (message) {
-      emit(DashboardSuccess(message));
-    });
-  }
-
-  Future<void> _onKickMemberEvent(
-    KickMemberEvent event,
-    Emitter<DashboardState> emit,
-  ) async {
-    emit(DashboardLoading());
-    final res = await _kickMember(
-      KickMemberParams(
-        kitchenId: event.activeKitchenId,
-        memberId: event.memberId,
-      ),
-    );
-
-    res.fold((failure) => emit(DashboardFailure(failure.message)), (message) {
-      emit(DashboardSuccess(message));
-    });
-  }
-
-  Future<void> _onApproveRequestEvent(
-    ApproveRequestEvent event,
-    Emitter<DashboardState> emit,
-  ) async {
-    log("[approve]");
-    emit(ApproveLoading(event.date.toString()));
-    final userId = event.memberId;
-    log("[approve] $userId");
-    final userDoc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .get();
-    log("[approve] $userDoc");
-    if (!userDoc.exists) {
-      log("[approve] not exist $userDoc");
-      log("[approve] $userDoc");
-      emit(DashboardFailure("User not found"));
-      return;
-    }
-
-    final kitchenQuery = await FirebaseFirestore.instance
-        .collection('kitchens')
-        .where("user_id", isEqualTo: _userCubit.state.userId)
-        .where("kitchen_id", isEqualTo: event.kitchenId)
-        .get();
-
-    if (kitchenQuery.docs.isEmpty) {
-      emit(DashboardFailure("Kitchen not found"));
-      return;
-    }
-
-    final kitchenDoc = kitchenQuery.docs.first;
-    final kitchenData = kitchenDoc.data();
-    final inviteCode = kitchenData['invitation_code'] ?? '';
-    final kitchenName = kitchenData['kitchen_name'] ?? '';
-
-    final userData = userDoc.data();
-    final userDeviceToken = userData?['user_device_token'];
-
-    if (userDeviceToken == null || userDeviceToken.isEmpty) {
-      emit(DashboardFailure("User device token not found"));
-      return;
-    }
-
-    final notificationData = {
-      "status": true,
-      'title': "You have been added to the kitchen",
-      'body':
-          // ignore: unnecessary_brace_in_string_interps
-          "Your request to join the kitchen \"${kitchenName}\" has been approved by the host. You are now added to the kitchen. You can access it anytime using this invitation code: $inviteCode",
-      'host_user_id': userId,
-      'sender_user_id': _userCubit.state.userId,
-      'sender_name':
-          "${_userCubit.state.firstName} ${_userCubit.state.lastName}",
-      'kitchen_id': event.kitchenId,
-      'invitation_code': inviteCode,
-      'date': DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
-      'read': false,
-      'kitchen_joining_status': "Approved",
-      'approved_by': _userCubit.state.userId,
-    };
-
-    await FCMService().sendNotification(
-      userDeviceToken,
-      "You have been added to the kitchen",
-      "Your request to join the kitchen \"$kitchenName\" has been approved by the host. You are now added to the kitchen. You can access it anytime using this invitation code: $inviteCode",
-      _userCubit.state.invitationCode,
-      _userCubit.state.kitchenName,
-      "member",
-      _userCubit.state.activeKitchenId,
-      "Approved",
-    );
-
-    _kitchenBloc.add(MemberApprovedEvent(inviteCode, userId));
-    await FirebaseFirestore.instance
-        .collection('notifications')
-        .add(notificationData);
-    final notificationQuery = await FirebaseFirestore.instance
-        .collection('notifications')
-        .where('kitchen_id', isEqualTo: event.kitchenId)
-        .where('sender_user_id', isEqualTo: userId)
-        .get();
-
-    if (notificationQuery.docs.isNotEmpty) {
-      await notificationQuery.docs.first.reference.update({
-        'kitchen_joining_status': 'Approved',
-        'status': true,
-        'read': false,
-      });
-    }
-    updateNotificationStatus(event.id);
-    AppToast.show("Kitchen approval notification sent", ToastType.success);
-    emit(DashboardSuccess("Approved"));
-  }
-
-  Future<void> _onDeclineRequestEvent(
-    DeclineRequestEvent event,
-    Emitter<DashboardState> emit,
-  ) async {
-    emit(DeclineLoading(event.date.toString()));
-    final userId = event.memberId;
-
-    final userDoc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .get();
-
-    if (!userDoc.exists) {
-      emit(DashboardFailure("User not found"));
-      return;
-    }
-
-    final kitchenQuery = await FirebaseFirestore.instance
-        .collection('kitchens')
-        .where("user_id", isEqualTo: _userCubit.state.userId)
-        .where("kitchen_id", isEqualTo: event.kitchenId)
-        .get();
-
-    if (kitchenQuery.docs.isEmpty) {
-      emit(DashboardFailure("Kitchen not found"));
-      return;
-    }
-
-    final kitchenDoc = kitchenQuery.docs.first;
-    final kitchenData = kitchenDoc.data();
-    final inviteCode = kitchenData['invitation_code'] ?? '';
-    final kitchenName = kitchenData['kitchen_name'] ?? '';
-    final userData = userDoc.data();
-    final userDeviceToken = userData?['user_device_token'];
-
-    if (userDeviceToken == null || userDeviceToken.isEmpty) {
-      emit(DashboardFailure("User device token not found"));
-      return;
-    }
-
-    final notificationData = {
-      "status": true,
-      'title': "Your request to join the kitchen was declined",
-      'body':
-          "Your request to join the kitchen \"$kitchenName\" has been declined by the host. You can try again later or contact the host for more details.",
-      'host_user_id': userId,
-      'sender_user_id': _userCubit.state.userId,
-      'sender_name':
-          "${_userCubit.state.firstName} ${_userCubit.state.lastName}",
-      'kitchen_id': event.kitchenId,
-      'invitation_code': inviteCode,
-      'date': DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
-      'read': false,
-      'kitchen_joining_status': "Declined",
-      'approved_by': _userCubit.state.userId,
-    };
-
-    await FCMService().sendNotification(
-      userDeviceToken,
-      "Your request to join the kitchen was declined",
-      "Your request to join the kitchen \"$kitchenName\" has been declined by the host. You can try again later or contact the host for more details.",
-      _userCubit.state.invitationCode,
-      _userCubit.state.kitchenName,
-      _userCubit.state.role,
-      _userCubit.state.activeKitchenId,
-      "Declined",
-    );
-
-    await FirebaseFirestore.instance
-        .collection('notifications')
-        .add(notificationData);
-    final notificationQuery = await FirebaseFirestore.instance
-        .collection('notifications')
-        .where('kitchen_id', isEqualTo: event.kitchenId)
-        .where('sender_user_id', isEqualTo: userId)
-        .get();
-
-    if (notificationQuery.docs.isNotEmpty) {
-      await notificationQuery.docs.first.reference.update({
-        'kitchen_joining_status': 'Declined',
-        'status': true,
-        'read': false,
-      });
-    }
-    updateNotificationStatus(event.id);
-    AppToast.show("Request Declined Successfully", ToastType.success);
-
-    emit(DashboardSuccess("Declined"));
-  }
-
-  Future<void> updateNotificationStatus(int id) async {
-    final querySnapshot = await FirebaseFirestore.instance
-        .collection('notifications')
-        .where('id', isEqualTo: id)
-        .get();
-
-    for (final doc in querySnapshot.docs) {
-      await doc.reference.update({'status': true});
-    }
+    on<GetKitchenMembersEvent>((e, em) => _onGetDashboardMembers(this, e, em));
+    on<MakeCohostEvent>((e, em) => _onMakeCohostEvent(this, e, em));
+    on<KickMemberEvent>((e, em) => _onKickMemberEvent(this, e, em));
+    on<DemoteCohostEvent>((e, em) => _onDemoteCohostEvent(this, e, em));
+    on<ApproveRequestEvent>((e, em) => _onApproveRequestEvent(this, e, em));
+    on<DeclineRequestEvent>((e, em) => _onDeclineRequestEvent(this, e, em));
+    on<GetRecipeDetailsEvent>((e, em) => _onGetRecipeDetailsEvent(this, e, em));
   }
 }

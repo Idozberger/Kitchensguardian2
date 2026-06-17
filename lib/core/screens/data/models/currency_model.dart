@@ -1,3 +1,5 @@
+import 'package:foodkitchen/core/utils/json_conversion.dart';
+
 class Currency {
   final String code;
   final String symbol;
@@ -11,6 +13,9 @@ class Currency {
     'symbol': symbol,
   };
 
-  factory Currency.fromJson(Map<String, dynamic> json) =>
-      Currency(code: json['code'], name: json['name'], symbol: json['symbol']);
+  factory Currency.fromJson(Map<String, dynamic> json) => Currency(
+    code: readJsonString(json, 'code'),
+    name: readJsonString(json, 'name'),
+    symbol: readJsonString(json, 'symbol'),
+  );
 }

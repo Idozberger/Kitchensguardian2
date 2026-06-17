@@ -1,6 +1,6 @@
+import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/features/auth/data/data_source/auth_remote_datasource.dart';
 import 'package:foodkitchen/features/auth/domain/repository/auth_repository.dart';
-import 'package:foodkitchen/core/error/failures.dart';
 import 'package:fpdart/fpdart.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -26,7 +26,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -45,7 +45,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -61,7 +61,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -81,7 +81,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -97,7 +97,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -121,7 +121,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -134,7 +134,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -147,7 +147,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -160,7 +160,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -173,7 +173,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 }

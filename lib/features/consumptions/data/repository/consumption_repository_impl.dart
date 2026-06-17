@@ -1,10 +1,10 @@
-import 'dart:developer';
-
 import 'package:foodkitchen/core/error/failures.dart';
+import 'package:foodkitchen/core/utils/dev_logging.dart';
+import 'package:foodkitchen/core/utils/json_conversion.dart';
 import 'package:foodkitchen/features/consumptions/data/datasource/consumption_remote_datasource.dart';
+import 'package:foodkitchen/features/consumptions/data/model/comsumption_confirmation_model.dart';
 import 'package:foodkitchen/features/consumptions/domain/entities/consumption_confirmation.dart';
 import 'package:foodkitchen/features/consumptions/domain/repository/consumption_repository.dart';
-import 'package:foodkitchen/features/consumptions/data/model/comsumption_confirmation_model.dart';
 import 'package:fpdart/fpdart.dart';
 
 class ConsumptionRepositoryImpl implements ConsumptionRepository {
@@ -20,14 +20,18 @@ class ConsumptionRepositoryImpl implements ConsumptionRepository {
 
       final List<ConsumptionConfirmation> confirmations =
           (response as List<dynamic>)
-              .map((json) => ConsumptionConfirmationModel.fromJson(json))
+              .map(
+                (Object? json) => ConsumptionConfirmationModel.fromJson(
+                  jsonObjectFromResponseData(json),
+                ),
+              )
               .toList();
 
       return Right(confirmations);
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -43,7 +47,7 @@ class ConsumptionRepositoryImpl implements ConsumptionRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -54,7 +58,7 @@ class ConsumptionRepositoryImpl implements ConsumptionRepository {
     required String actualQuantityRemaining,
   }) async {
     try {
-      log("confirmatin id impl: $confirmationId");
+      devLog("confirmatin id impl: $confirmationId");
       final response = await consumptionRemoteDatasource
           .respondConsumptionConfirmation(
             confirmationId: confirmationId,
@@ -66,7 +70,7 @@ class ConsumptionRepositoryImpl implements ConsumptionRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 }

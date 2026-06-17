@@ -1,23 +1,12 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
-import 'package:foodkitchen/core/config/app_assets.dart';
-import 'package:foodkitchen/core/global/functions/gaps.dart';
-import 'package:foodkitchen/core/global/functions/resize.dart';
-import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/email_domain_formatter.dart';
-import 'package:foodkitchen/core/utils/name_formatter.dart';
-import 'package:foodkitchen/core/utils/password_formatter.dart';
-import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
+import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/features/auth/data/model/user_model.dart';
 import 'package:foodkitchen/features/auth/presentation/blocs/auth_bloc.dart';
-import 'package:foodkitchen/core/utils/show_toast.dart';
-import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
+import 'package:foodkitchen/features/auth/presentation/pages/signup/signup_scroll_content.dart';
 import 'package:foodkitchen/features/auth/presentation/widgets/appbar.dart';
-import 'package:foodkitchen/features/auth/presentation/widgets/textspan_widget.dart';
 import 'package:go_router/go_router.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -82,31 +71,14 @@ class _SignUpPageState extends State<SignUpPage> {
       listener: (BuildContext context, AuthState state) {
         if (state is AuthFailure) {
           AppToast.show(state.message, ToastType.error);
+          _clearStaleSocialSignUpState();
         }
         if (state is AuthUserCreatedSuccess) {
           AppToast.show(state.successMessage, ToastType.success);
-          if (_userCubit.state.userModel != null &&
-              _userCubit.state.userModel!.email.isNotEmpty) {
-            context.pushNamed(
-              "verify_email",
-              extra: UserModel(
-                email: _userCubit.state.userModel!.email,
-                firstName: _userCubit.state.userModel!.firstName,
-                lastName: _userCubit.state.userModel!.lastName,
-                password: _userCubit.state.userModel!.password,
-              ),
-            );
-          } else {
-            context.pushNamed(
-              "verify_email",
-              extra: UserModel(
-                email: _emailController.text.trim(),
-                firstName: _firstNameController.text,
-                lastName: _lastNameController.text,
-                password: _passwordController.text.trim(),
-              ),
-            );
-          }
+          context.pushNamed(
+            "verify_email",
+            extra: _userModelForVerifyEmail(),
+          );
         }
       },
       builder: (BuildContext context, AuthState state) {
@@ -119,180 +91,51 @@ class _SignUpPageState extends State<SignUpPage> {
             centerTitle: false,
           ),
           body: SafeArea(
-            child: SingleChildScrollView(
-              padding: gapSymmetric(horizontal: 20, vertical: 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: AppTextField(
-                                controller: _firstNameController,
-                                label: "First name",
-                                textInputAction: TextInputAction.next,
-                                hintText: "First name",
-                                inputFormatters: [
-                                  OnlyLettersFormatter(maxLength: 20),
-                                ],
-                              ),
-                            ),
-                            SizedBox(width: w(12)),
-                            Expanded(
-                              child: AppTextField(
-                                controller: _lastNameController,
-                                label: "Last name",
-                                textInputAction: TextInputAction.next,
-                                hintText: "Last name",
-                                inputFormatters: [
-                                  OnlyLettersFormatter(maxLength: 20),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: h(20)),
-
-                        AppTextField(
-                          controller: _emailController,
-                          label: "Email address",
-                          keyboardType: TextInputType.emailAddress,
-                          textInputAction: TextInputAction.next,
-                          hintText: "your.email@example.com",
-                          inputFormatters: [
-                            SingleAtSingleDotAfterAtFormatter(),
-                          ],
-                        ),
-                        SizedBox(height: h(20)),
-
-                        AppTextField(
-                          controller: _passwordController,
-                          label: "Password",
-                          textInputAction: TextInputAction.next,
-                          hintText: "At least 6 characters",
-                          obscureText: _isObscure,
-                          inputFormatters: [NoSpacePasswordFormatter()],
-                          suffixIcon: GestureDetector(
-                            onTap: () => updateObscure(),
-                            child: Padding(
-                              padding: gapSymmetric(
-                                vertical: 13,
-                                horizontal: 15,
-                              ),
-                              child: SvgPicture.asset(
-                                _isObscure == false
-                                    ? AppAssets.eyeVisibilitySvg
-                                    : AppAssets.eyeSvg,
-                                height: h(16),
-                                color: AppColors.greyColor,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: h(20)),
-
-                        AppTextField(
-                          controller: _confirmPasswordController,
-                          label: "Confirm Password",
-                          textInputAction: TextInputAction.done,
-                          hintText: "Re-enter your password",
-                          obscureText: _isConfirmPasswordObscure,
-                          inputFormatters: [NoSpacePasswordFormatter()],
-                          suffixIcon: GestureDetector(
-                            onTap: () => updateIsConfirmPasswordObscure(),
-                            child: Padding(
-                              padding: gapSymmetric(
-                                vertical: 13,
-                                horizontal: 15,
-                              ),
-                              child: SvgPicture.asset(
-                                _isConfirmPasswordObscure == false
-                                    ? AppAssets.eyeVisibilitySvg
-                                    : AppAssets.eyeSvg,
-                                height: h(16),
-                                color: AppColors.greyColor,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  Padding(
-                    padding: gapOnly(top: 28, bottom: 16),
-                    child: GenericButtonWidget(
-                      onPressed: () => _handleSignUp(context, state),
-                      text: "Sign up",
-                      isLoading: state is AuthLoading,
-                    ),
-                  ),
-
-                  Padding(
-                    padding: gapSymmetric(vertical: 8),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Container(height: 1, color: Colors.grey[300]),
-                        ),
-                        Padding(
-                          padding: gapSymmetric(horizontal: 12),
-                          child: Text(
-                            "Or",
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(
-                                  color: Colors.grey[600],
-                                  fontSize: t(12),
-                                ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Container(height: 1, color: Colors.grey[300]),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SocialAuthButton(
-                    isLoading: state is GoogleAuthsignUpLoading,
-                    iconPath: AppAssets.googleSvg,
-                    text: "Continue with Google",
-                    onTap: () {
-                      context.read<AuthBloc>().add(GoogleSignUpEvent());
-                    },
-                  ),
-                  if (Platform.isIOS)
-                    SocialAuthButton(
-                      isLoading: state is AppleSignUpLoading,
-                      iconPath: AppAssets.appleSvg,
-                      text: "Continue with Apple",
-                      onTap: () {
-                        context.read<AuthBloc>().add(AppleSignUpEvent());
-                      },
-                    ),
-
-                  Padding(
-                    padding: gapOnly(top: 20),
-                    child: Center(
-                      child: TextspanWidget(
-                        buttonColor: AppColors.primaryColor,
-                        callback: () {
-                          Navigator.of(context).pop();
-                        },
-                        text: "Already have an account?",
-                        buttonText: "Login",
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            child: SignUpScrollContent(
+              formKey: _formKey,
+              firstNameController: _firstNameController,
+              lastNameController: _lastNameController,
+              emailController: _emailController,
+              passwordController: _passwordController,
+              confirmPasswordController: _confirmPasswordController,
+              isObscure: _isObscure,
+              isConfirmPasswordObscure: _isConfirmPasswordObscure,
+              onTogglePasswordObscure: updateObscure,
+              onToggleConfirmPasswordObscure: updateIsConfirmPasswordObscure,
+              onSignUp: () => _handleSignUp(context, state),
+              authState: state,
             ),
           ),
         );
       },
+    );
+  }
+
+  void _clearStaleSocialSignUpState() {
+    _userCubit.setGoogleSignUpUserModel(
+      firstName: "",
+      lastName: "",
+      email: "",
+    );
+  }
+
+  /// Prefer form fields (email signup); fall back to cubit (Google/Apple signup).
+  UserModel _userModelForVerifyEmail() {
+    final formEmail = _emailController.text.trim();
+    if (formEmail.isNotEmpty) {
+      return UserModel(
+        email: formEmail,
+        firstName: _firstNameController.text.trim(),
+        lastName: _lastNameController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+    }
+    final cubitModel = _userCubit.state.userModel;
+    return UserModel(
+      email: cubitModel?.email ?? "",
+      firstName: cubitModel?.firstName ?? "",
+      lastName: cubitModel?.lastName ?? "",
+      password: cubitModel?.password ?? "",
     );
   }
 
@@ -371,66 +214,6 @@ class _SignUpPageState extends State<SignUpPage> {
         firstName: firstName,
         lastName: lastName,
         password: password,
-      ),
-    );
-  }
-}
-
-class SocialAuthButton extends StatelessWidget {
-  final VoidCallback? onTap;
-  final bool isLoading;
-  final String text;
-  final String iconPath;
-
-  const SocialAuthButton({
-    super.key,
-    required this.onTap,
-    required this.isLoading,
-    required this.text,
-    required this.iconPath,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: gapSymmetric(vertical: 4),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(h(10)),
-        onTap: isLoading ? null : onTap,
-        child: Ink(
-          height: h(48),
-          decoration: BoxDecoration(
-            color: Colors.grey[50],
-            border: Border.all(color: Colors.grey[300]!, width: 1),
-            borderRadius: BorderRadius.circular(h(10)),
-          ),
-          child: isLoading
-              ? Center(
-                  child: SizedBox(
-                    width: w(24),
-                    height: h(24),
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: AppColors.primaryColor,
-                    ),
-                  ),
-                )
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SvgPicture.asset(iconPath, height: h(20), width: w(20)),
-                    SizedBox(width: w(10)),
-                    Text(
-                      text,
-                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                        fontSize: t(14),
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey[800],
-                      ),
-                    ),
-                  ],
-                ),
-        ),
       ),
     );
   }

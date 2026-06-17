@@ -83,7 +83,7 @@ class _SmartKitchenSetupPageState extends State<SmartKitchenSetupPage> {
   Widget _buildScaffold(BuildContext context, SmartKitchenSetupState state) {
     return PopScope(
       canPop: widget.isRescanning,
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
 
         AppToast.show(
@@ -199,9 +199,7 @@ class _SmartKitchenSetupPageState extends State<SmartKitchenSetupPage> {
           context.go(Routes.dashboard);
         }
       },
-      builder: (context, state) {
-        return _buildScaffold(context, state);
-      },
+      builder: _buildScaffold,
     );
   }
 }

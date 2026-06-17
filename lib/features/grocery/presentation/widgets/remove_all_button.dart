@@ -14,7 +14,7 @@ class RemoveAllButton extends StatelessWidget {
         height: h(40),
 
         child: OutlinedButton(
-          onPressed: () => callback(),
+          onPressed: callback,
           child: Text(
             "Remove All",
             style: Theme.of(context).textTheme.headlineMedium!.copyWith(

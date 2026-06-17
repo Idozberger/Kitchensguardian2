@@ -1,81 +1,40 @@
-import 'dart:developer';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:foodkitchen/app/di.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
+import 'package:foodkitchen/features/kitchens/domain/datasources/kitchen_join_status_firestore_datasource.dart';
+import 'package:foodkitchen/features/kitchens/domain/entities/join_request_info.dart';
 import 'package:foodkitchen/features/kitchens/presentation/pages/all_join_request_page.dart';
 import 'package:foodkitchen/features/kitchens/presentation/pages/joining_request_shimmer.dart';
 
-class JoinRequestInfo {
-  final String status;
-  final String kitchenName;
-  final String kitchenId;
-  final String date;
-
-  const JoinRequestInfo({
-    required this.status,
-    required this.kitchenName,
-    required this.kitchenId,
-    required this.date,
-  });
-}
-
-class KitchenJoiningStatus extends StatelessWidget {
+class KitchenJoiningStatus extends StatefulWidget {
   final String userId;
 
   const KitchenJoiningStatus({super.key, required this.userId});
 
-  Stream<List<JoinRequestInfo>> _statusStream() {
-    return FirebaseFirestore.instance
-        .collection('notifications')
-        .where('sender_user_id', isEqualTo: userId)
-        .where('approved_by', isNotEqualTo: userId)
-        .where('kitchen_joining_status', isEqualTo: 'Pending')
-        .orderBy('approved_by')
-        .orderBy('date', descending: true)
-        .snapshots()
-        .asyncMap((snapshot) async {
-          if (snapshot.docs.isEmpty) return [];
+  @override
+  State<KitchenJoiningStatus> createState() => _KitchenJoiningStatusState();
+}
 
-          final results = <JoinRequestInfo>[];
-          for (final doc in snapshot.docs) {
-            final data = doc.data();
-            final kitchenId = data['kitchen_id'] as String? ?? '';
-            String kitchenName = data['kitchen_name'] as String? ?? '';
+class _KitchenJoiningStatusState extends State<KitchenJoiningStatus> {
+  late final Stream<List<JoinRequestInfo>> _statusStream;
 
-            if (kitchenName.isEmpty && kitchenId.isNotEmpty) {
-              final kitchenDoc = await FirebaseFirestore.instance
-                  .collection('kitchens')
-                  .doc(kitchenId)
-                  .get();
-              kitchenName =
-                  kitchenDoc.data()?['kitchen_name'] as String? ??
-                  'Unknown Kitchen';
-            }
-
-            results.add(
-              JoinRequestInfo(
-                status: data['kitchen_joining_status'] as String? ?? 'Pending',
-                kitchenName: kitchenName,
-                kitchenId: kitchenId,
-                date: data['date'] as String? ?? '',
-              ),
-            );
-          }
-          return results;
-        });
+  @override
+  void initState() {
+    super.initState();
+    _statusStream = sl<KitchenJoinStatusFirestoreDatasource>()
+        .watchPendingJoinRequestsForSender(widget.userId);
   }
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<JoinRequestInfo>>(
-      stream: _statusStream(),
+      stream: _statusStream,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const JoinRequestShimmer();
@@ -99,7 +58,7 @@ class KitchenJoiningStatus extends StatelessWidget {
                 child: GestureDetector(
                   onTap: () => Navigator.push(
                     context,
-                    MaterialPageRoute(
+                    MaterialPageRoute<void>(
                       builder: (_) => AllJoinRequestsPage(requests: requests),
                     ),
                   ),
@@ -200,8 +159,6 @@ class KitchenJoiningStatus extends StatelessWidget {
   };
 
   Widget _buildStatusPill(String status) {
-    log("status: $status");
-
     final (color, bg) = switch (status) {
       'Approved' => (const Color(0xFF2E7D32), const Color(0xFFE8F5E9)),
       'Declined' => (const Color(0xFFC62828), const Color(0xFFFFEBEE)),
@@ -213,7 +170,7 @@ class KitchenJoiningStatus extends StatelessWidget {
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

@@ -32,7 +32,7 @@ class FilterAppBarButton extends StatelessWidget {
 
 class FilterBottomSheet extends StatefulWidget {
   final ItemRequestFilter selectedFilter;
-  final Function(ItemRequestFilter) onApplyFilter;
+  final void Function(ItemRequestFilter) onApplyFilter;
 
   const FilterBottomSheet({
     super.key,

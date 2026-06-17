@@ -7,9 +7,10 @@ import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
+import 'package:foodkitchen/core/utils/dev_logging.dart';
+import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_otp_widget.dart';
 import 'package:foodkitchen/features/auth/presentation/blocs/auth_bloc.dart';
-import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:go_router/go_router.dart';
 
 class ResetPasswordVerificationPage extends StatefulWidget {
@@ -35,7 +36,7 @@ class _ResetPasswordVerificationPageState
 
   void onResendCode() {
     context.read<AuthBloc>().add(
-      ResendEmailVerficationCodeEvent(email: widget.email),
+      ResendEmailVerificationCodeEvent(email: widget.email),
     );
   }
 
@@ -92,11 +93,11 @@ class _ResetPasswordVerificationPageState
                         OtpField(
                           onChanged: (pin) {
                             updatePin(pin);
-                            debugPrint("Entered OTP: $pin");
+                            devPrint("Entered OTP: $pin");
                           },
                           onCompleted: (code) {
                             updatePin(code);
-                            debugPrint("Entered OTP: $code");
+                            devPrint("Entered OTP: $code");
                           },
                         ),
                       ],
@@ -121,9 +122,7 @@ class _ResetPasswordVerificationPageState
 
                   Center(
                     child: TextButton(
-                      onPressed: () {
-                        onResendCode();
-                      },
+                      onPressed: onResendCode,
                       child: state is CodeResendLoading
                           ? Center(
                               child: CircularProgressIndicator(

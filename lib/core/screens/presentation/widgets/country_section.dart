@@ -7,7 +7,7 @@ import 'package:foodkitchen/features/kitchens/presentation/widgets/kitchen_snipp
 class CountrySection extends StatelessWidget {
   final List<Country> countries;
   final Country? selectedCountry;
-  final Function(Country?) onCountryChanged;
+  final void Function(Country?) onCountryChanged;
 
   const CountrySection({
     super.key,

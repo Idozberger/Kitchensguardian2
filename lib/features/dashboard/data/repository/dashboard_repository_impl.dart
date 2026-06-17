@@ -21,15 +21,13 @@ class DashboardRepositoryImpl implements DashboardRepository {
         kitchenId: kitchenId,
       );
 
-      final members = response
-          .map<MemberModel>((member) => MemberModel.fromJson(member))
-          .toList();
+      final members = response.map<MemberModel>(MemberModel.fromJson).toList();
 
       return Right(members);
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -48,7 +46,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -67,7 +65,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -86,7 +84,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -108,7 +106,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 }

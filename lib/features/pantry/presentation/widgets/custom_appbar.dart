@@ -1,4 +1,5 @@
 // ignore_for_file: use_build_context_synchronously
+// Scan/permission flows use context after awaits; narrow refactors deferred.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -82,7 +83,10 @@ class MyPantryAppBar extends StatelessWidget implements PreferredSizeWidget {
           AppAssets.scanSvg,
           height: h(18),
           width: w(18),
-          color: isMember ? Colors.black : AppColors.primaryColor,
+          colorFilter: ColorFilter.mode(
+            isMember ? Colors.black : AppColors.primaryColor,
+            BlendMode.srcIn,
+          ),
         ),
         label: Text(
           "Scan",
@@ -161,7 +165,7 @@ class MyPantryAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   void _showPermissionDialog(BuildContext context, {bool isPermanent = false}) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => PermissionDialog(isPermanent: isPermanent),
     );
@@ -183,7 +187,10 @@ class PermissionDialog extends StatelessWidget {
             AppAssets.cameraSvg,
             height: h(44),
             width: w(44),
-            color: AppColors.primaryColor,
+            colorFilter: ColorFilter.mode(
+              AppColors.primaryColor,
+              BlendMode.srcIn,
+            ),
           ),
           gapVertical(8),
 

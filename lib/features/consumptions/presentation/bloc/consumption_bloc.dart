@@ -5,17 +5,14 @@ import 'package:foodkitchen/features/consumptions/domain/usecases/get_consumptio
 import 'package:foodkitchen/features/consumptions/domain/usecases/respond_consumption_confirmation.dart';
 import 'package:foodkitchen/features/consumptions/presentation/bloc/consumption_event.dart';
 import 'package:foodkitchen/features/consumptions/presentation/bloc/consumption_state.dart';
-import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
 
 class ConsumptionBloc extends Bloc<ConsumptionEvent, ConsumptionState> {
   final GetConsumptionConfirmationPendingUsecase
   _getConsumptionConfirmationPending;
   final GetConsumptionConfirmationCountUseCase _getConsumptionConfirmationCount;
   final RespondConsumptionConfirmationUseCase _respondConsumptionConfirmation;
-  final HomeBloc _homeBloc;
 
   ConsumptionBloc({
-    required HomeBloc homeBloc,
     required GetConsumptionConfirmationPendingUsecase
     getConsumptionConfirmationPending,
     required GetConsumptionConfirmationCountUseCase
@@ -25,7 +22,6 @@ class ConsumptionBloc extends Bloc<ConsumptionEvent, ConsumptionState> {
   }) : _getConsumptionConfirmationPending = getConsumptionConfirmationPending,
        _getConsumptionConfirmationCount = getConsumptionConfirmationCount,
        _respondConsumptionConfirmation = respondConsumptionConfirmation,
-       _homeBloc = homeBloc,
        super(const ConsumptionState()) {
     on<GetConsumptionConfirmationPendingEvent>(
       _onGetConsumptionConfirmationPending,
@@ -57,7 +53,7 @@ class ConsumptionBloc extends Bloc<ConsumptionEvent, ConsumptionState> {
     res.fold(
       (failure) {
         emit(state.copyWith(respondingOnConsumptionLoader: false));
-        AppToast.show(failure.message, ToastType.error);
+        AppToast.show(failure.userMessage, ToastType.error);
       },
       (successMessage) {
         emit(
@@ -89,7 +85,7 @@ class ConsumptionBloc extends Bloc<ConsumptionEvent, ConsumptionState> {
 
     res.fold(
       (failure) {
-        emit(state.copyWith(isLoading: false, errorMessage: failure.message));
+        emit(state.copyWith(isLoading: false, errorMessage: failure.userMessage));
       },
       (count) {
         emit(
@@ -116,7 +112,7 @@ class ConsumptionBloc extends Bloc<ConsumptionEvent, ConsumptionState> {
 
     res.fold(
       (failure) {
-        emit(state.copyWith(isLoading: false, errorMessage: failure.message));
+        emit(state.copyWith(isLoading: false, errorMessage: failure.userMessage));
       },
       (pendingList) {
         emit(

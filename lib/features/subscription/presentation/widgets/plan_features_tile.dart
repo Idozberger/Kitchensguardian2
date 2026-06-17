@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
+import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 
 class PlanComparisonTable extends StatelessWidget {
@@ -83,9 +83,12 @@ class PlanComparisonTable extends StatelessWidget {
                 child: SvgPicture.asset(
                   item.premiumValue ? AppAssets.tickSvg : AppAssets.crossSvg,
                   height: h(15),
-                  color: item.premiumValue
-                      ? AppColors.primaryColor
-                      : Colors.grey.shade700,
+                  colorFilter: ColorFilter.mode(
+                    item.premiumValue
+                        ? AppColors.primaryColor
+                        : Colors.grey.shade700,
+                    BlendMode.srcIn,
+                  ),
                 ),
               ),
             ],

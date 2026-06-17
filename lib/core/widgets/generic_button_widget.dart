@@ -52,7 +52,7 @@ class GenericButtonWidget extends StatelessWidget {
             : null,
         disabledBackgroundColor: AppColors.disabledPrimaryColor,
       ),
-      onPressed: isDisabled ? null : onPressed,
+      onPressed: (isDisabled || isLoading) ? null : onPressed,
       child: isLoading
           ? _buildLoadingIndicator(color: AppColors.primaryColor)
           : Text(
@@ -71,7 +71,7 @@ class GenericButtonWidget extends StatelessWidget {
   Widget _buildElevatedButton(BuildContext context) {
     return ElevatedButton(
       style: _buildButtonStyle(),
-      onPressed: isDisabled ? null : onPressed,
+      onPressed: (isDisabled || isLoading) ? null : onPressed,
       child: isLoading ? _buildLoadingIndicator() : _buildButtonText(context),
     );
   }

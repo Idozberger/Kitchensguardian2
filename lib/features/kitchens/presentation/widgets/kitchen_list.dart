@@ -3,11 +3,13 @@ import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
+import 'package:foodkitchen/core/services/di/service_locator.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/features/kitchens/domain/entities/kitchen.dart';
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_bloc.dart';
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_event.dart';
 import 'package:foodkitchen/features/kitchens/presentation/widgets/kitchen_tile.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class KitchenList extends StatelessWidget {
@@ -56,7 +58,7 @@ class KitchenList extends StatelessWidget {
 
   void _onDeleteOrLeave(
     BuildContext context,
-    kitchen,
+    Kitchen kitchen,
     bool isMember,
     KitchenBloc bloc,
   ) {
@@ -74,9 +76,9 @@ class KitchenList extends StatelessWidget {
               ? LeaveKitchenEvent(kitchen.kitchenId)
               : RemoveKitchenEvent(kitchen.kitchenId),
         );
-        Navigator.pop(context);
+        context.pop();
       },
-      onSecondaryPressed: () => Navigator.pop(context),
+      onSecondaryPressed: () => context.pop(),
     );
   }
 
@@ -91,7 +93,7 @@ class KitchenList extends StatelessWidget {
       return;
     }
 
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = sl<SharedPreferences>();
     await prefs.setString("kitchen_id", kitchen.kitchenId);
     await prefs.setString("role", kitchen.role);
     await prefs.setString("invitation_code", kitchen.invitationCode);

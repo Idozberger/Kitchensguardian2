@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:flutter/cupertino.dart';
+import 'package:foodkitchen/core/utils/dev_logging.dart';
 import 'package:foodkitchen/features/history/domain/entities/scan_item_entity.dart';
 
 class ScanItemModel extends ScanItemEntity {
@@ -59,7 +59,7 @@ class ScanItemModel extends ScanItemEntity {
       }
     }
 
-    debugPrint('Unsupported thumbnail type: ${thumbnailData.runtimeType}');
+    devPrint('Unsupported thumbnail type: ${thumbnailData.runtimeType}');
     return Uint8List(0);
   }
 }

@@ -1,5 +1,5 @@
-import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/core/common/usecase/usecase.dart';
+import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/features/smart_kitchen_setup/domain/entities/scanned_item.dart';
 import 'package:foodkitchen/features/smart_kitchen_setup/domain/repository/smart_kitchen_setup_repository.dart';
 import 'package:fpdart/fpdart.dart';
@@ -25,8 +25,8 @@ class ScanKitchenImagesUseCase
         miscFilePaths: params.miscFilePaths,
       );
       return Right(result);
-    } catch (e) {
-      return Left(Failure(e.toString()));
+    } catch (e, st) {
+      return Left(unknownFailureFrom(e, st));
     }
   }
 }

@@ -1,8 +1,9 @@
-import 'package:flutter/cupertino.dart';
-import 'package:foodkitchen/core/error/failures.dart';
-import 'package:foodkitchen/features/grocery/data/datasource/grocery_remote_datasource.dart';
 import 'package:foodkitchen/core/common/data/model/requested_items_model.dart';
 import 'package:foodkitchen/core/common/domain/entities/requested_item.dart';
+import 'package:foodkitchen/core/error/failures.dart';
+import 'package:foodkitchen/core/utils/dev_logging.dart';
+import 'package:foodkitchen/core/utils/json_conversion.dart';
+import 'package:foodkitchen/features/grocery/data/datasource/grocery_remote_datasource.dart';
 import 'package:foodkitchen/features/grocery/domain/repository/grocery_repository.dart';
 import 'package:fpdart/fpdart.dart';
 
@@ -18,13 +19,16 @@ class GroceryRepositoryImpl implements GroceryRepository {
         kitchenId: kitchenId,
       );
       final data = (response as List)
-          .map((e) => RequestedItemModel.fromJson(e))
+          .map(
+            (Object? e) =>
+                RequestedItemModel.fromJson(jsonObjectFromResponseData(e)),
+          )
           .toList();
       return Right(data);
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -41,13 +45,16 @@ class GroceryRepositoryImpl implements GroceryRepository {
         bucketType: bucketType,
       );
       final data = (response as List)
-          .map((e) => RequestedItemModel.fromJson(e))
+          .map(
+            (Object? e) =>
+                RequestedItemModel.fromJson(jsonObjectFromResponseData(e)),
+          )
           .toList();
       return Right(data);
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -58,13 +65,16 @@ class GroceryRepositoryImpl implements GroceryRepository {
       final response = await groceryRemoteDatasource
           .addMyListToKitchenInventory(kitchenId: kitchenId);
       final data = (response as List)
-          .map((e) => RequestedItemModel.fromJson(e))
+          .map(
+            (Object? e) =>
+                RequestedItemModel.fromJson(jsonObjectFromResponseData(e)),
+          )
           .toList();
       return Right(data);
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -77,15 +87,18 @@ class GroceryRepositoryImpl implements GroceryRepository {
         kitchenId: kitchenId,
       );
       final data = (response as List)
-          .map((e) => RequestedItemModel.fromJson(e))
+          .map(
+            (Object? e) =>
+                RequestedItemModel.fromJson(jsonObjectFromResponseData(e)),
+          )
           .toList();
 
-      debugPrint("Aigenerated list: ${data.map((item) => item.toJson())}");
+      devPrint("Aigenerated list: ${data.map((item) => item.toJson())}");
       return Right(data);
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -100,13 +113,16 @@ class GroceryRepositoryImpl implements GroceryRepository {
         itemsIds: itemsIds,
       );
       final data = (response as List)
-          .map((e) => RequestedItemModel.fromJson(e))
+          .map(
+            (Object? e) =>
+                RequestedItemModel.fromJson(jsonObjectFromResponseData(e)),
+          )
           .toList();
       return Right(data);
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -127,13 +143,16 @@ class GroceryRepositoryImpl implements GroceryRepository {
         bucketType: bucketType,
       );
       final data = (response as List)
-          .map((e) => RequestedItemModel.fromJson(e))
+          .map(
+            (Object? e) =>
+                RequestedItemModel.fromJson(jsonObjectFromResponseData(e)),
+          )
           .toList();
       return Right(data);
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -152,7 +171,7 @@ class GroceryRepositoryImpl implements GroceryRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 
@@ -177,7 +196,7 @@ class GroceryRepositoryImpl implements GroceryRepository {
     } on Failure catch (f) {
       return Left(f);
     } catch (e) {
-      return Left(UnknownFailure(e.toString()));
+      return Left(unknownFailureFrom(e));
     }
   }
 }

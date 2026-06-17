@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:foodkitchen/core/config/app_assets.dart';
-import 'package:foodkitchen/features/planner/presentation/widgets/recipes_tile.dart';
 import 'package:foodkitchen/core/common/data/model/recipe_model.dart';
-import 'package:go_router/go_router.dart';
+import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
+import 'package:foodkitchen/features/planner/presentation/widgets/recipes_tile.dart';
+import 'package:go_router/go_router.dart';
 
 class RecipeTileItem extends StatelessWidget {
   final RecipeModel recipe;

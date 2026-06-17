@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/common/domain/entities/requested_item.dart';
+import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:share_plus/share_plus.dart';
 
 class ShareButton extends StatelessWidget {
@@ -23,7 +23,9 @@ class ShareButton extends StatelessWidget {
     }
 
     final formattedList = _buildFormattedList();
-    await Share.share(formattedList, subject: 'My Grocery List');
+    await SharePlus.instance.share(
+      ShareParams(text: formattedList, subject: 'My Grocery List'),
+    );
   }
 
   void _showEmptyListSnackBar(BuildContext context) {

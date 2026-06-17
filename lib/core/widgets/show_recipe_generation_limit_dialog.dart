@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
+import 'package:foodkitchen/core/navigation/paywall_navigation.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:go_router/go_router.dart';
 
 void showLimitDialog(BuildContext context, VoidCallback callback) {
-  showDialog(
+  showDialog<void>(
     context: context,
     barrierDismissible: true,
     builder: (context) {
@@ -47,7 +47,7 @@ void showLimitDialog(BuildContext context, VoidCallback callback) {
                     child: GenericButtonWidget(
                       onPressed: () {
                         context.pop();
-                        context.push(Routes.subscription);
+                        openPaywallIfEnabled(context);
                       },
                       text: "Upgrade",
                     ),

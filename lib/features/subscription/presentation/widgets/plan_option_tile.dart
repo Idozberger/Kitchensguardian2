@@ -41,11 +41,14 @@ class PlanOptionTile extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Radio(
-                  value: true,
-                  groupValue: isSelected,
-                  fillColor: WidgetStatePropertyAll(AppColors.primaryColor),
-                  onChanged: (_) => onSelected?.call(true),
+                Icon(
+                  isSelected
+                      ? Icons.radio_button_checked
+                      : Icons.radio_button_off,
+                  color: isSelected
+                      ? AppColors.primaryColor
+                      : Colors.grey.shade400,
+                  size: 24,
                 ),
                 SizedBox(width: w(15)),
                 Column(

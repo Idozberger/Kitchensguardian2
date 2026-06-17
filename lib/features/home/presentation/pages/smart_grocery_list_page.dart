@@ -1,6 +1,5 @@
 // ignore_for_file: unnecessary_underscores
-
-import 'dart:developer';
+// Legacy private field names; clean up when editing smart cart flow.
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,12 +8,13 @@ import 'package:foodkitchen/core/common/domain/entities/requested_item.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
+import 'package:foodkitchen/core/utils/dev_logging.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
-import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_state.dart';
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_bloc.dart';
+import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_state.dart';
 import 'package:share_plus/share_plus.dart';
 
 class SmartCartPage extends StatefulWidget {
@@ -35,7 +35,7 @@ class _SmartCartPageState extends State<SmartCartPage> {
       );
 
       for (var item in items) {
-        log("Amount: ${item.quantity}");
+        devLog("Amount: ${item.quantity}");
       }
     }
   }
@@ -179,7 +179,7 @@ class _SmartCartPageState extends State<SmartCartPage> {
           Expanded(
             child: GenericButtonWidget(
               text: "Share",
-              onPressed: () => _shareList(items),
+              onPressed: () async => _shareList(items),
             ),
           ),
           gap(width: 12),
@@ -217,7 +217,7 @@ class _SmartCartPageState extends State<SmartCartPage> {
     ).showSnackBar(const SnackBar(content: Text("List copied!")));
   }
 
-  void _shareList(List<RequestedItemEntity> items) {
+  Future<void> _shareList(List<RequestedItemEntity> items) async {
     String result = "My Grocery List\n\n";
 
     for (int i = 0; i < items.length; i++) {
@@ -233,7 +233,9 @@ class _SmartCartPageState extends State<SmartCartPage> {
       }
     }
 
-    Share.share(result, subject: "My Grocery List");
+    await SharePlus.instance.share(
+      ShareParams(text: result, subject: "My Grocery List"),
+    );
   }
 
   AppBar _buildAppBar(BuildContext context) {

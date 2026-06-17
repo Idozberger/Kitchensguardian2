@@ -1,7 +1,10 @@
 import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:foodkitchen/core/common/domain/entities/expiring_item_entity.dart';
 import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
+import 'package:foodkitchen/core/utils/dev_logging.dart';
+import 'package:foodkitchen/core/utils/json_conversion.dart';
 import 'package:foodkitchen/features/planner/domain/entities/ingredient_entity.dart';
 
 class RecipeModel extends RecipeEntity {
@@ -33,78 +36,79 @@ class RecipeModel extends RecipeEntity {
     required super.expiringItemsUsed,
   });
 
-  static Uint8List? _parseThumbnail(dynamic value) {
+  static Uint8List? _parseThumbnail(Object? value) {
     if (value == null) return null;
 
     try {
       if (value is String) return base64Decode(value);
       if (value is List) return Uint8List.fromList(value.cast<int>());
-      if (value is Uint8List) return value;
+      if (value is Uint8List) return value.isEmpty ? null : value;
     } catch (e) {
-      debugPrint("⚠️ Thumbnail decode failed: $e");
+      devPrint("⚠️ Thumbnail decode failed: $e");
     }
 
     return null;
   }
 
-  static List<IngredientEntity> _parseIngredients(dynamic list) {
+  static List<IngredientEntity> _parseIngredients(Object? list) {
     if (list is! List) return [];
-    return list.map((e) {
+    return list.map((Object? e) {
+      final Map<String, dynamic> row = jsonObjectFromResponseData(e);
       return IngredientEntity(
-        name: e["name"] ?? "",
-        amount: e["amount"]?.toString() ?? "",
-        unit: e["unit"] ?? "",
+        name: readJsonString(row, 'name'),
+        amount: readJsonString(row, 'amount'),
+        unit: readJsonString(row, 'unit'),
       );
     }).toList();
   }
 
-  static List<ExpiringItemEntity> _safeList(dynamic list) {
+  static List<ExpiringItemEntity> _safeList(Object? list) {
     if (list is! List) return [];
 
-    return list.map((e) {
-      final field = Map<String, dynamic>.from(e);
+    return list.map((Object? e) {
+      final Map<String, dynamic> field = jsonObjectFromResponseData(e);
 
       return ExpiringItemEntity(
-        itemName: field["name"],
-        expiryStatus: field["expiry_status"],
-        itemId: field["item_id"],
-        quantity: field["quantity"],
-        unit: field["unit"],
+        itemName: readJsonString(field, 'name'),
+        expiryStatus: readJsonString(field, 'expiry_status'),
+        itemId: readJsonString(field, 'item_id'),
+        quantity: readJsonDouble(field, 'quantity'),
+        unit: readJsonString(field, 'unit'),
       );
     }).toList();
   }
 
   factory RecipeModel.fromJson(Map<String, dynamic> json) {
     return RecipeModel(
-      id: json["_id"] ?? "",
-      mealplanId: json["meal_plan_id"] ?? "",
-      title: json["title"] ?? "",
-      calories: json["calories"] ?? "",
-      cookingTime: json["cooking_time"] ?? "",
-      recipeShortSummary: json["recipe_short_summary"] ?? "",
-      cookingSteps: List<String>.from(json["cooking_steps"] ?? []),
-      missingItems: json["missing_items"] ?? false,
-      available: json["available"] ?? false,
-      mealType: json["meal_type"] ?? "",
-      formatedDateString: json["selected_date"] ?? "",
-      recipeId: json["recipe_id"] ?? "",
-      kitchenId: json["kitchen_id"] ?? "",
-      date: json["date"] ?? "",
-      createdAt: json["createdAt"] ?? "",
-      updatedAt: json["updatedAt"] ?? "",
-      createdBy: json["createdBy"] ?? "",
-      isCompleted: json["is_completed"] ?? false,
-      notes: json["notes"] ?? "",
+      id: readJsonString(json, '_id'),
+      mealplanId: readJsonString(json, 'meal_plan_id'),
+      title: readJsonString(json, 'title'),
+      calories: readJsonString(json, 'calories'),
+      cookingTime: readJsonString(json, 'cooking_time'),
+      recipeShortSummary: readJsonString(json, 'recipe_short_summary'),
+      cookingSteps: readJsonStringList(json, 'cooking_steps'),
+      missingItems: readJsonBool(json, 'missing_items'),
+      available: readJsonBool(json, 'available'),
+      mealType: readJsonString(json, 'meal_type'),
+      formatedDateString: readJsonString(json, 'selected_date'),
+      recipeId: readJsonString(json, 'recipe_id'),
+      kitchenId: readJsonString(json, 'kitchen_id'),
+      date: readJsonString(json, 'date'),
+      createdAt: readJsonString(json, 'createdAt'),
+      updatedAt: readJsonString(json, 'updatedAt'),
+      createdBy: readJsonString(json, 'createdBy'),
+      isCompleted: readJsonBool(json, 'is_completed'),
+      notes: readJsonString(json, 'notes'),
 
       /// Parsed fields
-      thumbnail: _parseThumbnail(json["thumbnail"]),
-      ingredients: _parseIngredients(json["ingredients"]),
-      missingIngredients: _parseIngredients(json["missing_items_list"]),
+      thumbnail: _parseThumbnail(json['thumbnail']),
+      ingredients: _parseIngredients(json['ingredients']),
+      missingIngredients: _parseIngredients(json['missing_items_list']),
 
       /// NEW FIELDS
-      expiringItems: _safeList(json["expiring_items"]),
-      expiringItemsCount: json["expiring_items_count"] ?? 0,
-      expiringItemsUsed: List<String>.from(json["expiring_items_used"] ?? []),
+      expiringItems: _safeList(json['expiring_items']),
+      expiringItemsCount: readJsonInt(json, 'expiring_items_count'),
+      expiringItemsUsed: readJsonStringList(json, 'expiring_items_used'),
     );
   }
 

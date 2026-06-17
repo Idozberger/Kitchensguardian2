@@ -130,7 +130,7 @@ class _AllPantryStoragePageState extends State<AllPantryStoragePage> {
                   );
                 }
 
-                return _emptyState(context, state);
+                return _emptyState(context, userState);
               },
             ),
           ),
@@ -157,8 +157,10 @@ class _AllPantryStoragePageState extends State<AllPantryStoragePage> {
 
                   child: SvgPicture.asset(
                     AppAssets.addSvg,
-                    // ignore: deprecated_member_use
-                    color: Colors.black,
+                    colorFilter: const ColorFilter.mode(
+                      Colors.black,
+                      BlendMode.srcIn,
+                    ),
                     height: h(16),
                   ),
                 ),
@@ -187,7 +189,7 @@ class _AllPantryStoragePageState extends State<AllPantryStoragePage> {
     );
   }
 
-  Widget _emptyState(BuildContext context, state) {
+  Widget _emptyState(BuildContext context, UserState state) {
     return Padding(
       padding: gapSymmetric(horizontal: 20),
       child: Center(

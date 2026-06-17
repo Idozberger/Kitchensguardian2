@@ -1,4 +1,5 @@
 import 'package:foodkitchen/core/screens/data/models/currency_model.dart';
+import 'package:foodkitchen/core/utils/json_conversion.dart';
 
 class Country {
   final String code;
@@ -14,11 +15,14 @@ class Country {
   };
 
   factory Country.fromMap(Map<String, dynamic> map) {
-    final currenciesList = map['currencies'] as List<dynamic>? ?? [];
+    final Object? raw = map['currencies'];
+    final List<dynamic> currenciesList = raw is List<dynamic> ? raw : [];
     return Country(
-      code: map['code'] ?? '',
-      name: map['name'] ?? '',
-      currencies: currenciesList.map((e) => Currency.fromJson(e)).toList(),
+      code: readJsonString(map, 'code'),
+      name: readJsonString(map, 'name'),
+      currencies: currenciesList
+          .map((Object? e) => Currency.fromJson(jsonObjectFromResponseData(e)))
+          .toList(),
     );
   }
 }

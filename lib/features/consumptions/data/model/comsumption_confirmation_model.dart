@@ -24,7 +24,7 @@ class ConsumptionConfirmationModel extends ConsumptionConfirmation {
       predictedDepletionDate: DateTime.parse(
         json['predicted_depletion_date'] as String,
       ),
-      status: (json['status'] as String),
+      status: json['status'] as String,
       expiresAt: DateTime.parse(json['expires_at'] as String),
     );
   }

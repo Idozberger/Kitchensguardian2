@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
@@ -39,7 +40,7 @@ class _TonightRecipeWidgetState extends State<TonightRecipeWidget> {
     super.dispose();
   }
 
-  List<dynamic> _getTodayRecipes(HomeState state) {
+  List<RecipeEntity> _getTodayRecipes(HomeState state) {
     final todayFormatted = formatDateToMeetBackendDate(DateTime.now());
     final recipes = state.dateBasedPlan
         .where((r) => r.date == todayFormatted)
@@ -62,7 +63,7 @@ class _TonightRecipeWidgetState extends State<TonightRecipeWidget> {
     );
   }
 
-  void _navigateToRecipeDetails(dynamic recipe) {
+  void _navigateToRecipeDetails(RecipeEntity recipe) {
     context.pushNamed(
       Routes.generateRecipesDetails,
       extra: {
@@ -116,7 +117,7 @@ class _TonightRecipeWidgetState extends State<TonightRecipeWidget> {
     );
   }
 
-  Widget _buildRecipeCarousel(List<dynamic> recipes) {
+  Widget _buildRecipeCarousel(List<RecipeEntity> recipes) {
     return SizedBox(
       height: h(278),
       child: PageView.builder(
@@ -130,7 +131,7 @@ class _TonightRecipeWidgetState extends State<TonightRecipeWidget> {
     );
   }
 
-  Widget _buildRecipeItem(dynamic recipe, int totalRecipes) {
+  Widget _buildRecipeItem(RecipeEntity recipe, int totalRecipes) {
     return Padding(
       padding: EdgeInsets.only(right: w(14)),
       child: RecipeCard(

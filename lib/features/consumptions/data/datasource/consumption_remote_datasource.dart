@@ -1,9 +1,8 @@
-import 'dart:convert';
-import 'dart:developer';
-
 import 'package:dio/dio.dart';
 import 'package:foodkitchen/core/global/functions/api_endpoints.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
+import 'package:foodkitchen/core/utils/dev_logging.dart';
+import 'package:foodkitchen/core/utils/json_conversion.dart';
 
 abstract interface class ConsumptionRemoteDatasource {
   Future<String> respondConsumptionConfirmation({
@@ -31,20 +30,22 @@ class ConsumptionRemoteDatasourceImpl implements ConsumptionRemoteDatasource {
       );
 
       if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
+        final Map<String, dynamic> data = jsonObjectFromResponseData(
+          response.data,
+        );
 
-        final message = data["error"];
-        throw message;
+        final Object? message = data['error'];
+        throw apiExceptionFrom(message);
       }
 
-      final data = response.data is String
-          ? jsonDecode(response.data)
-          : response.data;
-      return List<Map<String, dynamic>>.from(data['confirmations']);
+      final Map<String, dynamic> root = jsonObjectFromResponseData(
+        response.data,
+      );
+      final Object? conf = root['confirmations'];
+      if (conf is! List) return [];
+      return conf.map(jsonObjectFromResponseData).toList();
     } on DioException catch (e) {
-      throw dio.handleError(e);
+      throw await dio.handleError(e);
     }
   }
 
@@ -59,18 +60,19 @@ class ConsumptionRemoteDatasourceImpl implements ConsumptionRemoteDatasource {
         AppConstants.consumptionConfirmationRespond,
         data: {"confirmation_id": confirmationId, "response": responseText},
       );
-      log("dio error: ${response.toString()} ${response.statusCode}");
+      devLog("dio error: $response ${response.statusCode}");
       if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
+        final Map<String, dynamic> data = jsonObjectFromResponseData(
+          response.data,
+        );
 
-        final message = data["error"];
-        throw message;
+        final Object? message = data['error'];
+        throw apiExceptionFrom(message);
       }
-      return response.data["message"];
+      final Map<String, dynamic> ok = jsonObjectFromResponseData(response.data);
+      return readJsonString(ok, 'message');
     } on DioException catch (e) {
-      throw dio.handleError(e);
+      throw await dio.handleError(e);
     }
   }
 
@@ -84,16 +86,18 @@ class ConsumptionRemoteDatasourceImpl implements ConsumptionRemoteDatasource {
       );
 
       if (response.statusCode != 200 && response.statusCode != 201) {
-        final data = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
+        final Map<String, dynamic> data = jsonObjectFromResponseData(
+          response.data,
+        );
 
-        final message = data["error"];
-        throw message;
+        final Object? message = data['error'];
+        throw apiExceptionFrom(message);
       }
-      return response.data["pending_count"].toString();
+      final Map<String, dynamic> ok = jsonObjectFromResponseData(response.data);
+      final Object? pc = ok['pending_count'];
+      return pc?.toString() ?? '0';
     } on DioException catch (e) {
-      throw dio.handleError(e);
+      throw await dio.handleError(e);
     }
   }
 }

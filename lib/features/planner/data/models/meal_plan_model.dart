@@ -1,3 +1,5 @@
+import 'package:foodkitchen/core/utils/json_conversion.dart';
+
 class MealPlanModel {
   final String date;
   final String kitchenId;
@@ -25,11 +27,11 @@ class MealPlanModel {
 
   factory MealPlanModel.fromJson(Map<String, dynamic> json) {
     return MealPlanModel(
-      date: json['date'],
-      kitchenId: json['kitchenId'],
-      mealType: json['mealType'],
-      notes: json['notes'],
-      recipeId: json['recipeId'],
+      date: readJsonString(json, 'date'),
+      kitchenId: readJsonString(json, 'kitchenId'),
+      mealType: readJsonString(json, 'mealType'),
+      notes: readJsonString(json, 'notes'),
+      recipeId: readJsonString(json, 'recipeId'),
     );
   }
 }

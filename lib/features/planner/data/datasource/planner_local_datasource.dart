@@ -2,8 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/common/data/model/recipe_model.dart';
-import 'package:foodkitchen/core/global/functions/api_endpoints.dart';
+import 'package:foodkitchen/core/common/entitlement/user_entitlement_snapshot.dart';
 import 'package:foodkitchen/core/utils/date_format_to_string.dart';
+import 'package:foodkitchen/core/utils/dev_logging.dart';
+import 'package:foodkitchen/core/utils/json_conversion.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract interface class PlannerLocalDatasource {
@@ -17,8 +19,13 @@ abstract interface class PlannerLocalDatasource {
 }
 
 class PlannerLocalDatasourceImpl implements PlannerLocalDatasource {
+  PlannerLocalDatasourceImpl(
+    this.sharedPreferences,
+    this._entitlementSnapshot,
+  );
+
   final SharedPreferences sharedPreferences;
-  PlannerLocalDatasourceImpl(this.sharedPreferences);
+  final UserEntitlementSnapshot _entitlementSnapshot;
   @override
   Future<String> addToWeeklyPlan({required RecipeModel newPlan}) async {
     try {
@@ -31,7 +38,7 @@ class PlannerLocalDatasourceImpl implements PlannerLocalDatasource {
       final currentList = await getWeeklyPlans();
 
       String? getEndDateString = sharedPreferences.getString("end-date");
-      debugPrint("Stored end-date: $getEndDateString");
+      devPrint("Stored end-date: $getEndDateString");
       // If the user opens the app at 11:59 PM and tries to add a new plan,
       // this function will trigger to reset the plan dates accordingly
       if (getEndDateString != null) {
@@ -42,38 +49,38 @@ class PlannerLocalDatasourceImpl implements PlannerLocalDatasource {
           endDateTime.day,
         );
         if (endDateInDaysMonthYear.isBefore(today)) {
-          debugPrint("End date reached! Resetting start and end dates...");
+          devPrint("End date reached! Resetting start and end dates...");
           sharedPreferences.setString("start-date", formatDate(today));
 
-          if (AppConstants.entitlementIsActive == false) {
+          if (!_entitlementSnapshot.hasPremiumAccess) {
             final newEndDate = formatDate(
               DateTime.now().add(Duration(days: 2)),
             );
             sharedPreferences.setString("end-date", newEndDate);
-            debugPrint("Free user — new end-date set to: $newEndDate");
+            devPrint("Free user — new end-date set to: $newEndDate");
           } else {
             final newEndDate = formatDate(
               DateTime.now().add(Duration(days: 6)),
             );
             sharedPreferences.setString("end-date", newEndDate);
-            debugPrint("Premium user — new end-date set to: $newEndDate");
+            devPrint("Premium user — new end-date set to: $newEndDate");
           }
         } else {
-          debugPrint("End date not reached yet.");
+          devPrint("End date not reached yet.");
         }
       }
 
       if (currentList.isEmpty) {
         sharedPreferences.setString("start-date", formatDate(today));
 
-        if (AppConstants.entitlementIsActive == false) {
+        if (!_entitlementSnapshot.hasPremiumAccess) {
           final newEndDate = formatDate(DateTime.now().add(Duration(days: 2)));
           sharedPreferences.setString("end-date", newEndDate);
-          debugPrint("Free user — new end-date set to: $newEndDate");
+          devPrint("Free user — new end-date set to: $newEndDate");
         } else {
           final newEndDate = formatDate(DateTime.now().add(Duration(days: 6)));
           sharedPreferences.setString("end-date", newEndDate);
-          debugPrint("Premium user — new end-date set to: $newEndDate");
+          devPrint("Premium user — new end-date set to: $newEndDate");
         }
       }
 
@@ -91,25 +98,25 @@ class PlannerLocalDatasourceImpl implements PlannerLocalDatasource {
         return "${newPlan.mealType} meal already added for this date";
       }
 
-      debugPrint(
+      devPrint(
         "Adding new meal type '${newPlan.mealType}' for ${newPlan.formatedDateString}",
       );
 
       currentList.add(newPlan);
 
       if (matchingPlans.isEmpty) {
-        debugPrint("Added new plan for ${newPlan.formatedDateString}");
+        devPrint("Added new plan for ${newPlan.formatedDateString}");
       }
 
       await saveThings(currentList);
-      debugPrint(
+      devPrint(
         "Weekly plan list saved successfully. Total plans: ${currentList.length}",
       );
 
       return "Added ${newPlan.mealType} meal successfully";
     } catch (e, stackTrace) {
-      debugPrint("❌ Error adding to weekly plan: $e");
-      debugPrint("🪜 Stack trace: $stackTrace");
+      devPrint("❌ Error adding to weekly plan: $e");
+      devPrint("🪜 Stack trace: $stackTrace");
       return "Something went wrong, Please try again later.";
     }
   }
@@ -117,18 +124,21 @@ class PlannerLocalDatasourceImpl implements PlannerLocalDatasource {
   @override
   Future<List<RecipeModel>> getWeeklyPlans() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-
-      final List<String> jsonList = prefs.getStringList('weekly_plan') ?? [];
+      final List<String> jsonList =
+          sharedPreferences.getStringList('weekly_plan') ?? [];
 
       List<RecipeModel> allPlans = jsonList
-          .map((jsonString) => RecipeModel.fromJson(jsonDecode(jsonString)))
+          .map(
+            (String jsonString) => RecipeModel.fromJson(
+              jsonObjectFromResponseData(jsonDecode(jsonString)),
+            ),
+          )
           .toList();
 
       List<RecipeModel> filteredPlans = [];
 
       String? startDate = sharedPreferences.getString("start-date");
-      debugPrint("Start date from SharedPreferences: $startDate");
+      devPrint("Start date from SharedPreferences: $startDate");
 
       for (var i = 0; i < allPlans.length; i++) {
         final plan = allPlans[i];
@@ -150,17 +160,17 @@ class PlannerLocalDatasourceImpl implements PlannerLocalDatasource {
           if (planDate.isAfter(startDateTimePlanString)) {
             filteredPlans.add(plan);
           } else {
-            debugPrint("Skipped plan #$i — older than start date");
+            devPrint("Skipped plan #$i — older than start date");
           }
         } else {
-          debugPrint("No start-date found, skipping filtering logic");
+          devPrint("No start-date found, skipping filtering logic");
         }
       }
 
-      debugPrint("Filtered plans count: ${filteredPlans.length}");
+      devPrint("Filtered plans count: ${filteredPlans.length}");
       return filteredPlans;
     } catch (e) {
-      debugPrint("Error in getWeeklyPlans(): $e");
+      devPrint("Error in getWeeklyPlans(): $e");
 
       return [];
     }
@@ -168,12 +178,10 @@ class PlannerLocalDatasourceImpl implements PlannerLocalDatasource {
 
   Future<void> saveThings(List<RecipeModel> list) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-
-      debugPrint("Saving ${list.length} meal plans to SharedPreferences...");
+      devPrint("Saving ${list.length} meal plans to SharedPreferences...");
 
       if (list.isEmpty) {
-        debugPrint("The list of meal plans is empty.");
+        devPrint("The list of meal plans is empty.");
       }
 
       final List<String> jsonList = list.map((item) {
@@ -196,24 +204,27 @@ class PlannerLocalDatasourceImpl implements PlannerLocalDatasource {
               : "",
           "missing_items_list": item.missingIngredients,
         });
-        debugPrint("Serialized meal plan to JSON: $jsonString");
+        devPrint("Serialized meal plan to JSON: $jsonString");
         return jsonString;
       }).toList();
 
-      debugPrint("Serialized JSON list to save: $jsonList");
+      devPrint("Serialized JSON list to save: $jsonList");
 
-      bool success = await prefs.setStringList('weekly_plan', jsonList);
+      bool success = await sharedPreferences.setStringList(
+        'weekly_plan',
+        jsonList,
+      );
 
       if (success) {
-        debugPrint(
+        devPrint(
           "Successfully saved ${jsonList.length} meal plans to SharedPreferences.",
         );
       } else {
-        debugPrint("Failed to save meal plans to SharedPreferences.");
+        devPrint("Failed to save meal plans to SharedPreferences.");
       }
     } catch (e, stack) {
-      debugPrint("Error in saveThings(): $e");
-      debugPrint("Stack trace: $stack");
+      devPrint("Error in saveThings(): $e");
+      devPrint("Stack trace: $stack");
     }
   }
 
@@ -251,14 +262,14 @@ class PlannerLocalDatasourceImpl implements PlannerLocalDatasource {
       if (index != -1) {
         currentList.removeAt(index);
         await saveThings(currentList);
-        debugPrint("Deleted $mealType for $selectedDate successfully.");
+        devPrint("Deleted $mealType for $selectedDate successfully.");
       } else {
-        debugPrint("No matching plan found for $mealType on $selectedDate.");
+        devPrint("No matching plan found for $mealType on $selectedDate.");
       }
 
       return currentList;
     } catch (e, stack) {
-      debugPrint("Error in deleteMealTypeFromWeeklyPlan(): $e");
+      devPrint("Error in deleteMealTypeFromWeeklyPlan(): $e");
       debugPrintStack(stackTrace: stack);
       return [];
     }

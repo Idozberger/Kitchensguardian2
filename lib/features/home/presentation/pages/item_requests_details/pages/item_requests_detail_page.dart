@@ -38,7 +38,7 @@ class _ItemRequestsDetailPageState extends State<ItemRequestsDetailPage> {
   }
 
   void _showFilterBottomSheet() {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),

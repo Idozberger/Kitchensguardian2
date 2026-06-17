@@ -1,7 +1,7 @@
 import 'package:foodkitchen/core/common/domain/entities/pantries_entity.dart';
-import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';
+import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/features/pantry/domain/entities/scan_receipt.dart';
 import 'package:fpdart/fpdart.dart';
 

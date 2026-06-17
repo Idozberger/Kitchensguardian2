@@ -119,9 +119,7 @@ class PrimaryActionsWidget extends StatelessWidget {
                   width: double.infinity,
                   height: h(40),
                   child: OutlinedButton(
-                    onPressed: () {
-                      addToWeeklyPlanCallback();
-                    },
+                    onPressed: addToWeeklyPlanCallback,
                     child: state.addingToWeeklyPlan || addPlanDummyLoading
                         ? Transform.scale(
                             scale: 0.7,

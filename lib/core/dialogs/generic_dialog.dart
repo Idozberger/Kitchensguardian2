@@ -27,8 +27,7 @@ class GenericDialog extends StatelessWidget {
           child: Container(
             padding: gapSymmetric(horizontal: 20, vertical: 16),
             decoration: BoxDecoration(
-              // ignore: deprecated_member_use
-              color: backgroundColor.withOpacity(0.9),
+              color: backgroundColor.withValues(alpha: 0.9),
               borderRadius: BorderRadius.circular(borderRadius),
             ),
             child: child,
