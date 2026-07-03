@@ -21,7 +21,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 class CountryAndCurrencySetupScreen extends StatefulWidget {
   final bool isUpdating;
 
-  const CountryAndCurrencySetupScreen({super.key, this.isUpdating = false});
+  /// Where to go after a first-time save (ignored when [isUpdating]).
+  final String nextRoute;
+
+  const CountryAndCurrencySetupScreen({
+    super.key,
+    this.isUpdating = false,
+    this.nextRoute = Routes.kitchenSelection,
+  });
 
   @override
   State<CountryAndCurrencySetupScreen> createState() =>
@@ -34,7 +41,7 @@ class _CountryAndCurrencySetupScreenState
   late Currency? _selectedCurrency;
   bool _isLoading = false;
   List<Country> _countries = [];
-  List<Currency> _availableCurrencies = [];
+  List<Currency> _allCurrencies = [];
   bool _isLoadingData = true;
   late CachedCountryCurrencyRepository _localDataSource;
 
@@ -54,44 +61,26 @@ class _CountryAndCurrencySetupScreenState
         cache: CountryCurrencyCache(pref),
       );
       _countries = await _localDataSource.getCountries();
+      _allCurrencies = _buildAllCurrencies(_countries);
 
       if (_countries.isNotEmpty) {
         if (widget.isUpdating) {
-          String? savedCountryCode = pref.getString('country');
-          String? savedCurrencyCode = pref.getString('currency');
+          final String? savedCountryCode = pref.getString('country');
+          final String? savedCurrencyCode = pref.getString('currency');
 
-          if (savedCountryCode != null) {
-            _selectedCountry = _countries.firstWhere(
-              (c) => c.code == savedCountryCode,
-              orElse: () => _countries.first,
-            );
-          } else {
-            _selectedCountry = _countries.firstWhere(
-              (c) => c.code == 'US',
-              orElse: () => _countries.first,
-            );
-          }
-
-          _availableCurrencies = _selectedCountry!.currencies;
-
-          if (savedCurrencyCode != null) {
-            _selectedCurrency = _availableCurrencies.firstWhere(
-              (c) => c.code == savedCurrencyCode,
-            );
-          } else {
-            _selectedCurrency = _availableCurrencies.isNotEmpty
-                ? _availableCurrencies.first
-                : null;
-          }
+          _selectedCountry = _countries.firstWhere(
+            (c) => c.code == (savedCountryCode ?? 'US'),
+            orElse: () => _countries.first,
+          );
+          _selectedCurrency =
+              _currencyByCode(savedCurrencyCode) ??
+              _defaultCurrencyFor(_selectedCountry!);
         } else {
           _selectedCountry = _countries.firstWhere(
             (c) => c.code == 'US',
             orElse: () => _countries.first,
           );
-          _availableCurrencies = _selectedCountry!.currencies;
-          if (_availableCurrencies.isNotEmpty) {
-            _selectedCurrency = _availableCurrencies.first;
-          }
+          _selectedCurrency = _defaultCurrencyFor(_selectedCountry!);
         }
       }
     } catch (e) {
@@ -106,11 +95,42 @@ class _CountryAndCurrencySetupScreenState
     if (country == null) return;
     setState(() {
       _selectedCountry = country;
-      _availableCurrencies = country.currencies;
-      _selectedCurrency = _availableCurrencies.isNotEmpty
-          ? _availableCurrencies.first
-          : null;
+      // Default to the country's primary currency, but the full list stays
+      // available so the user can pick any currency (e.g. UAH while in PL).
+      _selectedCurrency = _defaultCurrencyFor(country);
     });
+  }
+
+  /// Flatten every country's currencies into a single list, deduped by [code].
+  /// Instances are reused so [DropdownButton] identity matching stays valid.
+  List<Currency> _buildAllCurrencies(List<Country> countries) {
+    final seen = <String>{};
+    final result = <Currency>[
+      for (final country in countries)
+        for (final currency in country.currencies)
+          if (seen.add(currency.code)) currency,
+    ];
+    result.sort((a, b) => a.code.compareTo(b.code));
+    return result;
+  }
+
+  /// Resolve a currency [code] to the shared instance in [_allCurrencies].
+  Currency? _currencyByCode(String? code) {
+    if (code == null) return null;
+    for (final currency in _allCurrencies) {
+      if (currency.code == code) return currency;
+    }
+    return null;
+  }
+
+  /// The shared-list instance of a country's primary currency, or the first
+  /// available currency as a fallback.
+  Currency? _defaultCurrencyFor(Country country) {
+    if (country.currencies.isNotEmpty) {
+      final match = _currencyByCode(country.currencies.first.code);
+      if (match != null) return match;
+    }
+    return _allCurrencies.isNotEmpty ? _allCurrencies.first : null;
   }
 
   Future<void> _savePreferences() async {
@@ -133,7 +153,7 @@ class _CountryAndCurrencySetupScreenState
         if (widget.isUpdating) {
           context.pop();
         } else {
-          context.go(Routes.kitchenSelection);
+          context.go(widget.nextRoute);
         }
       }
     } catch (e) {
@@ -180,7 +200,7 @@ class _CountryAndCurrencySetupScreenState
                 ),
                 gapH(18),
                 CurrencySection(
-                  currencies: _availableCurrencies,
+                  currencies: _allCurrencies,
                   selectedCurrency: _selectedCurrency,
                   selectedCountry: _selectedCountry,
                   onCurrencyChanged: (currency) {

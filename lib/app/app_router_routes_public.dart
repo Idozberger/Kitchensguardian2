@@ -9,7 +9,13 @@ List<RouteBase> buildPublicRoutes() => [
   ),
   GoRoute(
     path: Routes.onBoarding,
-    pageBuilder: (context, state) => buildPage(state.pageKey, IntroPage()),
+    pageBuilder: (context, state) =>
+        buildPage(state.pageKey, const IntroPage()),
+  ),
+  GoRoute(
+    path: Routes.introAppFeatures,
+    pageBuilder: (context, state) =>
+        buildPage(state.pageKey, const OnboardingFeaturesPage()),
   ),
   GoRoute(
     path: Routes.signIn,
@@ -66,7 +72,12 @@ List<RouteBase> buildPublicRoutes() => [
     path: Routes.countryAndCurrencySetup,
     builder: (context, state) {
       bool extra = state.extra as bool;
-      return CountryAndCurrencySetupScreen(isUpdating: extra);
+      final nextRoute =
+          state.uri.queryParameters['next'] ?? Routes.kitchenSelection;
+      return CountryAndCurrencySetupScreen(
+        isUpdating: extra,
+        nextRoute: nextRoute,
+      );
     },
   ),
   GoRoute(

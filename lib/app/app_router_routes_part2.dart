@@ -164,7 +164,7 @@ List<RouteBase> buildAppRouterRoutesPart2() => [
     name: Routes.smartKitchenSetup,
     path: Routes.smartKitchenSetup,
     pageBuilder: (context, state) {
-      final bool isRescanning = state.extra as bool;
+      final bool isRescanning = state.extra as bool? ?? false;
       return buildPage(
         state.pageKey,
         SmartKitchenSetupPage(isRescanning: isRescanning),

@@ -31,6 +31,7 @@ import 'package:foodkitchen/features/kitchens/presentation/pages/invite_member_p
 import 'package:foodkitchen/features/kitchens/presentation/pages/kitchen_page.dart';
 import 'package:foodkitchen/features/kitchens/presentation/pages/kitchen_selection_page.dart';
 import 'package:foodkitchen/features/onboarding/presentation/pages/intro_page.dart';
+import 'package:foodkitchen/features/onboarding/presentation/pages/onboarding_features_page.dart';
 import 'package:foodkitchen/features/onboarding/presentation/pages/splash_screen.dart';
 import 'package:foodkitchen/features/pantry/presentation/models/pantry_items.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/add_item_page.dart';
@@ -65,10 +66,7 @@ List<RouteBase> buildAppRouterRoutes() => [
   ...buildPublicRoutes(),
   ShellRoute(
     builder: (context, state, child) => child,
-    routes: [
-      ...buildAppRouterRoutesPart1(),
-      ...buildAppRouterRoutesPart2(),
-    ],
+    routes: [...buildAppRouterRoutesPart1(), ...buildAppRouterRoutesPart2()],
   ),
 ];
 
