@@ -155,7 +155,7 @@ class _SmartKitchenSetupPageState extends State<SmartKitchenSetupPage> {
                       );
                     },
             ),
-            if (_userCubit.state.userStorageAreas.isEmpty)
+            if (_userCubit.state.userStorageAreas.isEmpty) ...[
               MaterialButton(
                 onPressed: () => bloc.add(
                   SkipKitchenSetupEvent(
@@ -176,6 +176,17 @@ class _SmartKitchenSetupPageState extends State<SmartKitchenSetupPage> {
                         ).textTheme.headlineMedium?.copyWith(),
                       ),
               ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Text(
+                  "You can always do this later in the app",
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.greyColor,
+                  ),
+                ),
+              ),
+            ],
             gapH(8),
           ],
         ),

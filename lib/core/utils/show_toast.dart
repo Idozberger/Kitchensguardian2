@@ -5,6 +5,13 @@ import 'package:foodkitchen/core/global/functions/resize.dart';
 enum ToastType { success, error, warning, info }
 
 class AppToast {
+  /// Duration for important toasts (e.g. "account already registered") that
+  /// users need extra time to read. Android supports only SHORT/LONG.
+  static const Toast longDuration = Toast.LENGTH_LONG;
+
+  /// iOS/web toast lifetime (seconds) paired with [longDuration].
+  static const int longDurationIosSeconds = 4;
+
   static void show(
     String message,
     ToastType type, {

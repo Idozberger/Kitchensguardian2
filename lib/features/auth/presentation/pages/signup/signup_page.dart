@@ -70,7 +70,12 @@ class _SignUpPageState extends State<SignUpPage> {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (BuildContext context, AuthState state) {
         if (state is AuthFailure) {
-          AppToast.show(state.message, ToastType.error);
+          AppToast.show(
+            state.message,
+            ToastType.error,
+            toastLength: AppToast.longDuration,
+            timeInSecForIosWeb: AppToast.longDurationIosSeconds,
+          );
           _clearStaleSocialSignUpState();
         }
         if (state is AuthUserCreatedSuccess) {

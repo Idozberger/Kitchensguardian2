@@ -46,6 +46,13 @@ Future<void> main() async {
       ),
     );
   }, (Object error, StackTrace stack) {
-    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    // Always surface the underlying error; Crashlytics may be unavailable if the
+    // failure happened before Firebase.initializeApp() completed.
+    debugPrint('Uncaught zone error: $error\n$stack');
+    try {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    } catch (e) {
+      debugPrint('Crashlytics unavailable, could not record error: $e');
+    }
   });
 }

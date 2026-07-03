@@ -44,6 +44,10 @@ class CurrencyDropdown extends StatelessWidget {
           child: DropdownButton<Currency>(
             isExpanded: true,
             underline: SizedBox(),
+            // Cap the menu height so it never reaches the Dynamic Island / notch.
+            menuMaxHeight:
+                MediaQuery.sizeOf(context).height * 0.45 -
+                MediaQuery.paddingOf(context).top,
             value: selectedCurrency,
             onChanged: onChanged,
             dropdownColor: Colors.white,
