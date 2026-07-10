@@ -48,6 +48,9 @@ void _initOnboarding() async {
       () => UserCubit(
         commonRemoteDatasource: sl(),
         entitlementSnapshot: sl(),
+        unitSystemLocalDataSource: sl(),
+        getUnitSystem: GetUnitSystem(sl()),
+        setUnitSystem: SetUnitSystem(sl()),
       ),
     )
     // Bloc
@@ -149,6 +152,8 @@ void _initKitchen() async {
     ..registerFactory<KitchenRepository>(() => KitchenRepositoryImpl(sl()))
     // Usecases
     ..registerFactory(() => GetKitchens(sl()))
+    ..registerFactory(() => GetUnitSystem(sl()))
+    ..registerFactory(() => SetUnitSystem(sl()))
     ..registerFactory(() => CreateKitchenUseCase(sl()))
     ..registerFactory(() => JoinKitchenUseCase(sl()))
     ..registerFactory(() => LeaveKitchenUsecase(sl()))

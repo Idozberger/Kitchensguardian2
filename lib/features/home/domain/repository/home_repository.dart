@@ -1,4 +1,5 @@
 import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
+import 'package:foodkitchen/core/common/units/unit_system.dart';
 
 import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/features/home/domain/entities/item_request.dart';
@@ -7,7 +8,10 @@ import 'package:foodkitchen/features/home/domain/entities/pantry_data.dart';
 import 'package:fpdart/fpdart.dart';
 
 abstract interface class HomeRepository {
-  Future<Either<Failure, Kitchen>> createKitchen({required String kitchenName});
+  Future<Either<Failure, Kitchen>> createKitchen({
+    required String kitchenName,
+    required UnitSystem unitSystem,
+  });
   Future<Either<Failure, String>> respondToItemRequest({
     required String action,
     required String rejectReason,

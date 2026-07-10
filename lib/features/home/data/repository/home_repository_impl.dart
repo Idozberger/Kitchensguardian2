@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:foodkitchen/core/common/data/datasource/common_remote_datasource.dart';
 import 'package:foodkitchen/core/common/data/model/recipe_model.dart';
 import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
+import 'package:foodkitchen/core/common/units/unit_system.dart';
 import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/core/utils/dev_logging.dart';
 import 'package:foodkitchen/core/utils/json_conversion.dart';
@@ -26,10 +27,12 @@ class HomeRepositoryImpl implements HomeRepository {
   @override
   Future<Either<Failure, Kitchen>> createKitchen({
     required String kitchenName,
+    required UnitSystem unitSystem,
   }) async {
     try {
       final response = await homeRemoteDataSource.createKitchen(
         kitchenName: kitchenName,
+        unitSystem: unitSystem,
       );
       final Map<String, dynamic> r = jsonObjectFromResponseData(response);
       final kitchenModel = KitchenModel(

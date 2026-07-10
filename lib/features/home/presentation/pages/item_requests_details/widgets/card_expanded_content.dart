@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
+import 'package:foodkitchen/core/common/units/unit_system.dart';
 import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
@@ -36,7 +37,7 @@ class CardExpandedContent extends StatelessWidget {
           children: [
             InlineText(text: request.quantity.toString()),
             Dot(),
-            InlineText(text: request.unit),
+            InlineText(text: unitDisplayLabel(request.unit)),
             Dot(),
             InlineText(text: request.group),
           ],

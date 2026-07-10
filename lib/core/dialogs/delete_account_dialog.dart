@@ -140,10 +140,7 @@ class _DeleteAccountDialog extends StatelessWidget {
               ),
               SizedBox(width: w(10)),
               Flexible(
-                child: GenericButtonWidget(
-                  onPressed: onDelete,
-                  text: 'Delete',
-                ),
+                child: GenericButtonWidget(onPressed: onDelete, text: 'Delete'),
               ),
             ],
           ),

@@ -163,7 +163,10 @@ Future<void> _onDeleteMealTypeFromWeeklyPlan(
   res.fold(
     (failure) {
       emit(
-        bloc.state.copyWith(errorMessage: failure.userMessage, isLoading: false),
+        bloc.state.copyWith(
+          errorMessage: failure.userMessage,
+          isLoading: false,
+        ),
       );
     },
     (getAllWeeklyPlans) async {

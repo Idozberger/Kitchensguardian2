@@ -14,6 +14,7 @@ final class BackendSubscriptionPlan {
   final String priceDisplay;
   final double priceAmount;
   final String currency;
+
   /// `monthly` or `annual` (also accepts `yearly` from API).
   final String billingPeriod;
 

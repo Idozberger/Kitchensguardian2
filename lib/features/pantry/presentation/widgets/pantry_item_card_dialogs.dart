@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';
+import 'package:foodkitchen/core/common/units/unit_system.dart';
 import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
 import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
@@ -83,13 +84,11 @@ Future<dynamic> showPantryItemEditDialog(
                         label: "Units",
                         hint: "Select Units",
                         value: unit,
-                        items: const [
-                          "Kg",
-                          "Gram",
-                          "Litre",
-                          "Piece",
-                          "Milliliters",
-                        ],
+                        items: unitOptions(
+                          context.read<UserCubit>().state.unitSystem,
+                          current: unit,
+                        ),
+                        displayLabel: unitDisplayLabel,
                         onChanged: (val) => setDialogState(() => unit = val!),
                       ),
                     ),

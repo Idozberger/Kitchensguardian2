@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:foodkitchen/core/common/units/unit_system.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
@@ -160,7 +161,7 @@ class _CardInlineInfo extends StatelessWidget {
         Dot(),
         SizedBox(
           width: w(18),
-          child: InlineText(text: request.unit),
+          child: InlineText(text: unitDisplayLabel(request.unit)),
         ),
         Dot(),
         SizedBox(

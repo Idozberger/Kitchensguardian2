@@ -80,10 +80,7 @@ class _SignUpPageState extends State<SignUpPage> {
         }
         if (state is AuthUserCreatedSuccess) {
           AppToast.show(state.successMessage, ToastType.success);
-          context.pushNamed(
-            "verify_email",
-            extra: _userModelForVerifyEmail(),
-          );
+          context.pushNamed("verify_email", extra: _userModelForVerifyEmail());
         }
       },
       builder: (BuildContext context, AuthState state) {
@@ -117,11 +114,7 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   void _clearStaleSocialSignUpState() {
-    _userCubit.setGoogleSignUpUserModel(
-      firstName: "",
-      lastName: "",
-      email: "",
-    );
+    _userCubit.setGoogleSignUpUserModel(firstName: "", lastName: "", email: "");
   }
 
   /// Prefer form fields (email signup); fall back to cubit (Google/Apple signup).

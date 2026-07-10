@@ -7,10 +7,7 @@ import 'package:go_router/go_router.dart';
 /// Single entry for navigating to the subscription / paywall flow.
 void openPaywallIfEnabled(BuildContext context) {
   if (!Env.billingUiEnabled) {
-    AppToast.show(
-      'Subscriptions are not available yet.',
-      ToastType.info,
-    );
+    AppToast.show('Subscriptions are not available yet.', ToastType.info);
     return;
   }
   context.push(Routes.subscription);

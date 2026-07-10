@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
+import 'package:foodkitchen/core/common/units/unit_system.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/services/date_picker/date_picker_service.dart'
@@ -75,6 +78,7 @@ class AddKitchenPantryItemForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final unitSystem = context.watch<UserCubit>().state.unitSystem;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -124,7 +128,8 @@ class AddKitchenPantryItemForm extends StatelessWidget {
                 label: "Units",
                 hint: "Select Units",
                 value: item.unit,
-                items: const ["Kg", "Gram", "Litre", "Piece", "Milliliters"],
+                items: unitOptions(unitSystem, current: item.unit),
+                displayLabel: unitDisplayLabel,
                 onChanged: (val) => updateState(() => item.unit = val),
               ),
             ),

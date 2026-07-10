@@ -38,7 +38,10 @@ class SubscriptionRemoteDatasourceImpl implements SubscriptionRemoteDatasource {
         throw Exception('Invalid plans response');
       }
       final plans = plansRaw
-          .map((e) => BackendSubscriptionPlan.fromJson(jsonObjectFromResponseData(e)))
+          .map(
+            (e) =>
+                BackendSubscriptionPlan.fromJson(jsonObjectFromResponseData(e)),
+          )
           .where((p) => p.planId.isNotEmpty)
           .toList();
       if (plans.isEmpty) {
@@ -81,7 +84,9 @@ class SubscriptionRemoteDatasourceImpl implements SubscriptionRemoteDatasource {
     }
   }
 
-  List<BackendSubscriptionPlan> _sortPlans(List<BackendSubscriptionPlan> plans) {
+  List<BackendSubscriptionPlan> _sortPlans(
+    List<BackendSubscriptionPlan> plans,
+  ) {
     final copy = List<BackendSubscriptionPlan>.from(plans);
     copy.sort((a, b) {
       if (a.isMonthly != b.isMonthly) {

@@ -89,7 +89,8 @@ class _SelectDateWidgetState extends State<SelectDateWidget>
                     final isSelected = _isSameDate(date, currentSelected);
 
                     final globalIndex = weekIndex * 7 + dayIndex;
-                    final isLocked = !widget.hasPremiumAccess && globalIndex > 2;
+                    final isLocked =
+                        !widget.hasPremiumAccess && globalIndex > 2;
 
                     return GestureDetector(
                       onTap: () {

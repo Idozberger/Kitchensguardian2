@@ -122,8 +122,9 @@ class GroceryBloc extends Bloc<GroceryEvent, GroceryState> {
     );
 
     res.fold(
-      (failure) =>
-          emit(state.copyWith(errorMessage: failure.userMessage, isLoading: false)),
+      (failure) => emit(
+        state.copyWith(errorMessage: failure.userMessage, isLoading: false),
+      ),
       (requestedItemsList) {
         final buckets = partitionRequestedItemsByBucket(requestedItemsList);
         emit(
@@ -151,8 +152,9 @@ class GroceryBloc extends Bloc<GroceryEvent, GroceryState> {
     );
 
     res.fold(
-      (failure) =>
-          emit(state.copyWith(errorMessage: failure.userMessage, isLoading: false)),
+      (failure) => emit(
+        state.copyWith(errorMessage: failure.userMessage, isLoading: false),
+      ),
       (updatedItemsList) {
         final buckets = partitionRequestedItemsByBucket(updatedItemsList);
         emit(
@@ -177,8 +179,9 @@ class GroceryBloc extends Bloc<GroceryEvent, GroceryState> {
     );
 
     res.fold(
-      (failure) =>
-          emit(state.copyWith(errorMessage: failure.userMessage, isLoading: false)),
+      (failure) => emit(
+        state.copyWith(errorMessage: failure.userMessage, isLoading: false),
+      ),
       (updatedItemsList) {
         final buckets = partitionRequestedItemsByBucket(updatedItemsList);
         emit(
@@ -204,8 +207,9 @@ class GroceryBloc extends Bloc<GroceryEvent, GroceryState> {
     );
 
     res.fold(
-      (failure) =>
-          emit(state.copyWith(errorMessage: failure.userMessage, isLoading: false)),
+      (failure) => emit(
+        state.copyWith(errorMessage: failure.userMessage, isLoading: false),
+      ),
       (aiGeneratedItems) {
         emit(
           state.copyWith(aiGeneratedList: aiGeneratedItems, isLoading: false),
@@ -226,8 +230,9 @@ class GroceryBloc extends Bloc<GroceryEvent, GroceryState> {
     );
 
     res.fold(
-      (failure) =>
-          emit(state.copyWith(errorMessage: failure.userMessage, isLoading: false)),
+      (failure) => emit(
+        state.copyWith(errorMessage: failure.userMessage, isLoading: false),
+      ),
       (updatedItemsList) {
         final buckets = partitionRequestedItemsByBucket(updatedItemsList);
         emit(
@@ -258,8 +263,9 @@ class GroceryBloc extends Bloc<GroceryEvent, GroceryState> {
     );
 
     res.fold(
-      (failure) =>
-          emit(state.copyWith(errorMessage: failure.userMessage, isLoading: false)),
+      (failure) => emit(
+        state.copyWith(errorMessage: failure.userMessage, isLoading: false),
+      ),
       (requestedItemsList) {
         final buckets = partitionRequestedItemsByBucket(requestedItemsList);
         emit(

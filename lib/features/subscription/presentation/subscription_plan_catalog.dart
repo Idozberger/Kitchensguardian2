@@ -2,9 +2,7 @@ import 'package:foodkitchen/features/subscription/data/models/backend_subscripti
 
 /// Shared plan ordering and annual savings for subscription UI.
 abstract final class SubscriptionPlanCatalog {
-  static BackendSubscriptionPlan? monthly(
-    List<BackendSubscriptionPlan> plans,
-  ) {
+  static BackendSubscriptionPlan? monthly(List<BackendSubscriptionPlan> plans) {
     for (final p in plans) {
       if (p.isMonthly) {
         return p;

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';
+import 'package:foodkitchen/core/common/units/unit_system.dart';
 import 'package:foodkitchen/core/services/notifications/flutter_local_notifications_service.dart';
 import 'package:foodkitchen/core/utils/dev_logging.dart';
 
@@ -46,7 +47,7 @@ Future<void> schedulePantryStockNotifications({
         id: morningId,
         title: 'Low stock: ${item.name}',
         body:
-            'You are running low on ${item.name} (${item.quantity} ${item.unit}).',
+            'You are running low on ${item.name} (${item.quantity} ${unitDisplayLabel(item.unit)}).',
         dailyTime: morningTime,
         payload: jsonEncode({
           'type': 'low_stock',

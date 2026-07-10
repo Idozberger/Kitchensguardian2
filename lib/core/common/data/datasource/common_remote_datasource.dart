@@ -16,10 +16,7 @@ abstract interface class CommonRemoteDatasource {
 }
 
 class CommonRemoteDatasourceImpl implements CommonRemoteDatasource {
-  CommonRemoteDatasourceImpl({
-    required this.dio,
-    required this.profileCache,
-  });
+  CommonRemoteDatasourceImpl({required this.dio, required this.profileCache});
 
   final DioHelper dio;
   final ProfileResponseCache profileCache;

@@ -91,6 +91,7 @@ Future<Map<String, dynamic>> _pantryImplScanRecipt(
   required String filePath,
   required String currency,
   required String country,
+  required String kitchenId,
 }) async {
   try {
     final formData = FormData.fromMap({
@@ -99,6 +100,7 @@ Future<Map<String, dynamic>> _pantryImplScanRecipt(
         filename: filePath.split('/').last,
         contentType: DioMediaType('image', 'jpeg'),
       ),
+      "kitchen_id": kitchenId,
       "currency": currency,
       "country": country,
       "use_google_document": false,

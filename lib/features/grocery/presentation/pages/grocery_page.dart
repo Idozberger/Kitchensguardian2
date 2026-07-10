@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
+import 'package:foodkitchen/core/widgets/unit_system_change_listener.dart';
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_bloc.dart';
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_event.dart';
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_state.dart';
@@ -39,16 +40,19 @@ class _GroceryPageState extends State<GroceryPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<GroceryBloc, GroceryState>(
-      listener: _handleStateChanges,
-      child: BlocBuilder<GroceryBloc, GroceryState>(
-        builder: (context, state) => Scaffold(
-          backgroundColor: const Color(0xFFF9F9F9),
-          body: GroceryBody(
-            state: state,
-            userCubit: _userCubit,
-            groceryBloc: _groceryBloc,
-            controller: _searchController,
+    return UnitSystemChangeListener(
+      onChanged: _loadInitialData,
+      child: BlocListener<GroceryBloc, GroceryState>(
+        listener: _handleStateChanges,
+        child: BlocBuilder<GroceryBloc, GroceryState>(
+          builder: (context, state) => Scaffold(
+            backgroundColor: const Color(0xFFF9F9F9),
+            body: GroceryBody(
+              state: state,
+              userCubit: _userCubit,
+              groceryBloc: _groceryBloc,
+              controller: _searchController,
+            ),
           ),
         ),
       ),

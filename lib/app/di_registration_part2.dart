@@ -125,8 +125,13 @@ void _initProfile() async {
 }
 
 void _initCommonRemoteRepo() {
+  sl.registerFactory<UnitSystemLocalDataSource>(
+    () => UnitSystemLocalDatasourceImpl(sharedPreferences: sl()),
+  );
   sl.registerLazySingleton<ProfileResponseCache>(ProfileResponseCache.new);
-  sl.registerLazySingleton<UserEntitlementSnapshot>(UserEntitlementSnapshot.new);
+  sl.registerLazySingleton<UserEntitlementSnapshot>(
+    UserEntitlementSnapshot.new,
+  );
   sl.registerLazySingleton<BillingRepository>(NoOpBillingRepository.new);
   sl.registerLazySingleton<CommonRemoteDatasource>(
     () => CommonRemoteDatasourceImpl(dio: sl(), profileCache: sl()),

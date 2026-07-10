@@ -20,7 +20,11 @@ class ImagePreviewWidget extends StatelessWidget {
           file: File(imagePath),
           fit: BoxFit.cover,
           fallback: const Center(
-            child: Icon(Icons.image_not_supported, color: Colors.white54, size: 48),
+            child: Icon(
+              Icons.image_not_supported,
+              color: Colors.white54,
+              size: 48,
+            ),
           ),
         ),
       ),

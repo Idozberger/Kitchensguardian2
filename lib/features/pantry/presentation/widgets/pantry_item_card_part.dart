@@ -125,7 +125,7 @@ extension _PantryItemCardLayout on _PantryItemCardState {
                             width: w(38),
                             child: pantryItemCardInlineInfo(
                               context,
-                              widget.unit,
+                              unitDisplayLabel(widget.unit),
                             ),
                           ),
                           SizedBox(
@@ -169,7 +169,11 @@ extension _PantryItemCardLayout on _PantryItemCardState {
                 isExpanded: true,
               ),
               pantryItemCardDot(context),
-              pantryItemCardInlineInfo(context, widget.unit, isExpanded: true),
+              pantryItemCardInlineInfo(
+                context,
+                unitDisplayLabel(widget.unit),
+                isExpanded: true,
+              ),
               pantryItemCardDot(context),
               pantryItemCardInlineInfo(
                 context,

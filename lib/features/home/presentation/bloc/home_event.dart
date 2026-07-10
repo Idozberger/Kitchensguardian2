@@ -1,10 +1,18 @@
+import 'package:foodkitchen/core/common/units/unit_system.dart';
 import 'package:foodkitchen/features/planner/domain/entities/ingredient_entity.dart';
 
 sealed class HomeEvent {}
 
 class CreateKitchenEventForHome extends HomeEvent {
   final String kitchenName;
-  CreateKitchenEventForHome(this.kitchenName);
+
+  /// Measurement system picked in the create dialog (BRD UC-03).
+  final UnitSystem unitSystem;
+
+  CreateKitchenEventForHome(
+    this.kitchenName, {
+    this.unitSystem = UnitSystem.metric,
+  });
 }
 
 class JoinKitchenEventForHome extends HomeEvent {

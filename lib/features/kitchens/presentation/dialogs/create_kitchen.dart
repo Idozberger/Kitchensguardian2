@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:foodkitchen/core/common/units/unit_system.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
+import 'package:foodkitchen/core/widgets/generic_dropdown_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_bloc.dart';
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_event.dart';
@@ -30,6 +32,9 @@ class _CreateKitchenDialogContent extends StatefulWidget {
 class _CreateKitchenDialogContentState
     extends State<_CreateKitchenDialogContent> {
   late final TextEditingController _kitchenNameController;
+
+  /// Measurement system chosen at creation (BRD UC-03); defaults to metric.
+  UnitSystem _unitSystem = UnitSystem.metric;
 
   @override
   void initState() {
@@ -68,6 +73,8 @@ class _CreateKitchenDialogContentState
           SizedBox(height: h(10)),
           _buildTextField(),
           SizedBox(height: h(10)),
+          _buildUnitSystemField(),
+          SizedBox(height: h(10)),
           _buildCreateButton(state),
         ],
       ),
@@ -102,6 +109,20 @@ class _CreateKitchenDialogContentState
     );
   }
 
+  Widget _buildUnitSystemField() {
+    return PopupDropdownField(
+      label: "Measurement System",
+      hint: "Select system",
+      value: unitSystemToApi(_unitSystem),
+      items: unitSystemOptions,
+      displayLabel: unitSystemDisplayLabel,
+      onChanged: (value) {
+        if (value == null) return;
+        setState(() => _unitSystem = unitSystemFromApi(value));
+      },
+    );
+  }
+
   Widget _buildCreateButton(KitchenState state) {
     return Align(
       alignment: Alignment.center,
@@ -125,6 +146,8 @@ class _CreateKitchenDialogContentState
       return;
     }
 
-    context.read<KitchenBloc>().add(CreateKitchenEvent(kitchenName));
+    context.read<KitchenBloc>().add(
+      CreateKitchenEvent(kitchenName, unitSystem: _unitSystem),
+    );
   }
 }

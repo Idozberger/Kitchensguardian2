@@ -25,11 +25,10 @@ final class ProfileResponseCache {
 
   Map<String, dynamic> _copyForReturn(Map<String, dynamic> raw) {
     final avatar = raw['avatar'];
-    final copiedAvatar = avatar is Uint8List ? Uint8List.fromList(avatar) : avatar;
-    return <String, dynamic>{
-      ...raw,
-      'avatar': copiedAvatar,
-    };
+    final copiedAvatar = avatar is Uint8List
+        ? Uint8List.fromList(avatar)
+        : avatar;
+    return <String, dynamic>{...raw, 'avatar': copiedAvatar};
   }
 
   void invalidate() {

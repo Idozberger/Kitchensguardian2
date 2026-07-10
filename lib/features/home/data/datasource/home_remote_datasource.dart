@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:foodkitchen/core/common/units/unit_system.dart';
 import 'package:foodkitchen/core/global/functions/api_endpoints.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
 import 'package:foodkitchen/core/utils/dev_logging.dart';
@@ -10,7 +11,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 part 'home_remote_datasource_impl_part.dart';
 
 abstract interface class HomeRemoteDataSource {
-  Future<Map<String, dynamic>> createKitchen({required String kitchenName});
+  Future<Map<String, dynamic>> createKitchen({
+    required String kitchenName,
+    required UnitSystem unitSystem,
+  });
   Future<String> respondToItemRequest({
     required String action,
     required String rejectReason,
@@ -37,8 +41,14 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
   });
 
   @override
-  Future<Map<String, dynamic>> createKitchen({required String kitchenName}) =>
-      _homeImplCreateKitchen(this, kitchenName: kitchenName);
+  Future<Map<String, dynamic>> createKitchen({
+    required String kitchenName,
+    required UnitSystem unitSystem,
+  }) => _homeImplCreateKitchen(
+    this,
+    kitchenName: kitchenName,
+    unitSystem: unitSystem,
+  );
 
   @override
   Future<Map<String, List<Map<String, dynamic>>>> getPantriesItems({

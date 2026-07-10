@@ -15,7 +15,7 @@ class ScanReceiptItemModel extends ScanReceiptItemEntity {
   factory ScanReceiptItemModel.fromJson(Map<String, dynamic>? json) {
     return ScanReceiptItemModel(
       name: json?['name'] as String? ?? '',
-      unit: json?['unit'] as String? ?? 'Unit',
+      unit: json?['unit'] as String? ?? 'unit',
       amount: json?['quantity'] as String? ?? '0',
       expireDate: json?['expiry_date'] as String? ?? '0',
       thumbnail: json?['thumbnail'] as Uint8List? ?? Uint8List(0),

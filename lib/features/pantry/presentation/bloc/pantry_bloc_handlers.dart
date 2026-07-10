@@ -11,7 +11,9 @@ Future<void> _addScanItemsToPantry(
     AddPantryItemParams(pantry: event.pantry),
   );
 
-  res.fold((failure) => emit(PantryFailure(failure.userMessage)), (message) async {
+  res.fold((failure) => emit(PantryFailure(failure.userMessage)), (
+    message,
+  ) async {
     bloc._homeBloc.add(
       GetPantriesItemsEventForHome(kitchenId: event.pantry.kitchenId),
     );
@@ -47,7 +49,9 @@ Future<void> _onAddPantryItem(
     AddPantryItemParams(pantry: event.pantry),
   );
 
-  res.fold((failure) => emit(PantryFailure(failure.userMessage)), (message) async {
+  res.fold((failure) => emit(PantryFailure(failure.userMessage)), (
+    message,
+  ) async {
     bloc._homeBloc.add(
       GetPantriesItemsEventForHome(kitchenId: event.pantry.kitchenId),
     );
@@ -107,10 +111,13 @@ Future<void> _onScanReceipt(
       filePath: event.filePath,
       country: event.country,
       currency: event.currency,
+      kitchenId: event.kitchenId,
     ),
   );
 
-  res.fold((failure) => emit(PantryFailure(failure.userMessage)), (receiptDetails) {
+  res.fold((failure) => emit(PantryFailure(failure.userMessage)), (
+    receiptDetails,
+  ) {
     emit(ScanReceiptLoaded(receiptDetails));
   });
 }

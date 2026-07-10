@@ -23,7 +23,8 @@ class BackendSubscriptionPage extends StatefulWidget {
   const BackendSubscriptionPage({super.key});
 
   @override
-  State<BackendSubscriptionPage> createState() => _BackendSubscriptionPageState();
+  State<BackendSubscriptionPage> createState() =>
+      _BackendSubscriptionPageState();
 }
 
 class _BackendSubscriptionPageState extends State<BackendSubscriptionPage> {
@@ -163,10 +164,7 @@ class _BackendSubscriptionPageState extends State<BackendSubscriptionPage> {
                 textAlign: TextAlign.center,
               ),
               gap(height: 16),
-              GenericButtonWidget(
-                onPressed: _loadPlans,
-                text: 'Retry',
-              ),
+              GenericButtonWidget(onPressed: _loadPlans, text: 'Retry'),
             ],
           ),
         ),
@@ -306,10 +304,7 @@ class _BackendSubscriptionPageState extends State<BackendSubscriptionPage> {
           ),
         ],
       ),
-      title: Text(
-        'Premium',
-        style: Theme.of(context).textTheme.headlineLarge,
-      ),
+      title: Text('Premium', style: Theme.of(context).textTheme.headlineLarge),
       actions: [
         TextButton(
           onPressed: _restoring || _subscribing ? null : _restore,

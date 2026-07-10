@@ -156,9 +156,11 @@ Future<void> _docScannerAwaitLoadingDialogContext({
   required BuildContext routeContext,
   required BuildContext? Function() currentDialogContext,
 }) async {
-  for (var i = 0;
-      i < 15 && routeContext.mounted && currentDialogContext() == null;
-      i++) {
+  for (
+    var i = 0;
+    i < 15 && routeContext.mounted && currentDialogContext() == null;
+    i++
+  ) {
     await WidgetsBinding.instance.endOfFrame;
   }
 }

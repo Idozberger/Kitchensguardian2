@@ -43,8 +43,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
     final result = await _getProfilePicture(NoParams());
     result.fold(
-      (failure) =>
-          emit(state.copyWith(isLoading: false, errorMessage: failure.userMessage)),
+      (failure) => emit(
+        state.copyWith(isLoading: false, errorMessage: failure.userMessage),
+      ),
       (imagePath) {
         emit(
           state.copyWith(isLoading: false, imagePath: base64Decode(imagePath)),
@@ -63,8 +64,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       SetProfilePictureParams(filePath: event.filePath),
     );
     result.fold(
-      (failure) =>
-          emit(state.copyWith(isLoading: false, errorMessage: failure.userMessage)),
+      (failure) => emit(
+        state.copyWith(isLoading: false, errorMessage: failure.userMessage),
+      ),
       (imagePath) {
         emit(
           state.copyWith(isLoading: false, imagePath: base64Decode(imagePath)),
@@ -88,8 +90,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       ),
     );
     result.fold(
-      (failure) =>
-          emit(state.copyWith(isLoading: false, errorMessage: failure.userMessage)),
+      (failure) => emit(
+        state.copyWith(isLoading: false, errorMessage: failure.userMessage),
+      ),
       (successMessage) async {
         emit(state.copyWith(isLoading: false, successMessage: successMessage));
         _userCubit.updateUserProfileNames(
@@ -114,8 +117,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       ),
     );
     result.fold(
-      (failure) =>
-          emit(state.copyWith(isLoading: false, errorMessage: failure.userMessage)),
+      (failure) => emit(
+        state.copyWith(isLoading: false, errorMessage: failure.userMessage),
+      ),
       (successMessage) {
         emit(state.copyWith(isLoading: false, successMessage: successMessage));
       },

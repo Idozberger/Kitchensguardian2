@@ -42,51 +42,51 @@ class RecipeCard extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(h(10)),
             child: Container(
-            alignment: Alignment.topRight,
-            width: w(width),
-            height: h(height),
-            color: Colors.white,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                SafeMemoryImage(
-                  bytes: imageBytes,
-                  fit: BoxFit.cover,
-                  fallback: Image.asset(
-                    AppAssets.onBoardingSliderBg02,
+              alignment: Alignment.topRight,
+              width: w(width),
+              height: h(height),
+              color: Colors.white,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  SafeMemoryImage(
+                    bytes: imageBytes,
                     fit: BoxFit.cover,
-                  ),
-                ),
-                if (isTodayPlan)
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: Container(
-                    margin: gapOnly(top: 8, right: 8),
-                    decoration: const BoxDecoration(
-                      color: Colors.grey,
-                      shape: BoxShape.circle,
+                    fallback: Image.asset(
+                      AppAssets.onBoardingSliderBg02,
+                      fit: BoxFit.cover,
                     ),
-                    padding: gapAll(6),
-                    child: switch (mealType) {
-                      "breakfast" => SvgPicture.asset(
-                        AppAssets.breakfastSvg,
-                        color: Colors.black,
-                      ),
-                      "lunch" => SvgPicture.asset(
-                        AppAssets.lunchSvg,
-                        color: Colors.black,
-                      ),
-                      "dinner" => SvgPicture.asset(
-                        AppAssets.dinnerSvg,
-                        color: Colors.black,
-                      ),
-                      _ => const Icon(Icons.fastfood, color: Colors.white),
-                    },
                   ),
-                  ),
-              ],
+                  if (isTodayPlan)
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: Container(
+                        margin: gapOnly(top: 8, right: 8),
+                        decoration: const BoxDecoration(
+                          color: Colors.grey,
+                          shape: BoxShape.circle,
+                        ),
+                        padding: gapAll(6),
+                        child: switch (mealType) {
+                          "breakfast" => SvgPicture.asset(
+                            AppAssets.breakfastSvg,
+                            color: Colors.black,
+                          ),
+                          "lunch" => SvgPicture.asset(
+                            AppAssets.lunchSvg,
+                            color: Colors.black,
+                          ),
+                          "dinner" => SvgPicture.asset(
+                            AppAssets.dinnerSvg,
+                            color: Colors.black,
+                          ),
+                          _ => const Icon(Icons.fastfood, color: Colors.white),
+                        },
+                      ),
+                    ),
+                ],
+              ),
             ),
-          ),
           ),
           SizedBox(
             width: w(width),

@@ -69,12 +69,14 @@ class PantryRepositoryImpl implements PantryRepository {
     required String filePath,
     required String currency,
     required String country,
+    required String kitchenId,
   }) async {
     try {
       final response = await pantryRemoteDatasource.scanRecipt(
         filePath: filePath,
         currency: currency,
         country: country,
+        kitchenId: kitchenId,
       );
       devPrint("response result: ${response["items"]}");
       final itemsJson = response['items'] as List<dynamic>? ?? [];
@@ -84,7 +86,7 @@ class PantryRepositoryImpl implements PantryRepository {
       for (final Object? raw in itemsJson) {
         final Map<String, dynamic> e = jsonObjectFromResponseData(raw);
         final name = readJsonString(e, 'name');
-        final unit = readJsonString(e, 'unit', fallback: 'Unit');
+        final unit = readJsonString(e, 'unit', fallback: 'unit');
         final amount = readJsonString(e, 'amount');
         final group = readJsonString(e, 'recommended_storage');
         final expireDate = readJsonString(e, 'expiry_date');

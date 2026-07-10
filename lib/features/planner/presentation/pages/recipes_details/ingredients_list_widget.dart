@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
+import 'package:foodkitchen/core/common/units/unit_system.dart';
 
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
@@ -25,7 +26,7 @@ class IngredientsListWidget extends StatelessWidget {
             (item) => Padding(
               padding: EdgeInsets.only(bottom: h(13)),
               child: Text(
-                "${item.amount} ${item.unit} ${item.name}",
+                "${item.amount} ${unitDisplayLabel(item.unit)} ${item.name}",
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
             ),

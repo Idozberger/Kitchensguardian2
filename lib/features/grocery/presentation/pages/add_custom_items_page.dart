@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
+import 'package:foodkitchen/core/common/units/unit_system.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
@@ -202,7 +203,11 @@ class _AddCustomItemsPageState extends State<AddCustomItemsPage> {
                 label: "Units",
                 hint: "Select Units",
                 value: item.unit,
-                items: ["Kg", "Gram", "Litre", "Piece", "Milliliters"],
+                items: unitOptions(
+                  userCubit.state.unitSystem,
+                  current: item.unit,
+                ),
+                displayLabel: unitDisplayLabel,
                 onChanged: (val) => setState(() => item.unit = val),
               ),
             ),

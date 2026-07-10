@@ -152,7 +152,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                 return SafeCircleAvatar(
                                   radius: w(36),
                                   memoryBytes:
-                                      imageBytes ?? userstate.profilePictureFilePath,
+                                      imageBytes ??
+                                      userstate.profilePictureFilePath,
                                   backgroundColor: Colors.grey.shade200,
                                   fallback: Image.asset(
                                     AppAssets.avatar,

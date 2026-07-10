@@ -74,12 +74,20 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
 
     final countryCode = prefs.getString("country") ?? "USA";
     final currencyCode = prefs.getString("currency") ?? "USD";
+    final kitchenId =
+        prefs.getString("kitchen_id") ?? _userCubit.state.activeKitchenId;
+
+    if (kitchenId.isEmpty) {
+      AppToast.show("No active kitchen selected", ToastType.error);
+      return;
+    }
 
     _pantryBloc.add(
       ScanReceiptEvent(
         filePath: widget.imagePath,
         country: countryCode,
         currency: currencyCode,
+        kitchenId: kitchenId,
       ),
     );
   }

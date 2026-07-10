@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/common/cubits/user_state.dart';
+import 'package:foodkitchen/core/common/units/unit_system.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
@@ -94,7 +95,8 @@ class AddItemPantryItemForm extends StatelessWidget {
                 label: "Units",
                 hint: "Select Units",
                 value: item.unit,
-                items: const ["Kg", "Gram", "Litre", "Piece", "Milliliters"],
+                items: unitOptions(userState.unitSystem, current: item.unit),
+                displayLabel: unitDisplayLabel,
                 onChanged: (val) => updateState(() => item.unit = val),
               ),
             ),

@@ -222,6 +222,11 @@ extension _KitchenPageLayout on _KitchenPageState {
       role: kitchen.role,
     );
 
+    _userCubit.applyUnitSystemForKitchen(
+      kitchenId: kitchen.kitchenId,
+      fromKitchen: kitchen.unitSystem,
+    );
+
     AppToast.show(
       "Kitchen switched to ${kitchen.kitchenName}",
       ToastType.success,

@@ -30,10 +30,7 @@ abstract final class UserFacingErrorMapper {
     return UserFacingError(sanitizeUserVisibleMessage(message), cause: e);
   }
 
-  static UserFacingError fromFirebase(
-    Object error, [
-    StackTrace? stackTrace,
-  ]) {
+  static UserFacingError fromFirebase(Object error, [StackTrace? stackTrace]) {
     if (error is FirebaseException) {
       return UserFacingError(
         _firebaseUserMessage(error.code),
@@ -44,10 +41,7 @@ abstract final class UserFacingErrorMapper {
     return fromUnknown(error, stackTrace);
   }
 
-  static UserFacingError fromUnknown(
-    Object error, [
-    StackTrace? stackTrace,
-  ]) {
+  static UserFacingError fromUnknown(Object error, [StackTrace? stackTrace]) {
     AppLogger.recordNonFatal(error, stackTrace, reason: 'user_facing_unknown');
     return UserFacingError(
       sanitizeUserVisibleMessage(error.toString()),
@@ -72,6 +66,5 @@ abstract final class UserFacingErrorMapper {
     }
   }
 
-  static bool _looksInternal(String raw) =>
-      messageLooksUnsafeForUser(raw);
+  static bool _looksInternal(String raw) => messageLooksUnsafeForUser(raw);
 }

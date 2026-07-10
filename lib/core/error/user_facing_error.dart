@@ -6,9 +6,5 @@ class UserFacingError {
   final Object? cause;
   final StackTrace? stackTrace;
 
-  const UserFacingError(
-    this.userMessage, {
-    this.cause,
-    this.stackTrace,
-  });
+  const UserFacingError(this.userMessage, {this.cause, this.stackTrace});
 }

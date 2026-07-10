@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
+import 'package:foodkitchen/core/common/cubits/user_state.dart';
+import 'package:foodkitchen/core/common/units/unit_system.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/dialogs/delete_account_dialog.dart';
@@ -14,6 +16,7 @@ import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
+import 'package:foodkitchen/core/widgets/generic_dropdown_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 //import 'package:foodkitchen/core/widgets/generic_premium_card_widget.dart';
 import 'package:foodkitchen/features/profile/presentation/bloc/profile_bloc.dart';
@@ -45,7 +48,7 @@ class _ProfilePageState extends State<ProfilePage> {
     profileBloc.add(LoadProfilePicture());
   }
 
-/*
+  /*
   Future<void> _restoreSubscription(BuildContext context) async {
     try {
       final userCubit = context.read<UserCubit>();
@@ -174,6 +177,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                   }
                                 },
                               ),
+                              gap(height: 10),
+                              const _UnitSystemSelector(),
                             ],
                           ),
                         ),
@@ -325,6 +330,65 @@ Shared with love from KitchenGuardian
                 ),
               ),
             ),
+    );
+  }
+}
+
+/// Measurement system (Metric / Imperial) for the active kitchen — BRD UC-04.
+///
+/// The backend gates `set_unit_system` to the host, so non-hosts see the
+/// current value but get a toast instead of a write. Existing pantry, recipe
+/// and grocery data needs no client conversion: storage stays metric and the
+/// backend converts on the next read.
+class _UnitSystemSelector extends StatefulWidget {
+  const _UnitSystemSelector();
+
+  @override
+  State<_UnitSystemSelector> createState() => _UnitSystemSelectorState();
+}
+
+class _UnitSystemSelectorState extends State<_UnitSystemSelector> {
+  bool _isSaving = false;
+
+  Future<void> _onChanged(String? value) async {
+    if (value == null || _isSaving) return;
+
+    final userCubit = context.read<UserCubit>();
+    if (userCubit.state.role != "host") {
+      AppToast.show(
+        "Only the host can change the measurement system.",
+        ToastType.warning,
+      );
+      return;
+    }
+
+    setState(() => _isSaving = true);
+    final error = await userCubit.changeUnitSystemForActiveKitchen(
+      unitSystemFromApi(value),
+    );
+    if (!mounted) return;
+    setState(() => _isSaving = false);
+
+    if (error != null) {
+      AppToast.show(error, ToastType.error);
+    } else {
+      AppToast.show("Measurement system updated.", ToastType.success);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<UserCubit, UserState>(
+      buildWhen: (previous, current) =>
+          previous.unitSystem != current.unitSystem,
+      builder: (context, state) => PopupDropdownField(
+        label: "Measurement System",
+        hint: "Select system",
+        value: unitSystemToApi(state.unitSystem),
+        items: unitSystemOptions,
+        displayLabel: unitSystemDisplayLabel,
+        onChanged: _onChanged,
+      ),
     );
   }
 }

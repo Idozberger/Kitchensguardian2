@@ -27,10 +27,12 @@ final class ScanReceiptEvent extends PantryEvent {
   final String filePath;
   final String currency;
   final String country;
+  final String kitchenId;
   ScanReceiptEvent({
     required this.filePath,
     required this.country,
     required this.currency,
+    required this.kitchenId,
   });
 }
 

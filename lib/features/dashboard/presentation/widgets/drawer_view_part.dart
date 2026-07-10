@@ -9,10 +9,7 @@ Widget _appDrawerProfileSection(BuildContext context) {
           SafeCircleAvatar(
             radius: h(35),
             memoryBytes: state.profilePictureFilePath,
-            fallback: Image.asset(
-              AppAssets.avatar,
-              fit: BoxFit.cover,
-            ),
+            fallback: Image.asset(AppAssets.avatar, fit: BoxFit.cover),
           ),
           gap(height: 15),
           Text(

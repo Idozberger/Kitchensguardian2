@@ -221,13 +221,19 @@ Future<void> _onCreateKitchenEvent(
   emit(bloc.state.copyWith(isLoading: true));
 
   final res = await bloc._createKitchen(
-    CreateKitchenParams(kitchenName: event.kitchenName),
+    CreateKitchenParams(
+      kitchenName: event.kitchenName,
+      unitSystem: event.unitSystem,
+    ),
   );
 
   await res.fold(
     (failure) async {
       emit(
-        bloc.state.copyWith(isLoading: false, errorMessage: failure.userMessage),
+        bloc.state.copyWith(
+          isLoading: false,
+          errorMessage: failure.userMessage,
+        ),
       );
     },
     (kitchen) async {
@@ -236,6 +242,12 @@ Future<void> _onCreateKitchenEvent(
         activeKitchenId: kitchen.kitchenId,
         invitationCode: kitchen.invitationCode,
         role: "host",
+      );
+
+      // Seed with the system the user just picked so the first frame is right.
+      bloc._userCubit.applyUnitSystemForKitchen(
+        kitchenId: kitchen.kitchenId,
+        fromKitchen: unitSystemToApi(event.unitSystem),
       );
 
       await bloc._saveOrUpdateUserKitchen(

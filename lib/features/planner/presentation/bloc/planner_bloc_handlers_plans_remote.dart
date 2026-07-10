@@ -16,7 +16,10 @@ Future<void> _onGetAllMealPlans(
   await res.fold(
     (failure) {
       emit(
-        bloc.state.copyWith(errorMessage: failure.userMessage, loadingPlans: false),
+        bloc.state.copyWith(
+          errorMessage: failure.userMessage,
+          loadingPlans: false,
+        ),
       );
     },
     (getAllWeeklyPlans) async {
@@ -65,7 +68,10 @@ Future<void> _onGetMealByDate(
   res.fold(
     (failure) {
       emit(
-        bloc.state.copyWith(errorMessage: failure.userMessage, isLoading: false),
+        bloc.state.copyWith(
+          errorMessage: failure.userMessage,
+          isLoading: false,
+        ),
       );
     },
     (successMessage) {
@@ -95,7 +101,10 @@ Future<void> _onUpdateMealPlan(
   res.fold(
     (failure) {
       emit(
-        bloc.state.copyWith(errorMessage: failure.userMessage, isLoading: false),
+        bloc.state.copyWith(
+          errorMessage: failure.userMessage,
+          isLoading: false,
+        ),
       );
     },
     (successMessage) {
@@ -179,7 +188,10 @@ Future<void> _onCreatePlan(
       );
 
       emit(
-        bloc.state.copyWith(errorMessage: failure.userMessage, isLoading: false),
+        bloc.state.copyWith(
+          errorMessage: failure.userMessage,
+          isLoading: false,
+        ),
       );
     },
     (successMessage) async {

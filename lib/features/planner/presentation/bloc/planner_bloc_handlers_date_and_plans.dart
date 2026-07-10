@@ -57,7 +57,10 @@ Future<void> _onSetDateRange(
   res.fold(
     (failure) {
       emit(
-        bloc.state.copyWith(errorMessage: failure.userMessage, isLoading: false),
+        bloc.state.copyWith(
+          errorMessage: failure.userMessage,
+          isLoading: false,
+        ),
       );
     },
     (dateRange) {
@@ -88,7 +91,10 @@ Future<void> _onGetDateRangeEvent(
   await res.fold(
     (failure) {
       emit(
-        bloc.state.copyWith(errorMessage: failure.userMessage, isLoading: false),
+        bloc.state.copyWith(
+          errorMessage: failure.userMessage,
+          isLoading: false,
+        ),
       );
     },
     (dateRange) async {

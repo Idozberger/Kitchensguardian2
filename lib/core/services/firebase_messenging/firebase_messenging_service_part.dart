@@ -76,6 +76,7 @@ Future<void> _fcmHandlePostNavigationLogic(
     invitationCode: invitationCode,
     role: role,
   );
+  context.read<UserCubit>().applyUnitSystemForKitchen(kitchenId: kitchenId);
   await context.read<UserCubit>().setUser();
 
   context.read<ConsumptionBloc>().add(

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
+import 'package:foodkitchen/core/common/units/unit_system.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
@@ -186,6 +188,7 @@ class _DropdownsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final unitSystem = context.watch<UserCubit>().state.unitSystem;
     return Row(
       spacing: w(12),
       children: [
@@ -194,7 +197,8 @@ class _DropdownsRow extends StatelessWidget {
             label: "Units",
             hint: "Select Units",
             value: item.unit,
-            items: const ["Kg", "Gram", "Litre", "Piece", "Milliliters"],
+            items: unitOptions(unitSystem, current: item.unit),
+            displayLabel: unitDisplayLabel,
             onChanged: (val) {
               item.unit = val;
               onChanged();

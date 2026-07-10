@@ -1,3 +1,4 @@
+import 'package:foodkitchen/core/common/units/unit_system.dart';
 import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/features/kitchens/data/datasource/kitchen_remote_datasource.dart';
 import 'package:foodkitchen/features/kitchens/data/model/kitchen.dart';
@@ -27,10 +28,12 @@ class KitchenRepositoryImpl implements KitchenRepository {
   @override
   Future<Either<Failure, String>> createKitchen({
     required String kitchenName,
+    required UnitSystem unitSystem,
   }) async {
     try {
       final response = await kitchenRemoteDataSource.createKitchen(
         kitchenName: kitchenName,
+        unitSystem: unitSystem,
       );
       return right(response);
     } on Failure catch (f) {
@@ -99,6 +102,40 @@ class KitchenRepositoryImpl implements KitchenRepository {
       final response = await kitchenRemoteDataSource.inviteUser(
         kitchenId: kitchenId,
         email: email,
+      );
+      return right(response);
+    } on Failure catch (f) {
+      return Left(f);
+    } catch (e) {
+      return Left(unknownFailureFrom(e));
+    }
+  }
+
+  @override
+  Future<Either<Failure, String>> getUnitSystem({
+    required String kitchenId,
+  }) async {
+    try {
+      final response = await kitchenRemoteDataSource.getUnitSystem(
+        kitchenId: kitchenId,
+      );
+      return right(response);
+    } on Failure catch (f) {
+      return Left(f);
+    } catch (e) {
+      return Left(unknownFailureFrom(e));
+    }
+  }
+
+  @override
+  Future<Either<Failure, String>> setUnitSystem({
+    required String kitchenId,
+    required UnitSystem unitSystem,
+  }) async {
+    try {
+      final response = await kitchenRemoteDataSource.setUnitSystem(
+        kitchenId: kitchenId,
+        unitSystem: unitSystem,
       );
       return right(response);
     } on Failure catch (f) {

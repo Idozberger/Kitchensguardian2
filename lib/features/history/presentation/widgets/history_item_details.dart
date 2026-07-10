@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodkitchen/core/common/units/unit_system.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/utils/image_bytes.dart';
@@ -86,7 +87,7 @@ class HistoryDetailItem extends StatelessWidget {
                 ),
                 SizedBox(height: h(4)),
                 Text(
-                  "${item.amount} ${item.unit}",
+                  "${item.amount} ${unitDisplayLabel(item.unit)}",
                   style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                     color: const Color(0xff787878),
                     fontSize: t(14),

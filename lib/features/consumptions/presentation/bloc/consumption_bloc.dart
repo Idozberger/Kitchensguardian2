@@ -85,7 +85,9 @@ class ConsumptionBloc extends Bloc<ConsumptionEvent, ConsumptionState> {
 
     res.fold(
       (failure) {
-        emit(state.copyWith(isLoading: false, errorMessage: failure.userMessage));
+        emit(
+          state.copyWith(isLoading: false, errorMessage: failure.userMessage),
+        );
       },
       (count) {
         emit(
@@ -112,7 +114,9 @@ class ConsumptionBloc extends Bloc<ConsumptionEvent, ConsumptionState> {
 
     res.fold(
       (failure) {
-        emit(state.copyWith(isLoading: false, errorMessage: failure.userMessage));
+        emit(
+          state.copyWith(isLoading: false, errorMessage: failure.userMessage),
+        );
       },
       (pendingList) {
         emit(

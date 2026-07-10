@@ -24,6 +24,7 @@ abstract interface class PantryRemoteDatasource {
     required String filePath,
     required String currency,
     required String country,
+    required String kitchenId,
   });
   Future<String> requestItems({required PantryModel pantryModel});
   Future<String> showNotification({
@@ -69,11 +70,13 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
     required String filePath,
     required String currency,
     required String country,
+    required String kitchenId,
   }) => _pantryImplScanRecipt(
     this,
     filePath: filePath,
     currency: currency,
     country: country,
+    kitchenId: kitchenId,
   );
 
   @override

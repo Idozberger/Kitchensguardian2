@@ -3,11 +3,15 @@ part of 'package:foodkitchen/features/home/data/datasource/home_remote_datasourc
 Future<Map<String, dynamic>> _homeImplCreateKitchen(
   HomeRemoteDataSourceImpl ds, {
   required String kitchenName,
+  required UnitSystem unitSystem,
 }) async {
   try {
     final response = await ds.dio.post(
       AppConstants.createKitchen,
-      data: {"kitchen_name": kitchenName},
+      data: {
+        "kitchen_name": kitchenName,
+        "unit_system": unitSystemToApi(unitSystem),
+      },
     );
     if (response.statusCode != 200 && response.statusCode != 201) {
       final Map<String, dynamic> data = jsonObjectFromResponseData(

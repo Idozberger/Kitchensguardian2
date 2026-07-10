@@ -70,7 +70,10 @@ Future<void> _onGenerateRecipes(
   await res.fold(
     (failure) async {
       emit(
-        bloc.state.copyWith(errorMessage: failure.userMessage, isLoading: false),
+        bloc.state.copyWith(
+          errorMessage: failure.userMessage,
+          isLoading: false,
+        ),
       );
     },
     (recipes) async {
@@ -97,7 +100,10 @@ Future<void> _onAddToFavouriteRecipe(
   res.fold(
     (failure) {
       emit(
-        bloc.state.copyWith(errorMessage: failure.userMessage, isFavLoading: false),
+        bloc.state.copyWith(
+          errorMessage: failure.userMessage,
+          isFavLoading: false,
+        ),
       );
     },
     (recipes) {
@@ -122,7 +128,10 @@ Future<void> _onRemoveFromFavouriteRecipe(
   res.fold(
     (failure) {
       emit(
-        bloc.state.copyWith(errorMessage: failure.userMessage, isFavLoading: false),
+        bloc.state.copyWith(
+          errorMessage: failure.userMessage,
+          isFavLoading: false,
+        ),
       );
     },
     (recipes) {
@@ -184,7 +193,10 @@ Future<void> _onDeletePlan(
   res.fold(
     (failure) {
       emit(
-        bloc.state.copyWith(errorMessage: failure.userMessage, isLoading: false),
+        bloc.state.copyWith(
+          errorMessage: failure.userMessage,
+          isLoading: false,
+        ),
       );
     },
     (successMessage) async {

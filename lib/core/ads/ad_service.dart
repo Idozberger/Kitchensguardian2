@@ -20,9 +20,9 @@ class AdService {
   AdRequest get _request => const AdRequest();
 
   String get _interstitialAdUnitId => switch (defaultTargetPlatform) {
-        TargetPlatform.iOS => _keys.interstitialIos,
-        _ => _keys.interstitialAndroid,
-      };
+    TargetPlatform.iOS => _keys.interstitialIos,
+    _ => _keys.interstitialAndroid,
+  };
 
   Future<void> loadAndShowInterstitial({
     required BuildContext context,

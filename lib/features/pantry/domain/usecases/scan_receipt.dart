@@ -17,6 +17,7 @@ class ScanReceiptUseCase
       filePath: params.filePath,
       currency: params.currency,
       country: params.country,
+      kitchenId: params.kitchenId,
     );
   }
 }
@@ -25,10 +26,12 @@ class ScanReceiptUseCaseParams {
   final String filePath;
   final String currency;
   final String country;
+  final String kitchenId;
 
   ScanReceiptUseCaseParams({
     required this.filePath,
     required this.currency,
     required this.country,
+    required this.kitchenId,
   });
 }

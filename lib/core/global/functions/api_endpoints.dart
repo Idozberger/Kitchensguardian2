@@ -14,6 +14,9 @@ class AppConstants {
   static const String createKitchen = "/api/kitchen/create";
   static const String joinKitchen = "/api/kitchen/join_with_code";
   static const String kitchens = "/api/kitchen/list_user_kitchens";
+  static const String getUnitSystem = "/api/kitchen/get_unit_system";
+  // Host-only write; wired for KG-6 (unit selector UI) — not called by KG-7/KG-8.
+  static const String setUnitSystem = "/api/kitchen/set_unit_system";
   static const String leaveKitchen = "/api/kitchen/leave";
   static const String getMembers = "/api/kitchen/get_members";
   static const String makeCohost = "/api/kitchen/make_cohost";

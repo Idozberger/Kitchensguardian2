@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:foodkitchen/core/common/units/unit_system.dart';
 import 'package:foodkitchen/features/kitchens/domain/entities/kitchen.dart';
 
 abstract class KitchenEvent extends Equatable {
@@ -30,7 +31,17 @@ class RemoveKitchenEvent extends KitchenEvent {
 
 class CreateKitchenEvent extends KitchenEvent {
   final String kitchenName;
-  const CreateKitchenEvent(this.kitchenName);
+
+  /// Measurement system picked in the create dialog (BRD UC-03).
+  final UnitSystem unitSystem;
+
+  const CreateKitchenEvent(
+    this.kitchenName, {
+    this.unitSystem = UnitSystem.metric,
+  });
+
+  @override
+  List<Object?> get props => [kitchenName, unitSystem];
 }
 
 class JoinKitchenEvent extends KitchenEvent {

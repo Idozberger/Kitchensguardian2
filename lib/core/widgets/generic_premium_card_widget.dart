@@ -5,6 +5,7 @@ import 'package:foodkitchen/core/navigation/paywall_navigation.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
+
 class PremiumCardWidget extends StatelessWidget {
   final String titleLine1;
   final String titleLine2;

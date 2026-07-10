@@ -34,29 +34,29 @@ class HeaderImageWidget extends StatelessWidget {
           return ClipRRect(
             borderRadius: BorderRadius.circular(h(10)),
             child: SizedBox(
-            height: h(154),
-            width: double.infinity,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                SafeMemoryImage(
-                  bytes: thumbnailBytes,
-                  fit: BoxFit.cover,
-                  fallback: Image.asset(
-                    AppAssets.onBoardingSliderBg02,
+              height: h(154),
+              width: double.infinity,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  SafeMemoryImage(
+                    bytes: thumbnailBytes,
                     fit: BoxFit.cover,
+                    fallback: Image.asset(
+                      AppAssets.onBoardingSliderBg02,
+                      fit: BoxFit.cover,
+                    ),
                   ),
-                ),
-                Padding(
-                  padding: gapAll(15),
-                  child: Align(
-                    alignment: Alignment.topRight,
-                    child: _buildFavoriteButton(state),
+                  Padding(
+                    padding: gapAll(15),
+                    child: Align(
+                      alignment: Alignment.topRight,
+                      child: _buildFavoriteButton(state),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
           );
         },
       ),

@@ -2,11 +2,15 @@ import 'dart:typed_data';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/data/datasource/common_remote_datasource.dart';
+import 'package:foodkitchen/core/common/data/datasource/unit_system_local_datasource.dart';
 import 'package:foodkitchen/core/common/data/model/pantries_model.dart';
 import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/core/common/entitlement/user_entitlement_snapshot.dart';
+import 'package:foodkitchen/core/common/units/unit_system.dart';
 import 'package:foodkitchen/core/utils/dev_logging.dart';
 import 'package:foodkitchen/features/auth/data/model/user_model.dart';
+import 'package:foodkitchen/features/kitchens/domain/usecases/get_unit_system.dart';
+import 'package:foodkitchen/features/kitchens/domain/usecases/set_unit_system.dart';
 
 import 'user_state.dart';
 
@@ -14,12 +18,21 @@ class UserCubit extends Cubit<UserState> {
   UserCubit({
     required CommonRemoteDatasource commonRemoteDatasource,
     required UserEntitlementSnapshot entitlementSnapshot,
+    required UnitSystemLocalDataSource unitSystemLocalDataSource,
+    required GetUnitSystem getUnitSystem,
+    required SetUnitSystem setUnitSystem,
   }) : _commonRemoteDatasource = commonRemoteDatasource,
        _entitlementSnapshot = entitlementSnapshot,
+       _unitSystemLocalDataSource = unitSystemLocalDataSource,
+       _getUnitSystem = getUnitSystem,
+       _setUnitSystem = setUnitSystem,
        super(const UserState());
 
   final CommonRemoteDatasource _commonRemoteDatasource;
   final UserEntitlementSnapshot _entitlementSnapshot;
+  final UnitSystemLocalDataSource _unitSystemLocalDataSource;
+  final GetUnitSystem _getUnitSystem;
+  final SetUnitSystem _setUnitSystem;
 
   bool _backendProfileEntitlement = false;
   bool _manualPremiumDev = false;
@@ -105,6 +118,89 @@ class UserCubit extends Cubit<UserState> {
         role: role,
         profilePictureFilePath: avatarBytes,
       ),
+    );
+  }
+
+  /// Resolves and applies the active kitchen's measurement system (KG-7/KG-8).
+  ///
+  /// 1. Synchronously seeds from [fromKitchen] (the `unit_system` carried by a
+  ///    kitchen switch) or the local cache, so dropdowns are correct on the
+  ///    first frame — even offline / before any network call.
+  /// 2. Persists the resolved value to the per-kitchen cache.
+  /// 3. Refreshes from the backend (authoritative; catches changes made on
+  ///    another device via KG-6), updating state + cache if it differs.
+  Future<void> applyUnitSystemForKitchen({
+    required String kitchenId,
+    String? fromKitchen,
+  }) async {
+    if (kitchenId.isEmpty) return;
+
+    final cached = _unitSystemLocalDataSource.read(kitchenId: kitchenId);
+    final seed = (fromKitchen != null && fromKitchen.trim().isNotEmpty)
+        ? fromKitchen
+        : cached;
+
+    if (seed != null && seed.trim().isNotEmpty) {
+      final system = unitSystemFromApi(seed);
+      if (!isClosed) emit(state.copyWith(unitSystem: system));
+      await _unitSystemLocalDataSource.cache(
+        kitchenId: kitchenId,
+        unitSystem: unitSystemToApi(system),
+      );
+    }
+
+    final result = await _getUnitSystem(
+      GetUnitSystemParams(kitchenId: kitchenId),
+    );
+    await result.match(
+      (failure) async => devLog('getUnitSystem failed: $failure'),
+      (value) async {
+        final system = unitSystemFromApi(value);
+        await _unitSystemLocalDataSource.cache(
+          kitchenId: kitchenId,
+          unitSystem: unitSystemToApi(system),
+        );
+        // Only reflect if this is still the active kitchen.
+        if (!isClosed && state.activeKitchenId == kitchenId) {
+          emit(state.copyWith(unitSystem: system));
+        }
+      },
+    );
+  }
+
+  /// Changes the active kitchen's measurement system (BRD UC-04, host only).
+  ///
+  /// Persists to the backend first; only on success does it emit + cache, so a
+  /// rejected write (e.g. non-host) never leaves the UI showing a system the
+  /// backend did not accept. Storage stays metric — existing pantry, recipe and
+  /// grocery values surface in the new system on the next read.
+  ///
+  /// Returns `null` on success, or the user-facing error message on failure.
+  Future<String?> changeUnitSystemForActiveKitchen(UnitSystem system) async {
+    final kitchenId = state.activeKitchenId;
+    if (kitchenId.isEmpty) return 'No active kitchen.';
+    if (state.unitSystem == system) return null;
+
+    final result = await _setUnitSystem(
+      SetUnitSystemParams(kitchenId: kitchenId, unitSystem: system),
+    );
+
+    return result.match(
+      (failure) {
+        devLog('setUnitSystem failed: $failure');
+        return failure.userMessage;
+      },
+      (value) {
+        final applied = unitSystemFromApi(value);
+        _unitSystemLocalDataSource.cache(
+          kitchenId: kitchenId,
+          unitSystem: unitSystemToApi(applied),
+        );
+        if (!isClosed && state.activeKitchenId == kitchenId) {
+          emit(state.copyWith(unitSystem: applied));
+        }
+        return null;
+      },
     );
   }
 

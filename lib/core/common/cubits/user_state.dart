@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantries_entity.dart';
 import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
+import 'package:foodkitchen/core/common/units/unit_system.dart';
 import 'package:foodkitchen/features/auth/data/model/user_model.dart';
 
 class UserState {
@@ -22,6 +23,10 @@ class UserState {
   final List<PantriesCommonEntity> userStorageAreas;
   final UserModel? userModel;
 
+  /// Active kitchen's measurement system (KG-7/KG-8). Defaults to metric —
+  /// the backend default — until a kitchen's `unit_system` is resolved.
+  final UnitSystem unitSystem;
+
   const UserState({
     this.kitchenName = "",
     this.firstName = '',
@@ -40,6 +45,7 @@ class UserState {
     this.doneSteps = const [],
     this.userStorageAreas = const [],
     this.userModel,
+    this.unitSystem = UnitSystem.metric,
   });
 
   UserState copyWith({
@@ -60,6 +66,7 @@ class UserState {
     List<List<Map<String, dynamic>>>? doneSteps,
     List<PantriesCommonEntity>? userStorageAreas,
     UserModel? userModel,
+    UnitSystem? unitSystem,
   }) {
     return UserState(
       firstName: firstName ?? this.firstName,
@@ -80,6 +87,7 @@ class UserState {
       doneSteps: doneSteps ?? this.doneSteps,
       userStorageAreas: userStorageAreas ?? this.userStorageAreas,
       userModel: userModel ?? this.userModel,
+      unitSystem: unitSystem ?? this.unitSystem,
     );
   }
 }

@@ -96,12 +96,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AppleSignUpLoading());
     final res = await _appleSignUpUsecase(NoParams());
 
-    res.fold((failure) {
-      _clearSocialSignUpUserModel();
-      emit(AuthFailure(failure.userMessage));
-    }, (message) {
-      emit(AuthUserCreatedSuccess(message));
-    });
+    res.fold(
+      (failure) {
+        _clearSocialSignUpUserModel();
+        emit(AuthFailure(failure.userMessage));
+      },
+      (message) {
+        emit(AuthUserCreatedSuccess(message));
+      },
+    );
   }
 
   Future<void> _onGoogleSignUp(
@@ -111,12 +114,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(GoogleAuthsignUpLoading());
     final res = await _googleSignupUsecase(NoParams());
 
-    res.fold((failure) {
-      _clearSocialSignUpUserModel();
-      emit(AuthFailure(failure.userMessage));
-    }, (message) {
-      emit(AuthUserCreatedSuccess(message));
-    });
+    res.fold(
+      (failure) {
+        _clearSocialSignUpUserModel();
+        emit(AuthFailure(failure.userMessage));
+      },
+      (message) {
+        emit(AuthUserCreatedSuccess(message));
+      },
+    );
   }
 
   Future<void> _onAppleSignIn(
@@ -126,13 +132,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AppleSignInLoading());
     final res = await _appleSignInUsecase(NoParams());
 
-    res.fold((failure) {
-      _clearSocialSignUpUserModel();
-      emit(AuthFailure(failure.userMessage));
-    }, (message) {
-      emit(AuthSuccess(message));
-      onGetCurrentUser(AuthGetCurrentUser(), emit);
-    });
+    res.fold(
+      (failure) {
+        _clearSocialSignUpUserModel();
+        emit(AuthFailure(failure.userMessage));
+      },
+      (message) {
+        emit(AuthSuccess(message));
+        onGetCurrentUser(AuthGetCurrentUser(), emit);
+      },
+    );
   }
 
   Future<void> _onGoogleSignIn(
@@ -142,13 +151,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(GoogleAuthLoading());
     final res = await _googleSignInUsecase(NoParams());
 
-    res.fold((failure) {
-      _clearSocialSignUpUserModel();
-      emit(AuthFailure(failure.userMessage));
-    }, (message) {
-      emit(AuthSuccess(message));
-      onGetCurrentUser(AuthGetCurrentUser(), emit);
-    });
+    res.fold(
+      (failure) {
+        _clearSocialSignUpUserModel();
+        emit(AuthFailure(failure.userMessage));
+      },
+      (message) {
+        emit(AuthSuccess(message));
+        onGetCurrentUser(AuthGetCurrentUser(), emit);
+      },
+    );
   }
 
   Future<void> _onAuthSignUp(AuthSignUp event, Emitter<AuthState> emit) async {
@@ -279,10 +291,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   void _clearSocialSignUpUserModel() {
-    _userCubit.setGoogleSignUpUserModel(
-      firstName: "",
-      lastName: "",
-      email: "",
-    );
+    _userCubit.setGoogleSignUpUserModel(firstName: "", lastName: "", email: "");
   }
 }

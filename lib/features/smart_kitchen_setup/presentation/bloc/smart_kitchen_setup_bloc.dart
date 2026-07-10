@@ -47,7 +47,9 @@ class SmartKitchenSetupBloc
 
     await result.fold(
       (failure) {
-        emit(state.copyWith(errorMessage: failure.userMessage, isSkipping: false));
+        emit(
+          state.copyWith(errorMessage: failure.userMessage, isSkipping: false),
+        );
       },
       (successMessage) async {
         await _userCubit.getUserStorageArea(kitchenId: event.kitchenId);
@@ -66,7 +68,9 @@ class SmartKitchenSetupBloc
 
     await result.fold(
       (failure) {
-        emit(state.copyWith(errorMessage: failure.userMessage, isSkipping: false));
+        emit(
+          state.copyWith(errorMessage: failure.userMessage, isSkipping: false),
+        );
       },
       (successMessage) async {
         await _userCubit.getUserStorageArea(kitchenId: event.kitchenId);

@@ -7,10 +7,7 @@ import 'package:go_router/go_router.dart';
 /// Pops the current route when the stack allows it; otherwise [go]es to
 /// [fallbackLocation]. Uses [GoRouter.maybeOf] so missing router ancestry
 /// does not throw (e.g. error overlays or root-only routes).
-void popOrGo(
-  BuildContext context, {
-  String fallbackLocation = Routes.splash,
-}) {
+void popOrGo(BuildContext context, {String fallbackLocation = Routes.splash}) {
   final router = _resolveRouter(context);
   if (router != null) {
     if (router.canPop()) {

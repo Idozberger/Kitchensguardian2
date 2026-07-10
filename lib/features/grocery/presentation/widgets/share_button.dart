@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/common/domain/entities/requested_item.dart';
+import 'package:foodkitchen/core/common/units/unit_system.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -48,7 +49,7 @@ class ShareButton extends StatelessWidget {
   }
 
   String _formatListItem(int index, RequestedItemEntity item) {
-    return "$index️⃣  ${item.name}\n     Quantity: ${item.quantity} ${item.unit}";
+    return "$index️⃣  ${item.name}\n     Quantity: ${item.quantity} ${unitDisplayLabel(item.unit)}";
   }
 
   String _formatListWithBorders(String itemsList) {

@@ -20,6 +20,7 @@ abstract interface class PantryRepository {
     required String filePath,
     required String currency,
     required String country,
+    required String kitchenId,
   });
 
   Future<Either<Failure, String>> requestItems({required Pantry pantry});

@@ -104,6 +104,10 @@ class KitchenList extends StatelessWidget {
       invitationCode: kitchen.invitationCode,
       role: kitchen.role,
     );
+    userCubit.applyUnitSystemForKitchen(
+      kitchenId: kitchen.kitchenId,
+      fromKitchen: kitchen.unitSystem,
+    );
     kitchenBloc.add(SwitchKitchenEvent(kitchen));
     await userCubit.getUserStorageArea(kitchenId: kitchen.kitchenId);
 

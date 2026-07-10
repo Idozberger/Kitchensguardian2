@@ -79,7 +79,7 @@ extension _DashboardPageChrome on _DashboardPageState {
     );
   }
 
-/*
+  /*
   Widget buildDashboardSwitchPremiumButton(BuildContext context) {
     final isPremium = context.watch<UserCubit>().state.isPremiumUser;
 

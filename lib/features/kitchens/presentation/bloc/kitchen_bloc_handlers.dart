@@ -41,7 +41,10 @@ Future<void> _onCreateKitchenEvent(
 ) async {
   emit(KitchensLoading());
   final res = await bloc._createKitchen(
-    CreateKitchenParams(kitchenName: event.kitchenName),
+    CreateKitchenParams(
+      kitchenName: event.kitchenName,
+      unitSystem: event.unitSystem,
+    ),
   );
 
   res.fold((failure) => emit(KitchenFailure(failure.userMessage)), (message) {

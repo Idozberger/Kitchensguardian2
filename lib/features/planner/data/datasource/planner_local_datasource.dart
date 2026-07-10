@@ -19,10 +19,7 @@ abstract interface class PlannerLocalDatasource {
 }
 
 class PlannerLocalDatasourceImpl implements PlannerLocalDatasource {
-  PlannerLocalDatasourceImpl(
-    this.sharedPreferences,
-    this._entitlementSnapshot,
-  );
+  PlannerLocalDatasourceImpl(this.sharedPreferences, this._entitlementSnapshot);
 
   final SharedPreferences sharedPreferences;
   final UserEntitlementSnapshot _entitlementSnapshot;

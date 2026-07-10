@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/domain/entities/requested_item.dart';
+import 'package:foodkitchen/core/common/units/unit_system.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
@@ -124,7 +125,7 @@ class _SmartCartPageState extends State<SmartCartPage> {
                         style: Theme.of(context).textTheme.headlineLarge,
                       ),
                       Text(
-                        ingredient.unit,
+                        unitDisplayLabel(ingredient.unit),
                         style: Theme.of(context).textTheme.headlineSmall,
                       ),
                     ],
@@ -203,10 +204,10 @@ class _SmartCartPageState extends State<SmartCartPage> {
 
       if (qty > 1) {
         result +=
-            "• $qty × ${ingredient.quantity} ${ingredient.unit} ${ingredient.name}\n";
+            "• $qty × ${ingredient.quantity} ${unitDisplayLabel(ingredient.unit)} ${ingredient.name}\n";
       } else {
         result +=
-            "• ${ingredient.quantity} ${ingredient.unit} ${ingredient.name}\n";
+            "• ${ingredient.quantity} ${unitDisplayLabel(ingredient.unit)} ${ingredient.name}\n";
       }
     }
 
@@ -226,10 +227,10 @@ class _SmartCartPageState extends State<SmartCartPage> {
 
       if (qty > 1) {
         result +=
-            "• $qty × ${ingredient.quantity} ${ingredient.unit} ${ingredient.name}\n";
+            "• $qty × ${ingredient.quantity} ${unitDisplayLabel(ingredient.unit)} ${ingredient.name}\n";
       } else {
         result +=
-            "• ${ingredient.quantity} ${ingredient.unit} ${ingredient.name}\n";
+            "• ${ingredient.quantity} ${unitDisplayLabel(ingredient.unit)} ${ingredient.name}\n";
       }
     }
 

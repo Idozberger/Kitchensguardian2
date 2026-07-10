@@ -7,9 +7,11 @@ import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/utils/date_format_to_string.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_recipe_is_under_progress_widget.dart';
+import 'package:foodkitchen/core/widgets/unit_system_change_listener.dart';
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_bloc.dart';
 import 'package:foodkitchen/features/grocery/presentation/bloc/grocery_event.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
+import 'package:foodkitchen/features/home/presentation/bloc/home_event.dart';
 import 'package:foodkitchen/features/home/presentation/bloc/home_state.dart';
 import 'package:foodkitchen/features/home/presentation/pages/kitchen_home_view.dart';
 import 'package:foodkitchen/features/home/presentation/widgets/Low_stock_and_expiry_banner.dart';
@@ -34,29 +36,45 @@ class _HomePageState extends State<HomePage> {
     _groceryBloc = context.read<GroceryBloc>();
   }
 
+  /// Re-fetches the unit-bearing home data after the measurement system
+  /// changes (BRD UC-04). AI-generated suggestions are left alone — they are
+  /// regenerated on demand, not on a preference toggle.
+  void _reloadForUnitSystem() {
+    final kitchenId = _userCubit.state.activeKitchenId;
+    if (kitchenId.isEmpty) return;
+
+    context.read<HomeBloc>()
+      ..add(GetPantriesItemsEventForHome(kitchenId: kitchenId))
+      ..add(GetAllRequestedItemsEvent(kitchenId: kitchenId));
+    _groceryBloc.add(RequestedGroceryEvent(kitchenId: kitchenId));
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF9F9F9),
-      body: BlocListener<HomeBloc, HomeState>(
-        listenWhen: (prev, curr) =>
-            prev.successMessage != curr.successMessage ||
-            prev.errorMessage != curr.errorMessage,
-        listener: (_, state) => _handleToastMessage(state),
-        child: BlocBuilder<UserCubit, UserState>(
-          builder: (context, userState) {
-            final hasKitchen = userState.activeKitchenId.isNotEmpty;
+    return UnitSystemChangeListener(
+      onChanged: _reloadForUnitSystem,
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF9F9F9),
+        body: BlocListener<HomeBloc, HomeState>(
+          listenWhen: (prev, curr) =>
+              prev.successMessage != curr.successMessage ||
+              prev.errorMessage != curr.errorMessage,
+          listener: (_, state) => _handleToastMessage(state),
+          child: BlocBuilder<UserCubit, UserState>(
+            builder: (context, userState) {
+              final hasKitchen = userState.activeKitchenId.isNotEmpty;
 
-            return BlocBuilder<HomeBloc, HomeState>(
-              builder: (context, homeState) {
-                return _buildBody(
-                  userState: userState,
-                  homeState: homeState,
-                  hasKitchen: hasKitchen,
-                );
-              },
-            );
-          },
+              return BlocBuilder<HomeBloc, HomeState>(
+                builder: (context, homeState) {
+                  return _buildBody(
+                    userState: userState,
+                    homeState: homeState,
+                    hasKitchen: hasKitchen,
+                  );
+                },
+              );
+            },
+          ),
         ),
       ),
     );

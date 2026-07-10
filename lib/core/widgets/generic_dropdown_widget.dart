@@ -11,6 +11,11 @@ class PopupDropdownField extends StatefulWidget {
   final String? hint;
   final ValueChanged<String?> onChanged;
 
+  /// Optional presentational transform for option/selected labels (e.g. show
+  /// the discrete unit "unit" as "Unit"). The underlying value passed to
+  /// [onChanged] and used for storage is never changed.
+  final String Function(String value)? displayLabel;
+
   const PopupDropdownField({
     super.key,
     required this.label,
@@ -18,6 +23,7 @@ class PopupDropdownField extends StatefulWidget {
     required this.onChanged,
     this.value,
     this.hint,
+    this.displayLabel,
   });
 
   @override
@@ -89,7 +95,11 @@ class _PopupDropdownFieldState extends State<PopupDropdownField> {
                       shrinkWrap: true,
                       itemBuilder: (context, index) {
                         final option = widget.items[index];
-                        final isSelected = widget.value == option;
+                        final label =
+                            widget.displayLabel?.call(option) ?? option;
+                        final isSelected = widget.displayLabel != null
+                            ? widget.displayLabel!(widget.value ?? '') == label
+                            : widget.value == option;
 
                         return InkWell(
                           onTap: () {
@@ -106,7 +116,7 @@ class _PopupDropdownFieldState extends State<PopupDropdownField> {
                               children: [
                                 Expanded(
                                   child: Text(
-                                    option,
+                                    label,
                                     style: Theme.of(context)
                                         .textTheme
                                         .headlineMedium
@@ -178,7 +188,10 @@ class _PopupDropdownFieldState extends State<PopupDropdownField> {
                 children: [
                   Expanded(
                     child: Text(
-                      widget.value ?? widget.hint ?? "",
+                      widget.value != null
+                          ? (widget.displayLabel?.call(widget.value!) ??
+                                widget.value!)
+                          : (widget.hint ?? ""),
                       style: Theme.of(context).textTheme.headlineLarge
                           ?.copyWith(
                             color: AppColors.apptextFieldStyleTextColor,

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
+import 'package:foodkitchen/core/common/units/unit_system.dart';
 import 'package:foodkitchen/core/dialogs/generic_dialog.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
@@ -56,8 +58,6 @@ class _EditItemDialog extends StatefulWidget {
 }
 
 class _EditItemDialogState extends State<_EditItemDialog> {
-  static const _unitOptions = ["Kg", "Gram", "Litre", "Piece", "Milliliters"];
-
   late String _selectedUnit;
 
   @override
@@ -134,7 +134,11 @@ class _EditItemDialogState extends State<_EditItemDialog> {
                       label: "Units",
                       hint: "Select Units",
                       value: _selectedUnit,
-                      items: _unitOptions,
+                      items: unitOptions(
+                        context.read<UserCubit>().state.unitSystem,
+                        current: _selectedUnit,
+                      ),
+                      displayLabel: unitDisplayLabel,
                       onChanged: (val) =>
                           setState(() => _selectedUnit = val ?? _selectedUnit),
                     ),

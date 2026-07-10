@@ -47,7 +47,7 @@ extension _ConsumptionConfirmationCardLayout on ConsumptionConfirmationCard {
       spacing: w(8),
       children: [
         Text(
-          "$quantity $unit",
+          "$quantity ${unitDisplayLabel(unit)}",
           style: Theme.of(
             context,
           ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w500),

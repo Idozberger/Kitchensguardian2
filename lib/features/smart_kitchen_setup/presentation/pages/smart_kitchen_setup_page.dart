@@ -181,9 +181,9 @@ class _SmartKitchenSetupPageState extends State<SmartKitchenSetupPage> {
                 child: Text(
                   "You can always do this later in the app",
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.greyColor,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: AppColors.greyColor),
                 ),
               ),
             ],
