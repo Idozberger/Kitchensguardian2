@@ -240,7 +240,9 @@ extension _KitchenPageLayout on _KitchenPageState {
 
     await _userCubit.getUserStorageArea(kitchenId: kitchen.kitchenId);
 
-    if (_userCubit.state.userStorageAreas.isEmpty) {
+    // Only host/co-host can run the fridge-scan setup; a plain member stays
+    // where they are even if the kitchen has no storage areas yet.
+    if (_userCubit.state.userStorageAreas.isEmpty && kitchen.role != "member") {
       router.goNamed(Routes.smartKitchenSetup, extra: false);
     }
   }

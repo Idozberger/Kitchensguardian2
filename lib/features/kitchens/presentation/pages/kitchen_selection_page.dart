@@ -89,7 +89,17 @@ class _KitchenSelectionPageState extends State<KitchenSelectionPage> {
           if (state is OpenKitchen) {
             kitchenBloc.add(FetchKitchens());
             devLog("Storage area: ${userCubit.state.userStorageAreas}");
-            if (userCubit.state.userStorageAreas.isNotEmpty) {
+            // First kitchen chosen (created or joined) — now the onboarding
+            // feature carousel runs, which itself routes to the fridge scan
+            // or the dashboard afterwards.
+            if (!userCubit.state.onboardingCompleted) {
+              context.go(Routes.introAppFeatures);
+              return;
+            }
+            // Only host/co-host can run the fridge-scan setup; a plain member
+            // who joined a not-yet-scanned kitchen goes to the dashboard.
+            final bool isMember = userCubit.state.role == "member";
+            if (userCubit.state.userStorageAreas.isNotEmpty || isMember) {
               context.goNamed(
                 Routes.dashboard,
                 extra: {

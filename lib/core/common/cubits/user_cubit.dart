@@ -80,9 +80,25 @@ class UserCubit extends Cubit<UserState> {
         email: response['email'] as String?,
         userId: response['user_id'] as String?,
         profilePictureFilePath: avatarBytes,
+        // Missing key (e.g. profile fetch failed) keeps the fail-safe default
+        // of true so the intro carousel is never re-shown by mistake.
+        onboardingCompleted:
+            (response['onboarding_completed'] as bool?) ?? true,
       ),
     );
     _recomputePremiumAccess();
+  }
+
+  /// Marks the post-signup intro flow as completed — optimistically in state,
+  /// then persisted on the backend so it survives re-login and other devices.
+  Future<void> completeOnboarding() async {
+    if (state.onboardingCompleted) return;
+    emit(state.copyWith(onboardingCompleted: true));
+    try {
+      await _commonRemoteDatasource.completeOnboarding();
+    } catch (e) {
+      devLog('completeOnboarding failed: $e');
+    }
   }
 
   void _recomputePremiumAccess() {

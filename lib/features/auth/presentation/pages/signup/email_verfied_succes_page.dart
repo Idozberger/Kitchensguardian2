@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/config/routes.dart';
+import 'package:foodkitchen/core/services/di/service_locator.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/features/auth/presentation/blocs/auth_bloc.dart';
 import 'package:foodkitchen/features/auth/presentation/widgets/success_page_widget.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class EmailVerifiedSuccessPage extends StatelessWidget {
   const EmailVerifiedSuccessPage({super.key});
@@ -20,8 +22,16 @@ class EmailVerifiedSuccessPage extends StatelessWidget {
 
   void _handleStateChange(BuildContext context, AuthState state) {
     if (state is FetchedUserDetails) {
-      // New user: show the feature onboarding (screens 2–4) before setup.
-      context.go(Routes.introAppFeatures);
+      // New user goes straight to the kitchen selection screen (create or
+      // join); the feature onboarding runs only after that choice.
+      final prefs = sl<SharedPreferences>();
+      final country = prefs.getString('country');
+      final currency = prefs.getString('currency');
+      if (country == null || currency == null) {
+        context.goNamed(Routes.countryAndCurrencySetup, extra: false);
+      } else {
+        context.go(Routes.kitchenSelection);
+      }
     }
 
     if (state is ErrorFetchingUserDetails) {

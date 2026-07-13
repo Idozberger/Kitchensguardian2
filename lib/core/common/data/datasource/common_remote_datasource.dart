@@ -13,6 +13,7 @@ abstract interface class CommonRemoteDatasource {
     required String kitchenId,
   });
   Future<Map<String, dynamic>> getProfileData();
+  Future<void> completeOnboarding();
 }
 
 class CommonRemoteDatasourceImpl implements CommonRemoteDatasource {
@@ -115,10 +116,32 @@ class CommonRemoteDatasourceImpl implements CommonRemoteDatasource {
         'verified': data['verified'] ?? false,
         'created_at': data['created_at'] ?? '',
         'entitlement_is_active': data['entitlement_is_active'] == true,
+        // Nullable on purpose: an old backend without this field must not be
+        // read as "onboarding not completed".
+        'onboarding_completed': data['onboarding_completed'] as bool?,
       };
     } catch (e, s) {
       devLog('getProfileData error: $e\n$s');
       return {};
+    }
+  }
+
+  @override
+  Future<void> completeOnboarding() async {
+    try {
+      final response = await dio.post(AppConstants.completeOnboarding);
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final Map<String, dynamic> errBody = jsonObjectFromResponseData(
+          response.data,
+        );
+        throw apiExceptionFrom(errBody['error'] ?? 'Unknown error occurred');
+      }
+
+      // Cached profile still carries the old flag — drop it.
+      profileCache.invalidate();
+    } on DioException catch (e) {
+      throw await dio.handleError(e);
     }
   }
 }

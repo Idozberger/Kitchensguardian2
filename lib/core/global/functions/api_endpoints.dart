@@ -72,6 +72,7 @@ class AppConstants {
   static const String getDateRange = "/api/kitchen/get_date_range";
   static const String setDateRange = "/api/kitchen/set_date_range";
   static const String getUserProfile = "/api/get_user_profile";
+  static const String completeOnboarding = "/api/complete_onboarding";
   static const String subscriptionPlans = "/api/subscription/plans";
   static const String subscriptionSubscribe = "/api/subscription/subscribe";
   static const String subscriptionRestore = "/api/subscription/restore";

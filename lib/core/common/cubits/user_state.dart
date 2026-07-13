@@ -23,6 +23,11 @@ class UserState {
   final List<PantriesCommonEntity> userStorageAreas;
   final UserModel? userModel;
 
+  /// Whether the user has finished the post-signup intro flow (feature
+  /// carousel). Defaults to true so the carousel is never shown before the
+  /// profile has loaded; the backend flag is authoritative.
+  final bool onboardingCompleted;
+
   /// Active kitchen's measurement system (KG-7/KG-8). Defaults to metric —
   /// the backend default — until a kitchen's `unit_system` is resolved.
   final UnitSystem unitSystem;
@@ -45,6 +50,7 @@ class UserState {
     this.doneSteps = const [],
     this.userStorageAreas = const [],
     this.userModel,
+    this.onboardingCompleted = true,
     this.unitSystem = UnitSystem.metric,
   });
 
@@ -66,6 +72,7 @@ class UserState {
     List<List<Map<String, dynamic>>>? doneSteps,
     List<PantriesCommonEntity>? userStorageAreas,
     UserModel? userModel,
+    bool? onboardingCompleted,
     UnitSystem? unitSystem,
   }) {
     return UserState(
@@ -87,6 +94,7 @@ class UserState {
       doneSteps: doneSteps ?? this.doneSteps,
       userStorageAreas: userStorageAreas ?? this.userStorageAreas,
       userModel: userModel ?? this.userModel,
+      onboardingCompleted: onboardingCompleted ?? this.onboardingCompleted,
       unitSystem: unitSystem ?? this.unitSystem,
     );
   }
