@@ -1,7 +1,7 @@
 name: foodkitchen
 description: "Kitchens Guardian"
 publish_to: 'none'
-version: 1.0.0+18
+version: 1.0.3+20
 
 environment:
   sdk: ^3.8.1
