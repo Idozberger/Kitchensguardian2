@@ -16,6 +16,10 @@ class OnboardingColors {
   static const Color bodyMuted = Color(0xFF4A4A4A);
   static const Color dotActive = Color(0xFFF08200);
   static const Color dotInactive = Color(0xFFF7D0A1);
+
+  /// Orange gradient of the "Scan Your Products" onboarding screen.
+  static const Color scanGradientTop = Color(0xFFF9A825);
+  static const Color scanGradientBottom = Color(0xFFF57F17);
 }
 
 /// A single run of onboarding title text: [text] rendered dark or [accent].
@@ -31,7 +35,10 @@ class OnboardingTitleSpan {
 class OnboardingTitle extends StatelessWidget {
   final List<OnboardingTitleSpan> spans;
 
-  const OnboardingTitle(this.spans, {super.key});
+  /// Color of non-accent spans; defaults to [OnboardingColors.titleDark].
+  final Color? color;
+
+  const OnboardingTitle(this.spans, {super.key, this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +57,7 @@ class OnboardingTitle extends StatelessWidget {
               style: baseStyle.copyWith(
                 color: span.accent
                     ? OnboardingColors.accent
-                    : OnboardingColors.titleDark,
+                    : (color ?? OnboardingColors.titleDark),
               ),
             ),
         ],
@@ -60,16 +67,22 @@ class OnboardingTitle extends StatelessWidget {
   }
 }
 
-/// Cream background with the faint decorative food-icon pattern from the design.
+/// Cream background with the faint decorative food-icon pattern from the
+/// design. Pass [gradient] to replace the flat cream fill (e.g. the orange
+/// gradient of the scan screen) while keeping the pattern overlay.
 class OnboardingBackground extends StatelessWidget {
   final Widget child;
+  final Gradient? gradient;
 
-  const OnboardingBackground({super.key, required this.child});
+  const OnboardingBackground({super.key, required this.child, this.gradient});
 
   @override
   Widget build(BuildContext context) {
-    return ColoredBox(
-      color: OnboardingColors.background,
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: gradient == null ? OnboardingColors.background : null,
+        gradient: gradient,
+      ),
       child: Stack(
         children: [
           Positioned.fill(

@@ -1,23 +1,20 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
-import 'package:foodkitchen/core/services/di/service_locator.dart';
-import 'package:foodkitchen/core/utils/show_toast.dart';
-import 'package:foodkitchen/features/home/presentation/bloc/home_bloc.dart';
-import 'package:foodkitchen/features/home/presentation/bloc/home_event.dart';
-import 'package:foodkitchen/features/home/presentation/bloc/home_state.dart';
 import 'package:foodkitchen/features/onboarding/presentation/widgets/onboarding_theme.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-/// Onboarding screens 2–4 — feature highlights shown to a newly registered
-/// user. "Next" on the last page creates a default kitchen and opens the fridge
-/// scan; "Skip" exits to the dashboard. Country/currency is collected first if
-/// not set yet.
-const String _defaultKitchenName = 'Kitchen';
-
+/// Onboarding screens 2–4 — feature highlights shown once, right after the
+/// user picks their first kitchen (created or joined) on the kitchen selection
+/// screen. Finishing (or skipping) marks `onboarding_completed` on the backend
+/// and routes onwards: host/co-host of a not-yet-scanned kitchen goes to the
+/// fridge scan, everyone else to the dashboard.
 class OnboardingFeaturesPage extends StatefulWidget {
   const OnboardingFeaturesPage({super.key});
 
@@ -53,14 +50,14 @@ class _OnboardingFeaturesPageState extends State<OnboardingFeaturesPage> {
     ),
   ];
 
-  final HomeBloc _homeBloc = sl<HomeBloc>();
-  bool _isCreatingKitchen = false;
+  /// The "Scan Your Products" screen is appended after the feature pages.
+  int get _pageCount => _pages.length + 1;
 
-  bool get _isLastPage => _currentPage == _pages.length - 1;
+  bool get _isLastPage => _currentPage == _pageCount - 1;
 
   void _onNext() {
     if (_isLastPage) {
-      _createDefaultKitchenAndScan();
+      _finishOnboarding();
     } else {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
@@ -69,49 +66,20 @@ class _OnboardingFeaturesPageState extends State<OnboardingFeaturesPage> {
     }
   }
 
-  /// Creates a default "Kitchen" so the fridge scan has an active kitchen,
-  /// then routes to it (via country/currency setup if not set yet).
-  void _createDefaultKitchenAndScan() {
-    setState(() => _isCreatingKitchen = true);
-    _homeBloc.add(CreateKitchenEventForHome(_defaultKitchenName));
-  }
+  /// Marks onboarding as completed and routes onwards: host/co-host of a
+  /// kitchen without storage areas goes to the fridge scan, a plain member
+  /// (or an already scanned kitchen) goes to the dashboard.
+  void _finishOnboarding() {
+    final userCubit = context.read<UserCubit>();
+    userCubit.completeOnboarding();
 
-  void _onKitchenState(BuildContext context, HomeState state) {
-    if (!_isCreatingKitchen) return;
-
-    if (state.isLoading) return;
-
-    if (state.errorMessage != null) {
-      setState(() => _isCreatingKitchen = false);
-      AppToast.show(state.errorMessage!, ToastType.error);
-      return;
-    }
-    if (state.successMessage != null) {
-      _isCreatingKitchen = false;
-      _goToNext(Routes.smartKitchenSetup);
-    }
-  }
-
-  /// Exits onboarding to the dashboard (no kitchen is created).
-  void _onSkip() {
-    _goToNext(Routes.dashboard);
-  }
-
-  /// Routes to [destination], collecting country/currency first if not set.
-  void _goToNext(String destination) {
-    final prefs = sl<SharedPreferences>();
-    final country = prefs.getString('country');
-    final currency = prefs.getString('currency');
-    if (country == null || currency == null) {
-      context.goNamed(
-        Routes.countryAndCurrencySetup,
-        extra: false,
-        queryParameters: {'next': destination},
-      );
-    } else if (destination == Routes.smartKitchenSetup) {
-      context.goNamed(destination, extra: false);
+    final userState = userCubit.state;
+    final bool needsScan =
+        userState.role != 'member' && userState.userStorageAreas.isEmpty;
+    if (needsScan) {
+      context.goNamed(Routes.smartKitchenSetup, extra: false);
     } else {
-      context.go(destination);
+      context.go(Routes.dashboard);
     }
   }
 
@@ -123,30 +91,37 @@ class _OnboardingFeaturesPageState extends State<OnboardingFeaturesPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<HomeBloc, HomeState>(
-      bloc: _homeBloc,
-      listener: _onKitchenState,
-      child: Scaffold(
-        body: OnboardingBackground(
-          child: SafeArea(
-            child: Column(
-              children: [
-                Expanded(
-                  child: PageView.builder(
-                    controller: _pageController,
-                    itemCount: _pages.length,
-                    onPageChanged: (index) =>
-                        setState(() => _currentPage = index),
-                    itemBuilder: (context, index) =>
-                        _FeaturePageContent(data: _pages[index]),
-                  ),
+    return Scaffold(
+      body: OnboardingBackground(
+        gradient: _isLastPage
+            ? const LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  OnboardingColors.scanGradientTop,
+                  OnboardingColors.scanGradientBottom,
+                ],
+              )
+            : null,
+        child: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                child: PageView.builder(
+                  controller: _pageController,
+                  itemCount: _pageCount,
+                  onPageChanged: (index) =>
+                      setState(() => _currentPage = index),
+                  itemBuilder: (context, index) => index < _pages.length
+                      ? _FeaturePageContent(data: _pages[index])
+                      : const _ScanProductsPageContent(),
                 ),
-                OnboardingDots(count: _pages.length, activeIndex: _currentPage),
-                gapVertical(20),
-                _buildBottomBar(),
-                gapVertical(24),
-              ],
-            ),
+              ),
+              OnboardingDots(count: _pageCount, activeIndex: _currentPage),
+              gapVertical(20),
+              _buildBottomBar(),
+              gapVertical(24),
+            ],
           ),
         ),
       ),
@@ -160,7 +135,7 @@ class _OnboardingFeaturesPageState extends State<OnboardingFeaturesPage> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           TextButton(
-            onPressed: _isCreatingKitchen ? null : _onSkip,
+            onPressed: _finishOnboarding,
             child: Text(
               'Skip',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
@@ -173,7 +148,6 @@ class _OnboardingFeaturesPageState extends State<OnboardingFeaturesPage> {
           GenericOnboardingButton(
             text: 'Next',
             width: w(200),
-            isLoading: _isCreatingKitchen,
             onPressed: _onNext,
           ),
         ],
@@ -187,6 +161,81 @@ class _FeaturePageData {
   final List<OnboardingTitleSpan> title;
 
   const _FeaturePageData({required this.image, required this.title});
+}
+
+/// The final "Scan Your Products" onboarding screen: white title over the
+/// orange gradient and a frosted card with a product inside a scan frame.
+class _ScanProductsPageContent extends StatelessWidget {
+  const _ScanProductsPageContent();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: gapSymmetric(horizontal: 20),
+      child: Column(
+        children: [
+          gapVertical(24),
+          const OnboardingTitle([
+            OnboardingTitleSpan('Scan\nYour Products'),
+          ], color: Colors.white),
+          const Expanded(child: Center(child: _ScanCard())),
+        ],
+      ),
+    );
+  }
+}
+
+class _ScanCard extends StatelessWidget {
+  const _ScanCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: w(280),
+      height: w(280),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.35),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.24)),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFF08200).withValues(alpha: 0.13),
+            blurRadius: 20,
+            spreadRadius: 8,
+          ),
+        ],
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          SvgPicture.asset(
+            'assets/svgs/onb_scan_frame.svg',
+            width: w(230),
+            height: w(230),
+          ),
+          Image.asset(
+            'assets/images/onb_scan_product.png',
+            height: w(169),
+            fit: BoxFit.contain,
+          ),
+          Transform.translate(
+            offset: Offset(0, w(45)),
+            child: Transform.rotate(
+              angle: -0.94 * math.pi / 180,
+              child: Container(
+                width: w(150),
+                height: 3,
+                decoration: BoxDecoration(
+                  color: OnboardingColors.accent,
+                  borderRadius: BorderRadius.circular(3),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _FeaturePageContent extends StatelessWidget {
