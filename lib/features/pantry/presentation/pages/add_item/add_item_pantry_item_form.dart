@@ -14,6 +14,7 @@ import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
 import 'package:foodkitchen/core/widgets/safe_image.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:foodkitchen/features/pantry/presentation/models/pantry_items.dart';
+import 'package:foodkitchen/features/pantry/presentation/pages/add_item/item_name_search_field.dart';
 
 typedef AddItemPageSetState = void Function(VoidCallback fn);
 
@@ -55,17 +56,7 @@ class AddItemPantryItemForm extends StatelessWidget {
         SizedBox(height: h(10)),
         _formLabel(context, "Item name"),
         SizedBox(height: h(10)),
-        AppTextField(
-          textInputAction: TextInputAction.next,
-          color: AppColors.apptextFieldStyleTextColor,
-          controller: item.nameController,
-          hintText: "Enter item name",
-          fillColor: const Color(0xFFF9F9F9),
-          isFilled: true,
-          isLabled: false,
-          keyboardType: TextInputType.text,
-          label: '',
-        ),
+        ItemNameSearchField(controller: item.nameController),
         SizedBox(height: h(15)),
         _formLabel(context, "Quantity"),
         SizedBox(height: h(10)),
