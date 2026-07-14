@@ -9,6 +9,7 @@ class RequestedItemEntity {
   final String unit;
   final String userId;
   final DateTime requestedAt;
+  final String iconUrl;
 
   RequestedItemEntity({
     required this.id,
@@ -21,5 +22,6 @@ class RequestedItemEntity {
     required this.unit,
     required this.userId,
     required this.requestedAt,
+    this.iconUrl = '',
   });
 }

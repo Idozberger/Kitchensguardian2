@@ -59,7 +59,22 @@ class _KitchenAnalysisPageState extends State<KitchenAnalysisPage> {
       for (final scanned in state.scannedItems) {
         _items.add(kitchenAnalysisMapScannedToPantryItem(scanned));
       }
+      if (_items.any((item) => item.needsReview)) {
+        AppToast.show(
+          "Some items had low detection confidence — please review them before confirming.",
+          ToastType.warning,
+        );
+      }
     }
+  }
+
+  void _retryScan() {
+    smartKitchenSetupBloc.add(
+      SmartKitchenSetupApiCalled(
+        kitchenId: _userCubit.state.activeKitchenId,
+        payload: smartKitchenSetupBloc.state.payload,
+      ),
+    );
   }
 
   void _addNewItem() {
@@ -107,6 +122,8 @@ class _KitchenAnalysisPageState extends State<KitchenAnalysisPage> {
           listener: (context, state) {
             if (state.scannedItems.isNotEmpty) {
               getScannedItems(state);
+            } else if (state.errorMessage != null) {
+              AppToast.show(state.errorMessage!, ToastType.error);
             }
           },
           builder: (context, smartKitchenSetupState) {
@@ -134,7 +151,16 @@ class _KitchenAnalysisPageState extends State<KitchenAnalysisPage> {
                                 child: BlocBuilder<UserCubit, UserState>(
                                   builder: (context, userState) {
                                     if (_items.isEmpty) {
-                                      return const KitchenAnalysisEmptyItemsPlaceholder();
+                                      return KitchenAnalysisEmptyItemsPlaceholder(
+                                        errorMessage:
+                                            smartKitchenSetupState.errorMessage,
+                                        onRetry:
+                                            smartKitchenSetupState
+                                                    .errorMessage !=
+                                                null
+                                            ? _retryScan
+                                            : null,
+                                      );
                                     }
 
                                     return ListView.builder(
@@ -145,17 +171,35 @@ class _KitchenAnalysisPageState extends State<KitchenAnalysisPage> {
                                         final item = _items[index];
                                         return Padding(
                                           padding: gapOnly(bottom: 12),
-                                          child: UpperTile(
-                                            widget: AddItemPantryItemForm(
-                                              item: item,
-                                              userState: userState,
-                                              isMember: false,
-                                              isFirstItem: _items.first == item,
-                                              updateState: setState,
-                                              onRemove: () => setState(
-                                                () => _items.remove(item),
+                                          child: Stack(
+                                            children: [
+                                              UpperTile(
+                                                borderColor: item.needsReview
+                                                    ? Colors.orange
+                                                    : null,
+                                                widget: AddItemPantryItemForm(
+                                                  item: item,
+                                                  userState: userState,
+                                                  isMember: false,
+                                                  isFirstItem:
+                                                      _items.first == item,
+                                                  updateState: setState,
+                                                  onRemove: () => setState(
+                                                    () => _items.remove(item),
+                                                  ),
+                                                ),
                                               ),
-                                            ),
+                                              if (item.needsReview)
+                                                const Positioned(
+                                                  top: 6,
+                                                  right: 6,
+                                                  child: Icon(
+                                                    Icons.warning_amber_rounded,
+                                                    color: Colors.orange,
+                                                    size: 20,
+                                                  ),
+                                                ),
+                                            ],
                                           ),
                                         );
                                       },

@@ -24,7 +24,13 @@ class ScanHistoryCubit extends Cubit<ScanHistoryState> {
         final updatedItems = List<ScanHistoryEntity>.from(state.items)
           ..addAll(newItems);
 
-        emit(state.copyWith(items: updatedItems, isLoading: false));
+        emit(
+          state.copyWith(
+            items: updatedItems,
+            isLoading: false,
+            hasMore: newItems.isNotEmpty,
+          ),
+        );
       },
     );
 
@@ -32,6 +38,6 @@ class ScanHistoryCubit extends Cubit<ScanHistoryState> {
   }
 
   void clearState() {
-    emit(state.copyWith(items: []));
+    emit(state.copyWith(items: [], hasMore: true));
   }
 }

@@ -1,4 +1,5 @@
 import 'package:foodkitchen/core/common/domain/entities/requested_item.dart';
+import 'package:foodkitchen/core/utils/json_conversion.dart';
 
 class RequestedItemModel extends RequestedItemEntity {
   RequestedItemModel({
@@ -12,6 +13,7 @@ class RequestedItemModel extends RequestedItemEntity {
     required super.userId,
     required super.requestedAt,
     required super.checked,
+    super.iconUrl,
   });
 
   factory RequestedItemModel.fromJson(Map<String, dynamic> json) {
@@ -30,6 +32,7 @@ class RequestedItemModel extends RequestedItemEntity {
       requestedAt:
           DateTime.tryParse(json['requested_at']?.toString() ?? '') ??
           DateTime.now(),
+      iconUrl: readJsonString(json, 'icon_url'),
     );
   }
 
@@ -45,6 +48,7 @@ class RequestedItemModel extends RequestedItemEntity {
       'user_id': userId,
       'checked': checked,
       'requested_at': requestedAt.toIso8601String(),
+      'icon_url': iconUrl,
     };
   }
 }

@@ -58,6 +58,7 @@ class PantryItemModel extends PantryItemEntity {
     required super.itemId,
     required super.thumbnailBytes,
     required super.addedAt,
+    super.iconUrl,
   });
 
   factory PantryItemModel.fromJson(Map<String, dynamic> json) {
@@ -89,6 +90,7 @@ class PantryItemModel extends PantryItemEntity {
       addedAt:
           DateTime.tryParse(readJsonString(json, 'added_at')) ??
           DateTime.fromMillisecondsSinceEpoch(0),
+      iconUrl: readJsonString(json, 'icon_url'),
     );
   }
 
@@ -104,6 +106,7 @@ class PantryItemModel extends PantryItemEntity {
       "stock_status": stockStatus,
       "item_id": itemId,
       "added_at": addedAt.toString(),
+      "icon_url": iconUrl,
     };
   }
 
@@ -120,6 +123,7 @@ class PantryItemModel extends PantryItemEntity {
       stockStatus: entity.stockStatus,
       itemId: entity.itemId,
       addedAt: entity.addedAt,
+      iconUrl: entity.iconUrl,
     );
   }
 }

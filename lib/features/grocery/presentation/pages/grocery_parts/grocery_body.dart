@@ -99,6 +99,12 @@ class _GroceryBodyState extends State<GroceryBody> {
   }
 
   @override
+  void dispose() {
+    _itemsScrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return BlocBuilder<GroceryBloc, GroceryState>(
       builder: (_, state) {

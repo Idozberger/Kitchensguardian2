@@ -185,6 +185,7 @@ class SmartKitchenSetupBloc
     SmartKitchenSetupApiCalled event,
     Emitter<SmartKitchenSetupState> emit,
   ) async {
+    if (state.isLoading) return;
     emit(state.copyWith(isScanning: true, clearError: true, isLoading: true));
 
     final params = ScanKitchenImagesUseCaseParams(

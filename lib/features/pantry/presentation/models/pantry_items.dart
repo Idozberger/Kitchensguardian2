@@ -12,6 +12,7 @@ class PantryItem {
   final TextEditingController expireDate;
   String? unit;
   String? pantry;
+  bool needsReview = false;
 
   PantryItem({
     required this.nameController,

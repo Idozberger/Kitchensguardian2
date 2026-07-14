@@ -105,6 +105,7 @@ Future<void> _onScanReceipt(
   ScanReceiptEvent event,
   Emitter<PantryState> emit,
 ) async {
+  if (bloc.state is PantryScanItemsLoading) return;
   emit(PantryScanItemsLoading());
   final res = await bloc._scanReceiptUseCase(
     ScanReceiptUseCaseParams(

@@ -12,6 +12,7 @@ class PantryItemEntity {
   final String stockStatus;
   final String itemId;
   final DateTime? addedAt;
+  final String iconUrl;
 
   PantryItemEntity({
     required this.name,
@@ -25,6 +26,7 @@ class PantryItemEntity {
     this.thumbnailBytes,
     required this.itemId,
     this.addedAt,
+    this.iconUrl = '',
   });
   Map<String, dynamic> toMap() {
     return {
@@ -37,6 +39,7 @@ class PantryItemEntity {
       'expiryStatus': expiryStatus,
       'stockStatus': stockStatus,
       'itemId': itemId,
+      'iconUrl': iconUrl,
     };
   }
 }

@@ -4,6 +4,7 @@ class ScannedItemEntity {
   final int confidence;
   final String expiryDate;
   final String name;
+  final bool needsReview;
   final int quantity;
   final String recommendedStorage;
   final String tempId;
@@ -15,6 +16,7 @@ class ScannedItemEntity {
     required this.confidence,
     required this.expiryDate,
     required this.name,
+    required this.needsReview,
     required this.quantity,
     required this.recommendedStorage,
     required this.tempId,

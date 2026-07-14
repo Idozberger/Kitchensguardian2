@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:foodkitchen/core/global/functions/api_endpoints.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
 import 'package:foodkitchen/core/utils/dev_logging.dart';
@@ -75,12 +76,18 @@ class SmartKitchenSetupDatasourceImpl implements SmartKitchenSetupDatasource {
 
       final Object? autoRaw = decoded['auto_confirmed'];
       final List<Map<String, dynamic>> autoConfirmed = autoRaw is List
-          ? autoRaw.map(jsonObjectFromResponseData).toList()
+          ? autoRaw
+                .map(jsonObjectFromResponseData)
+                .map((m) => m..['needs_review'] = false)
+                .toList()
           : <Map<String, dynamic>>[];
 
       final Object? reviewRaw = decoded['user_review'];
       final List<Map<String, dynamic>> userReview = reviewRaw is List
-          ? reviewRaw.map(jsonObjectFromResponseData).toList()
+          ? reviewRaw
+                .map(jsonObjectFromResponseData)
+                .map((m) => m..['needs_review'] = true)
+                .toList()
           : <Map<String, dynamic>>[];
 
       return [...autoConfirmed, ...userReview];
@@ -100,10 +107,22 @@ class SmartKitchenSetupDatasourceImpl implements SmartKitchenSetupDatasource {
     devLog("path: $path");
     if (path.isEmpty) return;
     final cleanPath = path.replaceFirst('file://', '');
-    fields[key] = await MultipartFile.fromFile(
+    final compressed = await FlutterImageCompress.compressWithFile(
       cleanPath,
-      filename: cleanPath.split('/').last,
+      minWidth: 1280,
+      minHeight: 960,
+      quality: 70,
+      format: CompressFormat.jpeg,
     );
+    fields[key] = compressed != null
+        ? MultipartFile.fromBytes(
+            compressed,
+            filename: '${cleanPath.split('/').last}.jpg',
+          )
+        : await MultipartFile.fromFile(
+            cleanPath,
+            filename: cleanPath.split('/').last,
+          );
   }
 
   @override

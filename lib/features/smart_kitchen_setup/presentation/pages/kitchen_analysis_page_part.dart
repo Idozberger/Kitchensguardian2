@@ -8,7 +8,8 @@ PantryItem kitchenAnalysisMapScannedToPantryItem(ScannedItemEntity item) {
       manuFacturingDate: TextEditingController(),
     )
     ..unit = item.unit
-    ..pantry = item.area;
+    ..pantry = item.area
+    ..needsReview = item.needsReview;
 }
 
 String? kitchenAnalysisValidateRow(PantryItem item) {
