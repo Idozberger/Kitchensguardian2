@@ -33,60 +33,75 @@ class ReceiptPantryItemFormTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return UpperTile(
-      widget: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _FormLabelRow(
-            label: "Item Image",
-            action: isFirstItem
-                ? null
-                : CircularIconButton(
-                    iconAsset: AppAssets.deleteSvg,
-                    onTap: onItemRemoved,
-                  ),
+    return Stack(
+      children: [
+        UpperTile(
+          borderColor: item.needsReview ? Colors.orange : null,
+          widget: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _FormLabelRow(
+                label: "Item Image",
+                action: isFirstItem
+                    ? null
+                    : CircularIconButton(
+                        iconAsset: AppAssets.deleteSvg,
+                        onTap: onItemRemoved,
+                      ),
+              ),
+              SizedBox(height: h(10)),
+              _ItemImagePicker(item: item, onPicked: onFieldChanged),
+              SizedBox(height: h(10)),
+              const _FormLabelRow(label: "Item name"),
+              SizedBox(height: h(10)),
+              AppTextField(
+                label: '',
+                color: AppColors.apptextFieldStyleTextColor,
+                controller: item.nameController,
+                hintText: "Enter item name",
+                fillColor: const Color(0xffF9F9F9),
+                isFilled: true,
+                isLabled: false,
+              ),
+              SizedBox(height: h(15)),
+              const _FormLabelRow(label: "Quantity"),
+              SizedBox(height: h(10)),
+              AppTextField(
+                label: '',
+                color: AppColors.apptextFieldStyleTextColor,
+                controller: item.qtyController,
+                hintText: "Enter item quantity",
+                fillColor: const Color(0xffF9F9F9),
+                isFilled: true,
+                keyboardType: TextInputType.number,
+                isLabled: false,
+              ),
+              SizedBox(height: h(15)),
+              _DropdownsRow(
+                item: item,
+                pantryNames: userCubit.state.userStorageAreas
+                    .map((storage) => storage.pantryName)
+                    .toList(),
+                onChanged: onFieldChanged,
+              ),
+              SizedBox(height: h(15)),
+              const _FormLabelRow(label: "Expiring date"),
+              SizedBox(height: h(10)),
+              _ExpiryDateField(item: item, onPicked: onFieldChanged),
+            ],
           ),
-          SizedBox(height: h(10)),
-          _ItemImagePicker(item: item, onPicked: onFieldChanged),
-          SizedBox(height: h(10)),
-          const _FormLabelRow(label: "Item name"),
-          SizedBox(height: h(10)),
-          AppTextField(
-            label: '',
-            color: AppColors.apptextFieldStyleTextColor,
-            controller: item.nameController,
-            hintText: "Enter item name",
-            fillColor: const Color(0xffF9F9F9),
-            isFilled: true,
-            isLabled: false,
+        ),
+        if (item.needsReview)
+          const Positioned(
+            top: 6,
+            right: 6,
+            child: Icon(
+              Icons.warning_amber_rounded,
+              color: Colors.orange,
+              size: 20,
+            ),
           ),
-          SizedBox(height: h(15)),
-          const _FormLabelRow(label: "Quantity"),
-          SizedBox(height: h(10)),
-          AppTextField(
-            label: '',
-            color: AppColors.apptextFieldStyleTextColor,
-            controller: item.qtyController,
-            hintText: "Enter item quantity",
-            fillColor: const Color(0xffF9F9F9),
-            isFilled: true,
-            keyboardType: TextInputType.number,
-            isLabled: false,
-          ),
-          SizedBox(height: h(15)),
-          _DropdownsRow(
-            item: item,
-            pantryNames: userCubit.state.userStorageAreas
-                .map((storage) => storage.pantryName)
-                .toList(),
-            onChanged: onFieldChanged,
-          ),
-          SizedBox(height: h(15)),
-          const _FormLabelRow(label: "Expiring date"),
-          SizedBox(height: h(10)),
-          _ExpiryDateField(item: item, onPicked: onFieldChanged),
-        ],
-      ),
+      ],
     );
   }
 }

@@ -7,6 +7,7 @@ class ScanReceiptItemEntity {
   final String expireDate;
   final String group;
   final Uint8List thumbnail;
+  final bool needsReview;
 
   ScanReceiptItemEntity({
     required this.name,
@@ -15,5 +16,6 @@ class ScanReceiptItemEntity {
     required this.expireDate,
     required this.group,
     required this.thumbnail,
+    required this.needsReview,
   });
 }

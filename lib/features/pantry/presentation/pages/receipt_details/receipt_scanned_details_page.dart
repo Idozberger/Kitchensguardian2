@@ -200,6 +200,12 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
     setState(() {
       _items = receiptMapScanToPantryItems(scanReceipt);
     });
+    if (_items.any((item) => item.needsReview)) {
+      AppToast.show(
+        "Some items had low detection confidence — please review them before confirming.",
+        ToastType.warning,
+      );
+    }
   }
 
   void _validateAndSubmit() {
