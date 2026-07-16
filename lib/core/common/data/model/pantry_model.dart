@@ -34,6 +34,8 @@ class PantryModel extends Pantry {
           'quantity': item.quantity,
           'unit': item.unit,
           'group': item.group,
+          if (item.sharedIngredientId != null)
+            'shared_ingredient_id': item.sharedIngredientId,
         };
       }).toList(),
     };
@@ -59,6 +61,7 @@ class PantryItemModel extends PantryItemEntity {
     required super.thumbnailBytes,
     required super.addedAt,
     super.iconUrl,
+    super.sharedIngredientId,
   });
 
   factory PantryItemModel.fromJson(Map<String, dynamic> json) {
@@ -104,6 +107,8 @@ class PantryItemModel extends PantryItemEntity {
       "item_id": itemId,
       "added_at": addedAt.toString(),
       "icon_url": iconUrl,
+      if (sharedIngredientId != null)
+        "shared_ingredient_id": sharedIngredientId,
     };
   }
 
@@ -121,6 +126,7 @@ class PantryItemModel extends PantryItemEntity {
       itemId: entity.itemId,
       addedAt: entity.addedAt,
       iconUrl: entity.iconUrl,
+      sharedIngredientId: entity.sharedIngredientId,
     );
   }
 }

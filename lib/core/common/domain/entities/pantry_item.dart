@@ -13,6 +13,7 @@ class PantryItemEntity {
   final String itemId;
   final DateTime? addedAt;
   final String iconUrl;
+  final String? sharedIngredientId;
 
   PantryItemEntity({
     required this.name,
@@ -27,6 +28,7 @@ class PantryItemEntity {
     required this.itemId,
     this.addedAt,
     this.iconUrl = '',
+    this.sharedIngredientId,
   });
   Map<String, dynamic> toMap() {
     return {

@@ -56,7 +56,11 @@ class AddItemPantryItemForm extends StatelessWidget {
         SizedBox(height: h(10)),
         _formLabel(context, "Item name"),
         SizedBox(height: h(10)),
-        ItemNameSearchField(controller: item.nameController),
+        ItemNameSearchField(
+          controller: item.nameController,
+          onCatalogIdChanged: (id) =>
+              updateState(() => item.sharedIngredientId = id),
+        ),
         SizedBox(height: h(15)),
         _formLabel(context, "Quantity"),
         SizedBox(height: h(10)),

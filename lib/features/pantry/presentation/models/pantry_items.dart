@@ -21,6 +21,10 @@ class PantryItem {
   String? pantry;
   bool needsReview = false;
 
+  /// Set when [nameController]'s value was picked from the shared ingredient
+  /// catalog search; cleared as soon as the user edits the name by hand.
+  String? sharedIngredientId;
+
   PantryItem({
     required this.nameController,
     required this.qtyController,

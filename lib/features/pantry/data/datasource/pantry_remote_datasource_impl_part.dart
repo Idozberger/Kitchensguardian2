@@ -47,6 +47,37 @@ Future<String> _pantryImplAddPantryItem(
   }
 }
 
+Future<({List<Map<String, dynamic>> results, bool hasMore})>
+_pantryImplSearchSharedIngredients(
+  PantryRemoteDatasourceImpl ds, {
+  required String query,
+  required int page,
+}) async {
+  try {
+    final url =
+        "${AppConstants.searchSharedIngredients}?q=${Uri.encodeQueryComponent(query)}&page_size=20&page=$page";
+
+    final response = await ds.dio.get(url);
+
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      final Map<String, dynamic> data = jsonObjectFromResponseData(
+        response.data,
+      );
+      throw apiExceptionFrom(data['error'] ?? 'Unknown error');
+    }
+
+    final Map<String, dynamic> root = jsonObjectFromResponseData(response.data);
+    final Object? resultsRaw = root['results'];
+    final results = resultsRaw is List
+        ? resultsRaw.map(jsonObjectFromResponseData).toList()
+        : <Map<String, dynamic>>[];
+    final totalPages = readJsonInt(root, 'total_pages', fallback: 1);
+    return (results: results, hasMore: page < totalPages);
+  } on DioException catch (e) {
+    throw await ds.dio.handleError(e);
+  }
+}
+
 Future<List<Map<String, dynamic>>> _pantryImplGetPantryItems(
   PantryRemoteDatasourceImpl ds, {
   required String kitchenId,

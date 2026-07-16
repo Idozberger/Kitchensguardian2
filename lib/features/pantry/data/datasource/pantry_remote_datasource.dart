@@ -44,6 +44,8 @@ abstract interface class PantryRemoteDatasource {
   });
   Future<String> deleteItem({required PantryModel pantryModel});
   Future<String> updateItem({required PantryModel pantryModel});
+  Future<({List<Map<String, dynamic>> results, bool hasMore})>
+  searchSharedIngredients({required String query, required int page});
 }
 
 class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
@@ -121,4 +123,9 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
   @override
   Future<String> addRequestItem({required PantryModel pantryModel}) =>
       _pantryImplAddRequestItem(this, pantryModel: pantryModel);
+
+  @override
+  Future<({List<Map<String, dynamic>> results, bool hasMore})>
+  searchSharedIngredients({required String query, required int page}) =>
+      _pantryImplSearchSharedIngredients(this, query: query, page: page);
 }
