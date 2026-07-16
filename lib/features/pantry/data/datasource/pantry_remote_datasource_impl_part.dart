@@ -55,7 +55,7 @@ _pantryImplSearchSharedIngredients(
 }) async {
   try {
     final url =
-        "${AppConstants.searchSharedIngredients}?q=${Uri.encodeQueryComponent(query)}&page_size=20&page=$page";
+        "${AppConstants.searchSharedIngredients}?q=${Uri.encodeQueryComponent(query)}&page_size=${AppConstants.sharedIngredientsSearchPageSize}&page=$page";
 
     final response = await ds.dio.get(url);
 

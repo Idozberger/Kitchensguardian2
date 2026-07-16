@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 
 class KitchenAnalysisEmptyItemsPlaceholder extends StatelessWidget {
   final String? errorMessage;
   final VoidCallback? onRetry;
+  final VoidCallback? onAddManually;
 
   const KitchenAnalysisEmptyItemsPlaceholder({
     super.key,
     this.errorMessage,
     this.onRetry,
+    this.onAddManually,
   });
 
   @override
@@ -39,13 +42,29 @@ class KitchenAnalysisEmptyItemsPlaceholder extends StatelessWidget {
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 13, color: Colors.grey),
           ),
-          if (isError && onRetry != null) ...[
+          if (onRetry != null) ...[
             const SizedBox(height: 16),
             SizedBox(
               width: 160,
               child: GenericButtonWidget(
                 onPressed: onRetry!,
                 text: 'Try Again',
+              ),
+            ),
+          ],
+          if (onAddManually != null) ...[
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: onAddManually,
+              child: Text(
+                'Add Item Manually',
+                style: TextStyle(
+                  color: AppColors.primaryColor,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  decoration: TextDecoration.underline,
+                  decorationColor: AppColors.primaryColor,
+                ),
               ),
             ),
           ],

@@ -91,4 +91,5 @@ class AppConstants {
       "/api/recipe/check_missing_ingredients";
   static const String searchSharedIngredients =
       "/api/shared_ingredients/search";
+  static const int sharedIngredientsSearchPageSize = 20;
 }

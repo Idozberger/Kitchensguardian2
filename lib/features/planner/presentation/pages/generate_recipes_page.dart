@@ -103,6 +103,7 @@ class _GenerateRecipesPageState extends State<GenerateRecipesPage> {
         return;
       } else {
         showAdLoadingDialog(context);
+        return;
       }
     }
 

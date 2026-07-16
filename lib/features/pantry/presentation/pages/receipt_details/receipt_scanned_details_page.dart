@@ -122,7 +122,11 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
 
   void _handleStateChange(BuildContext context, PantryState state) {
     if (state is PantryFailure) {
-      setState(() => _errorMessage = state.errorMessage);
+      if (_items.isEmpty) {
+        setState(() => _errorMessage = state.errorMessage);
+      } else {
+        AppToast.show(state.errorMessage, ToastType.error);
+      }
     } else if (state is PantrySuccess) {
       AppToast.show(
         "Items added to your kitchen successfully!",

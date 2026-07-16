@@ -14,20 +14,15 @@ class ScanKitchenImagesUseCase
   @override
   Future<Either<Failure, List<ScannedItemEntity>>> call(
     ScanKitchenImagesUseCaseParams params,
-  ) async {
-    try {
-      final result = await smartKitchenSetupRepository.scanKitchenImages(
-        kitchenId: params.kitchenId,
-        fridgeFilePaths: params.fridgeFilePaths,
-        freezerFilePaths: params.freezerFilePaths,
-        pantryFilePaths: params.pantryFilePaths,
-        spicesFilePaths: params.spicesFilePaths,
-        miscFilePaths: params.miscFilePaths,
-      );
-      return Right(result);
-    } catch (e, st) {
-      return Left(unknownFailureFrom(e, st));
-    }
+  ) {
+    return smartKitchenSetupRepository.scanKitchenImages(
+      kitchenId: params.kitchenId,
+      fridgeFilePaths: params.fridgeFilePaths,
+      freezerFilePaths: params.freezerFilePaths,
+      pantryFilePaths: params.pantryFilePaths,
+      spicesFilePaths: params.spicesFilePaths,
+      miscFilePaths: params.miscFilePaths,
+    );
   }
 }
 

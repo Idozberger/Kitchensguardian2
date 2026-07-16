@@ -131,7 +131,6 @@ class _KitchenAnalysisPageState extends State<KitchenAnalysisPage> {
               listener: (context, state) {
                 if (state is PantryFailure) {
                   AppToast.show(state.errorMessage, ToastType.error);
-                  _resetState();
                 } else if (state is PantrySuccess) {
                   AppToast.show(state.successMessage, ToastType.success);
                   context.go(Routes.dashboard);
@@ -154,12 +153,8 @@ class _KitchenAnalysisPageState extends State<KitchenAnalysisPage> {
                                       return KitchenAnalysisEmptyItemsPlaceholder(
                                         errorMessage:
                                             smartKitchenSetupState.errorMessage,
-                                        onRetry:
-                                            smartKitchenSetupState
-                                                    .errorMessage !=
-                                                null
-                                            ? _retryScan
-                                            : null,
+                                        onRetry: _retryScan,
+                                        onAddManually: _addNewItem,
                                       );
                                     }
 
@@ -218,8 +213,7 @@ class _KitchenAnalysisPageState extends State<KitchenAnalysisPage> {
         bottomNavigationBar:
             BlocBuilder<SmartKitchenSetupBloc, SmartKitchenSetupState>(
               builder: (context, smartKitchenState) {
-                if (smartKitchenState.scannedItems.isEmpty ||
-                    smartKitchenState.isLoading) {
+                if (_items.isEmpty || smartKitchenState.isLoading) {
                   return const SizedBox.shrink();
                 }
                 return PantryItemSubmitFooter(

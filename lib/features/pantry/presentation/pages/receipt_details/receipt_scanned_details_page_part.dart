@@ -171,6 +171,7 @@ Future<Pantry> receiptBuildPantryFromItems({
         expiryStatus: '',
         stockStatus: '',
         itemId: '',
+        sharedIngredientId: item.sharedIngredientId,
       ),
     );
   }

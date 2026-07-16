@@ -1,4 +1,5 @@
 import 'package:foodkitchen/core/error/failures.dart';
+import 'package:foodkitchen/core/logging/app_logger.dart';
 import 'package:foodkitchen/features/smart_kitchen_setup/data/datasource/smart_kitchen_setup_datasource.dart';
 import 'package:foodkitchen/features/smart_kitchen_setup/domain/entities/scanned_item.dart';
 import 'package:foodkitchen/features/smart_kitchen_setup/domain/repository/smart_kitchen_setup_repository.dart';
@@ -11,7 +12,7 @@ class SmartKitchenSetupRepositoryImpl implements SmartKitchenSetupRepository {
   SmartKitchenSetupRepositoryImpl({required this.smartKitchenSetupDatasource});
 
   @override
-  Future<List<ScannedItemEntity>> scanKitchenImages({
+  Future<Either<Failure, List<ScannedItemEntity>>> scanKitchenImages({
     required String kitchenId,
     required List<String> fridgeFilePaths,
     required List<String> freezerFilePaths,
@@ -19,19 +20,36 @@ class SmartKitchenSetupRepositoryImpl implements SmartKitchenSetupRepository {
     required List<String> spicesFilePaths,
     required List<String> miscFilePaths,
   }) async {
-    final rawData = await smartKitchenSetupDatasource.getScanResult(
-      kitchenId: kitchenId,
-      fridgeFilePaths: fridgeFilePaths,
-      freezerFilePaths: freezerFilePaths,
-      pantryFilePaths: pantryFilePaths,
-      spicesFilePaths: spicesFilePaths,
-      miscFilePaths: miscFilePaths,
-    );
+    try {
+      final rawData = await smartKitchenSetupDatasource.getScanResult(
+        kitchenId: kitchenId,
+        fridgeFilePaths: fridgeFilePaths,
+        freezerFilePaths: freezerFilePaths,
+        pantryFilePaths: pantryFilePaths,
+        spicesFilePaths: spicesFilePaths,
+        miscFilePaths: miscFilePaths,
+      );
 
-    return rawData.map<ScannedItemEntity>((json) {
-      final model = ScannedItemModel.fromJson(json);
-      return model.toEntity();
-    }).toList();
+      final items = <ScannedItemEntity>[];
+      for (final json in rawData) {
+        try {
+          items.add(ScannedItemModel.fromJson(json).toEntity());
+        } catch (itemError, itemStack) {
+          // One malformed scanned item shouldn't drop every other correctly-parsed item.
+          AppLogger.recordNonFatal(
+            itemError,
+            itemStack,
+            reason: 'scan_kitchen_item_parse',
+          );
+        }
+      }
+
+      return Right(items);
+    } on Failure catch (f) {
+      return Left(f);
+    } catch (e, st) {
+      return Left(unknownFailureFrom(e, st));
+    }
   }
 
   @override

@@ -80,6 +80,7 @@ class _AddKitchenPantryPageState extends State<AddKitchenPantryPage> {
           expiryStatus: '',
           stockStatus: '',
           itemId: '',
+          sharedIngredientId: item.sharedIngredientId,
         ),
       );
     }

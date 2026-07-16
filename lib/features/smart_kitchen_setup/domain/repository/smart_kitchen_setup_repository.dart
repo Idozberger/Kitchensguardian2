@@ -3,7 +3,7 @@ import 'package:foodkitchen/features/smart_kitchen_setup/domain/entities/scanned
 import 'package:fpdart/fpdart.dart';
 
 abstract class SmartKitchenSetupRepository {
-  Future<List<ScannedItemEntity>> scanKitchenImages({
+  Future<Either<Failure, List<ScannedItemEntity>>> scanKitchenImages({
     required String kitchenId,
     required List<String> fridgeFilePaths,
     required List<String> freezerFilePaths,

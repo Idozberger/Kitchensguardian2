@@ -13,6 +13,7 @@ import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:foodkitchen/features/pantry/presentation/models/pantry_items.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/add_item/add_item_pantry_item_form.dart';
+import 'package:foodkitchen/features/pantry/presentation/pages/add_item/item_name_search_field.dart';
 
 /// Default storage labels for onboarding / add-kitchen pantry flow.
 const List<String> kAddKitchenPantryAreaOptions = [
@@ -96,15 +97,10 @@ class AddKitchenPantryItemForm extends StatelessWidget {
                 ),
         ),
         SizedBox(height: h(10)),
-        AppTextField(
-          color: AppColors.apptextFieldStyleTextColor,
+        ItemNameSearchField(
           controller: item.nameController,
-          hintText: "Enter item name",
-          fillColor: const Color(0xffF9F9F9),
-          isFilled: true,
-          isLabled: false,
-          keyboardType: TextInputType.text,
-          label: "",
+          onCatalogIdChanged: (id) =>
+              updateState(() => item.sharedIngredientId = id),
         ),
         SizedBox(height: h(15)),
         _formLabel(context, "Quantity"),

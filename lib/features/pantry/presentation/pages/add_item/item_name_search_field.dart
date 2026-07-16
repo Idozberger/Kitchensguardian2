@@ -7,6 +7,19 @@ import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
 import 'package:foodkitchen/features/pantry/domain/repository/item_search_repository.dart';
 
+enum _OverlayState { idle, searching, results, empty, error }
+
+/// Applies a catalog suggestion to the name field and optional catalog link.
+void applyItemSearchSelection({
+  required TextEditingController controller,
+  required ItemSearchResult item,
+  ValueChanged<String?>? onCatalogIdChanged,
+}) {
+  controller.text = item.name;
+  controller.selection = TextSelection.collapsed(offset: item.name.length);
+  onCatalogIdChanged?.call(item.id);
+}
+
 /// "Item name" field with debounced, backend-searched autocomplete.
 ///
 /// Selecting a suggestion links the row to the shared ingredient catalog via
@@ -16,17 +29,28 @@ class ItemNameSearchField extends StatefulWidget {
     super.key,
     required this.controller,
     this.onCatalogIdChanged,
+    this.onEdited,
+    this.repository,
   });
 
   final TextEditingController controller;
   final ValueChanged<String?>? onCatalogIdChanged;
+
+  /// Called when the user edits the text (before debounced search).
+  final VoidCallback? onEdited;
+
+  /// Optional override for tests; production uses [sl].
+  final ItemSearchRepository? repository;
 
   @override
   State<ItemNameSearchField> createState() => _ItemNameSearchFieldState();
 }
 
 class _ItemNameSearchFieldState extends State<ItemNameSearchField> {
-  final _repository = sl<ItemSearchRepository>();
+  static const _minQueryLength = 3;
+  static const _debounceMs = 300;
+
+  late final ItemSearchRepository _repository;
   final _layerLink = LayerLink();
   final _focusNode = FocusNode();
   final _scrollController = ScrollController();
@@ -38,10 +62,14 @@ class _ItemNameSearchFieldState extends State<ItemNameSearchField> {
   int _page = 1;
   bool _hasMore = false;
   bool _loadingMore = false;
+  _OverlayState _overlayState = _OverlayState.idle;
+  String? _errorMessage;
+  String? _loadMoreError;
 
   @override
   void initState() {
     super.initState();
+    _repository = widget.repository ?? sl<ItemSearchRepository>();
     _focusNode.addListener(_handleFocusChange);
     _scrollController.addListener(_onScroll);
   }
@@ -63,24 +91,44 @@ class _ItemNameSearchFieldState extends State<ItemNameSearchField> {
 
   void _onChanged(String query) {
     widget.onCatalogIdChanged?.call(null);
+    widget.onEdited?.call();
     _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 300), () => _search(query));
+    _debounce = Timer(
+      const Duration(milliseconds: _debounceMs),
+      () => _search(query),
+    );
   }
 
   Future<void> _search(String query) async {
     final token = ++_searchToken;
-    if (query.trim().length < 2) {
+    final trimmed = query.trim();
+    if (trimmed.length < _minQueryLength) {
       _removeOverlay();
       return;
     }
     _query = query;
+    _loadMoreError = null;
+    _setOverlayState(_OverlayState.searching);
     final result = await _repository.searchItems(query);
     if (!mounted || token != _searchToken) return;
-    result.match((_) => _removeOverlay(), (res) {
-      _page = 1;
-      _hasMore = res.hasMore;
-      _showResults(res.items);
-    });
+    result.match(
+      (failure) {
+        _errorMessage = failure.userMessage;
+        _setOverlayState(_OverlayState.error);
+      },
+      (res) {
+        _page = 1;
+        _hasMore = res.hasMore;
+        _errorMessage = null;
+        if (res.items.isEmpty) {
+          _results = [];
+          _setOverlayState(_OverlayState.empty);
+        } else {
+          _results = res.items;
+          _setOverlayState(_OverlayState.results);
+        }
+      },
+    );
   }
 
   void _onScroll() {
@@ -95,22 +143,32 @@ class _ItemNameSearchFieldState extends State<ItemNameSearchField> {
   Future<void> _loadMore() async {
     final token = _searchToken;
     _loadingMore = true;
+    _loadMoreError = null;
     _overlayEntry?.markNeedsBuild();
     final result = await _repository.searchItems(_query, page: _page + 1);
     if (!mounted || token != _searchToken) return;
     _loadingMore = false;
-    result.match((_) {}, (res) {
-      _page += 1;
-      _hasMore = res.hasMore;
-      _results = [..._results, ...res.items];
-      _overlayEntry?.markNeedsBuild();
-    });
-    _overlayEntry?.markNeedsBuild();
+    result.match(
+      (failure) {
+        _loadMoreError = failure.userMessage;
+        _overlayEntry?.markNeedsBuild();
+      },
+      (res) {
+        _page += 1;
+        _hasMore = res.hasMore;
+        _results = [..._results, ...res.items];
+        _overlayEntry?.markNeedsBuild();
+      },
+    );
   }
 
-  void _showResults(List<ItemSearchResult> items) {
-    _results = items;
-    if (items.isEmpty || !_focusNode.hasFocus) {
+  void _setOverlayState(_OverlayState state) {
+    _overlayState = state;
+    if (!_focusNode.hasFocus) {
+      _removeOverlay();
+      return;
+    }
+    if (state == _OverlayState.idle) {
       _removeOverlay();
       return;
     }
@@ -125,16 +183,125 @@ class _ItemNameSearchFieldState extends State<ItemNameSearchField> {
   void _removeOverlay() {
     _overlayEntry?.remove();
     _overlayEntry = null;
+    _overlayState = _OverlayState.idle;
   }
 
   void _selectItem(ItemSearchResult item) {
-    widget.controller.text = item.name;
-    widget.controller.selection = TextSelection.collapsed(
-      offset: item.name.length,
+    applyItemSearchSelection(
+      controller: widget.controller,
+      item: item,
+      onCatalogIdChanged: widget.onCatalogIdChanged,
     );
-    widget.onCatalogIdChanged?.call(item.id);
     _removeOverlay();
     _focusNode.unfocus();
+  }
+
+  void _retrySearch() {
+    if (_query.trim().length >= _minQueryLength) {
+      unawaited(_search(_query));
+    }
+  }
+
+  Widget _buildOverlayContent(BuildContext context) {
+    switch (_overlayState) {
+      case _OverlayState.searching:
+        return Padding(
+          padding: EdgeInsets.symmetric(vertical: h(16)),
+          child: const Center(
+            child: SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          ),
+        );
+      case _OverlayState.empty:
+        return Padding(
+          padding: EdgeInsets.symmetric(horizontal: w(12), vertical: h(16)),
+          child: Text(
+            'No ingredients found',
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+              color: const Color(0xff787878),
+            ),
+          ),
+        );
+      case _OverlayState.error:
+        return InkWell(
+          onTap: _retrySearch,
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: w(12), vertical: h(16)),
+            child: Text(
+              _errorMessage ?? 'Search failed. Tap to retry.',
+              style: Theme.of(
+                context,
+              ).textTheme.headlineMedium?.copyWith(color: Colors.red.shade700),
+            ),
+          ),
+        );
+      case _OverlayState.results:
+        return Scrollbar(
+          controller: _scrollController,
+          thumbVisibility: true,
+          child: ListView.builder(
+            controller: _scrollController,
+            padding: EdgeInsets.zero,
+            shrinkWrap: true,
+            itemCount:
+                _results.length +
+                (_loadingMore ? 1 : 0) +
+                (_loadMoreError != null ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index < _results.length) {
+                final item = _results[index];
+                return InkWell(
+                  key: ValueKey('item_search_${item.id}'),
+                  onTap: () => _selectItem(item),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: w(12),
+                      vertical: h(12),
+                    ),
+                    child: Text(
+                      item.name,
+                      style: Theme.of(context).textTheme.headlineMedium
+                          ?.copyWith(color: const Color(0xff787878)),
+                    ),
+                  ),
+                );
+              }
+              if (_loadingMore && index == _results.length) {
+                return Padding(
+                  padding: EdgeInsets.symmetric(vertical: h(12)),
+                  child: const Center(
+                    child: SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
+                );
+              }
+              return InkWell(
+                onTap: _loadMore,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: w(12),
+                    vertical: h(12),
+                  ),
+                  child: Text(
+                    _loadMoreError ?? 'Failed to load more. Tap to retry.',
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      color: Colors.red.shade700,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      case _OverlayState.idle:
+        return const SizedBox.shrink();
+    }
   }
 
   OverlayEntry _buildOverlayEntry() {
@@ -158,50 +325,17 @@ class _ItemNameSearchFieldState extends State<ItemNameSearchField> {
                 border: Border.all(color: AppColors.greyColor),
               ),
               constraints: BoxConstraints(maxHeight: h(220)),
-              child: Scrollbar(
-                controller: _scrollController,
-                thumbVisibility: true,
-                child: ListView.builder(
-                  controller: _scrollController,
-                  padding: EdgeInsets.zero,
-                  shrinkWrap: true,
-                  itemCount: _results.length + (_loadingMore ? 1 : 0),
-                  itemBuilder: (context, index) {
-                    if (index >= _results.length) {
-                      return Padding(
-                        padding: EdgeInsets.symmetric(vertical: h(12)),
-                        child: const Center(
-                          child: SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          ),
-                        ),
-                      );
-                    }
-                    final item = _results[index];
-                    return InkWell(
-                      onTap: () => _selectItem(item),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: w(12),
-                          vertical: h(12),
-                        ),
-                        child: Text(
-                          item.name,
-                          style: Theme.of(context).textTheme.headlineMedium
-                              ?.copyWith(color: const Color(0xff787878)),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
+              child: _buildOverlayContent(context),
             ),
           ),
         ),
       ),
     );
+  }
+
+  void _restoreOverlayIfNeeded() {
+    if (!_focusNode.hasFocus || _overlayState == _OverlayState.idle) return;
+    _setOverlayState(_overlayState);
   }
 
   @override
@@ -220,9 +354,7 @@ class _ItemNameSearchFieldState extends State<ItemNameSearchField> {
         keyboardType: TextInputType.text,
         label: '',
         onChanged: _onChanged,
-        onTap: () {
-          if (_results.isNotEmpty) _showResults(_results);
-        },
+        onTap: _restoreOverlayIfNeeded,
       ),
     );
   }

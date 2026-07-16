@@ -92,7 +92,10 @@ class AddItemPantryItemForm extends StatelessWidget {
                 value: item.unit,
                 items: unitOptions(userState.unitSystem, current: item.unit),
                 displayLabel: unitDisplayLabel,
-                onChanged: (val) => updateState(() => item.unit = val),
+                onChanged: (val) => updateState(() {
+                  item.unit = val;
+                  item.needsReview = false;
+                }),
               ),
             ),
             if (isMember == false)
@@ -104,7 +107,10 @@ class AddItemPantryItemForm extends StatelessWidget {
                   items: userState.userStorageAreas
                       .map((area) => area.pantryName)
                       .toList(),
-                  onChanged: (val) => updateState(() => item.pantry = val),
+                  onChanged: (val) => updateState(() {
+                    item.pantry = val;
+                    item.needsReview = false;
+                  }),
                 ),
               ),
           ],
@@ -125,7 +131,7 @@ class AddItemPantryItemForm extends StatelessWidget {
         customBorder: const CircleBorder(),
         onTap: () async {
           item.file = await ImagePickerService.showImageSourceDialog(context);
-          updateState(() {});
+          updateState(() => item.needsReview = false);
         },
         child: Stack(
           alignment: Alignment.center,
@@ -170,7 +176,10 @@ class AddItemPantryItemForm extends StatelessWidget {
       onTap: () async {
         final pickedDate = await DatePickerService.pickDate(context: context);
         if (pickedDate != null) {
-          updateState(() => item.expireDate.text = pickedDate);
+          updateState(() {
+            item.expireDate.text = pickedDate;
+            item.needsReview = false;
+          });
         }
       },
       child: AppTextField(
