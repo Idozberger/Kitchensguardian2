@@ -94,6 +94,12 @@ Future<Map<String, dynamic>> _pantryImplScanRecipt(
   required String kitchenId,
 }) async {
   try {
+    if (!File(filePath).existsSync()) {
+      throw const Failure(
+        'Receipt photo could not be found. Please retake the photo.',
+      );
+    }
+
     final formData = FormData.fromMap({
       "file": await MultipartFile.fromFile(
         filePath,
@@ -112,7 +118,7 @@ Future<Map<String, dynamic>> _pantryImplScanRecipt(
         response.data,
       );
       final Object? message = data['error'] ?? 'Unknown error';
-      throw apiExceptionFrom(message);
+      throw ServerFailure(message.toString());
     }
 
     final Map<String, dynamic> res = jsonObjectFromResponseData(response.data);

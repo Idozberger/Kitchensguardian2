@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:foodkitchen/features/pantry/domain/entities/scan_receipt_item.dart';
 
 class ScanReceiptItemModel extends ScanReceiptItemEntity {
@@ -19,7 +17,7 @@ class ScanReceiptItemModel extends ScanReceiptItemEntity {
       unit: json?['unit'] as String? ?? 'unit',
       amount: json?['quantity'] as String? ?? '0',
       expireDate: json?['expiry_date'] as String? ?? '0',
-      thumbnail: json?['thumbnail'] as Uint8List? ?? Uint8List(0),
+      thumbnail: json?['thumbnail'] as String? ?? '',
       group: json?['storage'] as String? ?? 'Refrigerator',
       needsReview: json?['needs_review'] as bool? ?? false,
     );
@@ -41,7 +39,7 @@ class ScanReceiptItemModel extends ScanReceiptItemEntity {
     String? unit,
     String? amount,
     String? expireDate,
-    Uint8List? thumbnail,
+    String? thumbnail,
     String? group,
     bool? needsReview,
   }) {

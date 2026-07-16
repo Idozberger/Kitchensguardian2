@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
+import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
@@ -56,67 +57,8 @@ class _FavouriteFoodPageState extends State<FavouriteFoodPage> {
                   ),
                 )
               : SafeArea(
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: gapSymmetric(horizontal: 20, vertical: 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Your all favorite food list",
-                            style: Theme.of(context).textTheme.headlineLarge,
-                          ),
-                          ListView.builder(
-                            itemCount: state.favouriteRecipes!.length,
-                            shrinkWrap: true,
-                            physics: NeverScrollableScrollPhysics(),
-                            padding: EdgeInsets.zero,
-                            itemBuilder: (context, index) {
-                              final recipe = state.favouriteRecipes![index];
-                              return Padding(
-                                padding: gapOnly(top: 10),
-                                child: UpperTile(
-                                  horizontalPadding: 8,
-                                  verticalPadding: 8,
-                                  widget: RecipeTile(
-                                    onTap: () {
-                                      context.pushNamed(
-                                        Routes.generateRecipesDetails,
-                                        extra: {
-                                          "meal_type_entity": recipe,
-                                          "is_plan": false,
-                                          "is_edit": false,
-                                        },
-                                      );
-                                    },
-                                    title: recipe.title,
-                                    subtitle: recipe.cookingTime,
-                                    uint8list: recipe.thumbnail,
-                                    trailingIcon:
-                                        AppAssets.arrowForwardAndroidSvg,
-                                    errorText:
-                                        recipe.missingIngredients.isNotEmpty
-                                        ? "Some items are missing*"
-                                        : "",
-
-                                    onTrailingTap: () {
-                                      context.pushNamed(
-                                        Routes.generateRecipesDetails,
-                                        extra: {
-                                          "meal_type_entity": recipe,
-                                          "is_plan": false,
-                                          "is_edit": false,
-                                        },
-                                      );
-                                    },
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
+                  child: FavouriteRecipesListView(
+                    recipes: state.favouriteRecipes!,
                   ),
                 );
         },
@@ -165,6 +107,69 @@ class _FavouriteFoodPageState extends State<FavouriteFoodPage> {
         "Favorite Food",
         style: Theme.of(context).textTheme.headlineLarge,
       ),
+    );
+  }
+}
+
+/// Lazily-built favourite recipes list. Extracted so the `ListView.builder`
+/// shape - required as favourites accumulate over time - is directly
+/// testable without standing up `PlannerBloc`/`UserCubit`.
+class FavouriteRecipesListView extends StatelessWidget {
+  const FavouriteRecipesListView({super.key, required this.recipes});
+
+  final List<RecipeEntity> recipes;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      padding: gapSymmetric(horizontal: 20, vertical: 20),
+      itemCount: recipes.length + 1,
+      itemBuilder: (context, index) {
+        if (index == 0) {
+          return Text(
+            "Your all favorite food list",
+            style: Theme.of(context).textTheme.headlineLarge,
+          );
+        }
+
+        final recipe = recipes[index - 1];
+        return Padding(
+          padding: gapOnly(top: 10),
+          child: UpperTile(
+            horizontalPadding: 8,
+            verticalPadding: 8,
+            widget: RecipeTile(
+              onTap: () {
+                context.pushNamed(
+                  Routes.generateRecipesDetails,
+                  extra: {
+                    "meal_type_entity": recipe,
+                    "is_plan": false,
+                    "is_edit": false,
+                  },
+                );
+              },
+              title: recipe.title,
+              subtitle: recipe.cookingTime,
+              uint8list: recipe.thumbnail,
+              trailingIcon: AppAssets.arrowForwardAndroidSvg,
+              errorText: recipe.missingIngredients.isNotEmpty
+                  ? "Some items are missing*"
+                  : "",
+              onTrailingTap: () {
+                context.pushNamed(
+                  Routes.generateRecipesDetails,
+                  extra: {
+                    "meal_type_entity": recipe,
+                    "is_plan": false,
+                    "is_edit": false,
+                  },
+                );
+              },
+            ),
+          ),
+        );
+      },
     );
   }
 }

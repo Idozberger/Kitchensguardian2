@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:foodkitchen/core/common/data/model/pantry_model.dart';
+import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/core/global/functions/api_endpoints.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
 import 'package:foodkitchen/core/services/notifications/flutter_local_notifications_service.dart';

@@ -154,7 +154,7 @@ void _onIncrementItem(
     );
 
     final item = updatedItems[event.index] as ScanReceiptItemModel;
-    String amount = (int.parse(item.amount) + 1).toString();
+    String amount = ((int.tryParse(item.amount) ?? 0) + 1).toString();
     updatedItems[event.index] = item.copyWith(amount: amount);
 
     emit(
@@ -180,7 +180,8 @@ void _onDecrementItem(
     );
 
     final item = updatedItems[event.index] as ScanReceiptItemModel;
-    String amount = (int.parse(item.amount) - 1).toString();
+    final currentAmount = int.tryParse(item.amount) ?? 0;
+    String amount = (currentAmount > 0 ? currentAmount - 1 : 0).toString();
     updatedItems[event.index] = item.copyWith(amount: amount);
 
     emit(

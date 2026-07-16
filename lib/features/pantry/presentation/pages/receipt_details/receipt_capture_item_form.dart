@@ -159,7 +159,7 @@ class _ItemImagePicker extends StatelessWidget {
             SafeCircleAvatar(
               radius: t(24),
               file: item.file,
-              memoryBytes: item.fileBytes,
+              memoryBytes: item.displayBytes,
               backgroundColor: Colors.transparent,
               fallback: const CircleAvatar(
                 radius: 24,
