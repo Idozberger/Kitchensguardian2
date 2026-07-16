@@ -158,6 +158,7 @@ import 'package:foodkitchen/features/profile/presentation/bloc/profile_bloc.dart
 import 'package:foodkitchen/features/smart_kitchen_setup/data/datasource/smart_kitchen_setup_datasource.dart';
 import 'package:foodkitchen/features/smart_kitchen_setup/data/repository/smart_kitchen_setup_repo_impl.dart';
 import 'package:foodkitchen/features/smart_kitchen_setup/domain/repository/smart_kitchen_setup_repository.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/domain/usecases/finalize_kitchen_setup.dart';
 import 'package:foodkitchen/features/smart_kitchen_setup/domain/usecases/scan_kitchen_images.dart';
 import 'package:foodkitchen/features/smart_kitchen_setup/domain/usecases/skip_kitchen_setup.dart';
 import 'package:foodkitchen/features/smart_kitchen_setup/presentation/bloc/smart_kitchen_setup_bloc.dart';

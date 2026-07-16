@@ -1,3 +1,4 @@
+import 'package:foodkitchen/core/utils/json_conversion.dart';
 import 'package:foodkitchen/features/smart_kitchen_setup/domain/entities/scanned_item.dart';
 
 class ScannedItemModel extends ScannedItemEntity {
@@ -12,20 +13,25 @@ class ScannedItemModel extends ScannedItemEntity {
     required super.recommendedStorage,
     required super.tempId,
     required super.unit,
+    super.sharedIngredientId,
+    super.libraryMatch,
   });
 
   factory ScannedItemModel.fromJson(Map<String, dynamic> json) {
+    final sharedId = json['shared_ingredient_id'];
     return ScannedItemModel(
-      area: json['area'] as String,
-      brand: json['brand'] as String?,
-      confidence: (json['confidence'] as num).toInt(),
-      expiryDate: json['expiry_date'] as String,
-      name: json['name'] as String,
-      needsReview: json['needs_review'] as bool? ?? false,
-      quantity: (json['quantity'] as num).toInt(),
-      recommendedStorage: json['recommended_storage'] as String,
-      tempId: json['temp_id'] as String,
-      unit: json['unit'] as String,
+      area: readJsonString(json, 'area'),
+      brand: json['brand']?.toString(),
+      confidence: (json['confidence'] as num?)?.toInt() ?? 0,
+      expiryDate: readJsonString(json, 'expiry_date'),
+      name: readJsonString(json, 'name'),
+      needsReview: readJsonBool(json, 'needs_review'),
+      quantity: (json['quantity'] as num?)?.toInt() ?? 0,
+      recommendedStorage: readJsonString(json, 'recommended_storage'),
+      tempId: readJsonString(json, 'temp_id'),
+      unit: readJsonString(json, 'unit'),
+      sharedIngredientId: sharedId?.toString(),
+      libraryMatch: json['library_match']?.toString(),
     );
   }
 
@@ -41,6 +47,10 @@ class ScannedItemModel extends ScannedItemEntity {
       'recommended_storage': recommendedStorage,
       'temp_id': tempId,
       'unit': unit,
+      if (sharedIngredientId != null)
+        'shared_ingredient_id':
+            int.tryParse(sharedIngredientId!) ?? sharedIngredientId,
+      if (libraryMatch != null) 'library_match': libraryMatch,
     };
   }
 
@@ -56,6 +66,8 @@ class ScannedItemModel extends ScannedItemEntity {
       recommendedStorage: recommendedStorage,
       tempId: tempId,
       unit: unit,
+      sharedIngredientId: sharedIngredientId,
+      libraryMatch: libraryMatch,
     );
   }
 }

@@ -5,8 +5,15 @@ import 'package:foodkitchen/core/services/dio/dio_helper.dart';
 import 'package:foodkitchen/core/utils/dev_logging.dart';
 import 'package:foodkitchen/core/utils/json_conversion.dart';
 
+typedef KitchenSetupScanResponse = ({
+  String sessionId,
+  List<Map<String, dynamic>> items,
+});
+
+typedef KitchenSetupConfirmResponse = ({int addedCount, int updatedCount});
+
 abstract class SmartKitchenSetupDatasource {
-  Future<List<Map<String, dynamic>>> getScanResult({
+  Future<KitchenSetupScanResponse> getScanResult({
     required String kitchenId,
     required List<String> fridgeFilePaths,
     required List<String> freezerFilePaths,
@@ -14,6 +21,14 @@ abstract class SmartKitchenSetupDatasource {
     required List<String> spicesFilePaths,
     required List<String> miscFilePaths,
   });
+
+  Future<void> editSetup({
+    required String sessionId,
+    required List<Map<String, dynamic>> items,
+  });
+
+  Future<KitchenSetupConfirmResponse> confirmSetup({required String sessionId});
+
   Future<String> skipKitchenSetup({required String kitchenId});
 }
 
@@ -23,7 +38,7 @@ class SmartKitchenSetupDatasourceImpl implements SmartKitchenSetupDatasource {
   SmartKitchenSetupDatasourceImpl({required this.dio});
 
   @override
-  Future<List<Map<String, dynamic>>> getScanResult({
+  Future<KitchenSetupScanResponse> getScanResult({
     required String kitchenId,
     required List<String> fridgeFilePaths,
     required List<String> freezerFilePaths,
@@ -74,6 +89,11 @@ class SmartKitchenSetupDatasourceImpl implements SmartKitchenSetupDatasource {
         response.data,
       );
 
+      final sessionId = readJsonString(decoded, 'session_id');
+      if (sessionId.isEmpty) {
+        throw apiExceptionFrom('Missing setup session id');
+      }
+
       final Object? autoRaw = decoded['auto_confirmed'];
       final List<Map<String, dynamic>> autoConfirmed = autoRaw is List
           ? autoRaw
@@ -82,7 +102,8 @@ class SmartKitchenSetupDatasourceImpl implements SmartKitchenSetupDatasource {
                 .toList()
           : <Map<String, dynamic>>[];
 
-      final Object? reviewRaw = decoded['user_review'];
+      final Object? reviewRaw =
+          decoded['needs_review'] ?? decoded['user_review'];
       final List<Map<String, dynamic>> userReview = reviewRaw is List
           ? reviewRaw
                 .map(jsonObjectFromResponseData)
@@ -90,12 +111,61 @@ class SmartKitchenSetupDatasourceImpl implements SmartKitchenSetupDatasource {
                 .toList()
           : <Map<String, dynamic>>[];
 
-      return [...autoConfirmed, ...userReview];
+      return (sessionId: sessionId, items: [...autoConfirmed, ...userReview]);
     } on DioException catch (e) {
       throw await dio.handleError(e);
     } catch (e, stacktrace) {
       devPrint('Stacktrace: $stacktrace');
       rethrow;
+    }
+  }
+
+  @override
+  Future<void> editSetup({
+    required String sessionId,
+    required List<Map<String, dynamic>> items,
+  }) async {
+    try {
+      final response = await dio.put(
+        AppConstants.kitchenSetupEdit,
+        data: {'session_id': sessionId, 'items': items},
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final Map<String, dynamic> data = jsonObjectFromResponseData(
+          response.data,
+        );
+        throw apiExceptionFrom(data['error'] ?? 'Unknown error');
+      }
+    } on DioException catch (e) {
+      throw await dio.handleError(e);
+    }
+  }
+
+  @override
+  Future<KitchenSetupConfirmResponse> confirmSetup({
+    required String sessionId,
+  }) async {
+    try {
+      final response = await dio.post(
+        AppConstants.kitchenSetupConfirm,
+        data: {'session_id': sessionId},
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final Map<String, dynamic> data = jsonObjectFromResponseData(
+          response.data,
+        );
+        throw apiExceptionFrom(data['error'] ?? 'Unknown error');
+      }
+
+      final Map<String, dynamic> ok = jsonObjectFromResponseData(response.data);
+      return (
+        addedCount: readJsonInt(ok, 'added_count'),
+        updatedCount: readJsonInt(ok, 'updated_count'),
+      );
+    } on DioException catch (e) {
+      throw await dio.handleError(e);
     }
   }
 

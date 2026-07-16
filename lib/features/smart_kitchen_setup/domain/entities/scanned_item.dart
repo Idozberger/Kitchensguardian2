@@ -9,6 +9,8 @@ class ScannedItemEntity {
   final String recommendedStorage;
   final String tempId;
   final String unit;
+  final String? sharedIngredientId;
+  final String? libraryMatch;
 
   const ScannedItemEntity({
     required this.area,
@@ -21,5 +23,7 @@ class ScannedItemEntity {
     required this.recommendedStorage,
     required this.tempId,
     required this.unit,
+    this.sharedIngredientId,
+    this.libraryMatch,
   });
 }

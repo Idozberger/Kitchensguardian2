@@ -8,6 +8,7 @@ import 'package:foodkitchen/core/error/user_facing_error_mapper.dart';
 import 'package:foodkitchen/core/services/document_scanning/document_scanning_service.dart';
 import 'package:foodkitchen/core/utils/dev_logging.dart';
 import 'package:foodkitchen/features/smart_kitchen_setup/data/models/kitchen_section_model.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/domain/usecases/finalize_kitchen_setup.dart';
 import 'package:foodkitchen/features/smart_kitchen_setup/domain/usecases/scan_kitchen_images.dart';
 import 'package:foodkitchen/features/smart_kitchen_setup/domain/usecases/skip_kitchen_setup.dart';
 import 'package:foodkitchen/features/smart_kitchen_setup/presentation/bloc/smart_kitchen_setup_event.dart';
@@ -18,14 +19,17 @@ class SmartKitchenSetupBloc
     extends Bloc<SmartKitchenSetupEvent, SmartKitchenSetupState> {
   final UserCubit _userCubit;
   final ScanKitchenImagesUseCase _scanKitchenImagesUseCase;
+  final FinalizeKitchenSetup _finalizeKitchenSetup;
   final SkipKitchenSetup _skipKitchenSetup;
 
   SmartKitchenSetupBloc({
     required UserCubit userCubit,
     required ScanKitchenImagesUseCase scanKitchenImagesUseCase,
+    required FinalizeKitchenSetup finalizeKitchenSetup,
     required SkipKitchenSetup skipKitchenSetup,
   }) : _userCubit = userCubit,
        _scanKitchenImagesUseCase = scanKitchenImagesUseCase,
+       _finalizeKitchenSetup = finalizeKitchenSetup,
        _skipKitchenSetup = skipKitchenSetup,
        super(SmartKitchenSetupState.initial()) {
     on<SmartKitchenSetupStarted>(_onStarted);
@@ -33,6 +37,8 @@ class SmartKitchenSetupBloc
     on<SmartKitchenSetupSectionCleared>(_onSectionCleared);
     on<SmartKitchenSetupConfirmed>(_onConfirmed);
     on<SmartKitchenSetupApiCalled>(_onApiCalled);
+    on<SmartKitchenSetupFinalizeReviewed>(_onFinalizeReviewed);
+    on<SmartKitchenSetupFinalizeAcknowledged>(_onFinalizeAcknowledged);
     on<SkipKitchenSetupEvent>(_onSkipKitchenSetupEvent);
     on<AddDefaultStoragesEvent>(_onAddDefaultStoragesEvent);
   }
@@ -186,7 +192,15 @@ class SmartKitchenSetupBloc
     Emitter<SmartKitchenSetupState> emit,
   ) async {
     if (state.isLoading) return;
-    emit(state.copyWith(isScanning: true, clearError: true, isLoading: true));
+    emit(
+      state.copyWith(
+        isScanning: true,
+        clearError: true,
+        isLoading: true,
+        scannedItems: [],
+        sessionId: '',
+      ),
+    );
 
     final params = ScanKitchenImagesUseCaseParams(
       kitchenId: event.kitchenId,
@@ -215,17 +229,64 @@ class SmartKitchenSetupBloc
           ),
         );
       },
-      (scannedItems) {
+      (scanResult) {
         emit(
           state.copyWith(
             isScanning: false,
             isConfirmed: true,
             isLoading: false,
-            scannedItems: scannedItems,
+            sessionId: scanResult.sessionId,
+            scannedItems: scanResult.items,
           ),
         );
       },
     );
+  }
+
+  Future<void> _onFinalizeReviewed(
+    SmartKitchenSetupFinalizeReviewed event,
+    Emitter<SmartKitchenSetupState> emit,
+  ) async {
+    final sessionId = state.sessionId;
+    if (sessionId == null || sessionId.isEmpty) {
+      emit(
+        state.copyWith(
+          errorMessage: 'Setup session expired. Please scan again.',
+        ),
+      );
+      return;
+    }
+
+    if (state.isFinalizing) return;
+
+    emit(state.copyWith(isFinalizing: true, clearError: true));
+
+    final result = await _finalizeKitchenSetup(
+      FinalizeKitchenSetupParams(sessionId: sessionId, items: event.items),
+    );
+
+    result.fold(
+      (failure) {
+        emit(
+          state.copyWith(
+            isFinalizing: false,
+            errorMessage: failure.userMessage,
+          ),
+        );
+      },
+      (message) {
+        emit(
+          state.copyWith(isFinalizing: false, finalizeSuccessMessage: message),
+        );
+      },
+    );
+  }
+
+  void _onFinalizeAcknowledged(
+    SmartKitchenSetupFinalizeAcknowledged event,
+    Emitter<SmartKitchenSetupState> emit,
+  ) {
+    emit(state.copyWith(clearFinalizeSuccess: true));
   }
 
   List<KitchenSection> _updateSection(
