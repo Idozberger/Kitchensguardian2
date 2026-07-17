@@ -58,6 +58,7 @@ Future<void> _onGenerateRecipes(
   GenerateRecipesEvent event,
   Emitter<PlannerState> emit,
 ) async {
+  if (bloc.state.isLoading) return;
   emit(bloc.state.copyWith(isLoading: true));
 
   final res = await bloc._generateRecipes(

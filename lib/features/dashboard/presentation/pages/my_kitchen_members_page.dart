@@ -58,8 +58,8 @@ class _MyKitchenMembersPageState extends State<MyKitchenMembersPage> {
           if (state is DashboardLoading) {
             return Center(child: Lottie.asset(AppAssets.loader));
           } else if (state is DashboardLoaded) {
-            return SingleChildScrollView(
-              child: MembersList(members: state.kitchenMembers),
+            return CustomScrollView(
+              slivers: [MembersList(members: state.kitchenMembers)],
             );
           } else {
             return const EmptyMembersView();

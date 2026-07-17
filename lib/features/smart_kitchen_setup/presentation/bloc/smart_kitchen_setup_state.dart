@@ -8,9 +8,12 @@ class SmartKitchenSetupState {
   final bool isConfirmed;
   final bool isLoading;
   final bool isSkipping;
+  final bool isFinalizing;
   final String? activeSectionId;
   final String? errorMessage;
   final String? skipSuccessMessage;
+  final String? finalizeSuccessMessage;
+  final String? sessionId;
 
   final List<KitchenSection> sections;
   final List<ScannedItemEntity> scannedItems;
@@ -21,9 +24,12 @@ class SmartKitchenSetupState {
     required this.isConfirmed,
     required this.isLoading,
     required this.isSkipping,
+    required this.isFinalizing,
     required this.sections,
     required this.scannedItems,
     this.skipSuccessMessage,
+    this.finalizeSuccessMessage,
+    this.sessionId,
     this.activeSectionId,
     this.errorMessage,
   });
@@ -34,6 +40,7 @@ class SmartKitchenSetupState {
       isScanning: false,
       isConfirmed: false,
       isLoading: false,
+      isFinalizing: false,
       sections: kSections,
       scannedItems: [],
       isSkipping: false,
@@ -59,18 +66,27 @@ class SmartKitchenSetupState {
     bool clearError = false,
     bool? isSkipping,
     bool? isLoading,
+    bool? isFinalizing,
     bool clearActiveSection = false,
+    bool clearFinalizeSuccess = false,
     String? skipSuccessMessage,
+    String? finalizeSuccessMessage,
+    String? sessionId,
     List<KitchenSection>? sections,
     List<ScannedItemEntity>? scannedItems,
   }) {
     return SmartKitchenSetupState(
       skipSuccessMessage: skipSuccessMessage,
+      finalizeSuccessMessage: clearFinalizeSuccess
+          ? null
+          : (finalizeSuccessMessage ?? this.finalizeSuccessMessage),
+      sessionId: sessionId ?? this.sessionId,
       isInitial: isInitial ?? this.isInitial,
       isScanning: isScanning ?? this.isScanning,
       isConfirmed: isConfirmed ?? this.isConfirmed,
       sections: sections ?? this.sections,
       isLoading: isLoading ?? this.isLoading,
+      isFinalizing: isFinalizing ?? this.isFinalizing,
       scannedItems: scannedItems ?? this.scannedItems,
       isSkipping: isSkipping ?? this.isSkipping,
       activeSectionId: clearActiveSection

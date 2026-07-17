@@ -36,3 +36,12 @@ final class AddDefaultStoragesEvent extends SmartKitchenSetupEvent {
 
   AddDefaultStoragesEvent({required this.kitchenId});
 }
+
+final class SmartKitchenSetupFinalizeReviewed extends SmartKitchenSetupEvent {
+  final List<Map<String, dynamic>> items;
+
+  SmartKitchenSetupFinalizeReviewed({required this.items});
+}
+
+final class SmartKitchenSetupFinalizeAcknowledged
+    extends SmartKitchenSetupEvent {}

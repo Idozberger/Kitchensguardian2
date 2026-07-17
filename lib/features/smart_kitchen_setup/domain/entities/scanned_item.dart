@@ -4,10 +4,13 @@ class ScannedItemEntity {
   final int confidence;
   final String expiryDate;
   final String name;
+  final bool needsReview;
   final int quantity;
   final String recommendedStorage;
   final String tempId;
   final String unit;
+  final String? sharedIngredientId;
+  final String? libraryMatch;
 
   const ScannedItemEntity({
     required this.area,
@@ -15,9 +18,12 @@ class ScannedItemEntity {
     required this.confidence,
     required this.expiryDate,
     required this.name,
+    required this.needsReview,
     required this.quantity,
     required this.recommendedStorage,
     required this.tempId,
     required this.unit,
+    this.sharedIngredientId,
+    this.libraryMatch,
   });
 }

@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:foodkitchen/features/pantry/domain/entities/scan_receipt_item.dart';
 
 class ScanReceiptItemModel extends ScanReceiptItemEntity {
@@ -10,6 +8,7 @@ class ScanReceiptItemModel extends ScanReceiptItemEntity {
     required super.expireDate,
     required super.thumbnail,
     required super.group,
+    required super.needsReview,
   });
 
   factory ScanReceiptItemModel.fromJson(Map<String, dynamic>? json) {
@@ -18,8 +17,9 @@ class ScanReceiptItemModel extends ScanReceiptItemEntity {
       unit: json?['unit'] as String? ?? 'unit',
       amount: json?['quantity'] as String? ?? '0',
       expireDate: json?['expiry_date'] as String? ?? '0',
-      thumbnail: json?['thumbnail'] as Uint8List? ?? Uint8List(0),
+      thumbnail: json?['thumbnail'] as String? ?? '',
       group: json?['storage'] as String? ?? 'Refrigerator',
+      needsReview: json?['needs_review'] as bool? ?? false,
     );
   }
   Map<String, dynamic> toJson() {
@@ -30,6 +30,7 @@ class ScanReceiptItemModel extends ScanReceiptItemEntity {
       'expiry_date': expireDate,
       'thumbnail': thumbnail,
       'storage': group,
+      'needs_review': needsReview,
     };
   }
 
@@ -38,8 +39,9 @@ class ScanReceiptItemModel extends ScanReceiptItemEntity {
     String? unit,
     String? amount,
     String? expireDate,
-    Uint8List? thumbnail,
+    String? thumbnail,
     String? group,
+    bool? needsReview,
   }) {
     return ScanReceiptItemModel(
       name: name ?? this.name,
@@ -48,6 +50,7 @@ class ScanReceiptItemModel extends ScanReceiptItemEntity {
       expireDate: expireDate ?? this.expireDate,
       thumbnail: thumbnail ?? this.thumbnail,
       group: group ?? this.group,
+      needsReview: needsReview ?? this.needsReview,
     );
   }
 }

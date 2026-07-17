@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:foodkitchen/core/common/data/model/pantry_model.dart';
+import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/core/global/functions/api_endpoints.dart';
 import 'package:foodkitchen/core/services/dio/dio_helper.dart';
 import 'package:foodkitchen/core/services/notifications/flutter_local_notifications_service.dart';
@@ -43,6 +44,8 @@ abstract interface class PantryRemoteDatasource {
   });
   Future<String> deleteItem({required PantryModel pantryModel});
   Future<String> updateItem({required PantryModel pantryModel});
+  Future<({List<Map<String, dynamic>> results, bool hasMore})>
+  searchSharedIngredients({required String query, required int page});
 }
 
 class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
@@ -120,4 +123,9 @@ class PantryRemoteDatasourceImpl implements PantryRemoteDatasource {
   @override
   Future<String> addRequestItem({required PantryModel pantryModel}) =>
       _pantryImplAddRequestItem(this, pantryModel: pantryModel);
+
+  @override
+  Future<({List<Map<String, dynamic>> results, bool hasMore})>
+  searchSharedIngredients({required String query, required int page}) =>
+      _pantryImplSearchSharedIngredients(this, query: query, page: page);
 }

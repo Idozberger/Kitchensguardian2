@@ -34,5 +34,8 @@ class DocumentScannerService {
   Future<void> scanDocument(BuildContext context, {bool replacement = false}) =>
       _docScannerScanDocument(this, context, replacement: replacement);
 
+  Future<String?> compressImage(String sourcePath) =>
+      _docScannerCompressImage(this, sourcePath);
+
   Future<void> cleanupTempFiles() => _docScannerCleanupTempFiles(this);
 }

@@ -136,25 +136,23 @@ extension _GroceryBodyLayout on _GroceryBodyState {
       widget: Scrollbar(
         controller: _itemsScrollController,
         thumbVisibility: true,
-        child: SingleChildScrollView(
+        child: ListView.builder(
           controller: _itemsScrollController,
-          child: Padding(
-            padding: gapSymmetric(horizontal: 15),
-            child: Column(
-              children: List.generate(items.length, (index) {
-                final item = items[index];
+          padding: gapSymmetric(horizontal: 15),
+          itemCount: items.length,
+          itemBuilder: (context, index) {
+            final item = items[index];
 
-                return GroceryListItem(
-                  grocery: item,
-                  isChecked: groceryBodyIsItemChecked(item.itemId),
-                  isFinalList: _selectedTabIndex == 2,
-                  onChanged: (_) => _toggleItemSelection(item.itemId),
-                  onDelete: () => groceryBodyHandleDeleteItem(item.itemId),
-                  showDivider: index != items.length - 1,
-                );
-              }),
-            ),
-          ),
+            return GroceryListItem(
+              key: ValueKey(item.itemId),
+              grocery: item,
+              isChecked: groceryBodyIsItemChecked(item.itemId),
+              isFinalList: _selectedTabIndex == 2,
+              onChanged: (_) => _toggleItemSelection(item.itemId),
+              onDelete: () => groceryBodyHandleDeleteItem(item.itemId),
+              showDivider: index != items.length - 1,
+            );
+          },
         ),
       ),
     );

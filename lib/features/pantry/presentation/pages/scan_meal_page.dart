@@ -10,6 +10,7 @@ import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/dialogs/camera_permission_denied.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
+import 'package:foodkitchen/core/services/document_scanning/document_scanning_service.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/dev_logging.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
@@ -113,11 +114,15 @@ class _ScanMealPageState extends State<ScanMealPage>
 
     try {
       final image = await _controller!.takePicture();
-      setState(() => capturedImagePath = image.path);
+      final compressedPath = await DocumentScannerService().compressImage(
+        image.path,
+      );
+      final finalPath = compressedPath ?? image.path;
+      setState(() => capturedImagePath = finalPath);
 
       context.pushNamed(
         Routes.capturedImageDetails,
-        extra: {"image_path": image.path},
+        extra: {"image_path": finalPath},
       );
     } catch (e) {
       devPrint("Capture error: $e");

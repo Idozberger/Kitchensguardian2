@@ -140,6 +140,7 @@ Future<void> _onSwitchKitchen(
   SwitchKitchenEvent event,
   Emitter<KitchenState> emit,
 ) async {
+  if (bloc.state is KitchensLoading) return;
   emit(KitchensLoading());
   final kitchenId = event.kitchen.kitchenId;
   if (event.kitchen.invitationCode.isNotEmpty) {

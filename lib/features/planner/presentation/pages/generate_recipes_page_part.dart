@@ -4,25 +4,32 @@ part of 'package:foodkitchen/features/planner/presentation/pages/generate_recipe
 
 extension _GenerateRecipesPageWidgets on _GenerateRecipesPageState {
   Widget buildGenerateRecipesBody(PlannerState state) {
+    final bool isLoading = state.isLoading || state.isFavLoading;
     return SafeArea(
-      child: SingleChildScrollView(
-        padding: gapSymmetric(horizontal: 20, vertical: 14),
-        child: Column(
-          children: [
-            if (state.startedRecipe.isNotEmpty)
-              buildRecipeInProgressNotification(state),
-            buildGenerateRecipesSearchBar(),
-            if (state.isLoading || state.isFavLoading)
-              buildGenerateRecipesLoadingState()
-            else ...[
-              if (state.recipes != null && state.recipes!.isNotEmpty)
-                gap(height: 14),
-              buildGeneratedRecipesSection(state),
-              gap(height: 14),
-              buildSavedRecipesSection(state),
-            ],
-          ],
-        ),
+      child: CustomScrollView(
+        slivers: [
+          SliverPadding(
+            padding: gapSymmetric(horizontal: 20, vertical: 14),
+            sliver: SliverMainAxisGroup(
+              slivers: [
+                if (state.startedRecipe.isNotEmpty)
+                  SliverToBoxAdapter(
+                    child: buildRecipeInProgressNotification(state),
+                  ),
+                SliverToBoxAdapter(child: buildGenerateRecipesSearchBar()),
+                if (isLoading)
+                  SliverToBoxAdapter(child: buildGenerateRecipesLoadingState())
+                else ...[
+                  if (state.recipes != null && state.recipes!.isNotEmpty)
+                    SliverToBoxAdapter(child: gap(height: 14)),
+                  buildGeneratedRecipesSection(state),
+                  SliverToBoxAdapter(child: gap(height: 14)),
+                  buildSavedRecipesSection(state),
+                ],
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

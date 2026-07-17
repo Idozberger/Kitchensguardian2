@@ -10,16 +10,25 @@ List<PantryItem> receiptMapScanToPantryItems(ScanReceiptEntity scanReceipt) {
           nameController: TextEditingController(text: e.name),
           qtyController: TextEditingController(text: e.amount),
           expireDate: TextEditingController(
-            text: e.expireDate == "null"
-                ? formatDate(DateTime.now())
-                : e.expireDate,
+            text: _isParseableExpiryDate(e.expireDate)
+                ? e.expireDate
+                : formatDate(DateTime.now()),
           ),
           manuFacturingDate: TextEditingController(),
           unit: e.unit,
-          fileBytes: e.thumbnail,
-        ),
+          thumbnailBase64: e.thumbnail,
+        )..needsReview = e.needsReview,
       )
       .toList();
+}
+
+bool _isParseableExpiryDate(String value) {
+  try {
+    parseDate(value);
+    return true;
+  } catch (_) {
+    return false;
+  }
 }
 
 String? receiptValidatePantryItem(PantryItem item, int index) {
@@ -35,6 +44,10 @@ String? receiptValidatePantryItem(PantryItem item, int index) {
     return "$displayName: item name must be at least 3 characters long.";
   }
   if (qty.isEmpty) return "$displayName: please enter the quantity.";
+  final parsedQty = double.tryParse(qty);
+  if (parsedQty == null || parsedQty <= 0) {
+    return "$displayName: quantity must be a valid number greater than 0.";
+  }
   if (unit == null || unit.isEmpty) {
     return "$displayName: please select a unit.";
   }
@@ -66,6 +79,11 @@ Future<String?> receiptPantryItemThumbnailBase64(PantryItem item) async {
   try {
     if (item.file != null) {
       return await receiptCompressImageFile(item.file!);
+    } else if (item.thumbnailBase64 != null &&
+        item.thumbnailBase64!.isNotEmpty) {
+      // Reuse the original scan payload as-is - avoids a pointless
+      // decode-then-re-encode round trip for items the user never touched.
+      return "data:image/jpeg;base64,${item.thumbnailBase64}";
     } else if (item.fileBytes != null && item.fileBytes!.isNotEmpty) {
       return "data:image/jpeg;base64,${base64Encode(item.fileBytes!)}";
     }
@@ -73,6 +91,64 @@ Future<String?> receiptPantryItemThumbnailBase64(PantryItem item) async {
     devPrint("Image compression failed: $e");
   }
   return null;
+}
+
+/// Lazily-built receipt items list (image preview + one row per scanned
+/// item). Extracted from [_CaptureDetailsPageState] so the `ListView.builder`
+/// shape — required for high-volume receipts — is directly testable without
+/// standing up the page's bloc/DI dependencies.
+class ReceiptItemsListView extends StatelessWidget {
+  const ReceiptItemsListView({
+    super.key,
+    required this.imagePath,
+    required this.items,
+    required this.userCubit,
+    required this.onItemRemoved,
+    required this.onFieldChanged,
+  });
+
+  final String imagePath;
+  final List<PantryItem> items;
+  final UserCubit userCubit;
+  final ValueChanged<PantryItem> onItemRemoved;
+  final VoidCallback onFieldChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      padding: gapAll(20),
+      itemCount: items.length + 1,
+      itemBuilder: (context, index) {
+        if (index == 0) {
+          return Column(
+            children: [
+              ImagePreviewWidget(imagePath: imagePath),
+              SizedBox(height: h(12)),
+            ],
+          );
+        }
+
+        final itemIndex = index - 1;
+        final item = items[itemIndex];
+        return Column(
+          children: [
+            if (itemIndex > 0)
+              Padding(
+                padding: gapOnly(bottom: 16),
+                child: const Divider(color: Color(0xFFF4F4F4), height: 1),
+              ),
+            ReceiptPantryItemFormTile(
+              item: item,
+              isFirstItem: itemIndex == 0,
+              userCubit: userCubit,
+              onItemRemoved: () => onItemRemoved(item),
+              onFieldChanged: onFieldChanged,
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
 
 Future<Pantry> receiptBuildPantryFromItems({
@@ -95,6 +171,7 @@ Future<Pantry> receiptBuildPantryFromItems({
         expiryStatus: '',
         stockStatus: '',
         itemId: '',
+        sharedIngredientId: item.sharedIngredientId,
       ),
     );
   }

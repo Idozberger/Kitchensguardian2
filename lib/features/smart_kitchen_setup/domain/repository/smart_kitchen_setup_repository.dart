@@ -1,9 +1,9 @@
 import 'package:foodkitchen/core/error/failures.dart';
-import 'package:foodkitchen/features/smart_kitchen_setup/domain/entities/scanned_item.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/domain/entities/kitchen_setup_scan_result.dart';
 import 'package:fpdart/fpdart.dart';
 
 abstract class SmartKitchenSetupRepository {
-  Future<List<ScannedItemEntity>> scanKitchenImages({
+  Future<Either<Failure, KitchenSetupScanResult>> scanKitchenImages({
     required String kitchenId,
     required List<String> fridgeFilePaths,
     required List<String> freezerFilePaths,
@@ -11,5 +11,11 @@ abstract class SmartKitchenSetupRepository {
     required List<String> spicesFilePaths,
     required List<String> miscFilePaths,
   });
+
+  Future<Either<Failure, String>> finalizeSetup({
+    required String sessionId,
+    required List<Map<String, dynamic>> items,
+  });
+
   Future<Either<Failure, String>> skipKitchenSetup({required String kitchenId});
 }

@@ -8,6 +8,7 @@ import 'package:foodkitchen/core/common/domain/entities/pantries_entity.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';
 import 'package:foodkitchen/core/error/failures.dart';
+import 'package:foodkitchen/core/logging/app_logger.dart';
 import 'package:foodkitchen/core/utils/dev_logging.dart';
 import 'package:foodkitchen/core/utils/json_conversion.dart';
 import 'package:foodkitchen/features/pantry/data/datasource/pantry_remote_datasource.dart';
@@ -84,38 +85,48 @@ class PantryRepositoryImpl implements PantryRepository {
       List<ScanReceiptItemModel> items = [];
 
       for (final Object? raw in itemsJson) {
-        final Map<String, dynamic> e = jsonObjectFromResponseData(raw);
-        final name = readJsonString(e, 'name');
-        final unit = readJsonString(e, 'unit', fallback: 'unit');
-        final amount = readJsonString(e, 'amount');
-        final group = readJsonString(e, 'recommended_storage');
-        final expireDate = readJsonString(e, 'expiry_date');
-        final Object? thumbRaw = e['thumbnail'];
-        Uint8List thumbnailBytes = Uint8List(0);
-        if (thumbRaw is Uint8List) {
-          thumbnailBytes = thumbRaw;
-        } else if (thumbRaw is String && thumbRaw.isNotEmpty) {
-          try {
-            thumbnailBytes = base64Decode(thumbRaw);
-          } catch (_) {
-            thumbnailBytes = Uint8List(0);
-          }
+        try {
+          final Map<String, dynamic> e = jsonObjectFromResponseData(raw);
+          final name = readJsonString(e, 'name');
+          final unit = readJsonString(e, 'unit', fallback: 'unit');
+          final amount = readJsonString(e, 'amount');
+          final group = readJsonString(e, 'recommended_storage');
+          final expireDate = readJsonString(e, 'expiry_date');
+          final needsReview = readJsonBool(e, 'needs_review');
+          // Keep the raw base64 payload as-is - decoding happens lazily at
+          // render time (PantryItem.displayBytes) so a large receipt doesn't
+          // decode every item's image up front.
+          final Object? thumbRaw = e['thumbnail'];
+          final String thumbnailBase64 = thumbRaw is String
+              ? thumbRaw
+              : thumbRaw is Uint8List
+              ? base64Encode(thumbRaw)
+              : '';
+
+          devPrint(
+            "Item parsed - name: $name, unit: $unit, quantity: $amount, expireDate: $expireDate",
+          );
+
+          items.add(
+            ScanReceiptItemModel(
+              group: group,
+              name: name,
+              unit: unit,
+              amount: amount.isEmpty ? "1" : amount,
+              expireDate: expireDate,
+              thumbnail: thumbnailBase64,
+              needsReview: needsReview,
+            ),
+          );
+        } catch (itemError, itemStack) {
+          // One malformed OCR line shouldn't drop every other correctly-parsed item.
+          AppLogger.recordNonFatal(
+            itemError,
+            itemStack,
+            reason: 'scan_receipt_item_parse',
+          );
+          devPrint("Skipped malformed scanned item: $itemError");
         }
-
-        devPrint(
-          "Item parsed - name: $name, unit: $unit, quantity: $amount, expireDate: $expireDate",
-        );
-
-        items.add(
-          ScanReceiptItemModel(
-            group: group,
-            name: name,
-            unit: unit,
-            amount: amount.isEmpty ? "1" : amount,
-            expireDate: expireDate,
-            thumbnail: thumbnailBytes,
-          ),
-        );
       }
 
       final receipt = ScanReceiptModel(

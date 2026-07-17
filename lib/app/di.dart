@@ -103,7 +103,9 @@ import 'package:foodkitchen/features/kitchens/domain/usecases/submit_kitchen_joi
 import 'package:foodkitchen/features/kitchens/presentation/bloc/kitchen_bloc.dart';
 import 'package:foodkitchen/features/onboarding/presentation/bloc/user_bloc.dart';
 import 'package:foodkitchen/features/pantry/data/datasource/pantry_remote_datasource.dart';
+import 'package:foodkitchen/features/pantry/data/repository/item_search_repository_impl.dart';
 import 'package:foodkitchen/features/pantry/data/repository/pantry_repository_impl.dart';
+import 'package:foodkitchen/features/pantry/domain/repository/item_search_repository.dart';
 import 'package:foodkitchen/features/pantry/domain/repository/pantry_repository.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/add_pantry_item.dart';
 import 'package:foodkitchen/features/pantry/domain/usecases/cart_items.dart';
@@ -156,6 +158,7 @@ import 'package:foodkitchen/features/profile/presentation/bloc/profile_bloc.dart
 import 'package:foodkitchen/features/smart_kitchen_setup/data/datasource/smart_kitchen_setup_datasource.dart';
 import 'package:foodkitchen/features/smart_kitchen_setup/data/repository/smart_kitchen_setup_repo_impl.dart';
 import 'package:foodkitchen/features/smart_kitchen_setup/domain/repository/smart_kitchen_setup_repository.dart';
+import 'package:foodkitchen/features/smart_kitchen_setup/domain/usecases/finalize_kitchen_setup.dart';
 import 'package:foodkitchen/features/smart_kitchen_setup/domain/usecases/scan_kitchen_images.dart';
 import 'package:foodkitchen/features/smart_kitchen_setup/domain/usecases/skip_kitchen_setup.dart';
 import 'package:foodkitchen/features/smart_kitchen_setup/presentation/bloc/smart_kitchen_setup_bloc.dart';

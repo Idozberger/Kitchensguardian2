@@ -142,7 +142,7 @@ class _SmartKitchenSetupPageState extends State<SmartKitchenSetupPage> {
           children: [
             gapVertical(12),
             ConfirmButton(
-              canConfirm: state.canConfirm,
+              isLoading: state.isLoading,
               onConfirm: state.isSkipping
                   ? () {}
                   : state.completedCount > 0

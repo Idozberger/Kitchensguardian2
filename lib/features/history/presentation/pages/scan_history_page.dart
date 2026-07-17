@@ -49,7 +49,8 @@ class _ScanHistoryPageState extends State<ScanHistoryPage> {
     _scrollController.addListener(() {
       if (_isAtEndOfList() &&
           !_isFetchingMore &&
-          !_scanHistoryCubit.state.isLoading) {
+          !_scanHistoryCubit.state.isLoading &&
+          _scanHistoryCubit.state.hasMore) {
         _loadMoreHistory();
       }
     });

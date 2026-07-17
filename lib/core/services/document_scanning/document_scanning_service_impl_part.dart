@@ -27,6 +27,8 @@ Future<String?> _docScannerCompressImage(
     final compressedFile = await FlutterImageCompress.compressAndGetFile(
       sourcePath,
       outputPath,
+      minWidth: 1280,
+      minHeight: 960,
       quality: 70,
       format: CompressFormat.jpeg,
     );
