@@ -113,7 +113,19 @@ class DioHelper {
     return await _dio.post(
       path,
       data: data,
-      options: Options(contentType: Headers.jsonContentType),
+      options: options is Options
+          ? options
+          : Options(contentType: Headers.jsonContentType),
+    );
+  }
+
+  Future<Response> put(String path, {dynamic data, dynamic options}) async {
+    return await _dio.put(
+      path,
+      data: data,
+      options: options is Options
+          ? options
+          : Options(contentType: Headers.jsonContentType),
     );
   }
 

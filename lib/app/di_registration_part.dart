@@ -15,12 +15,14 @@ void _initSmartKitchenSetup() {
 
   // Use Case
   sl.registerFactory(() => ScanKitchenImagesUseCase(sl()));
+  sl.registerFactory(() => FinalizeKitchenSetup(sl()));
   sl.registerFactory(() => SkipKitchenSetup(sl()));
 
   // Bloc
   sl.registerFactory<SmartKitchenSetupBloc>(
     () => SmartKitchenSetupBloc(
       scanKitchenImagesUseCase: sl(),
+      finalizeKitchenSetup: sl(),
       skipKitchenSetup: sl(),
       userCubit: sl(),
     ),

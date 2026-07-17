@@ -4,10 +4,13 @@ class ScannedItemEntity {
   final int confidence;
   final String expiryDate;
   final String name;
+  final bool needsReview;
   final int quantity;
   final String recommendedStorage;
   final String tempId;
   final String unit;
+  final String? sharedIngredientId;
+  final String? libraryMatch;
 
   /// KG-16: estimated per-unit weight in grams for discrete/count goods
   /// (e.g. "1 can ~400g"). Null for weight/volume units and fresh produce.
@@ -20,10 +23,13 @@ class ScannedItemEntity {
     required this.confidence,
     required this.expiryDate,
     required this.name,
+    required this.needsReview,
     required this.quantity,
     required this.recommendedStorage,
     required this.tempId,
     required this.unit,
+    this.sharedIngredientId,
+    this.libraryMatch,
     this.estimatedWeightGrams,
     this.weightBasis,
   });

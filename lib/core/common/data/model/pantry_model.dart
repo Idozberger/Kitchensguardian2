@@ -1,8 +1,8 @@
-import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';
+import 'package:foodkitchen/core/global/functions/api_endpoints.dart';
 import 'package:foodkitchen/core/utils/json_conversion.dart';
 
 class PantryModel extends Pantry {
@@ -34,6 +34,8 @@ class PantryModel extends Pantry {
           'quantity': item.quantity,
           'unit': item.unit,
           'group': item.group,
+          if (item.sharedIngredientId != null)
+            'shared_ingredient_id': item.sharedIngredientId,
         };
       }).toList(),
     };
@@ -58,19 +60,18 @@ class PantryItemModel extends PantryItemEntity {
     required super.itemId,
     required super.thumbnailBytes,
     required super.addedAt,
+    super.iconUrl,
+    super.sharedIngredientId,
   });
 
   factory PantryItemModel.fromJson(Map<String, dynamic> json) {
-    String? thumbnailBase64 = json['thumbnail']?.toString();
-    Uint8List? thumbnailBytes;
+    // `thumbnail` is a backend path (e.g. `/api/ingredient-icons/7`) that
+    // redirects to the actual file — never base64, never decode it.
+    final String thumbnailPath = json['thumbnail']?.toString() ?? '';
+    String resolvedIconUrl = readJsonString(json, 'icon_url');
 
-    if (thumbnailBase64 != null && thumbnailBase64.contains('base64,')) {
-      try {
-        final base64Image = thumbnailBase64.split('base64,').last;
-        thumbnailBytes = base64Decode(base64Image);
-      } catch (_) {
-        thumbnailBytes = null;
-      }
+    if (resolvedIconUrl.isEmpty && thumbnailPath.startsWith('/')) {
+      resolvedIconUrl = '${AppConstants.baseUrl}$thumbnailPath';
     }
 
     return PantryItemModel(
@@ -82,13 +83,14 @@ class PantryItemModel extends PantryItemEntity {
       unit: json['unit']?.toString() ?? '',
       group: json['group']?.toString() ?? '',
       expireDate: json['expiry_date']?.toString() ?? '',
-      thumbnailBytes: thumbnailBytes ?? Uint8List(0),
+      thumbnailBytes: Uint8List(0),
       expiryStatus: json['expiry_status']?.toString() ?? '',
       stockStatus: json['stock_status']?.toString() ?? '',
       itemId: json['item_id']?.toString() ?? '',
       addedAt:
           DateTime.tryParse(readJsonString(json, 'added_at')) ??
           DateTime.fromMillisecondsSinceEpoch(0),
+      iconUrl: resolvedIconUrl,
     );
   }
 
@@ -104,6 +106,9 @@ class PantryItemModel extends PantryItemEntity {
       "stock_status": stockStatus,
       "item_id": itemId,
       "added_at": addedAt.toString(),
+      "icon_url": iconUrl,
+      if (sharedIngredientId != null)
+        "shared_ingredient_id": sharedIngredientId,
     };
   }
 
@@ -120,6 +125,8 @@ class PantryItemModel extends PantryItemEntity {
       stockStatus: entity.stockStatus,
       itemId: entity.itemId,
       addedAt: entity.addedAt,
+      iconUrl: entity.iconUrl,
+      sharedIngredientId: entity.sharedIngredientId,
     );
   }
 }

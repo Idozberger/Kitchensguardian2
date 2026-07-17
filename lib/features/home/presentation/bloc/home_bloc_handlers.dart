@@ -135,6 +135,7 @@ Future<void> _onGetRecipeSuggestion(
   GetRecipeSuggestionEvent event,
   Emitter<HomeState> emit,
 ) async {
+  if (bloc.state.loadingRecipeSuggestion) return;
   emit(bloc.state.copyWith(loadingRecipeSuggestion: true));
 
   final res = await bloc._getRecipeSuggestionUsecase(

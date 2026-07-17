@@ -9,7 +9,31 @@ PantryItem kitchenAnalysisMapScannedToPantryItem(ScannedItemEntity item) {
       estimatedWeightGrams: item.estimatedWeightGrams,
     )
     ..unit = item.unit
-    ..pantry = item.area;
+    ..pantry = item.recommendedStorage.isNotEmpty
+        ? item.recommendedStorage
+        : item.area
+    ..needsReview = item.needsReview
+    ..sharedIngredientId = item.sharedIngredientId;
+}
+
+Map<String, dynamic> kitchenAnalysisToEditPayload(PantryItem item) {
+  final map = <String, dynamic>{
+    'name': item.nameController.text.trim(),
+    'quantity': double.tryParse(item.qtyController.text.trim()) ?? 0,
+    'unit': item.unit ?? '',
+    'recommended_storage': (item.pantry ?? '').toLowerCase(),
+    'expiry_date': formatExpiry(item.expireDate.text),
+  };
+
+  final sharedId = item.sharedIngredientId;
+  if (sharedId != null && sharedId.isNotEmpty) {
+    final parsedId = int.tryParse(sharedId);
+    if (parsedId != null) {
+      map['shared_ingredient_id'] = parsedId;
+    }
+  }
+
+  return map;
 }
 
 String? kitchenAnalysisValidateRow(PantryItem item) {
@@ -29,20 +53,4 @@ String? kitchenAnalysisValidateRow(PantryItem item) {
   }
 
   return null;
-}
-
-Future<String> kitchenAnalysisCompressImage(File? imageFile) async {
-  if (imageFile == null) return "";
-  final result = await FlutterImageCompress.compressWithList(
-    imageFile.readAsBytesSync(),
-    minWidth: 800,
-    minHeight: 600,
-    quality: 15,
-    rotate: 0,
-    inSampleSize: 1,
-    autoCorrectionAngle: true,
-    format: CompressFormat.jpeg,
-    keepExif: false,
-  );
-  return "data:image/jpeg;base64,${base64Encode(result)}";
 }

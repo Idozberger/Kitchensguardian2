@@ -70,6 +70,14 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
   }
 
   void scanReceipt() async {
+    if (!File(widget.imagePath).existsSync()) {
+      AppToast.show(
+        "Receipt photo could not be found. Please retake the photo.",
+        ToastType.error,
+      );
+      return;
+    }
+
     final prefs = sl<SharedPreferences>();
 
     final countryCode = prefs.getString("country") ?? "USA";
@@ -114,7 +122,11 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
 
   void _handleStateChange(BuildContext context, PantryState state) {
     if (state is PantryFailure) {
-      setState(() => _errorMessage = state.errorMessage);
+      if (_items.isEmpty) {
+        setState(() => _errorMessage = state.errorMessage);
+      } else {
+        AppToast.show(state.errorMessage, ToastType.error);
+      }
     } else if (state is PantrySuccess) {
       AppToast.show(
         "Items added to your kitchen successfully!",
@@ -159,39 +171,12 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
   }
 
   Widget _buildItemsListView() {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: gapAll(20),
-        child: Column(
-          children: [
-            ImagePreviewWidget(imagePath: widget.imagePath),
-            SizedBox(height: h(12)),
-            ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              padding: EdgeInsets.only(bottom: h(20)),
-              itemCount: _items.length,
-              separatorBuilder: (_, __) => Padding(
-                padding: gapOnly(bottom: 16),
-                child: const Divider(color: Color(0xFFF4F4F4), height: 1),
-              ),
-              itemBuilder: (context, index) {
-                final item = _items[index];
-                return ReceiptPantryItemFormTile(
-                  item: item,
-                  isFirstItem: index == 0,
-                  userCubit: _userCubit,
-                  onItemRemoved: () {
-                    _items.remove(item);
-                    setState(() {});
-                  },
-                  onFieldChanged: () => setState(() {}),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
+    return ReceiptItemsListView(
+      imagePath: widget.imagePath,
+      items: _items,
+      userCubit: _userCubit,
+      onItemRemoved: (item) => setState(() => _items.remove(item)),
+      onFieldChanged: () => setState(() {}),
     );
   }
 
@@ -200,6 +185,12 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
     setState(() {
       _items = receiptMapScanToPantryItems(scanReceipt);
     });
+    if (_items.any((item) => item.needsReview)) {
+      AppToast.show(
+        "Some items had low detection confidence — please review them before confirming.",
+        ToastType.warning,
+      );
+    }
   }
 
   void _validateAndSubmit() {

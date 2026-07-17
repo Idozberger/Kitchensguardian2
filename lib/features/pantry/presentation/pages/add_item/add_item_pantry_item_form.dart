@@ -14,6 +14,7 @@ import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
 import 'package:foodkitchen/core/widgets/safe_image.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:foodkitchen/features/pantry/presentation/models/pantry_items.dart';
+import 'package:foodkitchen/features/pantry/presentation/pages/add_item/item_name_search_field.dart';
 
 typedef AddItemPageSetState = void Function(VoidCallback fn);
 
@@ -55,16 +56,10 @@ class AddItemPantryItemForm extends StatelessWidget {
         SizedBox(height: h(10)),
         _formLabel(context, "Item name"),
         SizedBox(height: h(10)),
-        AppTextField(
-          textInputAction: TextInputAction.next,
-          color: AppColors.apptextFieldStyleTextColor,
+        ItemNameSearchField(
           controller: item.nameController,
-          hintText: "Enter item name",
-          fillColor: const Color(0xFFF9F9F9),
-          isFilled: true,
-          isLabled: false,
-          keyboardType: TextInputType.text,
-          label: '',
+          onCatalogIdChanged: (id) =>
+              updateState(() => item.sharedIngredientId = id),
         ),
         SizedBox(height: h(15)),
         _formLabel(context, "Quantity"),
@@ -98,7 +93,10 @@ class AddItemPantryItemForm extends StatelessWidget {
                 value: item.unit,
                 items: unitOptions(userState.unitSystem, current: item.unit),
                 displayLabel: unitDisplayLabel,
-                onChanged: (val) => updateState(() => item.unit = val),
+                onChanged: (val) => updateState(() {
+                  item.unit = val;
+                  item.needsReview = false;
+                }),
               ),
             ),
             if (isMember == false)
@@ -110,7 +108,10 @@ class AddItemPantryItemForm extends StatelessWidget {
                   items: userState.userStorageAreas
                       .map((area) => area.pantryName)
                       .toList(),
-                  onChanged: (val) => updateState(() => item.pantry = val),
+                  onChanged: (val) => updateState(() {
+                    item.pantry = val;
+                    item.needsReview = false;
+                  }),
                 ),
               ),
           ],
@@ -131,7 +132,7 @@ class AddItemPantryItemForm extends StatelessWidget {
         customBorder: const CircleBorder(),
         onTap: () async {
           item.file = await ImagePickerService.showImageSourceDialog(context);
-          updateState(() {});
+          updateState(() => item.needsReview = false);
         },
         child: Stack(
           alignment: Alignment.center,
@@ -201,7 +202,10 @@ class AddItemPantryItemForm extends StatelessWidget {
       onTap: () async {
         final pickedDate = await DatePickerService.pickDate(context: context);
         if (pickedDate != null) {
-          updateState(() => item.expireDate.text = pickedDate);
+          updateState(() {
+            item.expireDate.text = pickedDate;
+            item.needsReview = false;
+          });
         }
       },
       child: AppTextField(

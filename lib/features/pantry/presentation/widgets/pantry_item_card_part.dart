@@ -62,15 +62,21 @@ extension _PantryItemCardLayout on _PantryItemCardState {
                       height: h(28),
                       width: h(28),
                       fit: BoxFit.cover,
-                      fallback: Container(
+                      fallback: SafeNetworkImage(
+                        url: widget.pantryItemEntity.iconUrl,
                         height: h(28),
                         width: h(28),
-                        alignment: Alignment.center,
-                        color: Colors.grey.shade200,
-                        child: Icon(
-                          Icons.food_bank,
-                          size: h(16),
-                          color: Colors.grey.shade500,
+                        fit: BoxFit.cover,
+                        fallback: Container(
+                          height: h(28),
+                          width: h(28),
+                          alignment: Alignment.center,
+                          color: Colors.grey.shade200,
+                          child: Icon(
+                            Icons.food_bank,
+                            size: h(16),
+                            color: Colors.grey.shade500,
+                          ),
                         ),
                       ),
                     ),

@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:foodkitchen/features/pantry/domain/entities/scan_receipt_item.dart';
 
 class ScanReceiptItemModel extends ScanReceiptItemEntity {
@@ -10,6 +8,7 @@ class ScanReceiptItemModel extends ScanReceiptItemEntity {
     required super.expireDate,
     required super.thumbnail,
     required super.group,
+    required super.needsReview,
     super.estimatedWeightGrams,
     super.weightBasis,
   });
@@ -20,8 +19,9 @@ class ScanReceiptItemModel extends ScanReceiptItemEntity {
       unit: json?['unit'] as String? ?? 'unit',
       amount: json?['quantity'] as String? ?? '0',
       expireDate: json?['expiry_date'] as String? ?? '0',
-      thumbnail: json?['thumbnail'] as Uint8List? ?? Uint8List(0),
+      thumbnail: json?['thumbnail'] as String? ?? '',
       group: json?['storage'] as String? ?? 'Refrigerator',
+      needsReview: json?['needs_review'] as bool? ?? false,
       estimatedWeightGrams: (json?['estimated_weight_grams'] as num?)
           ?.toDouble(),
       weightBasis: json?['weight_basis'] as String?,
@@ -35,6 +35,7 @@ class ScanReceiptItemModel extends ScanReceiptItemEntity {
       'expiry_date': expireDate,
       'thumbnail': thumbnail,
       'storage': group,
+      'needs_review': needsReview,
       'estimated_weight_grams': estimatedWeightGrams,
       'weight_basis': weightBasis,
     };
@@ -45,8 +46,9 @@ class ScanReceiptItemModel extends ScanReceiptItemEntity {
     String? unit,
     String? amount,
     String? expireDate,
-    Uint8List? thumbnail,
+    String? thumbnail,
     String? group,
+    bool? needsReview,
     double? estimatedWeightGrams,
     String? weightBasis,
   }) {
@@ -57,6 +59,7 @@ class ScanReceiptItemModel extends ScanReceiptItemEntity {
       expireDate: expireDate ?? this.expireDate,
       thumbnail: thumbnail ?? this.thumbnail,
       group: group ?? this.group,
+      needsReview: needsReview ?? this.needsReview,
       estimatedWeightGrams: estimatedWeightGrams ?? this.estimatedWeightGrams,
       weightBasis: weightBasis ?? this.weightBasis,
     );

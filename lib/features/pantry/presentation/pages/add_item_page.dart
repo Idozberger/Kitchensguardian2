@@ -221,6 +221,7 @@ class _AddItemPageState extends State<AddItemPage> {
           expiryStatus: '',
           stockStatus: '',
           itemId: '',
+          sharedIngredientId: item.sharedIngredientId,
         ),
       );
     }

@@ -59,6 +59,9 @@ Future<void> _initPantry() async {
         pantryRemoteDatasource: sl(),
       ),
     )
+    ..registerFactory<ItemSearchRepository>(
+      () => ItemSearchRepositoryImpl(sl()),
+    )
     // Usecases
     ..registerFactory(() => AddPantryItem(sl()))
     ..registerFactory(() => GetPantryItems(sl()))

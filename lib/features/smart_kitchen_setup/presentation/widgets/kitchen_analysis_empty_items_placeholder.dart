@@ -1,29 +1,73 @@
 import 'package:flutter/material.dart';
+import 'package:foodkitchen/core/theme/app_colors.dart';
+import 'package:foodkitchen/core/widgets/generic_button_widget.dart';
 
 class KitchenAnalysisEmptyItemsPlaceholder extends StatelessWidget {
-  const KitchenAnalysisEmptyItemsPlaceholder({super.key});
+  final String? errorMessage;
+  final VoidCallback? onRetry;
+  final VoidCallback? onAddManually;
+
+  const KitchenAnalysisEmptyItemsPlaceholder({
+    super.key,
+    this.errorMessage,
+    this.onRetry,
+    this.onAddManually,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    final bool isError = errorMessage != null;
+
+    return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.inventory_2_outlined, size: 48, color: Colors.grey),
-          SizedBox(height: 12),
+          Icon(
+            isError ? Icons.error_outline : Icons.inventory_2_outlined,
+            size: 48,
+            color: isError ? Colors.redAccent : Colors.grey,
+          ),
+          const SizedBox(height: 12),
           Text(
-            'No items found',
-            style: TextStyle(
+            isError ? 'Scan failed' : 'No items found',
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.black87,
             ),
           ),
-          SizedBox(height: 6),
+          const SizedBox(height: 6),
           Text(
-            'Scanned items will appear here',
-            style: TextStyle(fontSize: 13, color: Colors.grey),
+            isError ? errorMessage! : 'Scanned items will appear here',
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 13, color: Colors.grey),
           ),
+          if (onRetry != null) ...[
+            const SizedBox(height: 16),
+            SizedBox(
+              width: 160,
+              child: GenericButtonWidget(
+                onPressed: onRetry!,
+                text: 'Try Again',
+              ),
+            ),
+          ],
+          if (onAddManually != null) ...[
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: onAddManually,
+              child: Text(
+                'Add Item Manually',
+                style: TextStyle(
+                  color: AppColors.primaryColor,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  decoration: TextDecoration.underline,
+                  decorationColor: AppColors.primaryColor,
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

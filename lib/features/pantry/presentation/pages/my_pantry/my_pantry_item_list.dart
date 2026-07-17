@@ -87,6 +87,7 @@ class MyPantryItemList extends StatelessWidget {
     required PantryFilter selectedFilter,
   }) {
     return GestureDetector(
+      key: ValueKey(item.itemId),
       onTap: () {
         if (isLocked) {
           AppToast.show("Upgrade to unlock all items", ToastType.warning);

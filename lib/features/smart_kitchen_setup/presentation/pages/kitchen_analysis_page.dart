@@ -1,24 +1,16 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/cubits/user_state.dart';
-import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
-import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
-import 'package:foodkitchen/core/utils/dev_logging.dart';
 import 'package:foodkitchen/core/utils/format_date_for_backend.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_gap_widget.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_bloc.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_event.dart';
-import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_state.dart';
 import 'package:foodkitchen/features/pantry/presentation/models/pantry_items.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/add_item/add_item_page_chrome.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/add_item/add_item_pantry_item_form.dart';
@@ -59,7 +51,24 @@ class _KitchenAnalysisPageState extends State<KitchenAnalysisPage> {
       for (final scanned in state.scannedItems) {
         _items.add(kitchenAnalysisMapScannedToPantryItem(scanned));
       }
+      if (_items.any((item) => item.needsReview)) {
+        AppToast.show(
+          "Some items had low detection confidence — please review them before confirming.",
+          ToastType.warning,
+        );
+      }
+      setState(() {});
     }
+  }
+
+  void _retryScan() {
+    setState(() => _items = []);
+    smartKitchenSetupBloc.add(
+      SmartKitchenSetupApiCalled(
+        kitchenId: _userCubit.state.activeKitchenId,
+        payload: smartKitchenSetupBloc.state.payload,
+      ),
+    );
   }
 
   void _addNewItem() {
@@ -86,6 +95,16 @@ class _KitchenAnalysisPageState extends State<KitchenAnalysisPage> {
     });
   }
 
+  void _handleFinalizeSuccess(String message) {
+    AppToast.show(message, ToastType.success);
+    final kitchenId = _userCubit.state.activeKitchenId;
+    smartKitchenSetupBloc.add(AddDefaultStoragesEvent(kitchenId: kitchenId));
+    _pantryBloc.add(GetPantryItemsEvent(kitchenId: kitchenId));
+    smartKitchenSetupBloc.add(SmartKitchenSetupFinalizeAcknowledged());
+    context.go(Routes.dashboard);
+    _resetState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -105,47 +124,53 @@ class _KitchenAnalysisPageState extends State<KitchenAnalysisPage> {
         ),
         body: BlocConsumer<SmartKitchenSetupBloc, SmartKitchenSetupState>(
           listener: (context, state) {
-            if (state.scannedItems.isNotEmpty) {
+            if (state.finalizeSuccessMessage != null) {
+              _handleFinalizeSuccess(state.finalizeSuccessMessage!);
+            } else if (state.scannedItems.isNotEmpty) {
               getScannedItems(state);
+            } else if (state.errorMessage != null) {
+              AppToast.show(state.errorMessage!, ToastType.error);
             }
           },
           builder: (context, smartKitchenSetupState) {
-            return BlocConsumer<PantryBloc, PantryState>(
-              listener: (context, state) {
-                if (state is PantryFailure) {
-                  AppToast.show(state.errorMessage, ToastType.error);
-                  _resetState();
-                } else if (state is PantrySuccess) {
-                  AppToast.show(state.successMessage, ToastType.success);
-                  context.go(Routes.dashboard);
-                  _resetState();
-                }
-              },
-              builder: (context, state) {
-                return smartKitchenSetupState.isLoading
-                    ? AiAnalyzingLoader()
-                    : SafeArea(
-                        child: Padding(
-                          padding: gapSymmetric(horizontal: 20, vertical: 0),
-                          child: Column(
-                            children: [
-                              gap(height: 14),
-                              Expanded(
-                                child: BlocBuilder<UserCubit, UserState>(
-                                  builder: (context, userState) {
-                                    if (_items.isEmpty) {
-                                      return const KitchenAnalysisEmptyItemsPlaceholder();
-                                    }
+            final isBusy =
+                smartKitchenSetupState.isLoading ||
+                smartKitchenSetupState.isFinalizing;
 
-                                    return ListView.builder(
-                                      padding: gapZero,
-                                      shrinkWrap: true,
-                                      itemCount: _items.length,
-                                      itemBuilder: (context, index) {
-                                        final item = _items[index];
-                                        return Padding(
-                                          padding: gapOnly(bottom: 12),
-                                          child: UpperTile(
+            return isBusy
+                ? const AiAnalyzingLoader()
+                : SafeArea(
+                    child: Padding(
+                      padding: gapSymmetric(horizontal: 20, vertical: 0),
+                      child: Column(
+                        children: [
+                          gap(height: 14),
+                          Expanded(
+                            child: BlocBuilder<UserCubit, UserState>(
+                              builder: (context, userState) {
+                                if (_items.isEmpty) {
+                                  return KitchenAnalysisEmptyItemsPlaceholder(
+                                    errorMessage:
+                                        smartKitchenSetupState.errorMessage,
+                                    onRetry: _retryScan,
+                                    onAddManually: _addNewItem,
+                                  );
+                                }
+
+                                return ListView.builder(
+                                  padding: gapZero,
+                                  shrinkWrap: true,
+                                  itemCount: _items.length,
+                                  itemBuilder: (context, index) {
+                                    final item = _items[index];
+                                    return Padding(
+                                      padding: gapOnly(bottom: 12),
+                                      child: Stack(
+                                        children: [
+                                          UpperTile(
+                                            borderColor: item.needsReview
+                                                ? Colors.orange
+                                                : null,
                                             widget: AddItemPantryItemForm(
                                               item: item,
                                               userState: userState,
@@ -157,25 +182,36 @@ class _KitchenAnalysisPageState extends State<KitchenAnalysisPage> {
                                               ),
                                             ),
                                           ),
-                                        );
-                                      },
+                                          if (item.needsReview)
+                                            const Positioned(
+                                              top: 6,
+                                              right: 6,
+                                              child: Icon(
+                                                Icons.warning_amber_rounded,
+                                                color: Colors.orange,
+                                                size: 20,
+                                              ),
+                                            ),
+                                        ],
+                                      ),
                                     );
                                   },
-                                ),
-                              ),
-                            ],
+                                );
+                              },
+                            ),
                           ),
-                        ),
-                      );
-              },
-            );
+                        ],
+                      ),
+                    ),
+                  );
           },
         ),
         bottomNavigationBar:
             BlocBuilder<SmartKitchenSetupBloc, SmartKitchenSetupState>(
               builder: (context, smartKitchenState) {
-                if (smartKitchenState.scannedItems.isEmpty ||
-                    smartKitchenState.isLoading) {
+                if (_items.isEmpty ||
+                    smartKitchenState.isLoading ||
+                    smartKitchenState.isFinalizing) {
                   return const SizedBox.shrink();
                 }
                 return PantryItemSubmitFooter(
@@ -200,32 +236,9 @@ class _KitchenAnalysisPageState extends State<KitchenAnalysisPage> {
       }
     }
 
-    final pantryItems = <PantryItemEntity>[];
-    for (final item in _items) {
-      final compressedImage = await kitchenAnalysisCompressImage(item.file);
-      pantryItems.add(
-        PantryItemEntity(
-          name: item.nameController.text.trim(),
-          quantity: double.tryParse(item.qtyController.text.trim()) ?? 0,
-          unit: item.unit ?? "",
-          group: item.pantry ?? "",
-          expireDate: formatExpiry(item.expireDate.text),
-          thumbnail: compressedImage,
-          expiryStatus: '',
-          stockStatus: '',
-          itemId: '',
-        ),
-      );
-    }
-
-    final pantryModel = Pantry(
-      kitchenId: _userCubit.state.activeKitchenId,
-      items: pantryItems,
-    );
-    devLog("pantrymodel: ${pantryModel.items.map((item) => item.expireDate)}");
-    _pantryBloc.add(PantryAddItemEvent(pantry: pantryModel, isMember: false));
+    final payload = _items.map(kitchenAnalysisToEditPayload).toList();
     smartKitchenSetupBloc.add(
-      AddDefaultStoragesEvent(kitchenId: _userCubit.state.activeKitchenId),
+      SmartKitchenSetupFinalizeReviewed(items: payload),
     );
   }
 

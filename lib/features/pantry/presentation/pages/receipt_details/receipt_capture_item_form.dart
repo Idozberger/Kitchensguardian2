@@ -8,12 +8,13 @@ import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/services/date_picker/date_picker_service.dart';
 import 'package:foodkitchen/core/services/image_picker/image_picker_service.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
-import 'package:foodkitchen/core/widgets/safe_image.dart';
 import 'package:foodkitchen/core/widgets/generic_container_tile_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_dropdown_widget.dart';
 import 'package:foodkitchen/core/widgets/generic_text_form_field_widget.dart';
+import 'package:foodkitchen/core/widgets/safe_image.dart';
 import 'package:foodkitchen/features/dashboard/presentation/widgets/circular_icon_button.dart';
 import 'package:foodkitchen/features/pantry/presentation/models/pantry_items.dart';
+import 'package:foodkitchen/features/pantry/presentation/pages/add_item/item_name_search_field.dart';
 
 class ReceiptPantryItemFormTile extends StatelessWidget {
   const ReceiptPantryItemFormTile({
@@ -33,61 +34,79 @@ class ReceiptPantryItemFormTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return UpperTile(
-      widget: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _FormLabelRow(
-            label: "Item Image",
-            action: isFirstItem
-                ? null
-                : CircularIconButton(
-                    iconAsset: AppAssets.deleteSvg,
-                    onTap: onItemRemoved,
-                  ),
+    return Stack(
+      children: [
+        UpperTile(
+          borderColor: item.needsReview ? Colors.orange : null,
+          widget: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _FormLabelRow(
+                label: "Item Image",
+                action: isFirstItem
+                    ? null
+                    : CircularIconButton(
+                        iconAsset: AppAssets.deleteSvg,
+                        onTap: onItemRemoved,
+                      ),
+              ),
+              SizedBox(height: h(10)),
+              _ItemImagePicker(item: item, onPicked: onFieldChanged),
+              SizedBox(height: h(10)),
+              const _FormLabelRow(label: "Item name"),
+              SizedBox(height: h(10)),
+              ItemNameSearchField(
+                controller: item.nameController,
+                onCatalogIdChanged: (id) {
+                  item.sharedIngredientId = id;
+                  item.needsReview = false;
+                  onFieldChanged();
+                },
+                onEdited: () {
+                  item.needsReview = false;
+                  onFieldChanged();
+                },
+              ),
+              SizedBox(height: h(15)),
+              const _FormLabelRow(label: "Quantity"),
+              SizedBox(height: h(10)),
+              AppTextField(
+                label: '',
+                color: AppColors.apptextFieldStyleTextColor,
+                controller: item.qtyController,
+                hintText: "Enter item quantity",
+                fillColor: const Color(0xffF9F9F9),
+                isFilled: true,
+                keyboardType: TextInputType.number,
+                isLabled: false,
+              ),
+              _EstimatedWeightHint(item: item),
+              SizedBox(height: h(15)),
+              _DropdownsRow(
+                item: item,
+                pantryNames: userCubit.state.userStorageAreas
+                    .map((storage) => storage.pantryName)
+                    .toList(),
+                onChanged: onFieldChanged,
+              ),
+              SizedBox(height: h(15)),
+              const _FormLabelRow(label: "Expiring date"),
+              SizedBox(height: h(10)),
+              _ExpiryDateField(item: item, onPicked: onFieldChanged),
+            ],
           ),
-          SizedBox(height: h(10)),
-          _ItemImagePicker(item: item, onPicked: onFieldChanged),
-          SizedBox(height: h(10)),
-          const _FormLabelRow(label: "Item name"),
-          SizedBox(height: h(10)),
-          AppTextField(
-            label: '',
-            color: AppColors.apptextFieldStyleTextColor,
-            controller: item.nameController,
-            hintText: "Enter item name",
-            fillColor: const Color(0xffF9F9F9),
-            isFilled: true,
-            isLabled: false,
+        ),
+        if (item.needsReview)
+          const Positioned(
+            top: 6,
+            right: 6,
+            child: Icon(
+              Icons.warning_amber_rounded,
+              color: Colors.orange,
+              size: 20,
+            ),
           ),
-          SizedBox(height: h(15)),
-          const _FormLabelRow(label: "Quantity"),
-          SizedBox(height: h(10)),
-          AppTextField(
-            label: '',
-            color: AppColors.apptextFieldStyleTextColor,
-            controller: item.qtyController,
-            hintText: "Enter item quantity",
-            fillColor: const Color(0xffF9F9F9),
-            isFilled: true,
-            keyboardType: TextInputType.number,
-            isLabled: false,
-          ),
-          _EstimatedWeightHint(item: item),
-          SizedBox(height: h(15)),
-          _DropdownsRow(
-            item: item,
-            pantryNames: userCubit.state.userStorageAreas
-                .map((storage) => storage.pantryName)
-                .toList(),
-            onChanged: onFieldChanged,
-          ),
-          SizedBox(height: h(15)),
-          const _FormLabelRow(label: "Expiring date"),
-          SizedBox(height: h(10)),
-          _ExpiryDateField(item: item, onPicked: onFieldChanged),
-        ],
-      ),
+      ],
     );
   }
 }
@@ -131,6 +150,7 @@ class _ItemImagePicker extends StatelessWidget {
         customBorder: const CircleBorder(),
         onTap: () async {
           item.file = await ImagePickerService.showImageSourceDialog(context);
+          item.needsReview = false;
           onPicked();
         },
         child: Stack(
@@ -145,7 +165,7 @@ class _ItemImagePicker extends StatelessWidget {
             SafeCircleAvatar(
               radius: t(24),
               file: item.file,
-              memoryBytes: item.fileBytes,
+              memoryBytes: item.displayBytes,
               backgroundColor: Colors.transparent,
               fallback: const CircleAvatar(
                 radius: 24,
@@ -202,6 +222,7 @@ class _DropdownsRow extends StatelessWidget {
             displayLabel: unitDisplayLabel,
             onChanged: (val) {
               item.unit = val;
+              item.needsReview = false;
               onChanged();
             },
           ),
@@ -214,6 +235,7 @@ class _DropdownsRow extends StatelessWidget {
             items: pantryNames,
             onChanged: (val) {
               item.pantry = val;
+              item.needsReview = false;
               onChanged();
             },
           ),
@@ -268,6 +290,7 @@ class _ExpiryDateField extends StatelessWidget {
         final pickedDate = await DatePickerService.pickDate(context: context);
         if (pickedDate != null) {
           item.expireDate.text = pickedDate;
+          item.needsReview = false;
           onPicked();
         }
       },
