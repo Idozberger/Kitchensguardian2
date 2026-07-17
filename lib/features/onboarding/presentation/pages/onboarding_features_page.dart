@@ -50,7 +50,7 @@ class _OnboardingFeaturesPageState extends State<OnboardingFeaturesPage> {
     ),
   ];
 
-  /// The "Scan Your Products" screen is appended after the feature pages.
+  /// The "Scan Your Receipt" screen is appended after the feature pages.
   int get _pageCount => _pages.length + 1;
 
   bool get _isLastPage => _currentPage == _pageCount - 1;
@@ -163,8 +163,8 @@ class _FeaturePageData {
   const _FeaturePageData({required this.image, required this.title});
 }
 
-/// The final "Scan Your Products" onboarding screen: white title over the
-/// orange gradient and a frosted card with a product inside a scan frame.
+/// The final "Scan Your Receipt" onboarding screen: white title over the
+/// orange gradient and a frosted card with a receipt inside a scan frame.
 class _ScanProductsPageContent extends StatelessWidget {
   const _ScanProductsPageContent();
 
@@ -176,7 +176,7 @@ class _ScanProductsPageContent extends StatelessWidget {
         children: [
           gapVertical(24),
           const OnboardingTitle([
-            OnboardingTitleSpan('Scan\nYour Products'),
+            OnboardingTitleSpan('Scan\nYour Receipt'),
           ], color: Colors.white),
           const Expanded(child: Center(child: _ScanCard())),
         ],
@@ -214,8 +214,8 @@ class _ScanCard extends StatelessWidget {
             height: w(230),
           ),
           Image.asset(
-            'assets/images/onb_scan_product.png',
-            height: w(169),
+            'assets/images/onb_scan_receipt.png',
+            height: w(180),
             fit: BoxFit.contain,
           ),
           Transform.translate(
