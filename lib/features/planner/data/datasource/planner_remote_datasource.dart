@@ -37,6 +37,7 @@ abstract interface class PlannerRemoteDatasource {
   Future<List<Map<String, dynamic>>> generateRecipes({
     required String instructions,
     required String kitchenId,
+    String? keywords,
   });
   Future<List<Map<String, dynamic>>> favouriteRecipes({
     required String kitchenId,
@@ -93,10 +94,12 @@ class PlannerRemoteDatasourceImpl implements PlannerRemoteDatasource {
   Future<List<Map<String, dynamic>>> generateRecipes({
     required String instructions,
     required String kitchenId,
+    String? keywords,
   }) => _plannerImplGenerateRecipes(
     this,
     instructions: instructions,
     kitchenId: kitchenId,
+    keywords: keywords,
   );
 
   @override

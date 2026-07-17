@@ -5,11 +5,13 @@ Future<Either<Failure, List<RecipeEntity>>> _plannerRepoImplGenerateRecipes(
   PlannerRepositoryImpl r, {
   required String instructions,
   required String kitchenId,
+  String? keywords,
 }) async {
   try {
     final response = await r.plannerRemoteDatasource.generateRecipes(
       instructions: instructions,
       kitchenId: kitchenId,
+      keywords: keywords,
     );
     final generatedRecipes = (response as List)
         .map((e) => RecipeModel.fromJson(e as Map<String, dynamic>))

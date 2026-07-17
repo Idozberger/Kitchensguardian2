@@ -16,6 +16,7 @@ class GenerateRecipes
     return await plannerRepository.generateRecipes(
       kitchenId: params.kitchenId,
       instructions: params.instructions,
+      keywords: params.keywords,
     );
   }
 }
@@ -23,6 +24,11 @@ class GenerateRecipes
 class GenerateRecipesParams {
   final String instructions;
   final String kitchenId;
+  final String? keywords;
 
-  GenerateRecipesParams({required this.instructions, required this.kitchenId});
+  GenerateRecipesParams({
+    required this.instructions,
+    required this.kitchenId,
+    this.keywords,
+  });
 }

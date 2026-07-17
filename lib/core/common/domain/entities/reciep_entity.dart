@@ -33,6 +33,10 @@ class RecipeEntity {
   final List<ExpiringItemEntity> expiringItems;
   final List<String> expiringItemsUsed;
 
+  /// KG-19: true when this recipe was served from the recipe cache
+  /// (labeled "Previously Generated" in the UI) rather than freshly generated.
+  final bool previouslyGenerated;
+
   RecipeEntity({
     required this.id,
     required this.mealplanId,
@@ -60,5 +64,6 @@ class RecipeEntity {
     this.expiringItemsCount = 0,
     this.expiringItems = const [],
     this.expiringItemsUsed = const [],
+    this.previouslyGenerated = false,
   });
 }

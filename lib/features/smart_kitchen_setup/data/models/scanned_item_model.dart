@@ -11,6 +11,8 @@ class ScannedItemModel extends ScannedItemEntity {
     required super.recommendedStorage,
     required super.tempId,
     required super.unit,
+    super.estimatedWeightGrams,
+    super.weightBasis,
   });
 
   factory ScannedItemModel.fromJson(Map<String, dynamic> json) {
@@ -24,6 +26,9 @@ class ScannedItemModel extends ScannedItemEntity {
       recommendedStorage: json['recommended_storage'] as String,
       tempId: json['temp_id'] as String,
       unit: json['unit'] as String,
+      estimatedWeightGrams: (json['estimated_weight_grams'] as num?)
+          ?.toDouble(),
+      weightBasis: json['weight_basis'] as String?,
     );
   }
 
@@ -38,6 +43,8 @@ class ScannedItemModel extends ScannedItemEntity {
       'recommended_storage': recommendedStorage,
       'temp_id': tempId,
       'unit': unit,
+      'estimated_weight_grams': estimatedWeightGrams,
+      'weight_basis': weightBasis,
     };
   }
 
@@ -52,6 +59,8 @@ class ScannedItemModel extends ScannedItemEntity {
       recommendedStorage: recommendedStorage,
       tempId: tempId,
       unit: unit,
+      estimatedWeightGrams: estimatedWeightGrams,
+      weightBasis: weightBasis,
     );
   }
 }

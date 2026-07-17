@@ -45,8 +45,18 @@
 	<string>295968556562-3e8sicsicb6m6kh744bon398o8gaqu3k.apps.googleusercontent.com</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<!-- Dev/demo only: allows plain HTTP to a backend running on the local
+		     network (e.g. http://192.168.x.x:5001). Scoped to private/link-local
+		     addresses — ATS still enforces HTTPS for all public internet traffic. -->
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>This app requires access to your camera to scan receipts and pantry items.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>This app connects to a Kitchen Guardian backend running on your local network during development and demos.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This app requires access to your photo library to select and upload images.</string>
 	<key>NSUserNotificationUsageDescription</key>

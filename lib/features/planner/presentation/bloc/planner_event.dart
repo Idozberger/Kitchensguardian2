@@ -11,7 +11,14 @@ final class GenerateRecipesEvent extends PlannerEvent {
   final String instructions;
   final String kitchenId;
 
-  GenerateRecipesEvent({required this.instructions, required this.kitchenId});
+  /// KG-19: raw user search text, sent separately for recipe-cache matching.
+  final String? keywords;
+
+  GenerateRecipesEvent({
+    required this.instructions,
+    required this.kitchenId,
+    this.keywords,
+  });
 }
 
 final class GetFavouriteRecipesEvent extends PlannerEvent {

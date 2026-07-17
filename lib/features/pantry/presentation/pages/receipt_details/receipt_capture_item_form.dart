@@ -73,6 +73,7 @@ class ReceiptPantryItemFormTile extends StatelessWidget {
             keyboardType: TextInputType.number,
             isLabled: false,
           ),
+          _EstimatedWeightHint(item: item),
           SizedBox(height: h(15)),
           _DropdownsRow(
             item: item,
@@ -218,6 +219,38 @@ class _DropdownsRow extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// KG-16: shows the estimated weight alongside a count (e.g. "≈ 400 g each")
+/// for discrete/count goods only. Hidden for weight/volume units and produce.
+class _EstimatedWeightHint extends StatelessWidget {
+  const _EstimatedWeightHint({required this.item});
+
+  final PantryItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = estimatedWeightLabel(item.estimatedWeightGrams);
+    if (label == null || !isPiecesUnit(item.unit)) {
+      return const SizedBox.shrink();
+    }
+    return Padding(
+      padding: gapOnly(top: h(8)),
+      child: Row(
+        children: [
+          Icon(Icons.scale_outlined, size: t(15), color: Colors.grey.shade600),
+          SizedBox(width: w(6)),
+          Text(
+            "$label each (estimated)",
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontSize: t(13),
+              color: Colors.grey.shade700,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

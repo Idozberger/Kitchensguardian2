@@ -4,6 +4,7 @@ Future<List<Map<String, dynamic>>> _plannerImplGenerateRecipes(
   PlannerRemoteDatasourceImpl ds, {
   required String instructions,
   required String kitchenId,
+  String? keywords,
 }) async {
   try {
     final response = await ds.dio.post(
@@ -12,6 +13,9 @@ Future<List<Map<String, dynamic>>> _plannerImplGenerateRecipes(
         "instructions":
             "$instructions. Note: Generate recipes that have approximately mentioned calories only. Do not exceed or go below this number significantly.",
         "kitchen_id": kitchenId,
+        // KG-19: raw search text for recipe-cache similarity matching
+        if (keywords != null && keywords.trim().isNotEmpty)
+          "keywords": keywords.trim(),
       },
     );
 

@@ -9,6 +9,11 @@ class ScannedItemEntity {
   final String tempId;
   final String unit;
 
+  /// KG-16: estimated per-unit weight in grams for discrete/count goods
+  /// (e.g. "1 can ~400g"). Null for weight/volume units and fresh produce.
+  final double? estimatedWeightGrams;
+  final String? weightBasis;
+
   const ScannedItemEntity({
     required this.area,
     this.brand,
@@ -19,5 +24,7 @@ class ScannedItemEntity {
     required this.recommendedStorage,
     required this.tempId,
     required this.unit,
+    this.estimatedWeightGrams,
+    this.weightBasis,
   });
 }

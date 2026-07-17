@@ -90,6 +90,9 @@ class PantryRepositoryImpl implements PantryRepository {
         final amount = readJsonString(e, 'amount');
         final group = readJsonString(e, 'recommended_storage');
         final expireDate = readJsonString(e, 'expiry_date');
+        final estimatedWeightGrams = (e['estimated_weight_grams'] as num?)
+            ?.toDouble();
+        final weightBasis = e['weight_basis'] as String?;
         final Object? thumbRaw = e['thumbnail'];
         Uint8List thumbnailBytes = Uint8List(0);
         if (thumbRaw is Uint8List) {
@@ -114,6 +117,8 @@ class PantryRepositoryImpl implements PantryRepository {
             amount: amount.isEmpty ? "1" : amount,
             expireDate: expireDate,
             thumbnail: thumbnailBytes,
+            estimatedWeightGrams: estimatedWeightGrams,
+            weightBasis: weightBasis,
           ),
         );
       }

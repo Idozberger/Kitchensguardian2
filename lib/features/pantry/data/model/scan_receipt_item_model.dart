@@ -10,6 +10,8 @@ class ScanReceiptItemModel extends ScanReceiptItemEntity {
     required super.expireDate,
     required super.thumbnail,
     required super.group,
+    super.estimatedWeightGrams,
+    super.weightBasis,
   });
 
   factory ScanReceiptItemModel.fromJson(Map<String, dynamic>? json) {
@@ -20,6 +22,9 @@ class ScanReceiptItemModel extends ScanReceiptItemEntity {
       expireDate: json?['expiry_date'] as String? ?? '0',
       thumbnail: json?['thumbnail'] as Uint8List? ?? Uint8List(0),
       group: json?['storage'] as String? ?? 'Refrigerator',
+      estimatedWeightGrams: (json?['estimated_weight_grams'] as num?)
+          ?.toDouble(),
+      weightBasis: json?['weight_basis'] as String?,
     );
   }
   Map<String, dynamic> toJson() {
@@ -30,6 +35,8 @@ class ScanReceiptItemModel extends ScanReceiptItemEntity {
       'expiry_date': expireDate,
       'thumbnail': thumbnail,
       'storage': group,
+      'estimated_weight_grams': estimatedWeightGrams,
+      'weight_basis': weightBasis,
     };
   }
 
@@ -40,6 +47,8 @@ class ScanReceiptItemModel extends ScanReceiptItemEntity {
     String? expireDate,
     Uint8List? thumbnail,
     String? group,
+    double? estimatedWeightGrams,
+    String? weightBasis,
   }) {
     return ScanReceiptItemModel(
       name: name ?? this.name,
@@ -48,6 +57,8 @@ class ScanReceiptItemModel extends ScanReceiptItemEntity {
       expireDate: expireDate ?? this.expireDate,
       thumbnail: thumbnail ?? this.thumbnail,
       group: group ?? this.group,
+      estimatedWeightGrams: estimatedWeightGrams ?? this.estimatedWeightGrams,
+      weightBasis: weightBasis ?? this.weightBasis,
     );
   }
 }
