@@ -93,6 +93,9 @@ class PantryRepositoryImpl implements PantryRepository {
           final group = readJsonString(e, 'recommended_storage');
           final expireDate = readJsonString(e, 'expiry_date');
           final needsReview = readJsonBool(e, 'needs_review');
+          final estimatedWeightGrams = (e['estimated_weight_grams'] as num?)
+              ?.toDouble();
+          final weightBasis = e['weight_basis'] as String?;
           // Keep the raw base64 payload as-is - decoding happens lazily at
           // render time (PantryItem.displayBytes) so a large receipt doesn't
           // decode every item's image up front.
@@ -116,6 +119,8 @@ class PantryRepositoryImpl implements PantryRepository {
               expireDate: expireDate,
               thumbnail: thumbnailBase64,
               needsReview: needsReview,
+              estimatedWeightGrams: estimatedWeightGrams,
+              weightBasis: weightBasis,
             ),
           );
         } catch (itemError, itemStack) {

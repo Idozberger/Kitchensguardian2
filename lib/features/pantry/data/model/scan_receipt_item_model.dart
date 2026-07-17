@@ -9,6 +9,8 @@ class ScanReceiptItemModel extends ScanReceiptItemEntity {
     required super.thumbnail,
     required super.group,
     required super.needsReview,
+    super.estimatedWeightGrams,
+    super.weightBasis,
   });
 
   factory ScanReceiptItemModel.fromJson(Map<String, dynamic>? json) {
@@ -20,6 +22,9 @@ class ScanReceiptItemModel extends ScanReceiptItemEntity {
       thumbnail: json?['thumbnail'] as String? ?? '',
       group: json?['storage'] as String? ?? 'Refrigerator',
       needsReview: json?['needs_review'] as bool? ?? false,
+      estimatedWeightGrams: (json?['estimated_weight_grams'] as num?)
+          ?.toDouble(),
+      weightBasis: json?['weight_basis'] as String?,
     );
   }
   Map<String, dynamic> toJson() {
@@ -31,6 +36,8 @@ class ScanReceiptItemModel extends ScanReceiptItemEntity {
       'thumbnail': thumbnail,
       'storage': group,
       'needs_review': needsReview,
+      'estimated_weight_grams': estimatedWeightGrams,
+      'weight_basis': weightBasis,
     };
   }
 
@@ -42,6 +49,8 @@ class ScanReceiptItemModel extends ScanReceiptItemEntity {
     String? thumbnail,
     String? group,
     bool? needsReview,
+    double? estimatedWeightGrams,
+    String? weightBasis,
   }) {
     return ScanReceiptItemModel(
       name: name ?? this.name,
@@ -51,6 +60,8 @@ class ScanReceiptItemModel extends ScanReceiptItemEntity {
       thumbnail: thumbnail ?? this.thumbnail,
       group: group ?? this.group,
       needsReview: needsReview ?? this.needsReview,
+      estimatedWeightGrams: estimatedWeightGrams ?? this.estimatedWeightGrams,
+      weightBasis: weightBasis ?? this.weightBasis,
     );
   }
 }

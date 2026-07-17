@@ -11,6 +11,11 @@ class ScanReceiptItemEntity {
   final String thumbnail;
   final bool needsReview;
 
+  /// KG-16: estimated per-unit weight in grams for discrete/count goods
+  /// (e.g. "1 can ~400g"). Null for weight/volume units and fresh produce.
+  final double? estimatedWeightGrams;
+  final String? weightBasis;
+
   ScanReceiptItemEntity({
     required this.name,
     required this.unit,
@@ -19,5 +24,7 @@ class ScanReceiptItemEntity {
     required this.group,
     required this.thumbnail,
     required this.needsReview,
+    this.estimatedWeightGrams,
+    this.weightBasis,
   });
 }

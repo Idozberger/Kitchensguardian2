@@ -6,6 +6,7 @@ PantryItem kitchenAnalysisMapScannedToPantryItem(ScannedItemEntity item) {
       qtyController: TextEditingController(text: item.quantity.toString()),
       expireDate: TextEditingController(text: item.expiryDate),
       manuFacturingDate: TextEditingController(),
+      estimatedWeightGrams: item.estimatedWeightGrams,
     )
     ..unit = item.unit
     ..pantry = item.recommendedStorage.isNotEmpty

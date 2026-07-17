@@ -111,6 +111,7 @@ class _GenerateRecipesPageState extends State<GenerateRecipesPage> {
       GenerateRecipesEvent(
         instructions: _buildRecipePrompt(),
         kitchenId: kitchenId,
+        keywords: _searchController.text.trim(),
       ),
     );
   }
@@ -120,6 +121,7 @@ class _GenerateRecipesPageState extends State<GenerateRecipesPage> {
       GenerateRecipesEvent(
         instructions: _buildRecipePrompt(),
         kitchenId: context.read<UserCubit>().state.activeKitchenId,
+        keywords: _searchController.text.trim(),
       ),
     );
     AdService.instance.loadAndShowInterstitial(

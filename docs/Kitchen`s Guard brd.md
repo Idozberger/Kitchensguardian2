@@ -8,28 +8,34 @@ This phase focuses on improving the onboarding experience, enhancing receipt sca
 
 ## **High-Level Structure / User Flow**
 
-1. User completes onboarding and creates an account.  
-2. User creates a kitchen and selects a preferred measurement system (Metric or Imperial).  
-   user then scan fridge to log in all ingredients they already have.  
-3. User scans grocery receipts to automatically populate and to update pantry inventory.   
-4. Application tracks ingredient quantities, low stock and expiration dates.  
-5. User generates recipes based on available ingredients.  
-6. User creates grocery lists for missing items, meal plan.  
-7. User plans meals throughout (for the week) the week.
+1. User creates an account and signs in.  
+2. User lands on the **Kitchens** page.  
+3. User joins an existing kitchen or creates a new kitchen.  
+4. User selects the preferred measurement system (Metric or Imperial) during kitchen creation.  
+5. User scans their fridge to register the current pantry inventory.  
+6. While the fridge scan is being processed in the background, the onboarding screens are presented.  
+7. Once processing is complete, the user is redirected to the Home screen where the detected ingredients summary is displayed.  
+8. User continues using the application by scanning receipts, generating recipes, creating grocery lists, and planning meals.  
+9. User scans grocery receipts to automatically populate and update pantry inventory.  
+10. Application tracks ingredient quantities, low stock and expiration dates.  
+11. User generates recipes based on available ingredients.  
+12. User creates grocery lists for missing items, meal plan.  
+13. User plans meals for the week.
 
 User Actions:
 
 * Scan Receipt  
-* Review & Edit Scanned Items (wrong items flagged)  
+* Review & Edit Scanned Items\&Ability to highlight wrong items  
 * Save Items to Pantry  
 * Generate Recipes  
 * Create Grocery Lists  
 * Manage Kitchen Settings  
-* plan meals
+* Plan Meals
 
 System Processes:
 
 * Receipt Recognition (item recognition)  
+* Items recognition  
 * Ingredient Matching  
 * Shared Ingredient Caching (only in same district)  
 * Recipe Caching  
@@ -76,10 +82,14 @@ System Processes:
 
 ### **Onboarding Redesign**
 
-* Implement onboarding screens according to approved designs.  
-* Add informational text below Kitchen Scan Skip button.  
-* Implement reminder flow for skipped kitchen scan.  
-* Improve onboarding-to-home-screen transition.
+* Reorder the initial user flow so that users first access the **Kitchens** page after account creation.  
+* Allow users to create a new kitchen or join an existing one before any fridge scanning takes place.  
+* Present the fridge scanning flow only after a kitchen has been created or joined.  
+* Display onboarding screens while the fridge scan is being processed in the background.  
+* Redirect users to the Home screen once onboarding and scan processing are complete.  
+* Display a summary of detected pantry items after onboarding.  
+* Add informational text below the Kitchen Scan Skip button.  
+* Implement reminder flow for skipped kitchen scan.
 
 ### **Unit Selector (Metric / Imperial)**
 
@@ -103,8 +113,7 @@ System Processes:
   * Camera  
   * Gallery  
   * File Upload(Image Files and PDF Documents)   
-* Improve quantity estimation.  
-* Improve knowledge of what measurement to use. (sometimes it counts apples as 242 grams, or canned food like 2 piece)   
+* Improve quantity estimation. Improve prompts for scanned measuring.  
 * Improve retailer-independent recognition accuracy.  
 * Add low-confidence warning flow.  
 * Maintain manual review and editing process.
@@ -137,26 +146,39 @@ System Processes:
 
 ### **Function Description**
 
-Improve onboarding experience and provide better guidance for users who skip pantry scanning during setup.
+Redesign the onboarding flow to improve the initial user experience by ensuring users first create or join a kitchen before scanning their fridge. The onboarding experience should be displayed while the fridge scan is processed in the background, minimizing perceived waiting time and providing a seamless transition into the application. 
 
 ### **Use Cases & Acceptance Criteria**
 
-#### **UC-01 Skip Kitchen Scan**
+**UC-01 Initial Application Flow** 
 
 **Acceptance Criteria**
 
-* User can skip Kitchen Scan during onboarding.  
-* Informational text "You can always do this later in the app" is displayed below the Skip button.  
-* System records skipped status.  
-* User receives a reminder when reopening the application.
+* After account registration, users are redirected to the **Kitchens** page.  
+* Users can either create a new kitchen or join an existing one.  
+* The fridge scanning flow is unavailable until a kitchen has been created or joined.  
+* After kitchen setup, users proceed to the fridge scanning step.  
+* Fridge scanning starts before the onboarding experience is displayed.
 
-#### **UC-02 Complete Onboarding**
+#### **UC-02 Skip Kitchen Scan** 
 
 **Acceptance Criteria**
 
-* User can complete onboarding successfully.  
-* User is redirected to the Home Screen. If the user scanned their fridge, when they are redirected to the home page they should see a summary of everything the AI caught.  
-* No broken navigation paths exist.
+* Users may skip the fridge scanning step.  
+* Informational text **"You can always do this later in the app."** is displayed below the Skip button.  
+* The skipped status is stored.  
+* Users receive a reminder the next time they open the application.
+
+#### **UC-03 Complete Onboarding** 
+
+**Acceptance Criteria**
+
+* After the fridge scan starts, onboarding screens are displayed while scan processing continues in the background.  
+* Users can navigate through all onboarding screens without interrupting scan processing.  
+* Once onboarding is completed and scan processing has finished, users are redirected to the Home screen.  
+* If the fridge scan was completed successfully, the Home screen displays a summary of the detected pantry items.  
+* If scan processing is still running when onboarding finishes, the application displays an appropriate loading state until results are available.  
+* No broken navigation paths exist throughout the onboarding flow.
 
 ## **2\. Unit Selector**
 

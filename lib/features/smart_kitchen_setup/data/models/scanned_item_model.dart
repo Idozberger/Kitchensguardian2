@@ -15,6 +15,8 @@ class ScannedItemModel extends ScannedItemEntity {
     required super.unit,
     super.sharedIngredientId,
     super.libraryMatch,
+    super.estimatedWeightGrams,
+    super.weightBasis,
   });
 
   factory ScannedItemModel.fromJson(Map<String, dynamic> json) {
@@ -32,6 +34,9 @@ class ScannedItemModel extends ScannedItemEntity {
       unit: readJsonString(json, 'unit'),
       sharedIngredientId: sharedId?.toString(),
       libraryMatch: json['library_match']?.toString(),
+      estimatedWeightGrams: (json['estimated_weight_grams'] as num?)
+          ?.toDouble(),
+      weightBasis: json['weight_basis'] as String?,
     );
   }
 
@@ -51,6 +56,8 @@ class ScannedItemModel extends ScannedItemEntity {
         'shared_ingredient_id':
             int.tryParse(sharedIngredientId!) ?? sharedIngredientId,
       if (libraryMatch != null) 'library_match': libraryMatch,
+      'estimated_weight_grams': estimatedWeightGrams,
+      'weight_basis': weightBasis,
     };
   }
 
@@ -68,6 +75,8 @@ class ScannedItemModel extends ScannedItemEntity {
       unit: unit,
       sharedIngredientId: sharedIngredientId,
       libraryMatch: libraryMatch,
+      estimatedWeightGrams: estimatedWeightGrams,
+      weightBasis: weightBasis,
     );
   }
 }

@@ -29,10 +29,12 @@ class PlannerRepositoryImpl implements PlannerRepository {
   Future<Either<Failure, List<RecipeEntity>>> generateRecipes({
     required String instructions,
     required String kitchenId,
+    String? keywords,
   }) => _plannerRepoImplGenerateRecipes(
     this,
     instructions: instructions,
     kitchenId: kitchenId,
+    keywords: keywords,
   );
 
   @override

@@ -65,6 +65,7 @@ Future<void> _onGenerateRecipes(
     GenerateRecipesParams(
       instructions: event.instructions,
       kitchenId: event.kitchenId,
+      keywords: event.keywords,
     ),
   );
 

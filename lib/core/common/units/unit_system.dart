@@ -48,6 +48,29 @@ String unitDisplayLabel(String? raw) {
   return _piecesSpellings.contains(value.toLowerCase()) ? 'Unit' : value;
 }
 
+/// Whether [raw] denotes the discrete "count / pieces" unit (any of
+/// [_piecesSpellings]). Used to decide when an estimated weight is worth showing
+/// alongside the count (KG-16) — weight/volume units already carry their mass.
+bool isPiecesUnit(String? raw) {
+  final value = raw?.trim().toLowerCase() ?? '';
+  return _piecesSpellings.contains(value);
+}
+
+/// KG-16: short display label for an estimated per-unit weight in grams, e.g.
+/// 400 -> "~400 g", 1200 -> "~1.2 kg". Returns null when there is nothing to
+/// show (null / non-positive). Presentational only; the value stays canonical grams.
+String? estimatedWeightLabel(double? grams) {
+  if (grams == null || grams <= 0) return null;
+  if (grams >= 1000) {
+    final kg = grams / 1000;
+    final text = kg == kg.roundToDouble()
+        ? kg.toStringAsFixed(0)
+        : kg.toStringAsFixed(1);
+    return '~$text kg';
+  }
+  return '~${grams.round()} g';
+}
+
 /// Maps the backend `unit_system` string to [UnitSystem]. Anything other than
 /// "imperial" (including null/unknown) falls back to metric — the backend
 /// default — so a missing field never breaks parsing.

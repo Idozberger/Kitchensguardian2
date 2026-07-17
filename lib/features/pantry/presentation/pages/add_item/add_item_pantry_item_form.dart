@@ -81,6 +81,7 @@ class AddItemPantryItemForm extends StatelessWidget {
           isLabled: false,
           label: '',
         ),
+        _estimatedWeightHint(context),
         SizedBox(height: h(15)),
         Row(
           spacing: w(12),
@@ -167,6 +168,31 @@ class AddItemPantryItemForm extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// KG-16: shows the estimated weight alongside a count (e.g. "≈ 400 g each")
+  /// for discrete/count goods only. Hidden otherwise (manual add, weight units).
+  Widget _estimatedWeightHint(BuildContext context) {
+    final label = estimatedWeightLabel(item.estimatedWeightGrams);
+    if (label == null || !isPiecesUnit(item.unit)) {
+      return const SizedBox.shrink();
+    }
+    return Padding(
+      padding: gapOnly(top: h(8)),
+      child: Row(
+        children: [
+          Icon(Icons.scale_outlined, size: t(15), color: Colors.grey.shade600),
+          SizedBox(width: w(6)),
+          Text(
+            "$label each (estimated)",
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontSize: t(13),
+              color: Colors.grey.shade700,
+            ),
+          ),
+        ],
       ),
     );
   }

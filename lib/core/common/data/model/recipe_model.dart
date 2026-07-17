@@ -34,6 +34,7 @@ class RecipeModel extends RecipeEntity {
     required super.expiringItems,
     required super.expiringItemsCount,
     required super.expiringItemsUsed,
+    super.previouslyGenerated,
   });
 
   static Uint8List? _parseThumbnail(Object? value) {
@@ -109,6 +110,9 @@ class RecipeModel extends RecipeEntity {
       expiringItems: _safeList(json['expiring_items']),
       expiringItemsCount: readJsonInt(json, 'expiring_items_count'),
       expiringItemsUsed: readJsonStringList(json, 'expiring_items_used'),
+
+      /// KG-19: recipe cache label
+      previouslyGenerated: readJsonBool(json, 'previously_generated'),
     );
   }
 
@@ -142,6 +146,7 @@ class RecipeModel extends RecipeEntity {
       "expiring_items": expiringItems,
       "expiring_items_count": expiringItemsCount,
       "expiring_items_used": expiringItemsUsed,
+      "previously_generated": previouslyGenerated,
     };
   }
 
@@ -171,6 +176,7 @@ class RecipeModel extends RecipeEntity {
     List<ExpiringItemEntity>? expiringItems,
     int? expiringItemsCount,
     List<String>? expiringItemsUsed,
+    bool? previouslyGenerated,
   }) {
     return RecipeModel(
       id: id ?? this.id,
@@ -199,6 +205,7 @@ class RecipeModel extends RecipeEntity {
       expiringItems: expiringItems ?? this.expiringItems,
       expiringItemsCount: expiringItemsCount ?? this.expiringItemsCount,
       expiringItemsUsed: expiringItemsUsed ?? this.expiringItemsUsed,
+      previouslyGenerated: previouslyGenerated ?? this.previouslyGenerated,
     );
   }
 }

@@ -9,6 +9,7 @@ abstract interface class PlannerRepository {
   Future<Either<Failure, List<RecipeEntity>>> generateRecipes({
     required String instructions,
     required String kitchenId,
+    String? keywords,
   });
   Future<Either<Failure, List<RecipeEntity>>> favouriteRecipes({
     required String kitchenId,

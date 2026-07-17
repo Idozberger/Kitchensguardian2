@@ -12,6 +12,11 @@ class ScannedItemEntity {
   final String? sharedIngredientId;
   final String? libraryMatch;
 
+  /// KG-16: estimated per-unit weight in grams for discrete/count goods
+  /// (e.g. "1 can ~400g"). Null for weight/volume units and fresh produce.
+  final double? estimatedWeightGrams;
+  final String? weightBasis;
+
   const ScannedItemEntity({
     required this.area,
     this.brand,
@@ -25,5 +30,7 @@ class ScannedItemEntity {
     required this.unit,
     this.sharedIngredientId,
     this.libraryMatch,
+    this.estimatedWeightGrams,
+    this.weightBasis,
   });
 }

@@ -25,6 +25,11 @@ class PantryItem {
   /// catalog search; cleared as soon as the user edits the name by hand.
   String? sharedIngredientId;
 
+  /// KG-16: estimated per-unit weight in grams for discrete/count goods
+  /// (e.g. "1 can ~400g"). Null when there is nothing to estimate. Read-only —
+  /// a display hint carried through the scan-review UI.
+  double? estimatedWeightGrams;
+
   PantryItem({
     required this.nameController,
     required this.qtyController,
@@ -35,6 +40,7 @@ class PantryItem {
     this.file,
     this.fileBytes,
     this.thumbnailBase64,
+    this.estimatedWeightGrams,
   });
 
   /// Decodes [thumbnailBase64] into [fileBytes] on first access and caches
