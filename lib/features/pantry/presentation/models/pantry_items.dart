@@ -25,6 +25,11 @@ class PantryItem {
   /// catalog search; cleared as soon as the user edits the name by hand.
   String? sharedIngredientId;
 
+  /// KG-22: non-null when the AI scan already matched this item against the
+  /// shared ingredient library server-side. Read-only display hint — not
+  /// sent back on save.
+  String? libraryMatch;
+
   /// KG-16: estimated per-unit weight in grams for discrete/count goods
   /// (e.g. "1 can ~400g"). Null when there is nothing to estimate. Read-only —
   /// a display hint carried through the scan-review UI.

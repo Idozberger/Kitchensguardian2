@@ -75,7 +75,13 @@ class SmartKitchenSetupDatasourceImpl implements SmartKitchenSetupDatasource {
       final response = await dio.post(
         AppConstants.kitchenSetupScan,
         data: formData,
-        options: Options(contentType: 'multipart/form-data'),
+        // KG-13: multi-image AI recognition can run longer than the app-wide
+        // 60s default under load — give this call its own headroom without
+        // loosening the timeout for every other endpoint.
+        options: Options(
+          contentType: 'multipart/form-data',
+          receiveTimeout: const Duration(seconds: 120),
+        ),
       );
 
       if (response.statusCode != 200 && response.statusCode != 201) {

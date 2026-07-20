@@ -192,6 +192,20 @@ class _KitchenAnalysisPageState extends State<KitchenAnalysisPage> {
                                                 size: 20,
                                               ),
                                             ),
+                                          if (item.libraryMatch != null)
+                                            const Positioned(
+                                              top: 6,
+                                              left: 6,
+                                              child: Tooltip(
+                                                message:
+                                                    'Matched from shared ingredient library',
+                                                child: Icon(
+                                                  Icons.verified,
+                                                  color: Colors.green,
+                                                  size: 20,
+                                                ),
+                                              ),
+                                            ),
                                         ],
                                       ),
                                     );

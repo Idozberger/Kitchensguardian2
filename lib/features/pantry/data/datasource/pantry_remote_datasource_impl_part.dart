@@ -143,7 +143,14 @@ Future<Map<String, dynamic>> _pantryImplScanRecipt(
       "use_google_document": false,
     });
 
-    final response = await ds.dio.post(AppConstants.scanRecipt, data: formData);
+    final response = await ds.dio.post(
+      AppConstants.scanRecipt,
+      data: formData,
+      // KG-13: AI recognition can run longer than the app-wide 60s default
+      // under load — give this call its own headroom without loosening the
+      // timeout for every other endpoint.
+      options: Options(receiveTimeout: const Duration(seconds: 120)),
+    );
     if (response.statusCode != 200 && response.statusCode != 201) {
       final Map<String, dynamic> data = jsonObjectFromResponseData(
         response.data,

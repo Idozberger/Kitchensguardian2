@@ -13,7 +13,8 @@ PantryItem kitchenAnalysisMapScannedToPantryItem(ScannedItemEntity item) {
         ? item.recommendedStorage
         : item.area
     ..needsReview = item.needsReview
-    ..sharedIngredientId = item.sharedIngredientId;
+    ..sharedIngredientId = item.sharedIngredientId
+    ..libraryMatch = item.libraryMatch;
 }
 
 Map<String, dynamic> kitchenAnalysisToEditPayload(PantryItem item) {
