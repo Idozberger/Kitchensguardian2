@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:typed_data';
-
 import 'package:foodkitchen/core/common/data/datasource/common_remote_datasource.dart';
 import 'package:foodkitchen/core/common/data/model/pantries_model.dart';
 import 'package:foodkitchen/core/common/data/model/pantry_model.dart';
@@ -8,6 +5,7 @@ import 'package:foodkitchen/core/common/domain/entities/pantries_entity.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';
 import 'package:foodkitchen/core/error/failures.dart';
+import 'package:foodkitchen/core/global/functions/api_endpoints.dart';
 import 'package:foodkitchen/core/logging/app_logger.dart';
 import 'package:foodkitchen/core/utils/dev_logging.dart';
 import 'package:foodkitchen/core/utils/json_conversion.dart';
@@ -96,15 +94,16 @@ class PantryRepositoryImpl implements PantryRepository {
           final estimatedWeightGrams = (e['estimated_weight_grams'] as num?)
               ?.toDouble();
           final weightBasis = e['weight_basis'] as String?;
-          // Keep the raw base64 payload as-is - decoding happens lazily at
-          // render time (PantryItem.displayBytes) so a large receipt doesn't
-          // decode every item's image up front.
-          final Object? thumbRaw = e['thumbnail'];
-          final String thumbnailBase64 = thumbRaw is String
-              ? thumbRaw
-              : thumbRaw is Uint8List
-              ? base64Encode(thumbRaw)
-              : '';
+          // `thumbnail` is a shared_ingredients catalog icon path (e.g.
+          // `/api/shared_ingredients/42/image`) - resolve to a full URL,
+          // same as PantryItemModel.fromJson does for pantry list items.
+          // Never base64 here; the catalog icon may still be generating
+          // (background job), so the URL can briefly 404 - the UI falls
+          // back to a placeholder in that case.
+          final String thumbnailPath = readJsonString(e, 'thumbnail');
+          final String iconUrl = thumbnailPath.startsWith('/')
+              ? '${AppConstants.baseUrl}$thumbnailPath'
+              : thumbnailPath;
 
           devPrint(
             "Item parsed - name: $name, unit: $unit, quantity: $amount, expireDate: $expireDate",
@@ -117,7 +116,7 @@ class PantryRepositoryImpl implements PantryRepository {
               unit: unit,
               amount: amount.isEmpty ? "1" : amount,
               expireDate: expireDate,
-              thumbnail: thumbnailBase64,
+              thumbnail: iconUrl,
               needsReview: needsReview,
               estimatedWeightGrams: estimatedWeightGrams,
               weightBasis: weightBasis,

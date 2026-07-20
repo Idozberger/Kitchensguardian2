@@ -10,6 +10,7 @@ import 'package:foodkitchen/core/services/dio/dio_helper.dart';
 import 'package:foodkitchen/core/services/notifications/flutter_local_notifications_service.dart';
 import 'package:foodkitchen/core/utils/dev_logging.dart';
 import 'package:foodkitchen/core/utils/json_conversion.dart';
+import 'package:foodkitchen/features/pantry/data/datasource/scan_receipt_job_parser.dart';
 
 part 'pantry_remote_datasource_impl_part.dart';
 part 'pantry_remote_datasource_impl_part2.dart';

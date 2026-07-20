@@ -8,10 +8,13 @@ class PantryItem {
   File? file;
   Uint8List? fileBytes;
 
-  /// Raw base64 thumbnail from a scan response, left un-decoded until
-  /// [displayBytes] is first read (a receipt can have 50-100+ items, and
-  /// only the ones actually scrolled into view need decoding).
+  /// Raw base64 thumbnail (a user-picked replacement photo), left un-decoded
+  /// until [displayBytes] is first read.
   String? thumbnailBase64;
+
+  /// shared_ingredients catalog icon URL from the scan response, if the item
+  /// was matched to a catalog entry. Display-only — not sent back on save.
+  String? iconUrl;
 
   final TextEditingController nameController;
   final TextEditingController qtyController;
@@ -45,6 +48,7 @@ class PantryItem {
     this.file,
     this.fileBytes,
     this.thumbnailBase64,
+    this.iconUrl,
     this.estimatedWeightGrams,
   });
 
