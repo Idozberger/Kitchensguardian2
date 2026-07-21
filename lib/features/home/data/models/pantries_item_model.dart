@@ -1,3 +1,4 @@
+import 'package:foodkitchen/core/utils/json_conversion.dart';
 import 'package:foodkitchen/features/home/domain/entities/pantry_items.dart';
 
 class PantriesItemsModel extends PantriesItemsEntity {
@@ -17,9 +18,7 @@ class PantriesItemsModel extends PantriesItemsEntity {
     return PantriesItemsModel(
       thumbnail: "",
       name: json['name']?.toString() ?? '',
-      quantity: (json['quantity'] is int || json['quantity'] is double)
-          ? (json['quantity'] as num).toDouble()
-          : 0.0,
+      quantity: readJsonDouble(json, 'quantity'),
       unit: json['unit']?.toString() ?? '',
       group: json['group']?.toString() ?? '',
       expireDate: json['expiry_date']?.toString() ?? '',

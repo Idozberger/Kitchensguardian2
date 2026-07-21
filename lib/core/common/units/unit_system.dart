@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 /// Measurement system a kitchen uses. Stored per-kitchen on the backend as
 /// `unit_system` ("metric" | "imperial"). The database always holds metric
 /// quantities and the backend converts for display / normalizes on write, so
@@ -54,6 +56,18 @@ String unitDisplayLabel(String? raw) {
 bool isPiecesUnit(String? raw) {
   final value = raw?.trim().toLowerCase() ?? '';
   return _piecesSpellings.contains(value);
+}
+
+/// Display text for a stored quantity. Quantities are canonical doubles, so a
+/// plain `toString()` leaks "4.0" and "1816.0"; this drops the empty fraction
+/// and groups thousands ("1,816"). Pass [grouped] false for text fields, where
+/// the value must stay parseable by `double.tryParse`.
+String formatQuantity(num? value, {bool grouped = true}) {
+  if (value == null) return '';
+  if (grouped) return NumberFormat('#,##0.###').format(value);
+  return value == value.roundToDouble()
+      ? value.toInt().toString()
+      : value.toString();
 }
 
 /// KG-16: short display label for an estimated per-unit weight in grams, e.g.

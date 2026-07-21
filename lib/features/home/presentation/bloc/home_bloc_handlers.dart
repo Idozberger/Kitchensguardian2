@@ -201,7 +201,7 @@ Future<void> _onGetGenerateGroceryList(
   for (var i = 0; i < lowStockItems.length; i++) {
     missingIngredientNames.add(
       IngredientEntity(
-        amount: lowStockItems[i].quantity.toString(),
+        amount: formatQuantity(lowStockItems[i].quantity, grouped: false),
         name: lowStockItems[i].name,
         unit: lowStockItems[i].unit,
       ),

@@ -4,6 +4,7 @@ import 'package:foodkitchen/core/common/data/model/pantry_model.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantries_entity.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';
+import 'package:foodkitchen/core/common/units/unit_system.dart';
 import 'package:foodkitchen/core/error/failures.dart';
 import 'package:foodkitchen/core/global/functions/api_endpoints.dart';
 import 'package:foodkitchen/core/logging/app_logger.dart';
@@ -87,13 +88,17 @@ class PantryRepositoryImpl implements PantryRepository {
           final Map<String, dynamic> e = jsonObjectFromResponseData(raw);
           final name = readJsonString(e, 'name');
           final unit = readJsonString(e, 'unit', fallback: 'unit');
-          final amount = readJsonString(e, 'amount');
+          // `amount` arrives as a JSON number (778.0) - keep it out of the
+          // quantity field as "778.0".
+          final amount = readJsonDouble(e, 'amount');
           final group = readJsonString(e, 'recommended_storage');
           final expireDate = readJsonString(e, 'expiry_date');
           final needsReview = readJsonBool(e, 'needs_review');
-          final estimatedWeightGrams = (e['estimated_weight_grams'] as num?)
-              ?.toDouble();
-          final weightBasis = e['weight_basis'] as String?;
+          final estimatedWeightGrams = readJsonDoubleOrNull(
+            e,
+            'estimated_weight_grams',
+          );
+          final weightBasis = readJsonStringOrNull(e, 'weight_basis');
           // `thumbnail` is a shared_ingredients catalog icon path (e.g.
           // `/api/shared_ingredients/42/image`) - resolve to a full URL,
           // same as PantryItemModel.fromJson does for pantry list items.
@@ -106,7 +111,8 @@ class PantryRepositoryImpl implements PantryRepository {
               : thumbnailPath;
 
           devPrint(
-            "Item parsed - name: $name, unit: $unit, quantity: $amount, expireDate: $expireDate",
+            "Item parsed - name: $name, unit: $unit, quantity: $amount, "
+            "expireDate: $expireDate",
           );
 
           items.add(
@@ -114,7 +120,7 @@ class PantryRepositoryImpl implements PantryRepository {
               group: group,
               name: name,
               unit: unit,
-              amount: amount.isEmpty ? "1" : amount,
+              amount: formatQuantity(amount > 0 ? amount : 1, grouped: false),
               expireDate: expireDate,
               thumbnail: iconUrl,
               needsReview: needsReview,

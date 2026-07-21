@@ -3,7 +3,9 @@ part of 'package:foodkitchen/features/smart_kitchen_setup/presentation/pages/kit
 PantryItem kitchenAnalysisMapScannedToPantryItem(ScannedItemEntity item) {
   return PantryItem(
       nameController: TextEditingController(text: item.name),
-      qtyController: TextEditingController(text: item.quantity.toString()),
+      qtyController: TextEditingController(
+        text: formatQuantity(item.quantity, grouped: false),
+      ),
       expireDate: TextEditingController(text: item.expiryDate),
       manuFacturingDate: TextEditingController(),
       estimatedWeightGrams: item.estimatedWeightGrams,

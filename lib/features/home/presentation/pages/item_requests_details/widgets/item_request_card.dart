@@ -155,7 +155,7 @@ class _CardInlineInfo extends StatelessWidget {
           width: w(38),
           child: Align(
             alignment: Alignment.topRight,
-            child: InlineText(text: request.quantity.toString()),
+            child: InlineText(text: formatQuantity(request.quantity)),
           ),
         ),
         Dot(),

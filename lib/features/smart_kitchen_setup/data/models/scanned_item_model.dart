@@ -24,19 +24,21 @@ class ScannedItemModel extends ScannedItemEntity {
     return ScannedItemModel(
       area: readJsonString(json, 'area'),
       brand: json['brand']?.toString(),
-      confidence: (json['confidence'] as num?)?.toInt() ?? 0,
+      confidence: readJsonInt(json, 'confidence'),
       expiryDate: readJsonString(json, 'expiry_date'),
       name: readJsonString(json, 'name'),
       needsReview: readJsonBool(json, 'needs_review'),
-      quantity: (json['quantity'] as num?)?.toInt() ?? 0,
+      quantity: readJsonInt(json, 'quantity'),
       recommendedStorage: readJsonString(json, 'recommended_storage'),
       tempId: readJsonString(json, 'temp_id'),
       unit: readJsonString(json, 'unit'),
       sharedIngredientId: sharedId?.toString(),
       libraryMatch: json['library_match']?.toString(),
-      estimatedWeightGrams: (json['estimated_weight_grams'] as num?)
-          ?.toDouble(),
-      weightBasis: json['weight_basis'] as String?,
+      estimatedWeightGrams: readJsonDoubleOrNull(
+        json,
+        'estimated_weight_grams',
+      ),
+      weightBasis: readJsonStringOrNull(json, 'weight_basis'),
     );
   }
 
