@@ -12,4 +12,28 @@ class ScanReceiptItemModel extends ScanReceiptItemEntity {
     super.estimatedWeightGrams,
     super.weightBasis,
   });
+
+  ScanReceiptItemModel copyWith({
+    String? name,
+    String? unit,
+    String? amount,
+    String? expireDate,
+    String? group,
+    String? thumbnail,
+    bool? needsReview,
+    double? estimatedWeightGrams,
+    String? weightBasis,
+  }) {
+    return ScanReceiptItemModel(
+      name: name ?? this.name,
+      unit: unit ?? this.unit,
+      amount: amount ?? this.amount,
+      expireDate: expireDate ?? this.expireDate,
+      thumbnail: thumbnail ?? this.thumbnail,
+      group: group ?? this.group,
+      needsReview: needsReview ?? this.needsReview,
+      estimatedWeightGrams: estimatedWeightGrams ?? this.estimatedWeightGrams,
+      weightBasis: weightBasis ?? this.weightBasis,
+    );
+  }
 }
