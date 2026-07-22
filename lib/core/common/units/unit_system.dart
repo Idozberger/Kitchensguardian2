@@ -85,6 +85,16 @@ String? estimatedWeightLabel(double? grams) {
   return '~${grams.round()} g';
 }
 
+/// KG-16: total estimated weight for [count] discrete units weighing
+/// [perUnitGrams] each, e.g. 4 × 400 -> "~1.6 kg". Null when there is nothing
+/// to show (null / non-positive per-unit weight). A missing/invalid [count] is
+/// treated as 1. Builds on [estimatedWeightLabel] for the g→kg formatting.
+String? estimatedTotalWeightLabel(num? count, double? perUnitGrams) {
+  if (perUnitGrams == null || perUnitGrams <= 0) return null;
+  final n = (count == null || count <= 0) ? 1 : count;
+  return estimatedWeightLabel(perUnitGrams * n);
+}
+
 /// Maps the backend `unit_system` string to [UnitSystem]. Anything other than
 /// "imperial" (including null/unknown) falls back to metric — the backend
 /// default — so a missing field never breaks parsing.

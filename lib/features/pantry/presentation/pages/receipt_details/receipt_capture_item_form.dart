@@ -254,25 +254,39 @@ class _EstimatedWeightHint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final label = estimatedWeightLabel(item.estimatedWeightGrams);
-    if (label == null || !isPiecesUnit(item.unit)) {
-      return const SizedBox.shrink();
-    }
-    return Padding(
-      padding: gapOnly(top: h(8)),
-      child: Row(
-        children: [
-          Icon(Icons.scale_outlined, size: t(15), color: Colors.grey.shade600),
-          SizedBox(width: w(6)),
-          Text(
-            "$label each (estimated)",
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontSize: t(13),
-              color: Colors.grey.shade700,
-            ),
+    // Rebuild the total as the quantity is edited — it depends on qtyController.
+    return ListenableBuilder(
+      listenable: item.qtyController,
+      builder: (context, _) {
+        final count = double.tryParse(item.qtyController.text);
+        final label = estimatedTotalWeightLabel(
+          count,
+          item.estimatedWeightGrams,
+        );
+        if (label == null || !isPiecesUnit(item.unit)) {
+          return const SizedBox.shrink();
+        }
+        return Padding(
+          padding: gapOnly(top: h(8)),
+          child: Row(
+            children: [
+              Icon(
+                Icons.scale_outlined,
+                size: t(15),
+                color: Colors.grey.shade600,
+              ),
+              SizedBox(width: w(6)),
+              Text(
+                "$label (estimated)",
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontSize: t(13),
+                  color: Colors.grey.shade700,
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
