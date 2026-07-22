@@ -67,9 +67,16 @@ class PantryFailure extends PantryState {
 
 class ScanReceiptLoaded extends PantryState {
   final ScanReceiptEntity scanReceipt;
-  ScanReceiptLoaded(this.scanReceipt);
-  ScanReceiptLoaded copyWith({ScanReceiptEntity? scanReceipt}) {
-    return ScanReceiptLoaded(scanReceipt ?? this.scanReceipt);
+  final String imagePath;
+  ScanReceiptLoaded(this.scanReceipt, this.imagePath);
+  ScanReceiptLoaded copyWith({
+    ScanReceiptEntity? scanReceipt,
+    String? imagePath,
+  }) {
+    return ScanReceiptLoaded(
+      scanReceipt ?? this.scanReceipt,
+      imagePath ?? this.imagePath,
+    );
   }
 }
 

@@ -105,7 +105,10 @@ List<RouteBase> buildAppRouterRoutesPart2() => [
       final Map<String, dynamic> data = state.extra as Map<String, dynamic>;
       return buildPage(
         state.pageKey,
-        CaptureDetailsPage(imagePath: readRouteString(data, 'image_path')),
+        CaptureDetailsPage(
+          imagePath: readRouteString(data, 'image_path'),
+          resume: readRouteBool(data, 'resume'),
+        ),
       );
     },
   ),
