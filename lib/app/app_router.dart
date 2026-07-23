@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:foodkitchen/app/scan_status_banner.dart';
+import 'package:foodkitchen/app/scan_completion_toast.dart';
 import 'package:foodkitchen/core/common/domain/entities/reciep_entity.dart';
 import 'package:foodkitchen/core/config/env.dart';
 import 'package:foodkitchen/core/config/routes.dart';
@@ -66,7 +66,7 @@ part 'app_router_routes_public.dart';
 List<RouteBase> buildAppRouterRoutes() => [
   ...buildPublicRoutes(),
   ShellRoute(
-    builder: (context, state, child) => ScanStatusBanner(child: child),
+    builder: (context, state, child) => ScanCompletionToast(child: child),
     routes: [...buildAppRouterRoutesPart1(), ...buildAppRouterRoutesPart2()],
   ),
 ];

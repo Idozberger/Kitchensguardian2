@@ -67,6 +67,9 @@ class PantryFailure extends PantryState {
 
 class ScanReceiptLoaded extends PantryState {
   final ScanReceiptEntity scanReceipt;
+
+  /// Photo the scan came from — lets the review page be reopened with the
+  /// receipt image once the scan finishes off-screen.
   final String imagePath;
   ScanReceiptLoaded(this.scanReceipt, this.imagePath);
   ScanReceiptLoaded copyWith({

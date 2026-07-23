@@ -37,9 +37,8 @@ part 'receipt_scanned_details_page_part.dart';
 class CaptureDetailsPage extends StatefulWidget {
   final String imagePath;
 
-  /// When true the page was reopened from the global scan banner: the scan is
-  /// already done, so skip the ad + re-scan and seed items from the current
-  /// [ScanReceiptLoaded] state instead.
+  /// True when the page was reopened after the scan finished off-screen: the
+  /// items are already in [ScanReceiptLoaded], so skip the ad + re-scan.
   final bool resume;
   const CaptureDetailsPage({
     super.key,
