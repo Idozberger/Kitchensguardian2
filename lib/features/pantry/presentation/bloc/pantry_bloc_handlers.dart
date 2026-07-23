@@ -119,7 +119,7 @@ Future<void> _onScanReceipt(
   res.fold((failure) => emit(PantryFailure(failure.userMessage)), (
     receiptDetails,
   ) {
-    emit(ScanReceiptLoaded(receiptDetails));
+    emit(ScanReceiptLoaded(receiptDetails, event.filePath));
   });
 }
 

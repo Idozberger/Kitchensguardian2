@@ -16,7 +16,7 @@ List<PantryItem> receiptMapScanToPantryItems(ScanReceiptEntity scanReceipt) {
           ),
           manuFacturingDate: TextEditingController(),
           unit: e.unit,
-          thumbnailBase64: e.thumbnail,
+          iconUrl: e.thumbnail,
           estimatedWeightGrams: e.estimatedWeightGrams,
         )..needsReview = e.needsReview,
       )

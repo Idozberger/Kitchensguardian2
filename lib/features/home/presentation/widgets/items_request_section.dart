@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/cubits/user_state.dart';
+import 'package:foodkitchen/core/common/units/unit_system.dart';
 import 'package:foodkitchen/core/config/app_assets.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
@@ -103,7 +104,7 @@ class _ItemRequestSectionState extends State<ItemRequestSection> {
           ),
         ),
         Text(
-          request.quantity.toString(),
+          formatQuantity(request.quantity),
           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
             fontSize: t(12),
             color: const Color(0xFF787878),

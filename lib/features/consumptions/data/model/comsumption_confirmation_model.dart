@@ -1,3 +1,4 @@
+import 'package:foodkitchen/core/utils/json_conversion.dart';
 import 'package:foodkitchen/features/consumptions/domain/entities/consumption_confirmation.dart';
 
 class ConsumptionConfirmationModel extends ConsumptionConfirmation {
@@ -18,7 +19,7 @@ class ConsumptionConfirmationModel extends ConsumptionConfirmation {
       id: json['_id'] as String,
       confirmationId: json['confirmation_id'] as String,
       itemName: json['item_name'] as String,
-      quantity: (json['quantity'] as num).toDouble(),
+      quantity: readJsonDouble(json, 'quantity'),
       unit: json['unit'] as String,
       addedAt: DateTime.parse(json['added_at'] as String),
       predictedDepletionDate: DateTime.parse(

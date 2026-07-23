@@ -47,7 +47,7 @@ Future<void> schedulePantryStockNotifications({
         id: morningId,
         title: 'Low stock: ${item.name}',
         body:
-            'You are running low on ${item.name} (${item.quantity} ${unitDisplayLabel(item.unit)}).',
+            'You are running low on ${item.name} (${formatQuantity(item.quantity)} ${unitDisplayLabel(item.unit)}).',
         dailyTime: morningTime,
         payload: jsonEncode({
           'type': 'low_stock',

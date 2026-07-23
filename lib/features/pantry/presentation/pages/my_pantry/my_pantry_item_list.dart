@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';
+import 'package:foodkitchen/core/common/units/unit_system.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
 import 'package:foodkitchen/core/utils/show_toast.dart';
@@ -230,7 +231,7 @@ class _MyPantryItemTileState extends State<MyPantryItemTile>
         isLocked: widget.isLocked,
         thumbnail: widget.item.thumbnailBytes ?? Uint8List(0),
         title: widget.item.name,
-        quantity: widget.item.quantity.toString(),
+        quantity: formatQuantity(widget.item.quantity),
         unit: widget.item.unit,
         pantry: widget.item.group,
         expiry: _expiryText,

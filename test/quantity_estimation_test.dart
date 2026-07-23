@@ -84,4 +84,23 @@ void main() {
       expect(estimatedWeightLabel(-5), isNull);
     });
   });
+
+  group('estimatedTotalWeightLabel', () {
+    test('multiplies the per-unit weight by the count', () {
+      expect(estimatedTotalWeightLabel(4, 400), '~1.6 kg'); // 4 cans
+      expect(estimatedTotalWeightLabel(1, 400), '~400 g'); // one can
+      expect(estimatedTotalWeightLabel(3, 150), '~450 g');
+    });
+
+    test('treats a missing/invalid count as 1', () {
+      expect(estimatedTotalWeightLabel(null, 400), '~400 g');
+      expect(estimatedTotalWeightLabel(0, 400), '~400 g');
+      expect(estimatedTotalWeightLabel(-2, 400), '~400 g');
+    });
+
+    test('returns null when there is no per-unit weight to show', () {
+      expect(estimatedTotalWeightLabel(3, null), isNull);
+      expect(estimatedTotalWeightLabel(3, 0), isNull);
+    });
+  });
 }

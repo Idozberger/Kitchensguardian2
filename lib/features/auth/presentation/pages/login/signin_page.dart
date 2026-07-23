@@ -85,6 +85,10 @@ class _SignInPageState extends State<SignInPage> {
     final verifyEmail = email.isNotEmpty
         ? email
         : (_userCubit.state.userModel?.email ?? "");
+    // Логін не створює акаунт → код треба замовити явно.
+    context.read<AuthBloc>().add(
+      AuthSendUserEmailVerficationCode(email: verifyEmail),
+    );
     context.pushNamed(
       "verify_email",
       extra: UserModel(

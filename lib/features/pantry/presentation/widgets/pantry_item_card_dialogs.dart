@@ -28,7 +28,7 @@ Future<dynamic> showPantryItemEditDialog(
   );
 
   final TextEditingController quantity = TextEditingController(
-    text: pantryItem.quantity.toString(),
+    text: formatQuantity(pantryItem.quantity, grouped: false),
   );
 
   String unit = pantryItem.unit;

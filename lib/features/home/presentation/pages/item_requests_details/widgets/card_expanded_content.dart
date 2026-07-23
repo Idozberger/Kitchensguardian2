@@ -35,7 +35,7 @@ class CardExpandedContent extends StatelessWidget {
       children: [
         Row(
           children: [
-            InlineText(text: request.quantity.toString()),
+            InlineText(text: formatQuantity(request.quantity)),
             Dot(),
             InlineText(text: unitDisplayLabel(request.unit)),
             Dot(),

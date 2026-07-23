@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 /// Measurement system a kitchen uses. Stored per-kitchen on the backend as
 /// `unit_system` ("metric" | "imperial"). The database always holds metric
 /// quantities and the backend converts for display / normalizes on write, so
@@ -56,6 +58,18 @@ bool isPiecesUnit(String? raw) {
   return _piecesSpellings.contains(value);
 }
 
+/// Display text for a stored quantity. Quantities are canonical doubles, so a
+/// plain `toString()` leaks "4.0" and "1816.0"; this drops the empty fraction
+/// and groups thousands ("1,816"). Pass [grouped] false for text fields, where
+/// the value must stay parseable by `double.tryParse`.
+String formatQuantity(num? value, {bool grouped = true}) {
+  if (value == null) return '';
+  if (grouped) return NumberFormat('#,##0.###').format(value);
+  return value == value.roundToDouble()
+      ? value.toInt().toString()
+      : value.toString();
+}
+
 /// KG-16: short display label for an estimated per-unit weight in grams, e.g.
 /// 400 -> "~400 g", 1200 -> "~1.2 kg". Returns null when there is nothing to
 /// show (null / non-positive). Presentational only; the value stays canonical grams.
@@ -69,6 +83,16 @@ String? estimatedWeightLabel(double? grams) {
     return '~$text kg';
   }
   return '~${grams.round()} g';
+}
+
+/// KG-16: total estimated weight for [count] discrete units weighing
+/// [perUnitGrams] each, e.g. 4 × 400 -> "~1.6 kg". Null when there is nothing
+/// to show (null / non-positive per-unit weight). A missing/invalid [count] is
+/// treated as 1. Builds on [estimatedWeightLabel] for the g→kg formatting.
+String? estimatedTotalWeightLabel(num? count, double? perUnitGrams) {
+  if (perUnitGrams == null || perUnitGrams <= 0) return null;
+  final n = (count == null || count <= 0) ? 1 : count;
+  return estimatedWeightLabel(perUnitGrams * n);
 }
 
 /// Maps the backend `unit_system` string to [UnitSystem]. Anything other than

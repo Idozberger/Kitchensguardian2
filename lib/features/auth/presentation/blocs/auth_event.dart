@@ -20,16 +20,8 @@ class AuthGetCurrentUser extends AuthEvent {}
 class MoveSignUpUserToHome extends AuthEvent {}
 
 final class AuthSendUserEmailVerficationCode extends AuthEvent {
-  final String firstName;
-  final String lastName;
   final String email;
-  final String password;
-  AuthSendUserEmailVerficationCode({
-    required this.email,
-    required this.firstName,
-    required this.lastName,
-    required this.password,
-  });
+  AuthSendUserEmailVerficationCode({required this.email});
 }
 
 final class AuthSignIn extends AuthEvent {

@@ -8,10 +8,13 @@ class PantryItem {
   File? file;
   Uint8List? fileBytes;
 
-  /// Raw base64 thumbnail from a scan response, left un-decoded until
-  /// [displayBytes] is first read (a receipt can have 50-100+ items, and
-  /// only the ones actually scrolled into view need decoding).
+  /// Raw base64 thumbnail (a user-picked replacement photo), left un-decoded
+  /// until [displayBytes] is first read.
   String? thumbnailBase64;
+
+  /// shared_ingredients catalog icon URL from the scan response, if the item
+  /// was matched to a catalog entry. Display-only — not sent back on save.
+  String? iconUrl;
 
   final TextEditingController nameController;
   final TextEditingController qtyController;
@@ -24,6 +27,11 @@ class PantryItem {
   /// Set when [nameController]'s value was picked from the shared ingredient
   /// catalog search; cleared as soon as the user edits the name by hand.
   String? sharedIngredientId;
+
+  /// KG-22: non-null when the AI scan already matched this item against the
+  /// shared ingredient library server-side. Read-only display hint — not
+  /// sent back on save.
+  String? libraryMatch;
 
   /// KG-16: estimated per-unit weight in grams for discrete/count goods
   /// (e.g. "1 can ~400g"). Null when there is nothing to estimate. Read-only —
@@ -40,6 +48,7 @@ class PantryItem {
     this.file,
     this.fileBytes,
     this.thumbnailBase64,
+    this.iconUrl,
     this.estimatedWeightGrams,
   });
 

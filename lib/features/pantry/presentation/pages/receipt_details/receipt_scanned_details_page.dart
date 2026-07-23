@@ -36,7 +36,15 @@ part 'receipt_scanned_details_page_part.dart';
 
 class CaptureDetailsPage extends StatefulWidget {
   final String imagePath;
-  const CaptureDetailsPage({super.key, required this.imagePath});
+
+  /// True when the page was reopened after the scan finished off-screen: the
+  /// items are already in [ScanReceiptLoaded], so skip the ad + re-scan.
+  final bool resume;
+  const CaptureDetailsPage({
+    super.key,
+    required this.imagePath,
+    this.resume = false,
+  });
 
   @override
   State<CaptureDetailsPage> createState() => _CaptureDetailsPageState();
@@ -55,6 +63,11 @@ class _CaptureDetailsPageState extends State<CaptureDetailsPage> {
     _userCubit = context.read<UserCubit>();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      if (widget.resume) {
+        final state = _pantryBloc.state;
+        if (state is ScanReceiptLoaded) _initializeItems(state.scanReceipt);
+        return;
+      }
       showAdLoadingDialog(context);
       scanReceipt();
     });

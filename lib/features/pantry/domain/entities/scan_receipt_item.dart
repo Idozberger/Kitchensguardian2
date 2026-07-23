@@ -5,9 +5,8 @@ class ScanReceiptItemEntity {
   final String expireDate;
   final String group;
 
-  /// Raw base64 thumbnail payload from the scan API, left un-decoded.
-  /// Decode lazily at render time (see `PantryItem.displayBytes`) instead of
-  /// eagerly for every item — a receipt can have 50-100+ items.
+  /// Resolved shared_ingredients catalog icon URL, or empty if the scan
+  /// hasn't matched this item to a catalog entry (yet).
   final String thumbnail;
   final bool needsReview;
 

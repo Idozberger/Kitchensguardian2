@@ -40,6 +40,7 @@ int readJsonInt(Map<String, dynamic> m, String key, {int fallback = 0}) {
   final Object? v = m[key];
   if (v is int) return v;
   if (v is num) return v.toInt();
+  if (v is String) return num.tryParse(v)?.toInt() ?? fallback;
   return fallback;
 }
 
@@ -49,10 +50,29 @@ double readJsonDouble(
   double fallback = 0,
 }) {
   final Object? v = m[key];
-  if (v is double) return v;
-  if (v is int) return v.toDouble();
   if (v is num) return v.toDouble();
+  if (v is String) return double.tryParse(v) ?? fallback;
   return fallback;
+}
+
+/// Nullable number from JSON. Never throws on a wrong type: the backend sends
+/// the *string* `"null"` for absent numbers (indistinguishable from a real null
+/// in a printed map), and numbers occasionally arrive quoted. Anything
+/// unparseable becomes null, which is what an absent value means anyway.
+double? readJsonDoubleOrNull(Map<String, dynamic> m, String key) {
+  final Object? v = m[key];
+  if (v is num) return v.toDouble();
+  if (v is String) return double.tryParse(v);
+  return null;
+}
+
+/// Nullable string from JSON, with the backend's `"null"` / empty sentinels
+/// collapsed to a real null.
+String? readJsonStringOrNull(Map<String, dynamic> m, String key) {
+  final Object? v = m[key];
+  if (v == null) return null;
+  final String s = v.toString().trim();
+  return (s.isEmpty || s == 'null') ? null : s;
 }
 
 List<String> readJsonStringList(Map<String, dynamic> m, String key) {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/cubits/user_state.dart';
+import 'package:foodkitchen/core/common/units/unit_system.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
@@ -190,6 +191,20 @@ class _KitchenAnalysisPageState extends State<KitchenAnalysisPage> {
                                                 Icons.warning_amber_rounded,
                                                 color: Colors.orange,
                                                 size: 20,
+                                              ),
+                                            ),
+                                          if (item.libraryMatch != null)
+                                            const Positioned(
+                                              top: 6,
+                                              left: 6,
+                                              child: Tooltip(
+                                                message:
+                                                    'Matched from shared ingredient library',
+                                                child: Icon(
+                                                  Icons.verified,
+                                                  color: Colors.green,
+                                                  size: 20,
+                                                ),
                                               ),
                                             ),
                                         ],

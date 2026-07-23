@@ -23,12 +23,7 @@ abstract interface class AuthRemoteDataSource {
     required String email,
     required String password,
   });
-  Future<String> sendUserEmailVerificationCode({
-    required String firstName,
-    required String lastName,
-    required String email,
-    required String password,
-  });
+  Future<String> sendUserEmailVerificationCode({required String email});
   Future<String> signInUserWithEmailAndPassword({
     required String email,
     required String password,
@@ -116,18 +111,8 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource {
   );
 
   @override
-  Future<String> sendUserEmailVerificationCode({
-    required String firstName,
-    required String lastName,
-    required String email,
-    required String password,
-  }) => _authImplSendUserEmailVerificationCode(
-    this,
-    firstName: firstName,
-    lastName: lastName,
-    email: email,
-    password: password,
-  );
+  Future<String> sendUserEmailVerificationCode({required String email}) =>
+      _authImplSendUserEmailVerificationCode(this, email: email);
 
   @override
   Future<String> signInWithGoogle() => _authImplSignInWithGoogle(this);
