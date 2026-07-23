@@ -3,11 +3,27 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:foodkitchen/core/config/routes.dart';
 import 'package:foodkitchen/core/global/functions/resize.dart';
 import 'package:foodkitchen/core/theme/app_colors.dart';
+import 'package:foodkitchen/core/utils/show_toast.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_bloc.dart';
 import 'package:foodkitchen/features/pantry/presentation/bloc/pantry_state.dart';
 import 'package:go_router/go_router.dart';
 
-enum _ScanStatus { none, scanning, ready }
+enum ScanStatus { none, scanning, ready }
+
+/// Next banner status for [state], given the [current] one. Pure so the
+/// "a failed scan clears the banner" rule is testable without the shell.
+ScanStatus nextScanStatus(ScanStatus current, PantryState state) {
+  if (state is PantryScanItemsLoading) return ScanStatus.scanning;
+  if (state is ScanReceiptLoaded) return ScanStatus.ready;
+  if (state is PantrySuccess) return ScanStatus.none;
+  // A failed scan must clear the banner, otherwise "Scanning receipt…" spins
+  // forever once the user has left the capture page. Only while a scan is in
+  // flight — every other pantry error belongs to the screen that caused it.
+  if (state is PantryFailure && current == ScanStatus.scanning) {
+    return ScanStatus.none;
+  }
+  return current;
+}
 
 /// App-wide overlay mounted in the authenticated `ShellRoute`. Lets the user
 /// leave the receipt scan screen and keep browsing: shows "Scanning…" while a
@@ -24,7 +40,7 @@ class ScanStatusBanner extends StatefulWidget {
 }
 
 class _ScanStatusBannerState extends State<ScanStatusBanner> {
-  _ScanStatus _status = _ScanStatus.none;
+  ScanStatus _status = ScanStatus.none;
   int _count = 0;
   String _imagePath = '';
   bool _dismissed = false;
@@ -35,29 +51,39 @@ class _ScanStatusBannerState extends State<ScanStatusBanner> {
       GoRouter.of(context).routerDelegate.currentConfiguration.uri.path ==
       Routes.capturedImageDetails;
 
+  void _onPantryState(BuildContext context, PantryState state) {
+    final next = nextScanStatus(_status, state);
+
+    // The capture page shows its own error; elsewhere the toast is the only
+    // signal that the scan died.
+    if (state is PantryFailure && next != _status && !_onCapturePage) {
+      AppToast.show(state.errorMessage, ToastType.error);
+    }
+
+    setState(() {
+      _status = next;
+      if (state is ScanReceiptLoaded) {
+        _count = state.scanReceipt.items.length;
+        _imagePath = state.imagePath;
+      }
+      if (state is PantryScanItemsLoading || state is ScanReceiptLoaded) {
+        _dismissed = false;
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final showOverlay =
-        _status != _ScanStatus.none && !_dismissed && !_onCapturePage;
+        _status != ScanStatus.none && !_dismissed && !_onCapturePage;
 
     return BlocListener<PantryBloc, PantryState>(
       listenWhen: (_, current) =>
           current is PantryScanItemsLoading ||
           current is ScanReceiptLoaded ||
+          current is PantryFailure ||
           current is PantrySuccess,
-      listener: (context, state) => setState(() {
-        if (state is PantryScanItemsLoading) {
-          _status = _ScanStatus.scanning;
-          _dismissed = false;
-        } else if (state is ScanReceiptLoaded) {
-          _status = _ScanStatus.ready;
-          _count = state.scanReceipt.items.length;
-          _imagePath = state.imagePath;
-          _dismissed = false;
-        } else if (state is PantrySuccess) {
-          _status = _ScanStatus.none;
-        }
-      }),
+      listener: _onPantryState,
       // Compact pill overlaid in the app-bar band, starting to the right of the
       // back button so it never covers it.
       child: Stack(
@@ -79,7 +105,7 @@ class _ScanStatusBannerState extends State<ScanStatusBanner> {
   }
 
   Widget _banner() {
-    final isReady = _status == _ScanStatus.ready;
+    final isReady = _status == ScanStatus.ready;
     return Padding(
       padding: EdgeInsets.only(top: h(6)),
       child: Material(
