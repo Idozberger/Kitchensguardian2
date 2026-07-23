@@ -13,23 +13,12 @@ class SendUserEmailVerificationCode
     SendUserEmailVerificationCodeParams params,
   ) async {
     return await authRepository.sendUserEmailVerificationCode(
-      firstName: params.firstName,
-      lastName: params.lastName,
       email: params.email,
-      password: params.password,
     );
   }
 }
 
 class SendUserEmailVerificationCodeParams {
   final String email;
-  final String password;
-  final String firstName;
-  final String lastName;
-  SendUserEmailVerificationCodeParams({
-    required this.email,
-    required this.password,
-    required this.firstName,
-    required this.lastName,
-  });
+  SendUserEmailVerificationCodeParams({required this.email});
 }

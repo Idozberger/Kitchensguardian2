@@ -103,19 +103,11 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<Failure, String>> sendUserEmailVerificationCode({
-    required String firstName,
-    required String lastName,
     required String email,
-    required String password,
   }) async {
     try {
       String response = await authRemoteDataSource
-          .sendUserEmailVerificationCode(
-            firstName: firstName,
-            lastName: lastName,
-            email: email,
-            password: password,
-          );
+          .sendUserEmailVerificationCode(email: email);
 
       return Right(response);
     } on Failure catch (f) {

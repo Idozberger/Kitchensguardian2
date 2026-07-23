@@ -38,30 +38,12 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
   void initState() {
     userModel = widget.userModel;
     authBloc = context.read<AuthBloc>();
-    sendVerificationCode();
     super.initState();
   }
 
-  void sendVerificationCode() async {
-    authBloc.add(
-      AuthSendUserEmailVerficationCode(
-        email: userModel.email,
-        firstName: userModel.firstName,
-        lastName: userModel.lastName,
-        password: userModel.password,
-      ),
-    );
-  }
-
+  /// Код надсилає той екран, що сюди привів (register_user робить це сам).
   void onResendCode() {
-    authBloc.add(
-      AuthSendUserEmailVerficationCode(
-        email: userModel.email,
-        firstName: userModel.firstName,
-        lastName: userModel.lastName,
-        password: userModel.password,
-      ),
-    );
+    authBloc.add(AuthSendUserEmailVerficationCode(email: userModel.email));
   }
 
   @override

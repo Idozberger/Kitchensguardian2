@@ -185,12 +185,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(AuthLoading());
     final res = await _sendUserEmailVerificationCode(
-      SendUserEmailVerificationCodeParams(
-        email: event.email,
-        password: event.password,
-        firstName: event.firstName,
-        lastName: event.lastName,
-      ),
+      SendUserEmailVerificationCodeParams(email: event.email),
     );
 
     res.fold((failure) => emit(AuthFailure(failure.userMessage)), (message) {

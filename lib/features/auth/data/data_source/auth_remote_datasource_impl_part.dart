@@ -170,22 +170,12 @@ Future<String> _authImplSignInUserWithEmailAndPassword(
 
 Future<String> _authImplSendUserEmailVerificationCode(
   AuthRemoteDatasourceImpl ds, {
-  required String firstName,
-  required String lastName,
   required String email,
-  required String password,
 }) async {
   try {
-    UserModel userModel = UserModel(
-      firstName: firstName,
-      lastName: lastName,
-      email: email,
-      password: password,
-    );
-
     final response = await ds.dio.post(
       AppConstants.sendEmailVerification,
-      data: userModel.toJson(),
+      data: {"email": email},
     );
     if (response.statusCode != 200 && response.statusCode != 201) {
       final Map<String, dynamic> data = jsonObjectFromResponseData(
