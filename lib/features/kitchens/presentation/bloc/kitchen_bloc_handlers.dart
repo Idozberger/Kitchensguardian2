@@ -47,8 +47,40 @@ Future<void> _onCreateKitchenEvent(
     ),
   );
 
-  res.fold((failure) => emit(KitchenFailure(failure.userMessage)), (message) {
+  await res.fold((failure) async => emit(KitchenFailure(failure.userMessage)), (
+    message,
+  ) async {
     emit(KitchenSuccess(message));
+
+    // The datasource already persisted the new kitchen's id/invitation
+    // code/role to prefs on creation — switch into it right away instead of
+    // leaving the user on the kitchen list to tap "Show" themselves.
+    final prefs = sl<SharedPreferences>();
+    final kitchen = Kitchen(
+      kitchenId: prefs.getString('kitchen_id') ?? '',
+      invitationCode: prefs.getString('invitation_code') ?? '',
+      role: prefs.getString('role') ?? 'host',
+      kitchenName: event.kitchenName,
+      unitSystem: unitSystemToApi(event.unitSystem),
+    );
+
+    bloc._userCubit.updateActiveKitchenIdInvitationCodeAndRole(
+      kitchenName: kitchen.kitchenName,
+      activeKitchenId: kitchen.kitchenId,
+      invitationCode: kitchen.invitationCode,
+      role: kitchen.role,
+    );
+    bloc._userCubit.applyUnitSystemForKitchen(
+      kitchenId: kitchen.kitchenId,
+      fromKitchen: kitchen.unitSystem,
+    );
+
+    // Switched into directly (not via bloc.add(SwitchKitchenEvent(...)))
+    // so this handler doesn't hand control back to the event queue until
+    // OpenKitchen is emitted — otherwise a FetchKitchens() the kitchen-list
+    // page's own listener queues in reaction to KitchenSuccess above can be
+    // processed first and flash the stale list before the redirect.
+    await _switchIntoKitchen(bloc, kitchen, emit);
   });
 }
 
@@ -141,10 +173,22 @@ Future<void> _onSwitchKitchen(
   Emitter<KitchenState> emit,
 ) async {
   if (bloc.state is KitchensLoading) return;
+  await _switchIntoKitchen(bloc, event.kitchen, emit);
+}
+
+/// Loads planner/home/grocery data for [kitchen] and emits [OpenKitchen].
+/// Shared by [_onSwitchKitchen] and [_onCreateKitchenEvent] (which calls it
+/// directly rather than via `bloc.add(SwitchKitchenEvent(...))`, so nothing
+/// else can be dequeued from the bloc's event queue until it's done).
+Future<void> _switchIntoKitchen(
+  KitchenBloc bloc,
+  Kitchen kitchen,
+  Emitter<KitchenState> emit,
+) async {
   emit(KitchensLoading());
-  final kitchenId = event.kitchen.kitchenId;
-  if (event.kitchen.invitationCode.isNotEmpty) {
-    await bloc._saveOrUpdateUserKitchen(kitchen: event.kitchen);
+  final kitchenId = kitchen.kitchenId;
+  if (kitchen.invitationCode.isNotEmpty) {
+    await bloc._saveOrUpdateUserKitchen(kitchen: kitchen);
   }
   bloc._plannerBloc.add(GetDateRangeEvent(kitchenId: kitchenId));
   bloc._plannerBloc.add(GetAllWeeklyPlansEvent(kitchenId, null));

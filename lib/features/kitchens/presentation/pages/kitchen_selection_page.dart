@@ -116,7 +116,13 @@ class _KitchenSelectionPageState extends State<KitchenSelectionPage> {
           }
         },
         builder: (_, state) {
-          if (state is KitchensLoading) {
+          // KitchenSuccess (just created) and OpenKitchen (switching into it)
+          // are transient — about to refetch or navigate away. Keep showing
+          // the loader through them instead of flashing the stale list or the
+          // "something went wrong" empty state for a frame.
+          if (state is KitchensLoading ||
+              state is KitchenSuccess ||
+              state is OpenKitchen) {
             return Center(child: Lottie.asset(AppAssets.loader));
           }
 
