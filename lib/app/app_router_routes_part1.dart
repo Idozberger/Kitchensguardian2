@@ -57,6 +57,18 @@ List<RouteBase> buildAppRouterRoutesPart1() => [
     },
   ),
   GoRoute(
+    name: Routes.ingredientSearch,
+    path: Routes.ingredientSearch,
+    pageBuilder: (context, state) {
+      final extra = state.extra as Map<String, dynamic>?;
+
+      return buildPage(
+        state.pageKey,
+        IngredientSearchPage(isMember: readRouteBool(extra, 'isMember')),
+      );
+    },
+  ),
+  GoRoute(
     name: Routes.addItem,
     path: Routes.addItem,
     pageBuilder: (context, state) {

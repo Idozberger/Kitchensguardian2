@@ -143,10 +143,12 @@ class AddItemPantryItemForm extends StatelessWidget {
               backgroundColor: Colors.grey.shade200,
               child: Icon(Icons.person, color: Colors.grey, size: t(24)),
             ),
-            if (item.file != null)
+            // Catalog icon shows through until the user picks their own photo.
+            if (item.file != null || (item.iconUrl?.isNotEmpty ?? false))
               SafeCircleAvatar(
                 radius: t(24),
                 file: item.file,
+                networkUrl: item.iconUrl,
                 backgroundColor: Colors.transparent,
                 fallback: const SizedBox.shrink(),
               ),

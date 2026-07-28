@@ -38,6 +38,7 @@ import 'package:foodkitchen/features/pantry/presentation/models/pantry_items.dar
 import 'package:foodkitchen/features/pantry/presentation/pages/add_item_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/add_pantry_storage_type_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/all_storage_areas_page.dart';
+import 'package:foodkitchen/features/pantry/presentation/pages/ingredient_search/ingredient_search_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/my_pantry_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/receipt_details/receipt_scanned_details_page.dart';
 import 'package:foodkitchen/features/pantry/presentation/pages/request_now_page.dart';

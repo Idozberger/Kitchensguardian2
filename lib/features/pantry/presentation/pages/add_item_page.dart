@@ -188,9 +188,7 @@ class _AddItemPageState extends State<AddItemPage> {
           },
         ),
         bottomNavigationBar: AddItemPageBottomBar(
-          showAddMore: widget.addToInventory == false,
           isMember: widget.isMember,
-          onAddMore: _addNewItem,
           onSubmit: _handleSubmitItems,
         ),
       ),

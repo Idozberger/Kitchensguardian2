@@ -6,7 +6,14 @@ class ItemSearchResult {
   final String id;
   final String name;
 
-  const ItemSearchResult({required this.id, required this.name});
+  /// Catalog icon URL; empty when there is nothing to show yet.
+  final String iconUrl;
+
+  const ItemSearchResult({
+    required this.id,
+    required this.name,
+    this.iconUrl = '',
+  });
 }
 
 /// Looks up item name suggestions as the user types in "Add Item".

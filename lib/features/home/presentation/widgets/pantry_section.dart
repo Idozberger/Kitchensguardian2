@@ -106,7 +106,7 @@ class _PantrySectionState extends State<PantrySection> {
                   ? null
                   : () {
                       context.pushNamed(
-                        Routes.addItem,
+                        Routes.ingredientSearch,
                         extra: {"isMember": isMember},
                       );
                     },

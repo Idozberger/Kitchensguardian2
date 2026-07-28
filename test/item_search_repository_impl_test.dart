@@ -53,6 +53,63 @@ void main() {
       });
     });
 
+    test('falls back to image_url when icon_url is explicitly null', () async {
+      // Matches the real /api/shared_ingredients/search payload: `icon_url`
+      // is always null there, the icon lives in `image_url` instead.
+      final repo = ItemSearchRepositoryImpl(
+        _FakePantryRemoteDatasource(
+          searchHandler: ({required query, required page}) async => (
+            results: [
+              {
+                'id': 108,
+                'display_name': 'Granola Cereal',
+                'icon_url': null,
+                'image_url': 'https://cdn.example.com/108.jpg',
+              },
+            ],
+            hasMore: false,
+          ),
+        ),
+      );
+
+      final result = await repo.searchItems('gran');
+      result.match(
+        (_) => fail('expected Right'),
+        (data) =>
+            expect(data.items[0].iconUrl, 'https://cdn.example.com/108.jpg'),
+      );
+    });
+
+    test('reads the catalog icon under any of its field names', () async {
+      final repo = ItemSearchRepositoryImpl(
+        _FakePantryRemoteDatasource(
+          searchHandler: ({required query, required page}) async => (
+            results: [
+              {
+                'id': 'ing-1',
+                'display_name': 'Milk',
+                'icon_url': 'https://cdn.example.com/milk.png',
+              },
+              {
+                'id': 'ing-2',
+                'display_name': 'Eggs',
+                'image_url': 'https://cdn.example.com/eggs.png',
+              },
+              {'id': 'ing-3', 'display_name': 'Bread'},
+            ],
+            hasMore: false,
+          ),
+        ),
+      );
+
+      final result = await repo.searchItems('a');
+      result.match((_) => fail('expected Right'), (data) {
+        expect(data.items[0].iconUrl, 'https://cdn.example.com/milk.png');
+        expect(data.items[1].iconUrl, 'https://cdn.example.com/eggs.png');
+        expect(data.items[2].iconUrl, '');
+      });
+    });
+
     test('passes hasMore from datasource', () async {
       final repo = ItemSearchRepositoryImpl(
         _FakePantryRemoteDatasource(

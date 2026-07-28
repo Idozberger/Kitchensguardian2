@@ -122,7 +122,7 @@ class MyPantryAppBar extends StatelessWidget implements PreferredSizeWidget {
             );
             return;
           }
-          context.pushNamed(Routes.addItem);
+          context.pushNamed(Routes.ingredientSearch);
         },
         icon: SvgPicture.asset(AppAssets.addSvg, height: h(18), width: w(18)),
         label: Text(

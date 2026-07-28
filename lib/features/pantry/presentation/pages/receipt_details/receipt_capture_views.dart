@@ -159,7 +159,7 @@ class ReceiptCaptureEmptyView extends StatelessWidget {
             ),
             SizedBox(height: h(16)),
             TextButton(
-              onPressed: () => context.pushNamed(Routes.addItem),
+              onPressed: () => context.pushNamed(Routes.ingredientSearch),
               child: Text(
                 "Add Items Manually",
                 style: TextStyle(

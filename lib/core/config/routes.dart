@@ -14,6 +14,7 @@ class Routes {
   static const String dashboard = "/dashboard";
   static const String notification = "/notification";
   static const String scanHistory = "/scan_history";
+  static const String ingredientSearch = "/ingredient_search";
   static const String addItem = "/add_item";
   static const String recipeStartRequests = "/recipe_start_requests";
   static const String recipeRequestsDetail = "/recipe_request_details";

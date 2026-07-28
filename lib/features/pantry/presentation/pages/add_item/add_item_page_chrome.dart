@@ -92,26 +92,24 @@ class PantryItemSubmitFooter extends StatelessWidget {
   }
 }
 
+/// Add-item footer: submit only. Items are now added one at a time via the
+/// catalog search screen, so there is no "tap to add more" row here.
 class AddItemPageBottomBar extends StatelessWidget {
   const AddItemPageBottomBar({
     super.key,
-    required this.showAddMore,
     required this.isMember,
-    required this.onAddMore,
     required this.onSubmit,
   });
 
-  final bool showAddMore;
   final bool isMember;
-  final VoidCallback onAddMore;
   final VoidCallback onSubmit;
 
   @override
   Widget build(BuildContext context) {
     return PantryItemSubmitFooter(
-      showAddMore: showAddMore,
+      showAddMore: false,
       submitLabel: isMember ? "Request Item" : "Add Item",
-      onAddMore: onAddMore,
+      onAddMore: () {},
       onSubmit: onSubmit,
     );
   }
