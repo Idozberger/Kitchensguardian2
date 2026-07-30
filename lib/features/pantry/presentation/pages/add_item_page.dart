@@ -8,7 +8,6 @@ import 'package:foodkitchen/core/common/cubits/user_cubit.dart';
 import 'package:foodkitchen/core/common/cubits/user_state.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry.dart';
 import 'package:foodkitchen/core/common/domain/entities/pantry_item.dart';
-import 'package:foodkitchen/core/dialogs/delete_dialog.dart';
 import 'package:foodkitchen/core/global/functions/gaps.dart';
 import 'package:foodkitchen/core/utils/dev_logging.dart';
 import 'package:foodkitchen/core/utils/format_date_for_backend.dart';
@@ -235,58 +234,14 @@ class _AddItemPageState extends State<AddItemPage> {
   }
 
   void _handleBackNavigation() {
-    if (_items.isEmpty) {
-      _goBack();
-      return;
-    }
-
-    final hasUserInput = _items.any(
-      (item) =>
-          item.file != null ||
-          item.nameController.text.trim().isNotEmpty ||
-          item.qtyController.text.trim().isNotEmpty ||
-          (item.unit != null && item.unit!.isNotEmpty) ||
-          (item.pantry != null && item.pantry!.isNotEmpty) ||
-          item.expireDate.text.isNotEmpty,
-    );
-
-    if (hasUserInput) {
-      _showConfirmDialog(
-        title: "Go Back",
-        subtitle:
-            "If you go back, the items you just added will be removed. Continue?",
-        onConfirm: () {
-          Navigator.of(context).pop();
-          _goBack();
-        },
-      );
-    } else {
-      _goBack();
-    }
-  }
-
-  void _goBack() {
+    // Reached via pushNamed from the ingredient catalog screen (or with
+    // prefilled items from the recipe/missing-ingredients flow) — a plain
+    // pop already lands back on whichever of those pushed this page.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final router = GoRouter.of(context);
       if (router.canPop()) {
         router.pop();
       }
     });
-  }
-
-  Future<void> _showConfirmDialog({
-    required String title,
-    required String subtitle,
-    required VoidCallback onConfirm,
-  }) {
-    return showCustomGenericDialog(
-      context: context,
-      title: title,
-      subtitle: subtitle,
-      primaryButtonText: "Yes",
-      secondaryButtonText: "Cancel",
-      onPrimaryPressed: onConfirm,
-      onSecondaryPressed: () => context.pop(),
-    );
   }
 }
