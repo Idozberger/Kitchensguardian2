@@ -71,39 +71,8 @@ class RecipeTileItem extends StatelessWidget {
       },
     );
 
-    // KG-19: label recipes served from the cache as "Previously Generated".
-    if (!recipe.previouslyGenerated) return tile;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _previouslyGeneratedBadge(context),
-        const SizedBox(height: 6),
-        tile,
-      ],
-    );
-  }
-
-  Widget _previouslyGeneratedBadge(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: const Color(0xFFEDEDED),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.history, size: 13, color: Color(0xFF6B6B6B)),
-          const SizedBox(width: 4),
-          Text(
-            "Previously Generated",
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: const Color(0xFF6B6B6B),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
+    // KG-19: recipe.previouslyGenerated stays wired for internal logic,
+    // but the "Previously Generated" badge is intentionally not shown.
+    return tile;
   }
 }
